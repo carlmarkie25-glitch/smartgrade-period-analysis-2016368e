@@ -1,9 +1,11 @@
 import { Button } from "@/components/ui/button";
 import { GraduationCap, LayoutDashboard, BookOpen, FileText, BarChart3 } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Navbar = () => {
   const location = useLocation();
+  const { signOut } = useAuth();
 
   const navItems = [
     { path: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
@@ -39,7 +41,7 @@ const Navbar = () => {
             })}
           </div>
 
-          <Button variant="outline">Sign Out</Button>
+          <Button variant="outline" onClick={signOut}>Sign Out</Button>
         </div>
       </div>
     </nav>
