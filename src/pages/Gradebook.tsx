@@ -3,14 +3,23 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Lock, Unlock } from "lucide-react";
+import { Lock } from "lucide-react";
+import { useState } from "react";
+import { useClasses, useClassSubjects } from "@/hooks/useClasses";
+import { useStudents } from "@/hooks/useStudents";
+import { useGrades, useAssessmentTypes } from "@/hooks/useGrades";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const Gradebook = () => {
-  const students = [
-    { id: 1, name: "John Mensah", attendance: 5, participation: 4, project: 8, assignment: 9, quiz: 18, test: 45, total: 89 },
-    { id: 2, name: "Mary Johnson", attendance: 5, participation: 5, project: 9, assignment: 10, quiz: 19, test: 48, total: 96 },
-    { id: 3, name: "Peter Williams", attendance: 4, participation: 4, project: 7, assignment: 8, quiz: 16, test: 42, total: 81 },
-  ];
+  const [selectedClass, setSelectedClass] = useState<string>("");
+  const [selectedSubject, setSelectedSubject] = useState<string>("");
+  const [selectedPeriod, setSelectedPeriod] = useState<string>("p1");
+
+  const { data: classes, isLoading: classesLoading } = useClasses();
+  const { data: classSubjects, isLoading: subjectsLoading } = useClassSubjects(selectedClass);
+  const { data: students, isLoading: studentsLoading } = useStudents(selectedClass);
+  const { data: assessmentTypes, isLoading: assessmentLoading } = useAssessmentTypes();
+  const { data: grades, isLoading: gradesLoading } = useGrades(selectedSubject, selectedPeriod);
 
   return (
     <div className="min-h-screen bg-background">
@@ -28,29 +37,49 @@ const Gradebook = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-          <Select defaultValue="grade10a">
+          <Select value={selectedClass} onValueChange={setSelectedClass}>
             <SelectTrigger>
               <SelectValue placeholder="Select Class" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="grade10a">Grade 10A</SelectItem>
-              <SelectItem value="grade10b">Grade 10B</SelectItem>
-              <SelectItem value="grade11a">Grade 11A</SelectItem>
+              {classesLoading ? (
+                <SelectItem value="loading" disabled>Loading...</SelectItem>
+              ) : classes?.length === 0 ? (
+                <SelectItem value="none" disabled>No classes available</SelectItem>
+              ) : (
+                classes?.map((cls) => (
+                  <SelectItem key={cls.id} value={cls.id}>
+                    {cls.name}
+                  </SelectItem>
+                ))
+              )}
             </SelectContent>
           </Select>
 
-          <Select defaultValue="math">
+          <Select 
+            value={selectedSubject} 
+            onValueChange={setSelectedSubject}
+            disabled={!selectedClass}
+          >
             <SelectTrigger>
               <SelectValue placeholder="Select Subject" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="math">Mathematics</SelectItem>
-              <SelectItem value="english">English</SelectItem>
-              <SelectItem value="science">Science</SelectItem>
+              {subjectsLoading ? (
+                <SelectItem value="loading" disabled>Loading...</SelectItem>
+              ) : classSubjects?.length === 0 ? (
+                <SelectItem value="none" disabled>No subjects for this class</SelectItem>
+              ) : (
+                classSubjects?.map((cs) => (
+                  <SelectItem key={cs.id} value={cs.id}>
+                    {cs.subjects?.name}
+                  </SelectItem>
+                ))
+              )}
             </SelectContent>
           </Select>
 
-          <Select defaultValue="p3">
+          <Select value={selectedPeriod} onValueChange={setSelectedPeriod}>
             <SelectTrigger>
               <SelectValue placeholder="Select Period" />
             </SelectTrigger>
@@ -65,48 +94,93 @@ const Gradebook = () => {
           </Select>
         </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Mathematics - Grade 10A - Period 3</CardTitle>
-            <CardDescription>Assessment breakdown: Attendance (5), Participation (5), Project (10), Assignment (10), Quiz (20), Test (50)</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Student Name</TableHead>
-                    <TableHead className="text-center">Attend<br/>(5)</TableHead>
-                    <TableHead className="text-center">Partic<br/>(5)</TableHead>
-                    <TableHead className="text-center">Project<br/>(10)</TableHead>
-                    <TableHead className="text-center">Assign<br/>(10)</TableHead>
-                    <TableHead className="text-center">Quiz<br/>(20)</TableHead>
-                    <TableHead className="text-center">Test<br/>(50)</TableHead>
-                    <TableHead className="text-center font-bold">Total<br/>(100)</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {students.map((student) => (
-                    <TableRow key={student.id}>
-                      <TableCell className="font-medium">{student.name}</TableCell>
-                      <TableCell className="text-center">{student.attendance}</TableCell>
-                      <TableCell className="text-center">{student.participation}</TableCell>
-                      <TableCell className="text-center">{student.project}</TableCell>
-                      <TableCell className="text-center">{student.assignment}</TableCell>
-                      <TableCell className="text-center">{student.quiz}</TableCell>
-                      <TableCell className="text-center">{student.test}</TableCell>
-                      <TableCell className="text-center font-bold text-primary">{student.total}</TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-            <div className="mt-6 flex justify-end gap-4">
-              <Button variant="outline">Cancel</Button>
-              <Button>Save Grades</Button>
-            </div>
-          </CardContent>
-        </Card>
+        {!selectedClass || !selectedSubject ? (
+          <Card>
+            <CardContent className="py-12">
+              <p className="text-center text-muted-foreground">
+                Please select a class and subject to view the gradebook
+              </p>
+            </CardContent>
+          </Card>
+        ) : studentsLoading || gradesLoading || assessmentLoading ? (
+          <Card>
+            <CardHeader>
+              <Skeleton className="h-6 w-64" />
+              <Skeleton className="h-4 w-96 mt-2" />
+            </CardHeader>
+            <CardContent>
+              <Skeleton className="h-64 w-full" />
+            </CardContent>
+          </Card>
+        ) : (
+          <Card>
+            <CardHeader>
+              <CardTitle>
+                {classSubjects?.find(cs => cs.id === selectedSubject)?.subjects?.name} - 
+                {classes?.find(c => c.id === selectedClass)?.name} - 
+                Period {selectedPeriod.replace('p', '')}
+              </CardTitle>
+              <CardDescription>
+                {assessmentTypes && assessmentTypes.length > 0 
+                  ? `Assessment breakdown: ${assessmentTypes.map(at => `${at.name} (${at.max_points})`).join(', ')}`
+                  : 'No assessment types configured'
+                }
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {students && students.length > 0 ? (
+                <>
+                  <div className="overflow-x-auto">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Student Name</TableHead>
+                          {assessmentTypes?.map((at) => (
+                            <TableHead key={at.id} className="text-center">
+                              {at.name}<br/>({at.max_points})
+                            </TableHead>
+                          ))}
+                          <TableHead className="text-center font-bold">Total</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {students.map((student) => {
+                          const studentGrades = grades?.filter(g => g.student_id === student.id) || [];
+                          const total = studentGrades.reduce((sum, g) => sum + Number(g.score), 0);
+                          
+                          return (
+                            <TableRow key={student.id}>
+                              <TableCell className="font-medium">{student.full_name}</TableCell>
+                              {assessmentTypes?.map((at) => {
+                                const grade = studentGrades.find(g => g.assessment_type_id === at.id);
+                                return (
+                                  <TableCell key={at.id} className="text-center">
+                                    {grade ? Number(grade.score).toFixed(0) : '-'}
+                                  </TableCell>
+                                );
+                              })}
+                              <TableCell className="text-center font-bold text-primary">
+                                {total > 0 ? total.toFixed(0) : '-'}
+                              </TableCell>
+                            </TableRow>
+                          );
+                        })}
+                      </TableBody>
+                    </Table>
+                  </div>
+                  <div className="mt-6 flex justify-end gap-4">
+                    <Button variant="outline">Cancel</Button>
+                    <Button>Save Grades</Button>
+                  </div>
+                </>
+              ) : (
+                <p className="text-center text-muted-foreground py-8">
+                  No students found in this class
+                </p>
+              )}
+            </CardContent>
+          </Card>
+        )}
       </main>
     </div>
   );

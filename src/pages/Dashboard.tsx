@@ -1,13 +1,39 @@
 import Navbar from "@/components/Navbar";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { GraduationCap, Users, BookOpen, TrendingUp, FileText } from "lucide-react";
+import { useDashboardStats } from "@/hooks/useDashboardStats";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useNavigate } from "react-router-dom";
 
 const Dashboard = () => {
-  const stats = [
-    { icon: Users, label: "Total Students", value: "1,247", change: "+12%" },
-    { icon: BookOpen, label: "Active Classes", value: "42", change: "+3%" },
-    { icon: GraduationCap, label: "Current Period", value: "P3", change: "50% Complete" },
-    { icon: TrendingUp, label: "Pass Rate", value: "87%", change: "+5%" },
+  const { data: stats, isLoading } = useDashboardStats();
+  const navigate = useNavigate();
+
+  const statItems = [
+    { 
+      icon: Users, 
+      label: "Total Students", 
+      value: stats?.totalStudents.toString() || "0", 
+      change: "Active" 
+    },
+    { 
+      icon: BookOpen, 
+      label: "Active Classes", 
+      value: stats?.totalClasses.toString() || "0", 
+      change: "Current Year" 
+    },
+    { 
+      icon: GraduationCap, 
+      label: "Academic Year", 
+      value: stats?.currentYear || "N/A", 
+      change: "Active" 
+    },
+    { 
+      icon: TrendingUp, 
+      label: "System Status", 
+      value: "Active", 
+      change: "All Systems" 
+    },
   ];
 
   return (
@@ -20,23 +46,37 @@ const Dashboard = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          {stats.map((stat) => {
-            const Icon = stat.icon;
-            return (
-              <Card key={stat.label}>
-                <CardHeader className="flex flex-row items-center justify-between pb-2">
-                  <CardTitle className="text-sm font-medium text-muted-foreground">
-                    {stat.label}
-                  </CardTitle>
-                  <Icon className="h-4 w-4 text-primary" />
+          {isLoading ? (
+            Array(4).fill(0).map((_, i) => (
+              <Card key={i}>
+                <CardHeader>
+                  <Skeleton className="h-4 w-24" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-3xl font-bold text-foreground">{stat.value}</div>
-                  <p className="text-xs text-success mt-1">{stat.change}</p>
+                  <Skeleton className="h-8 w-16 mb-2" />
+                  <Skeleton className="h-3 w-20" />
                 </CardContent>
               </Card>
-            );
-          })}
+            ))
+          ) : (
+            statItems.map((stat) => {
+              const Icon = stat.icon;
+              return (
+                <Card key={stat.label}>
+                  <CardHeader className="flex flex-row items-center justify-between pb-2">
+                    <CardTitle className="text-sm font-medium text-muted-foreground">
+                      {stat.label}
+                    </CardTitle>
+                    <Icon className="h-4 w-4 text-primary" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-3xl font-bold text-foreground">{stat.value}</div>
+                    <p className="text-xs text-muted-foreground mt-1">{stat.change}</p>
+                  </CardContent>
+                </Card>
+              );
+            })
+          )}
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -73,15 +113,16 @@ const Dashboard = () => {
             <CardContent>
               <div className="grid grid-cols-2 gap-4">
                 {[
-                  { label: "Enter Grades", icon: BookOpen },
-                  { label: "Generate Report", icon: FileText },
-                  { label: "View Rankings", icon: TrendingUp },
-                  { label: "Manage Students", icon: Users },
+                  { label: "Enter Grades", icon: BookOpen, path: "/gradebook" },
+                  { label: "Generate Report", icon: FileText, path: "/reports" },
+                  { label: "View Analytics", icon: TrendingUp, path: "/analytics" },
+                  { label: "Manage Students", icon: Users, path: "/dashboard" },
                 ].map((action) => {
                   const Icon = action.icon;
                   return (
                     <button
                       key={action.label}
+                      onClick={() => navigate(action.path)}
                       className="p-4 rounded-lg border bg-card hover:bg-accent transition-colors text-left"
                     >
                       <Icon className="h-6 w-6 text-primary mb-2" />
