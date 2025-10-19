@@ -2,19 +2,37 @@ import Navbar from "@/components/Navbar";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { FileText, Download, Eye } from "lucide-react";
+import { FileText, Eye } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useState } from "react";
 import { useClasses } from "@/hooks/useClasses";
 import { useStudents } from "@/hooks/useStudents";
 import { Skeleton } from "@/components/ui/skeleton";
+import { StudentReportDialog } from "@/components/StudentReportDialog";
+import { useToast } from "@/hooks/use-toast";
 
 const Reports = () => {
   const [selectedClass, setSelectedClass] = useState<string>("");
   const [selectedPeriod, setSelectedPeriod] = useState<string>("p3");
+  const [selectedStudent, setSelectedStudent] = useState<string>("");
+  const [dialogOpen, setDialogOpen] = useState(false);
 
   const { data: classes, isLoading: classesLoading } = useClasses();
   const { data: students, isLoading: studentsLoading } = useStudents(selectedClass);
+  const { toast } = useToast();
+
+  const handleViewReport = (studentId: string) => {
+    setSelectedStudent(studentId);
+    setDialogOpen(true);
+  };
+
+  const handleGenerateAll = () => {
+    toast({
+      title: "Generating Reports",
+      description: `Generating ${students?.length || 0} report cards...`,
+    });
+    // In a real app, this would trigger batch PDF generation
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -60,7 +78,11 @@ const Reports = () => {
             </SelectContent>
           </Select>
 
-          <Button className="gap-2" disabled={!selectedClass}>
+          <Button 
+            className="gap-2" 
+            disabled={!selectedClass || !students || students.length === 0}
+            onClick={handleGenerateAll}
+          >
             <FileText className="h-4 w-4" />
             Generate All Reports
           </Button>
@@ -119,13 +141,14 @@ const Reports = () => {
                           <p className="text-xl font-bold text-primary">Active</p>
                         </div>
                         <div className="flex gap-2">
-                          <Button variant="outline" size="sm" className="gap-2">
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            className="gap-2"
+                            onClick={() => handleViewReport(student.id)}
+                          >
                             <Eye className="h-4 w-4" />
-                            View
-                          </Button>
-                          <Button size="sm" className="gap-2">
-                            <Download className="h-4 w-4" />
-                            Download
+                            View Report
                           </Button>
                         </div>
                       </div>
@@ -140,6 +163,14 @@ const Reports = () => {
             </CardContent>
           </Card>
         )}
+
+        <StudentReportDialog
+          open={dialogOpen}
+          onOpenChange={setDialogOpen}
+          studentId={selectedStudent}
+          period={selectedPeriod}
+          className={classes?.find(c => c.id === selectedClass)?.name || ""}
+        />
       </main>
     </div>
   );
