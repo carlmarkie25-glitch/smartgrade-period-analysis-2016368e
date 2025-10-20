@@ -116,7 +116,7 @@ const Dashboard = () => {
                   { label: "Enter Grades", icon: BookOpen, path: "/gradebook" },
                   { label: "Generate Report", icon: FileText, path: "/reports" },
                   { label: "View Analytics", icon: TrendingUp, path: "/analytics" },
-                  { label: "Manage Students", icon: Users, path: "/dashboard" },
+                  { label: "Admin Panel", icon: Users, path: "/admin" },
                 ].map((action) => {
                   const Icon = action.icon;
                   return (
