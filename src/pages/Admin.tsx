@@ -10,7 +10,10 @@ import { useUserManagement } from "@/hooks/useUserManagement";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { ArrowLeft, UserPlus, School, BookOpen, FileText, Users } from "lucide-react";
+import { ArrowLeft, UserPlus, School, BookOpen, FileText, Users, GraduationCap, Building } from "lucide-react";
+import { StudentManagementTab } from "@/components/StudentManagementTab";
+import { ClassManagementTab } from "@/components/ClassManagementTab";
+import { SubjectManagementTab } from "@/components/SubjectManagementTab";
 
 const Admin = () => {
   const navigate = useNavigate();
@@ -99,26 +102,34 @@ const Admin = () => {
 
       <div className="container mx-auto px-4 py-8">
         <Tabs defaultValue="users" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5">
+          <TabsList className="grid w-full grid-cols-7">
             <TabsTrigger value="users">
               <UserPlus className="h-4 w-4 mr-2" />
-              Users & Roles
+              Users
+            </TabsTrigger>
+            <TabsTrigger value="students">
+              <GraduationCap className="h-4 w-4 mr-2" />
+              Students
+            </TabsTrigger>
+            <TabsTrigger value="classes">
+              <Building className="h-4 w-4 mr-2" />
+              Classes
+            </TabsTrigger>
+            <TabsTrigger value="subjects">
+              <BookOpen className="h-4 w-4 mr-2" />
+              Subjects
             </TabsTrigger>
             <TabsTrigger value="academic">
               <School className="h-4 w-4 mr-2" />
-              Academic Years
+              Years
             </TabsTrigger>
             <TabsTrigger value="departments">
-              <BookOpen className="h-4 w-4 mr-2" />
-              Departments & Subjects
+              <Users className="h-4 w-4 mr-2" />
+              Departments
             </TabsTrigger>
             <TabsTrigger value="assessments">
               <FileText className="h-4 w-4 mr-2" />
-              Assessment Types
-            </TabsTrigger>
-            <TabsTrigger value="classes">
-              <Users className="h-4 w-4 mr-2" />
-              Classes
+              Assessments
             </TabsTrigger>
           </TabsList>
 
@@ -170,6 +181,18 @@ const Admin = () => {
                 )}
               </CardContent>
             </Card>
+          </TabsContent>
+
+          <TabsContent value="students">
+            <StudentManagementTab />
+          </TabsContent>
+
+          <TabsContent value="classes">
+            <ClassManagementTab />
+          </TabsContent>
+
+          <TabsContent value="subjects">
+            <SubjectManagementTab />
           </TabsContent>
 
           <TabsContent value="academic">
@@ -323,19 +346,6 @@ const Admin = () => {
             </Card>
           </TabsContent>
 
-          <TabsContent value="classes">
-            <Card>
-              <CardHeader>
-                <CardTitle>Class Management</CardTitle>
-                <CardDescription>Create classes and assign teachers (Coming soon)</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground">
-                  Use the Gradebook page to create and manage classes once you have departments, academic years, and teachers set up.
-                </p>
-              </CardContent>
-            </Card>
-          </TabsContent>
         </Tabs>
       </div>
     </div>

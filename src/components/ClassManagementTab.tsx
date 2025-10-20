@@ -1,0 +1,209 @@
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
+import { useClasses } from "@/hooks/useClasses";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { Pencil, Trash2, Plus } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
+
+export const ClassManagementTab = () => {
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [newClass, setNewClass] = useState({
+    name: "",
+    department_id: "",
+    academic_year_id: "",
+  });
+
+  const { data: classes, isLoading } = useClasses();
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  const { data: departments } = useQuery({
+    queryKey: ["departments"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("departments")
+        .select("*")
+        .order("name");
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const { data: academicYears } = useQuery({
+    queryKey: ["academic-years"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("academic_years")
+        .select("*")
+        .order("year_name", { ascending: false });
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const handleAddClass = async () => {
+    try {
+      const { error } = await supabase.from("classes").insert(newClass);
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Class added successfully",
+      });
+
+      queryClient.invalidateQueries({ queryKey: ["classes"] });
+      setIsAddDialogOpen(false);
+      setNewClass({
+        name: "",
+        department_id: "",
+        academic_year_id: "",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleDeleteClass = async (id: string) => {
+    if (!confirm("Are you sure you want to delete this class?")) return;
+
+    try {
+      const { error } = await supabase.from("classes").delete().eq("id", id);
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Class deleted successfully",
+      });
+
+      queryClient.invalidateQueries({ queryKey: ["classes"] });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
+
+  return (
+    <Card>
+      <CardHeader className="flex flex-row items-center justify-between">
+        <CardTitle>Class Management</CardTitle>
+        <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+          <DialogTrigger asChild>
+            <Button className="gap-2">
+              <Plus className="h-4 w-4" />
+              Add Class
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Add New Class</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 pt-4">
+              <div>
+                <Label htmlFor="name">Class Name</Label>
+                <Input
+                  id="name"
+                  value={newClass.name}
+                  onChange={(e) => setNewClass({ ...newClass, name: e.target.value })}
+                  placeholder="e.g., Grade 10A"
+                />
+              </div>
+              <div>
+                <Label htmlFor="department">Department</Label>
+                <Select value={newClass.department_id} onValueChange={(value) => setNewClass({ ...newClass, department_id: value })}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select department" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {departments?.map((dept) => (
+                      <SelectItem key={dept.id} value={dept.id}>
+                        {dept.name} ({dept.type})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label htmlFor="academic_year">Academic Year</Label>
+                <Select value={newClass.academic_year_id} onValueChange={(value) => setNewClass({ ...newClass, academic_year_id: value })}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select academic year" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {academicYears?.map((year) => (
+                      <SelectItem key={year.id} value={year.id}>
+                        {year.year_name} {year.is_current && "(Current)"}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <Button onClick={handleAddClass} className="w-full">
+                Add Class
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+      </CardHeader>
+      <CardContent>
+        {isLoading ? (
+          <div className="space-y-2">
+            {Array(5).fill(0).map((_, i) => (
+              <Skeleton key={i} className="h-16 w-full" />
+            ))}
+          </div>
+        ) : (
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Class Name</TableHead>
+                <TableHead>Department</TableHead>
+                <TableHead>Academic Year</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {classes?.map((cls) => (
+                <TableRow key={cls.id}>
+                  <TableCell className="font-medium">{cls.name}</TableCell>
+                  <TableCell>
+                    {cls.departments?.name} ({cls.departments?.type})
+                  </TableCell>
+                  <TableCell>{cls.academic_years?.year_name}</TableCell>
+                  <TableCell className="text-right">
+                    <div className="flex justify-end gap-2">
+                      <Button variant="outline" size="sm">
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleDeleteClass(cls.id)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        )}
+      </CardContent>
+    </Card>
+  );
+};

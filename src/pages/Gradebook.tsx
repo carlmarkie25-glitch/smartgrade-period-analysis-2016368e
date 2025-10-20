@@ -3,23 +3,82 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Lock } from "lucide-react";
-import { useState } from "react";
+import { Input } from "@/components/ui/input";
+import { Lock, Unlock, Save } from "lucide-react";
+import { useState, useEffect } from "react";
 import { useClasses, useClassSubjects } from "@/hooks/useClasses";
 import { useStudents } from "@/hooks/useStudents";
-import { useGrades, useAssessmentTypes } from "@/hooks/useGrades";
+import { useGrades, useAssessmentTypes, useSaveGrades } from "@/hooks/useGrades";
 import { Skeleton } from "@/components/ui/skeleton";
 
 const Gradebook = () => {
   const [selectedClass, setSelectedClass] = useState<string>("");
   const [selectedSubject, setSelectedSubject] = useState<string>("");
   const [selectedPeriod, setSelectedPeriod] = useState<string>("p1");
+  const [isLocked, setIsLocked] = useState(true);
+  const [editedGrades, setEditedGrades] = useState<Record<string, Record<string, number>>>({});
 
   const { data: classes, isLoading: classesLoading } = useClasses();
   const { data: classSubjects, isLoading: subjectsLoading } = useClassSubjects(selectedClass);
   const { data: students, isLoading: studentsLoading } = useStudents(selectedClass);
   const { data: assessmentTypes, isLoading: assessmentLoading } = useAssessmentTypes();
   const { data: grades, isLoading: gradesLoading } = useGrades(selectedSubject, selectedPeriod);
+  const saveGradesMutation = useSaveGrades();
+
+  // Initialize edited grades when data loads
+  useEffect(() => {
+    if (grades && students && assessmentTypes) {
+      const initialGrades: Record<string, Record<string, number>> = {};
+      students.forEach(student => {
+        initialGrades[student.id] = {};
+        assessmentTypes.forEach(at => {
+          const existingGrade = grades.find(g => 
+            g.student_id === student.id && g.assessment_type_id === at.id
+          );
+          initialGrades[student.id][at.id] = existingGrade ? Number(existingGrade.score) : 0;
+        });
+      });
+      setEditedGrades(initialGrades);
+    }
+  }, [grades, students, assessmentTypes]);
+
+  const handleGradeChange = (studentId: string, assessmentTypeId: string, value: string) => {
+    const numValue = Math.max(0, Number(value) || 0);
+    const maxScore = assessmentTypes?.find(at => at.id === assessmentTypeId)?.max_points || 0;
+    const clampedValue = Math.min(numValue, maxScore);
+    
+    setEditedGrades(prev => ({
+      ...prev,
+      [studentId]: {
+        ...prev[studentId],
+        [assessmentTypeId]: clampedValue,
+      },
+    }));
+  };
+
+  const handleSaveGrades = () => {
+    const gradesToSave = [];
+    for (const studentId in editedGrades) {
+      for (const assessmentTypeId in editedGrades[studentId]) {
+        const existingGrade = grades?.find(g => 
+          g.student_id === studentId && g.assessment_type_id === assessmentTypeId
+        );
+        const maxScore = assessmentTypes?.find(at => at.id === assessmentTypeId)?.max_points || 0;
+        
+        gradesToSave.push({
+          id: existingGrade?.id,
+          student_id: studentId,
+          class_subject_id: selectedSubject,
+          assessment_type_id: assessmentTypeId,
+          period: selectedPeriod,
+          score: editedGrades[studentId][assessmentTypeId],
+          max_score: maxScore,
+          is_locked: isLocked,
+        });
+      }
+    }
+    saveGradesMutation.mutate(gradesToSave);
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -30,9 +89,13 @@ const Gradebook = () => {
             <h1 className="text-4xl font-bold text-foreground mb-2">Gradebook</h1>
             <p className="text-muted-foreground">Enter and manage student grades</p>
           </div>
-          <Button variant="outline" className="gap-2">
-            <Lock className="h-4 w-4" />
-            Locked
+          <Button 
+            variant={isLocked ? "outline" : "default"} 
+            className="gap-2"
+            onClick={() => setIsLocked(!isLocked)}
+          >
+            {isLocked ? <Lock className="h-4 w-4" /> : <Unlock className="h-4 w-4" />}
+            {isLocked ? "Locked" : "Unlocked"}
           </Button>
         </div>
 
@@ -145,17 +208,30 @@ const Gradebook = () => {
                       </TableHeader>
                       <TableBody>
                         {students.map((student) => {
-                          const studentGrades = grades?.filter(g => g.student_id === student.id) || [];
-                          const total = studentGrades.reduce((sum, g) => sum + Number(g.score), 0);
+                          const studentEditedGrades = editedGrades[student.id] || {};
+                          const total = Object.values(studentEditedGrades).reduce((sum, score) => sum + score, 0);
                           
                           return (
                             <TableRow key={student.id}>
                               <TableCell className="font-medium">{student.full_name}</TableCell>
                               {assessmentTypes?.map((at) => {
-                                const grade = studentGrades.find(g => g.assessment_type_id === at.id);
+                                const currentValue = studentEditedGrades[at.id] || 0;
                                 return (
                                   <TableCell key={at.id} className="text-center">
-                                    {grade ? Number(grade.score).toFixed(0) : '-'}
+                                    {isLocked ? (
+                                      <span className="text-muted-foreground">
+                                        {currentValue > 0 ? currentValue : '-'}
+                                      </span>
+                                    ) : (
+                                      <Input
+                                        type="number"
+                                        min="0"
+                                        max={at.max_points}
+                                        value={currentValue || ''}
+                                        onChange={(e) => handleGradeChange(student.id, at.id, e.target.value)}
+                                        className="w-20 text-center mx-auto"
+                                      />
+                                    )}
                                   </TableCell>
                                 );
                               })}
@@ -169,8 +245,36 @@ const Gradebook = () => {
                     </Table>
                   </div>
                   <div className="mt-6 flex justify-end gap-4">
-                    <Button variant="outline">Cancel</Button>
-                    <Button>Save Grades</Button>
+                    <Button 
+                      variant="outline" 
+                      onClick={() => {
+                        // Reset to original grades
+                        if (grades && students && assessmentTypes) {
+                          const initialGrades: Record<string, Record<string, number>> = {};
+                          students.forEach(student => {
+                            initialGrades[student.id] = {};
+                            assessmentTypes.forEach(at => {
+                              const existingGrade = grades.find(g => 
+                                g.student_id === student.id && g.assessment_type_id === at.id
+                              );
+                              initialGrades[student.id][at.id] = existingGrade ? Number(existingGrade.score) : 0;
+                            });
+                          });
+                          setEditedGrades(initialGrades);
+                        }
+                      }}
+                      disabled={isLocked}
+                    >
+                      Cancel
+                    </Button>
+                    <Button 
+                      onClick={handleSaveGrades}
+                      disabled={isLocked || saveGradesMutation.isPending}
+                      className="gap-2"
+                    >
+                      <Save className="h-4 w-4" />
+                      {saveGradesMutation.isPending ? "Saving..." : "Save Grades"}
+                    </Button>
                   </div>
                 </>
               ) : (
