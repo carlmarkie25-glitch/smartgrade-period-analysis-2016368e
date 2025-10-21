@@ -65,8 +65,7 @@ const Gradebook = () => {
         );
         const maxScore = assessmentTypes?.find(at => at.id === assessmentTypeId)?.max_points || 0;
         
-        gradesToSave.push({
-          id: existingGrade?.id,
+        const gradeData: any = {
           student_id: studentId,
           class_subject_id: selectedSubject,
           assessment_type_id: assessmentTypeId,
@@ -74,7 +73,14 @@ const Gradebook = () => {
           score: editedGrades[studentId][assessmentTypeId],
           max_score: maxScore,
           is_locked: isLocked,
-        });
+        };
+
+        // Only include id if it exists (for updates)
+        if (existingGrade?.id) {
+          gradeData.id = existingGrade.id;
+        }
+
+        gradesToSave.push(gradeData);
       }
     }
     saveGradesMutation.mutate(gradesToSave);
