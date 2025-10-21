@@ -227,7 +227,7 @@ const Gradebook = () => {
                                         type="number"
                                         min="0"
                                         max={at.max_points}
-                                        value={currentValue || ''}
+                                        value={currentValue ?? ''}
                                         onChange={(e) => handleGradeChange(student.id, at.id, e.target.value)}
                                         className="w-20 text-center mx-auto"
                                       />
