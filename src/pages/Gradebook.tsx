@@ -153,12 +153,16 @@ const Gradebook = () => {
               <SelectValue placeholder="Select Period" />
             </SelectTrigger>
             <SelectContent>
+              <div className="px-2 py-1.5 text-sm font-semibold text-muted-foreground">Semester 1</div>
               <SelectItem value="p1">Period 1</SelectItem>
               <SelectItem value="p2">Period 2</SelectItem>
               <SelectItem value="p3">Period 3</SelectItem>
+              <SelectItem value="exam_s1">Exam S1</SelectItem>
+              <div className="px-2 py-1.5 text-sm font-semibold text-muted-foreground mt-2">Semester 2</div>
               <SelectItem value="p4">Period 4</SelectItem>
               <SelectItem value="p5">Period 5</SelectItem>
               <SelectItem value="p6">Period 6</SelectItem>
+              <SelectItem value="exam_s2">Exam S2</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -187,7 +191,19 @@ const Gradebook = () => {
               <CardTitle>
                 {classSubjects?.find(cs => cs.id === selectedSubject)?.subjects?.name} - 
                 {classes?.find(c => c.id === selectedClass)?.name} - 
-                Period {selectedPeriod.replace('p', '')}
+                {(() => {
+                  switch(selectedPeriod) {
+                    case 'p1': return 'Period 1';
+                    case 'p2': return 'Period 2';
+                    case 'p3': return 'Period 3';
+                    case 'p4': return 'Period 4';
+                    case 'p5': return 'Period 5';
+                    case 'p6': return 'Period 6';
+                    case 'exam_s1': return 'Exam S1';
+                    case 'exam_s2': return 'Exam S2';
+                    default: return selectedPeriod;
+                  }
+                })()}
               </CardTitle>
               <CardDescription>
                 {assessmentTypes && assessmentTypes.length > 0 
