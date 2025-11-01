@@ -526,7 +526,18 @@ export type Database = {
     Enums: {
       app_role: "admin" | "teacher" | "student" | "parent"
       department_type: "elementary" | "junior_high" | "senior_high"
-      period_type: "p1" | "p2" | "p3" | "p4" | "p5" | "p6"
+      period_type:
+        | "p1"
+        | "p2"
+        | "p3"
+        | "p4"
+        | "p5"
+        | "p6"
+        | "exam_s1"
+        | "exam_s2"
+        | "semester1"
+        | "semester2"
+        | "yearly"
       semester_type: "semester1" | "semester2"
     }
     CompositeTypes: {
@@ -657,7 +668,19 @@ export const Constants = {
     Enums: {
       app_role: ["admin", "teacher", "student", "parent"],
       department_type: ["elementary", "junior_high", "senior_high"],
-      period_type: ["p1", "p2", "p3", "p4", "p5", "p6"],
+      period_type: [
+        "p1",
+        "p2",
+        "p3",
+        "p4",
+        "p5",
+        "p6",
+        "exam_s1",
+        "exam_s2",
+        "semester1",
+        "semester2",
+        "yearly",
+      ],
       semester_type: ["semester1", "semester2"],
     },
   },

@@ -22,12 +22,24 @@ export const useStudentReport = (studentId: string, period: string) => {
 
       if (studentError) throw studentError;
 
-      // Get grades for this student and period
+      // Determine which periods to fetch based on report type
+      let periodsToFetch: any[] = [period];
+      
+      if (period === 'semester1') {
+        periodsToFetch = ['p1', 'p2', 'p3', 'exam_s1'];
+      } else if (period === 'semester2') {
+        periodsToFetch = ['p4', 'p5', 'p6', 'exam_s2'];
+      } else if (period === 'yearly') {
+        periodsToFetch = ['p1', 'p2', 'p3', 'exam_s1', 'p4', 'p5', 'p6', 'exam_s2'];
+      }
+
+      // Get grades for this student and period(s)
       const { data: grades, error: gradesError } = await supabase
         .from("student_grades")
         .select(`
           score,
           max_score,
+          period,
           assessment_types (
             name,
             max_points
@@ -40,7 +52,7 @@ export const useStudentReport = (studentId: string, period: string) => {
           )
         `)
         .eq("student_id", studentId)
-        .eq("period", period as any);
+        .in("period", periodsToFetch);
 
       if (gradesError) throw gradesError;
 

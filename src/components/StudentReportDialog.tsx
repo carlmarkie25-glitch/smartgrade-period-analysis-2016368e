@@ -37,9 +37,18 @@ export const StudentReportDialog = ({
     window.print();
   };
 
-  const periodName = period === "yearly" 
-    ? "Final Year Report" 
-    : `Period ${period.replace("p", "")} Report`;
+  const getPeriodName = (period: string) => {
+    switch(period) {
+      case "yearly": return "Final Year Report";
+      case "semester1": return "Semester 1 Report";
+      case "semester2": return "Semester 2 Report";
+      case "exam_s1": return "Semester 1 Exam Report";
+      case "exam_s2": return "Semester 2 Exam Report";
+      default: return `Period ${period.replace("p", "")} Report`;
+    }
+  };
+
+  const periodName = getPeriodName(period);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

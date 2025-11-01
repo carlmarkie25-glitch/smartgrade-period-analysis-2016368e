@@ -13,7 +13,7 @@ import { useToast } from "@/hooks/use-toast";
 
 const Reports = () => {
   const [selectedClass, setSelectedClass] = useState<string>("");
-  const [selectedPeriod, setSelectedPeriod] = useState<string>("p3");
+  const [selectedPeriod, setSelectedPeriod] = useState<string>("p1");
   const [selectedStudent, setSelectedStudent] = useState<string>("");
   const [dialogOpen, setDialogOpen] = useState(false);
 
@@ -32,6 +32,23 @@ const Reports = () => {
       description: `Generating ${students?.length || 0} report cards...`,
     });
     // In a real app, this would trigger batch PDF generation
+  };
+
+  const getPeriodDisplayName = (period: string) => {
+    switch(period) {
+      case "yearly": return "Final Year";
+      case "semester1": return "Semester 1";
+      case "semester2": return "Semester 2";
+      case "exam_s1": return "Semester 1 Exam";
+      case "exam_s2": return "Semester 2 Exam";
+      case "p1": return "Period 1";
+      case "p2": return "Period 2";
+      case "p3": return "Period 3";
+      case "p4": return "Period 4";
+      case "p5": return "Period 5";
+      case "p6": return "Period 6";
+      default: return period;
+    }
   };
 
   return (
@@ -68,12 +85,19 @@ const Reports = () => {
               <SelectValue placeholder="Report Type" />
             </SelectTrigger>
             <SelectContent>
+              <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground">Semester 1</div>
               <SelectItem value="p1">Period 1 Report</SelectItem>
               <SelectItem value="p2">Period 2 Report</SelectItem>
               <SelectItem value="p3">Period 3 Report</SelectItem>
+              <SelectItem value="exam_s1">Exam Report</SelectItem>
+              <SelectItem value="semester1">Semester 1 Report</SelectItem>
+              <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground mt-2">Semester 2</div>
               <SelectItem value="p4">Period 4 Report</SelectItem>
               <SelectItem value="p5">Period 5 Report</SelectItem>
               <SelectItem value="p6">Period 6 Report</SelectItem>
+              <SelectItem value="exam_s2">Exam Report</SelectItem>
+              <SelectItem value="semester2">Semester 2 Report</SelectItem>
+              <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground mt-2">Final</div>
               <SelectItem value="yearly">Final Yearly Report</SelectItem>
             </SelectContent>
           </Select>
@@ -110,8 +134,7 @@ const Reports = () => {
           <Card>
             <CardHeader>
               <CardTitle>
-                Student Report Cards - {classes?.find(c => c.id === selectedClass)?.name} - 
-                Period {selectedPeriod.replace('p', '')}
+                Student Report Cards - {classes?.find(c => c.id === selectedClass)?.name} - {getPeriodDisplayName(selectedPeriod)}
               </CardTitle>
               <CardDescription>View and download individual student reports</CardDescription>
             </CardHeader>
