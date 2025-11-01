@@ -66,59 +66,136 @@ export const useStudentReport = (studentId: string, period: string) => {
 
       if (periodTotalError) throw periodTotalError;
 
-      // Group grades by subject
-      const subjectGrades = new Map<string, {
-        name: string;
-        code: string;
-        total: number;
-        max: number;
-        assessments: Array<{ type: string; score: number; max: number }>;
-      }>();
+      // Check if this is a semester report
+      const isSemesterReport = period === 'semester1' || period === 'semester2' || period === 'yearly';
 
-      grades?.forEach((grade: any) => {
-        const subjectName = grade.class_subjects?.subjects?.name || "Unknown";
-        const subjectCode = grade.class_subjects?.subjects?.code || "N/A";
-        
-        const existing = subjectGrades.get(subjectName);
-        const assessment = {
-          type: grade.assessment_types?.name || "Assessment",
-          score: Number(grade.score),
-          max: Number(grade.max_score),
-        };
+      if (isSemesterReport) {
+        // For semester reports, organize by subject and period
+        const subjectGrades = new Map<string, {
+          name: string;
+          code: string;
+          periods: { [key: string]: { score: number; max: number } };
+        }>();
 
-        if (existing) {
-          existing.total += Number(grade.score);
-          existing.max += Number(grade.max_score);
-          existing.assessments.push(assessment);
-        } else {
-          subjectGrades.set(subjectName, {
-            name: subjectName,
-            code: subjectCode,
-            total: Number(grade.score),
-            max: Number(grade.max_score),
-            assessments: [assessment],
+        grades?.forEach((grade: any) => {
+          const subjectName = grade.class_subjects?.subjects?.name || "Unknown";
+          const subjectCode = grade.class_subjects?.subjects?.code || "N/A";
+          const gradePeriod = grade.period;
+          
+          const existing = subjectGrades.get(subjectName);
+
+          if (existing) {
+            if (!existing.periods[gradePeriod]) {
+              existing.periods[gradePeriod] = { score: 0, max: 0 };
+            }
+            existing.periods[gradePeriod].score += Number(grade.score);
+            existing.periods[gradePeriod].max += Number(grade.max_score);
+          } else {
+            subjectGrades.set(subjectName, {
+              name: subjectName,
+              code: subjectCode,
+              periods: {
+                [gradePeriod]: {
+                  score: Number(grade.score),
+                  max: Number(grade.max_score),
+                }
+              },
+            });
+          }
+        });
+
+        // Convert to array and calculate percentages for each period
+        const subjects = Array.from(subjectGrades.values()).map((subject) => {
+          const periodData: any = {};
+          let semesterTotal = 0;
+          let semesterMax = 0;
+
+          Object.keys(subject.periods).forEach(p => {
+            const pData = subject.periods[p];
+            const percentage = pData.max > 0 ? Math.round((pData.score / pData.max) * 100) : 0;
+            periodData[p] = { ...pData, percentage };
+            semesterTotal += pData.score;
+            semesterMax += pData.max;
           });
-        }
-      });
 
-      // Convert to array and calculate percentages
-      const subjects = Array.from(subjectGrades.values()).map((subject) => ({
-        ...subject,
-        percentage: Math.round((subject.total / subject.max) * 100),
-      }));
+          const semesterAverage = semesterMax > 0 ? Math.round((semesterTotal / semesterMax) * 100) : 0;
 
-      // Calculate overall average
-      const overallTotal = subjects.reduce((sum, s) => sum + s.total, 0);
-      const overallMax = subjects.reduce((sum, s) => sum + s.max, 0);
-      const overallAverage = overallMax > 0 ? Math.round((overallTotal / overallMax) * 100) : 0;
+          return {
+            ...subject,
+            periods: periodData,
+            semesterAverage,
+          };
+        });
 
-      return {
-        student,
-        subjects,
-        periodTotal,
-        overallAverage,
-        period,
-      };
+        // Calculate overall average
+        const overallTotal = subjects.reduce((sum, s) => sum + s.semesterAverage, 0);
+        const overallAverage = subjects.length > 0 ? Math.round(overallTotal / subjects.length) : 0;
+
+        return {
+          student,
+          subjects,
+          periodTotal,
+          overallAverage,
+          period,
+          isSemesterReport: true,
+        };
+      } else {
+        // Original logic for individual period reports
+        const subjectGrades = new Map<string, {
+          name: string;
+          code: string;
+          total: number;
+          max: number;
+          assessments: Array<{ type: string; score: number; max: number }>;
+        }>();
+
+        grades?.forEach((grade: any) => {
+          const subjectName = grade.class_subjects?.subjects?.name || "Unknown";
+          const subjectCode = grade.class_subjects?.subjects?.code || "N/A";
+          
+          const existing = subjectGrades.get(subjectName);
+          const assessment = {
+            type: grade.assessment_types?.name || "Assessment",
+            score: Number(grade.score),
+            max: Number(grade.max_score),
+          };
+
+          if (existing) {
+            existing.total += Number(grade.score);
+            existing.max += Number(grade.max_score);
+            existing.assessments.push(assessment);
+          } else {
+            subjectGrades.set(subjectName, {
+              name: subjectName,
+              code: subjectCode,
+              total: Number(grade.score),
+              max: Number(grade.max_score),
+              assessments: [assessment],
+            });
+          }
+        });
+
+        // Convert to array and calculate percentages
+        const subjects = Array.from(subjectGrades.values()).map((subject) => ({
+          ...subject,
+          percentage: Math.round((subject.total / subject.max) * 100),
+        }));
+
+        // Calculate overall average
+        const overallTotal = subjects.reduce((sum, s) => sum + s.total, 0);
+        const overallMax = subjects.reduce((sum, s) => sum + s.max, 0);
+        const overallAverage = overallMax > 0 ? Math.round((overallTotal / overallMax) * 100) : 0;
+
+        return {
+          student,
+          subjects,
+          periodTotal,
+          overallAverage,
+          period,
+          isSemesterReport: false,
+        };
+      }
+
     },
     enabled: !!studentId && !!period,
   });

@@ -98,39 +98,123 @@ export const StudentReportDialog = ({
                   <thead className="bg-muted">
                     <tr>
                       <th className="text-left p-3 text-sm font-semibold text-foreground">Subject</th>
-                      <th className="text-center p-3 text-sm font-semibold text-foreground">Score</th>
-                      <th className="text-center p-3 text-sm font-semibold text-foreground">Max</th>
-                      <th className="text-center p-3 text-sm font-semibold text-foreground">Percentage</th>
-                      <th className="text-center p-3 text-sm font-semibold text-foreground">Grade</th>
+                      {report.isSemesterReport ? (
+                        <>
+                          {period === 'semester1' && (
+                            <>
+                              <th className="text-center p-3 text-sm font-semibold text-foreground">P1</th>
+                              <th className="text-center p-3 text-sm font-semibold text-foreground">P2</th>
+                              <th className="text-center p-3 text-sm font-semibold text-foreground">P3</th>
+                              <th className="text-center p-3 text-sm font-semibold text-foreground">Exam</th>
+                              <th className="text-center p-3 text-sm font-semibold text-foreground">Semester Avg</th>
+                            </>
+                          )}
+                          {period === 'semester2' && (
+                            <>
+                              <th className="text-center p-3 text-sm font-semibold text-foreground">P4</th>
+                              <th className="text-center p-3 text-sm font-semibold text-foreground">P5</th>
+                              <th className="text-center p-3 text-sm font-semibold text-foreground">P6</th>
+                              <th className="text-center p-3 text-sm font-semibold text-foreground">Exam</th>
+                              <th className="text-center p-3 text-sm font-semibold text-foreground">Semester Avg</th>
+                            </>
+                          )}
+                          {period === 'yearly' && (
+                            <>
+                              <th className="text-center p-3 text-sm font-semibold text-foreground">S1 Avg</th>
+                              <th className="text-center p-3 text-sm font-semibold text-foreground">S2 Avg</th>
+                              <th className="text-center p-3 text-sm font-semibold text-foreground">Year Avg</th>
+                            </>
+                          )}
+                        </>
+                      ) : (
+                        <>
+                          <th className="text-center p-3 text-sm font-semibold text-foreground">Score</th>
+                          <th className="text-center p-3 text-sm font-semibold text-foreground">Percentage</th>
+                        </>
+                      )}
                     </tr>
                   </thead>
                   <tbody>
-                    {report.subjects.map((subject, index) => {
-                      const grade = subject.percentage >= 90 ? "A" :
-                                   subject.percentage >= 80 ? "B" :
-                                   subject.percentage >= 70 ? "C" :
-                                   subject.percentage >= 60 ? "D" :
-                                   subject.percentage >= 50 ? "E" : "F";
-                      
-                      const gradeColor = subject.percentage >= 50 ? "text-success" : "text-destructive";
-
+                    {report.subjects.map((subject: any, index: number) => {
                       return (
                         <tr key={index} className="border-t">
                           <td className="p-3 text-sm text-foreground font-medium">
                             {subject.name}
                           </td>
-                          <td className="p-3 text-sm text-center text-foreground">
-                            {subject.total}
-                          </td>
-                          <td className="p-3 text-sm text-center text-muted-foreground">
-                            {subject.max}
-                          </td>
-                          <td className="p-3 text-sm text-center font-semibold text-foreground">
-                            {subject.percentage}%
-                          </td>
-                          <td className={`p-3 text-sm text-center font-bold ${gradeColor}`}>
-                            {grade}
-                          </td>
+                          {report.isSemesterReport ? (
+                            <>
+                              {period === 'semester1' && (
+                                <>
+                                  <td className="p-3 text-sm text-center text-foreground">
+                                    {subject.periods?.p1?.percentage || '-'}%
+                                  </td>
+                                  <td className="p-3 text-sm text-center text-foreground">
+                                    {subject.periods?.p2?.percentage || '-'}%
+                                  </td>
+                                  <td className="p-3 text-sm text-center text-foreground">
+                                    {subject.periods?.p3?.percentage || '-'}%
+                                  </td>
+                                  <td className="p-3 text-sm text-center text-foreground">
+                                    {subject.periods?.exam_s1?.percentage || '-'}%
+                                  </td>
+                                  <td className="p-3 text-sm text-center font-semibold text-foreground">
+                                    {subject.semesterAverage}%
+                                  </td>
+                                </>
+                              )}
+                              {period === 'semester2' && (
+                                <>
+                                  <td className="p-3 text-sm text-center text-foreground">
+                                    {subject.periods?.p4?.percentage || '-'}%
+                                  </td>
+                                  <td className="p-3 text-sm text-center text-foreground">
+                                    {subject.periods?.p5?.percentage || '-'}%
+                                  </td>
+                                  <td className="p-3 text-sm text-center text-foreground">
+                                    {subject.periods?.p6?.percentage || '-'}%
+                                  </td>
+                                  <td className="p-3 text-sm text-center text-foreground">
+                                    {subject.periods?.exam_s2?.percentage || '-'}%
+                                  </td>
+                                  <td className="p-3 text-sm text-center font-semibold text-foreground">
+                                    {subject.semesterAverage}%
+                                  </td>
+                                </>
+                              )}
+                              {period === 'yearly' && (
+                                <>
+                                  <td className="p-3 text-sm text-center text-foreground">
+                                    {/* Calculate S1 average */}
+                                    {(() => {
+                                      const s1Periods = ['p1', 'p2', 'p3', 'exam_s1'];
+                                      const s1Scores = s1Periods.map(p => subject.periods?.[p]?.percentage).filter(Boolean);
+                                      return s1Scores.length > 0 ? Math.round(s1Scores.reduce((a: number, b: number) => a + b, 0) / s1Scores.length) : '-';
+                                    })()}%
+                                  </td>
+                                  <td className="p-3 text-sm text-center text-foreground">
+                                    {/* Calculate S2 average */}
+                                    {(() => {
+                                      const s2Periods = ['p4', 'p5', 'p6', 'exam_s2'];
+                                      const s2Scores = s2Periods.map(p => subject.periods?.[p]?.percentage).filter(Boolean);
+                                      return s2Scores.length > 0 ? Math.round(s2Scores.reduce((a: number, b: number) => a + b, 0) / s2Scores.length) : '-';
+                                    })()}%
+                                  </td>
+                                  <td className="p-3 text-sm text-center font-semibold text-foreground">
+                                    {subject.semesterAverage}%
+                                  </td>
+                                </>
+                              )}
+                            </>
+                          ) : (
+                            <>
+                              <td className="p-3 text-sm text-center text-foreground">
+                                {subject.total}
+                              </td>
+                              <td className="p-3 text-sm text-center font-semibold text-foreground">
+                                {subject.percentage}%
+                              </td>
+                            </>
+                          )}
                         </tr>
                       );
                     })}
