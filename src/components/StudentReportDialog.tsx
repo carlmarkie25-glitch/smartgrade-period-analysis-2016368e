@@ -102,27 +102,40 @@ export const StudentReportDialog = ({
                         <>
                           {period === 'semester1' && (
                             <>
-                              <th className="text-center p-3 text-sm font-semibold text-foreground">P1</th>
-                              <th className="text-center p-3 text-sm font-semibold text-foreground">P2</th>
-                              <th className="text-center p-3 text-sm font-semibold text-foreground">P3</th>
-                              <th className="text-center p-3 text-sm font-semibold text-foreground">Exam</th>
-                              <th className="text-center p-3 text-sm font-semibold text-foreground">Sem1 Avg</th>
+                              <th className="text-center p-2 text-xs font-semibold text-foreground">P1</th>
+                              <th className="text-center p-2 text-xs font-semibold text-foreground">Rank</th>
+                              <th className="text-center p-2 text-xs font-semibold text-foreground">P2</th>
+                              <th className="text-center p-2 text-xs font-semibold text-foreground">Rank</th>
+                              <th className="text-center p-2 text-xs font-semibold text-foreground">P3</th>
+                              <th className="text-center p-2 text-xs font-semibold text-foreground">Rank</th>
+                              <th className="text-center p-2 text-xs font-semibold text-foreground">Exam</th>
+                              <th className="text-center p-2 text-xs font-semibold text-foreground">Rank</th>
+                              <th className="text-center p-2 text-xs font-semibold text-foreground">S1 Avg</th>
+                              <th className="text-center p-2 text-xs font-semibold text-foreground">Rank</th>
                             </>
                           )}
                           {period === 'semester2' && (
                             <>
-                              <th className="text-center p-3 text-sm font-semibold text-foreground">P4</th>
-                              <th className="text-center p-3 text-sm font-semibold text-foreground">P5</th>
-                              <th className="text-center p-3 text-sm font-semibold text-foreground">P6</th>
-                              <th className="text-center p-3 text-sm font-semibold text-foreground">Exam</th>
-                              <th className="text-center p-3 text-sm font-semibold text-foreground">Sem2 Avg</th>
+                              <th className="text-center p-2 text-xs font-semibold text-foreground">P4</th>
+                              <th className="text-center p-2 text-xs font-semibold text-foreground">Rank</th>
+                              <th className="text-center p-2 text-xs font-semibold text-foreground">P5</th>
+                              <th className="text-center p-2 text-xs font-semibold text-foreground">Rank</th>
+                              <th className="text-center p-2 text-xs font-semibold text-foreground">P6</th>
+                              <th className="text-center p-2 text-xs font-semibold text-foreground">Rank</th>
+                              <th className="text-center p-2 text-xs font-semibold text-foreground">Exam</th>
+                              <th className="text-center p-2 text-xs font-semibold text-foreground">Rank</th>
+                              <th className="text-center p-2 text-xs font-semibold text-foreground">S2 Avg</th>
+                              <th className="text-center p-2 text-xs font-semibold text-foreground">Rank</th>
                             </>
                           )}
                           {period === 'yearly' && (
                             <>
-                              <th className="text-center p-3 text-sm font-semibold text-foreground">S1 Avg</th>
-                              <th className="text-center p-3 text-sm font-semibold text-foreground">S2 Avg</th>
-                              <th className="text-center p-3 text-sm font-semibold text-foreground">Year Avg</th>
+                              <th className="text-center p-2 text-xs font-semibold text-foreground">S1 Avg</th>
+                              <th className="text-center p-2 text-xs font-semibold text-foreground">Rank</th>
+                              <th className="text-center p-2 text-xs font-semibold text-foreground">S2 Avg</th>
+                              <th className="text-center p-2 text-xs font-semibold text-foreground">Rank</th>
+                              <th className="text-center p-2 text-xs font-semibold text-foreground">Year Avg</th>
+                              <th className="text-center p-2 text-xs font-semibold text-foreground">Rank</th>
                             </>
                           )}
                         </>
@@ -145,45 +158,75 @@ export const StudentReportDialog = ({
                             <>
                               {period === 'semester1' && (
                                 <>
-                                  <td className="p-3 text-sm text-center text-foreground">
+                                  <td className="p-2 text-xs text-center text-foreground">
                                     {subject.periods?.p1?.score || '-'}
                                   </td>
-                                  <td className="p-3 text-sm text-center text-foreground">
+                                  <td className="p-2 text-xs text-center text-muted-foreground">
+                                    {report.periodTotals?.get('p1')?.class_rank || '-'}
+                                  </td>
+                                  <td className="p-2 text-xs text-center text-foreground">
                                     {subject.periods?.p2?.score || '-'}
                                   </td>
-                                  <td className="p-3 text-sm text-center text-foreground">
+                                  <td className="p-2 text-xs text-center text-muted-foreground">
+                                    {report.periodTotals?.get('p2')?.class_rank || '-'}
+                                  </td>
+                                  <td className="p-2 text-xs text-center text-foreground">
                                     {subject.periods?.p3?.score || '-'}
                                   </td>
-                                  <td className="p-3 text-sm text-center text-foreground">
+                                  <td className="p-2 text-xs text-center text-muted-foreground">
+                                    {report.periodTotals?.get('p3')?.class_rank || '-'}
+                                  </td>
+                                  <td className="p-2 text-xs text-center text-foreground">
                                     {subject.periods?.exam_s1?.score || '-'}
                                   </td>
-                                  <td className="p-3 text-sm text-center font-semibold text-foreground">
+                                  <td className="p-2 text-xs text-center text-muted-foreground">
+                                    {report.periodTotals?.get('exam_s1')?.class_rank || '-'}
+                                  </td>
+                                  <td className="p-2 text-xs text-center font-semibold text-foreground">
                                     {subject.semesterAverage}
+                                  </td>
+                                  <td className="p-2 text-xs text-center font-semibold text-muted-foreground">
+                                    {report.yearlyTotal?.class_rank || '-'}
                                   </td>
                                 </>
                               )}
                               {period === 'semester2' && (
                                 <>
-                                  <td className="p-3 text-sm text-center text-foreground">
+                                  <td className="p-2 text-xs text-center text-foreground">
                                     {subject.periods?.p4?.score || '-'}
                                   </td>
-                                  <td className="p-3 text-sm text-center text-foreground">
+                                  <td className="p-2 text-xs text-center text-muted-foreground">
+                                    {report.periodTotals?.get('p4')?.class_rank || '-'}
+                                  </td>
+                                  <td className="p-2 text-xs text-center text-foreground">
                                     {subject.periods?.p5?.score || '-'}
                                   </td>
-                                  <td className="p-3 text-sm text-center text-foreground">
+                                  <td className="p-2 text-xs text-center text-muted-foreground">
+                                    {report.periodTotals?.get('p5')?.class_rank || '-'}
+                                  </td>
+                                  <td className="p-2 text-xs text-center text-foreground">
                                     {subject.periods?.p6?.score || '-'}
                                   </td>
-                                  <td className="p-3 text-sm text-center text-foreground">
+                                  <td className="p-2 text-xs text-center text-muted-foreground">
+                                    {report.periodTotals?.get('p6')?.class_rank || '-'}
+                                  </td>
+                                  <td className="p-2 text-xs text-center text-foreground">
                                     {subject.periods?.exam_s2?.score || '-'}
                                   </td>
-                                  <td className="p-3 text-sm text-center font-semibold text-foreground">
+                                  <td className="p-2 text-xs text-center text-muted-foreground">
+                                    {report.periodTotals?.get('exam_s2')?.class_rank || '-'}
+                                  </td>
+                                  <td className="p-2 text-xs text-center font-semibold text-foreground">
                                     {subject.semesterAverage}
+                                  </td>
+                                  <td className="p-2 text-xs text-center font-semibold text-muted-foreground">
+                                    {report.yearlyTotal?.class_rank || '-'}
                                   </td>
                                 </>
                               )}
                               {period === 'yearly' && (
                                 <>
-                                  <td className="p-3 text-sm text-center text-foreground">
+                                  <td className="p-2 text-xs text-center text-foreground">
                                     {/* Calculate S1 average */}
                                     {(() => {
                                       const s1Periods = ['p1', 'p2', 'p3', 'exam_s1'];
@@ -191,7 +234,10 @@ export const StudentReportDialog = ({
                                       return s1Scores.length > 0 ? (s1Scores.reduce((a: number, b: number) => a + b, 0) / s1Scores.length).toFixed(1) : '-';
                                     })()}
                                   </td>
-                                  <td className="p-3 text-sm text-center text-foreground">
+                                  <td className="p-2 text-xs text-center text-muted-foreground">
+                                    {report.yearlyTotal?.class_rank || '-'}
+                                  </td>
+                                  <td className="p-2 text-xs text-center text-foreground">
                                     {/* Calculate S2 average */}
                                     {(() => {
                                       const s2Periods = ['p4', 'p5', 'p6', 'exam_s2'];
@@ -199,8 +245,14 @@ export const StudentReportDialog = ({
                                       return s2Scores.length > 0 ? (s2Scores.reduce((a: number, b: number) => a + b, 0) / s2Scores.length).toFixed(1) : '-';
                                     })()}
                                   </td>
-                                  <td className="p-3 text-sm text-center font-semibold text-foreground">
+                                  <td className="p-2 text-xs text-center text-muted-foreground">
+                                    {report.yearlyTotal?.class_rank || '-'}
+                                  </td>
+                                  <td className="p-2 text-xs text-center font-semibold text-foreground">
                                     {subject.semesterAverage}
+                                  </td>
+                                  <td className="p-2 text-xs text-center font-semibold text-muted-foreground">
+                                    {report.yearlyTotal?.class_rank || '-'}
                                   </td>
                                 </>
                               )}
@@ -224,69 +276,99 @@ export const StudentReportDialog = ({
                         <td className="p-3 text-sm font-bold text-foreground">Average</td>
                         {period === 'semester1' && (
                           <>
-                            <td className="p-3 text-sm text-center font-semibold text-foreground">
+                            <td className="p-2 text-xs text-center font-semibold text-foreground">
                               {(() => {
                                 const scores = report.subjects.map((s: any) => s.periods?.p1?.score).filter(Boolean);
                                 return scores.length > 0 ? (scores.reduce((a: number, b: number) => a + b, 0) / scores.length).toFixed(1) : '-';
                               })()}
                             </td>
-                            <td className="p-3 text-sm text-center font-semibold text-foreground">
+                            <td className="p-2 text-xs text-center font-semibold text-muted-foreground">
+                              {report.periodTotals?.get('p1')?.class_rank || '-'}
+                            </td>
+                            <td className="p-2 text-xs text-center font-semibold text-foreground">
                               {(() => {
                                 const scores = report.subjects.map((s: any) => s.periods?.p2?.score).filter(Boolean);
                                 return scores.length > 0 ? (scores.reduce((a: number, b: number) => a + b, 0) / scores.length).toFixed(1) : '-';
                               })()}
                             </td>
-                            <td className="p-3 text-sm text-center font-semibold text-foreground">
+                            <td className="p-2 text-xs text-center font-semibold text-muted-foreground">
+                              {report.periodTotals?.get('p2')?.class_rank || '-'}
+                            </td>
+                            <td className="p-2 text-xs text-center font-semibold text-foreground">
                               {(() => {
                                 const scores = report.subjects.map((s: any) => s.periods?.p3?.score).filter(Boolean);
                                 return scores.length > 0 ? (scores.reduce((a: number, b: number) => a + b, 0) / scores.length).toFixed(1) : '-';
                               })()}
                             </td>
-                            <td className="p-3 text-sm text-center font-semibold text-foreground">
+                            <td className="p-2 text-xs text-center font-semibold text-muted-foreground">
+                              {report.periodTotals?.get('p3')?.class_rank || '-'}
+                            </td>
+                            <td className="p-2 text-xs text-center font-semibold text-foreground">
                               {(() => {
                                 const scores = report.subjects.map((s: any) => s.periods?.exam_s1?.score).filter(Boolean);
                                 return scores.length > 0 ? (scores.reduce((a: number, b: number) => a + b, 0) / scores.length).toFixed(1) : '-';
                               })()}
                             </td>
-                            <td className="p-3 text-sm text-center font-bold text-foreground">
+                            <td className="p-2 text-xs text-center font-semibold text-muted-foreground">
+                              {report.periodTotals?.get('exam_s1')?.class_rank || '-'}
+                            </td>
+                            <td className="p-2 text-xs text-center font-bold text-foreground">
                               {report.overallAverage}
+                            </td>
+                            <td className="p-2 text-xs text-center font-bold text-muted-foreground">
+                              {report.yearlyTotal?.class_rank || '-'}
                             </td>
                           </>
                         )}
                         {period === 'semester2' && (
                           <>
-                            <td className="p-3 text-sm text-center font-semibold text-foreground">
+                            <td className="p-2 text-xs text-center font-semibold text-foreground">
                               {(() => {
                                 const scores = report.subjects.map((s: any) => s.periods?.p4?.score).filter(Boolean);
                                 return scores.length > 0 ? (scores.reduce((a: number, b: number) => a + b, 0) / scores.length).toFixed(1) : '-';
                               })()}
                             </td>
-                            <td className="p-3 text-sm text-center font-semibold text-foreground">
+                            <td className="p-2 text-xs text-center font-semibold text-muted-foreground">
+                              {report.periodTotals?.get('p4')?.class_rank || '-'}
+                            </td>
+                            <td className="p-2 text-xs text-center font-semibold text-foreground">
                               {(() => {
                                 const scores = report.subjects.map((s: any) => s.periods?.p5?.score).filter(Boolean);
                                 return scores.length > 0 ? (scores.reduce((a: number, b: number) => a + b, 0) / scores.length).toFixed(1) : '-';
                               })()}
                             </td>
-                            <td className="p-3 text-sm text-center font-semibold text-foreground">
+                            <td className="p-2 text-xs text-center font-semibold text-muted-foreground">
+                              {report.periodTotals?.get('p5')?.class_rank || '-'}
+                            </td>
+                            <td className="p-2 text-xs text-center font-semibold text-foreground">
                               {(() => {
                                 const scores = report.subjects.map((s: any) => s.periods?.p6?.score).filter(Boolean);
                                 return scores.length > 0 ? (scores.reduce((a: number, b: number) => a + b, 0) / scores.length).toFixed(1) : '-';
                               })()}
                             </td>
-                            <td className="p-3 text-sm text-center font-semibold text-foreground">
+                            <td className="p-2 text-xs text-center font-semibold text-muted-foreground">
+                              {report.periodTotals?.get('p6')?.class_rank || '-'}
+                            </td>
+                            <td className="p-2 text-xs text-center font-semibold text-foreground">
                               {(() => {
                                 const scores = report.subjects.map((s: any) => s.periods?.exam_s2?.score).filter(Boolean);
                                 return scores.length > 0 ? (scores.reduce((a: number, b: number) => a + b, 0) / scores.length).toFixed(1) : '-';
                               })()}
                             </td>
-                            <td className="p-3 text-sm text-center font-bold text-foreground">
+                            <td className="p-2 text-xs text-center font-semibold text-muted-foreground">
+                              {report.periodTotals?.get('exam_s2')?.class_rank || '-'}
+                            </td>
+                            <td className="p-2 text-xs text-center font-bold text-foreground">
                               {report.overallAverage}
+                            </td>
+                            <td className="p-2 text-xs text-center font-bold text-muted-foreground">
+                              {report.yearlyTotal?.class_rank || '-'}
                             </td>
                           </>
                         )}
                         {period === 'yearly' && (
                           <>
-                            <td className="p-3 text-sm text-center font-semibold text-foreground">
+                            <td className="p-2 text-xs text-center font-semibold text-foreground">
                               {(() => {
                                 const s1Averages = report.subjects.map((s: any) => {
                                   const s1Periods = ['p1', 'p2', 'p3', 'exam_s1'];
@@ -296,7 +378,10 @@ export const StudentReportDialog = ({
                                 return s1Averages.length > 0 ? (s1Averages.reduce((a: number, b: number) => a + b, 0) / s1Averages.length).toFixed(1) : '-';
                               })()}
                             </td>
-                            <td className="p-3 text-sm text-center font-semibold text-foreground">
+                            <td className="p-2 text-xs text-center font-semibold text-muted-foreground">
+                              {report.yearlyTotal?.class_rank || '-'}
+                            </td>
+                            <td className="p-2 text-xs text-center font-semibold text-foreground">
                               {(() => {
                                 const s2Averages = report.subjects.map((s: any) => {
                                   const s2Periods = ['p4', 'p5', 'p6', 'exam_s2'];
@@ -306,8 +391,14 @@ export const StudentReportDialog = ({
                                 return s2Averages.length > 0 ? (s2Averages.reduce((a: number, b: number) => a + b, 0) / s2Averages.length).toFixed(1) : '-';
                               })()}
                             </td>
-                            <td className="p-3 text-sm text-center font-bold text-foreground">
+                            <td className="p-2 text-xs text-center font-semibold text-muted-foreground">
+                              {report.yearlyTotal?.class_rank || '-'}
+                            </td>
+                            <td className="p-2 text-xs text-center font-bold text-foreground">
                               {report.overallAverage}
+                            </td>
+                            <td className="p-2 text-xs text-center font-bold text-muted-foreground">
+                              {report.yearlyTotal?.class_rank || '-'}
                             </td>
                           </>
                         )}
@@ -324,14 +415,14 @@ export const StudentReportDialog = ({
                 <p className="text-sm text-muted-foreground mb-1">Overall Average</p>
                 <p className="text-3xl font-bold text-primary">{report.overallAverage}</p>
               </div>
-              {report.periodTotal?.class_rank && (
+              {report.yearlyTotal?.class_rank && (
                 <div className="p-4 border rounded-lg bg-secondary/5">
-                  <p className="text-sm text-muted-foreground mb-1">Class Rank</p>
+                  <p className="text-sm text-muted-foreground mb-1">Overall Class Rank</p>
                   <p className="text-3xl font-bold text-secondary">
-                    {report.periodTotal.class_rank}
-                    {report.periodTotal.class_rank === 1 ? "st" :
-                     report.periodTotal.class_rank === 2 ? "nd" :
-                     report.periodTotal.class_rank === 3 ? "rd" : "th"}
+                    {(() => {
+                      const rank = report.yearlyTotal.class_rank;
+                      return rank ? `${rank}${rank === 1 ? "st" : rank === 2 ? "nd" : rank === 3 ? "rd" : "th"}` : '-';
+                    })()}
                   </p>
                 </div>
               )}

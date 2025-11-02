@@ -56,15 +56,29 @@ export const useStudentReport = (studentId: string, period: string) => {
 
       if (gradesError) throw gradesError;
 
-      // Get period total (rank and total score)
-      const { data: periodTotal, error: periodTotalError } = await supabase
+      // Get period totals (rank and total score) for all relevant periods
+      const { data: periodTotals, error: periodTotalsError } = await supabase
         .from("student_period_totals")
         .select("*")
         .eq("student_id", studentId)
-        .eq("period", period as any)
-        .maybeSingle();
+        .in("period", periodsToFetch);
 
-      if (periodTotalError) throw periodTotalError;
+      if (periodTotalsError) throw periodTotalsError;
+
+      // Get semester/yearly totals if applicable
+      let yearlyTotal = null;
+      if (period === 'semester1' || period === 'semester2' || period === 'yearly') {
+        const { data: yearlyData, error: yearlyError } = await supabase
+          .from("student_yearly_totals")
+          .select("*")
+          .eq("student_id", studentId)
+          .maybeSingle();
+        
+        if (!yearlyError) yearlyTotal = yearlyData;
+      }
+
+      // Create a map for easy lookup
+      const periodTotalsMap = new Map(periodTotals?.map(pt => [pt.period, pt]) || []);
 
       // Check if this is a semester report
       const isSemesterReport = period === 'semester1' || period === 'semester2' || period === 'yearly';
@@ -134,7 +148,8 @@ export const useStudentReport = (studentId: string, period: string) => {
         return {
           student,
           subjects,
-          periodTotal,
+          periodTotals: periodTotalsMap,
+          yearlyTotal,
           overallAverage,
           period,
           isSemesterReport: true,
@@ -189,7 +204,8 @@ export const useStudentReport = (studentId: string, period: string) => {
         return {
           student,
           subjects,
-          periodTotal,
+          periodTotals: periodTotalsMap,
+          yearlyTotal,
           overallAverage,
           period,
           isSemesterReport: false,
