@@ -146,16 +146,16 @@ export const StudentReportDialog = ({
                               {period === 'semester1' && (
                                 <>
                                   <td className="p-3 text-sm text-center text-foreground">
-                                    {subject.periods?.p1 ? `${subject.periods.p1.score}/${subject.periods.p1.max} (${subject.periods.p1.percentage}%)` : '-'}
+                                    {subject.periods?.p1?.score || '-'}
                                   </td>
                                   <td className="p-3 text-sm text-center text-foreground">
-                                    {subject.periods?.p2 ? `${subject.periods.p2.score}/${subject.periods.p2.max} (${subject.periods.p2.percentage}%)` : '-'}
+                                    {subject.periods?.p2?.score || '-'}
                                   </td>
                                   <td className="p-3 text-sm text-center text-foreground">
-                                    {subject.periods?.p3 ? `${subject.periods.p3.score}/${subject.periods.p3.max} (${subject.periods.p3.percentage}%)` : '-'}
+                                    {subject.periods?.p3?.score || '-'}
                                   </td>
                                   <td className="p-3 text-sm text-center text-foreground">
-                                    {subject.periods?.exam_s1 ? `${subject.periods.exam_s1.score}/${subject.periods.exam_s1.max} (${subject.periods.exam_s1.percentage}%)` : '-'}
+                                    {subject.periods?.exam_s1?.score || '-'}
                                   </td>
                                   <td className="p-3 text-sm text-center font-semibold text-foreground">
                                     {subject.semesterAverage}%
@@ -165,16 +165,16 @@ export const StudentReportDialog = ({
                               {period === 'semester2' && (
                                 <>
                                   <td className="p-3 text-sm text-center text-foreground">
-                                    {subject.periods?.p4 ? `${subject.periods.p4.score}/${subject.periods.p4.max} (${subject.periods.p4.percentage}%)` : '-'}
+                                    {subject.periods?.p4?.score || '-'}
                                   </td>
                                   <td className="p-3 text-sm text-center text-foreground">
-                                    {subject.periods?.p5 ? `${subject.periods.p5.score}/${subject.periods.p5.max} (${subject.periods.p5.percentage}%)` : '-'}
+                                    {subject.periods?.p5?.score || '-'}
                                   </td>
                                   <td className="p-3 text-sm text-center text-foreground">
-                                    {subject.periods?.p6 ? `${subject.periods.p6.score}/${subject.periods.p6.max} (${subject.periods.p6.percentage}%)` : '-'}
+                                    {subject.periods?.p6?.score || '-'}
                                   </td>
                                   <td className="p-3 text-sm text-center text-foreground">
-                                    {subject.periods?.exam_s2 ? `${subject.periods.exam_s2.score}/${subject.periods.exam_s2.max} (${subject.periods.exam_s2.percentage}%)` : '-'}
+                                    {subject.periods?.exam_s2?.score || '-'}
                                   </td>
                                   <td className="p-3 text-sm text-center font-semibold text-foreground">
                                     {subject.semesterAverage}%
