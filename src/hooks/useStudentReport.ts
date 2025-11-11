@@ -65,6 +65,20 @@ export const useStudentReport = (studentId: string, period: string) => {
 
       if (periodTotalsError) throw periodTotalsError;
 
+      // Get total count of students for each period (for rank display as "X/Y")
+      const periodCounts: Record<string, number> = {};
+      for (const p of periodsToFetch) {
+        const { count, error: countError } = await supabase
+          .from("student_period_totals")
+          .select("*", { count: 'exact', head: true })
+          .eq("period", p)
+          .eq("class_subject_id", periodTotals?.[0]?.class_subject_id || '');
+        
+        if (!countError && count !== null) {
+          periodCounts[p] = count;
+        }
+      }
+
       // Get semester/yearly totals if applicable
       let yearlyTotal = null;
       if (period === 'semester1' || period === 'semester2' || period === 'yearly') {
@@ -149,6 +163,7 @@ export const useStudentReport = (studentId: string, period: string) => {
           student,
           subjects,
           periodTotals: periodTotalsMap,
+          periodCounts,
           yearlyTotal,
           overallAverage,
           period,
@@ -205,6 +220,7 @@ export const useStudentReport = (studentId: string, period: string) => {
           student,
           subjects,
           periodTotals: periodTotalsMap,
+          periodCounts,
           yearlyTotal,
           overallAverage,
           period,
