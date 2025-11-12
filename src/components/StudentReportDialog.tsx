@@ -248,7 +248,7 @@ export const StudentReportDialog = ({
                                 })()}
                               </td>
                               <td className="p-2 text-xs text-center font-bold text-foreground">
-                                {report.overallAverage.toFixed(1)}
+                                {(Math.floor(report.overallAverage * 10) / 10).toFixed(1)}
                               </td>
                             </>
                           )}
@@ -279,7 +279,7 @@ export const StudentReportDialog = ({
                                 })()}
                               </td>
                               <td className="p-2 text-xs text-center font-bold text-foreground">
-                                {report.overallAverage.toFixed(1)}
+                                {(Math.floor(report.overallAverage * 10) / 10).toFixed(1)}
                               </td>
                             </>
                           )}
@@ -306,7 +306,7 @@ export const StudentReportDialog = ({
                                 })()}
                               </td>
                               <td className="p-2 text-xs text-center font-bold text-foreground">
-                                {report.overallAverage.toFixed(1)}
+                                {(Math.floor(report.overallAverage * 10) / 10).toFixed(1)}
                               </td>
                             </>
                           )}
@@ -399,7 +399,7 @@ export const StudentReportDialog = ({
                         <tr className="border-t-2 bg-muted/50">
                           <td className="p-3 text-sm font-bold text-foreground">Average</td>
                           <td className="p-3 text-sm text-center font-semibold text-foreground" colSpan={2}>
-                            {report.overallAverage}
+                            {(Math.floor(report.overallAverage * 10) / 10).toFixed(1)}
                           </td>
                         </tr>
                         <tr className="border-t bg-muted/30">
