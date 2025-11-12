@@ -217,7 +217,7 @@ export const StudentReportDialog = ({
                       );
                     })}
                     {/* Average Row */}
-                    {report.isSemesterReport && (
+                    {report.isSemesterReport ? (
                       <>
                         <tr className="border-t-2 bg-muted/50">
                           <td className="p-3 text-sm font-bold text-foreground">Average</td>
@@ -391,6 +391,28 @@ export const StudentReportDialog = ({
                               </td>
                             </>
                           )}
+                        </tr>
+                      </>
+                    ) : (
+                      /* Individual Period Report - Add Rank Row */
+                      <>
+                        <tr className="border-t-2 bg-muted/50">
+                          <td className="p-3 text-sm font-bold text-foreground">Average</td>
+                          <td className="p-3 text-sm text-center font-semibold text-foreground" colSpan={2}>
+                            {report.overallAverage}
+                          </td>
+                        </tr>
+                        <tr className="border-t bg-muted/30">
+                          <td className="p-3 text-sm font-bold text-foreground">Rank</td>
+                          <td className="p-3 text-sm text-center font-bold text-muted-foreground" colSpan={2}>
+                            {(() => {
+                              const periodTotal = report.periodTotals?.get(period as any);
+                              const count = report.periodCounts?.[period];
+                              return periodTotal?.class_rank && count
+                                ? `${periodTotal.class_rank}/${count}` 
+                                : '-';
+                            })()}
+                          </td>
                         </tr>
                       </>
                     )}
