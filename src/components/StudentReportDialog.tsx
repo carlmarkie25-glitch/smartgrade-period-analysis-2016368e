@@ -129,7 +129,7 @@ export const StudentReportDialog = ({
                       ) : (
                         <>
                           <th className="text-center p-3 text-sm font-semibold text-foreground">Score</th>
-                          <th className="text-center p-3 text-sm font-semibold text-foreground">Percentage</th>
+                          <th className="text-center p-3 text-sm font-semibold text-foreground">Average</th>
                         </>
                       )}
                     </tr>
@@ -208,8 +208,8 @@ export const StudentReportDialog = ({
                               <td className="p-3 text-sm text-center text-foreground">
                                 {subject.total}
                               </td>
-                                   <td className="p-3 text-sm text-center font-semibold text-foreground">
-                                {subject.percentage}
+                              <td className="p-3 text-sm text-center font-semibold text-foreground">
+                                {subject.max > 0 ? (Math.floor((subject.total / subject.max) * 1000) / 10).toFixed(1) : '-'}
                               </td>
                             </>
                           )}
@@ -226,25 +226,25 @@ export const StudentReportDialog = ({
                               <td className="p-2 text-xs text-center font-semibold text-foreground">
                                 {(() => {
                                   const scores = report.subjects.map((s: any) => s.periods?.p1?.score).filter(Boolean);
-                                  return scores.length > 0 ? (scores.reduce((a: number, b: number) => a + b, 0) / scores.length).toFixed(1) : '-';
+                                  return scores.length > 0 ? (Math.floor((scores.reduce((a: number, b: number) => a + b, 0) / scores.length) * 10) / 10).toFixed(1) : '-';
                                 })()}
                               </td>
                               <td className="p-2 text-xs text-center font-semibold text-foreground">
                                 {(() => {
                                   const scores = report.subjects.map((s: any) => s.periods?.p2?.score).filter(Boolean);
-                                  return scores.length > 0 ? (scores.reduce((a: number, b: number) => a + b, 0) / scores.length).toFixed(1) : '-';
+                                  return scores.length > 0 ? (Math.floor((scores.reduce((a: number, b: number) => a + b, 0) / scores.length) * 10) / 10).toFixed(1) : '-';
                                 })()}
                               </td>
                               <td className="p-2 text-xs text-center font-semibold text-foreground">
                                 {(() => {
                                   const scores = report.subjects.map((s: any) => s.periods?.p3?.score).filter(Boolean);
-                                  return scores.length > 0 ? (scores.reduce((a: number, b: number) => a + b, 0) / scores.length).toFixed(1) : '-';
+                                  return scores.length > 0 ? (Math.floor((scores.reduce((a: number, b: number) => a + b, 0) / scores.length) * 10) / 10).toFixed(1) : '-';
                                 })()}
                               </td>
                               <td className="p-2 text-xs text-center font-semibold text-foreground">
                                 {(() => {
                                   const scores = report.subjects.map((s: any) => s.periods?.exam_s1?.score).filter(Boolean);
-                                  return scores.length > 0 ? (scores.reduce((a: number, b: number) => a + b, 0) / scores.length).toFixed(1) : '-';
+                                  return scores.length > 0 ? (Math.floor((scores.reduce((a: number, b: number) => a + b, 0) / scores.length) * 10) / 10).toFixed(1) : '-';
                                 })()}
                               </td>
                               <td className="p-2 text-xs text-center font-bold text-foreground">
@@ -257,25 +257,25 @@ export const StudentReportDialog = ({
                               <td className="p-2 text-xs text-center font-semibold text-foreground">
                                 {(() => {
                                   const scores = report.subjects.map((s: any) => s.periods?.p4?.score).filter(Boolean);
-                                  return scores.length > 0 ? (scores.reduce((a: number, b: number) => a + b, 0) / scores.length).toFixed(1) : '-';
+                                  return scores.length > 0 ? (Math.floor((scores.reduce((a: number, b: number) => a + b, 0) / scores.length) * 10) / 10).toFixed(1) : '-';
                                 })()}
                               </td>
                               <td className="p-2 text-xs text-center font-semibold text-foreground">
                                 {(() => {
                                   const scores = report.subjects.map((s: any) => s.periods?.p5?.score).filter(Boolean);
-                                  return scores.length > 0 ? (scores.reduce((a: number, b: number) => a + b, 0) / scores.length).toFixed(1) : '-';
+                                  return scores.length > 0 ? (Math.floor((scores.reduce((a: number, b: number) => a + b, 0) / scores.length) * 10) / 10).toFixed(1) : '-';
                                 })()}
                               </td>
                               <td className="p-2 text-xs text-center font-semibold text-foreground">
                                 {(() => {
                                   const scores = report.subjects.map((s: any) => s.periods?.p6?.score).filter(Boolean);
-                                  return scores.length > 0 ? (scores.reduce((a: number, b: number) => a + b, 0) / scores.length).toFixed(1) : '-';
+                                  return scores.length > 0 ? (Math.floor((scores.reduce((a: number, b: number) => a + b, 0) / scores.length) * 10) / 10).toFixed(1) : '-';
                                 })()}
                               </td>
                               <td className="p-2 text-xs text-center font-semibold text-foreground">
                                 {(() => {
                                   const scores = report.subjects.map((s: any) => s.periods?.exam_s2?.score).filter(Boolean);
-                                  return scores.length > 0 ? (scores.reduce((a: number, b: number) => a + b, 0) / scores.length).toFixed(1) : '-';
+                                  return scores.length > 0 ? (Math.floor((scores.reduce((a: number, b: number) => a + b, 0) / scores.length) * 10) / 10).toFixed(1) : '-';
                                 })()}
                               </td>
                               <td className="p-2 text-xs text-center font-bold text-foreground">
@@ -292,7 +292,7 @@ export const StudentReportDialog = ({
                                     const s1Scores = s1Periods.map(p => s.periods?.[p]?.percentage).filter(Boolean);
                                     return s1Scores.length > 0 ? s1Scores.reduce((a: number, b: number) => a + b, 0) / s1Scores.length : null;
                                   }).filter(Boolean);
-                                  return s1Averages.length > 0 ? (s1Averages.reduce((a: number, b: number) => a + b, 0) / s1Averages.length).toFixed(1) : '-';
+                                  return s1Averages.length > 0 ? (Math.floor((s1Averages.reduce((a: number, b: number) => a + b, 0) / s1Averages.length) * 10) / 10).toFixed(1) : '-';
                                 })()}
                               </td>
                               <td className="p-2 text-xs text-center font-semibold text-foreground">
@@ -302,7 +302,7 @@ export const StudentReportDialog = ({
                                     const s2Scores = s2Periods.map(p => s.periods?.[p]?.percentage).filter(Boolean);
                                     return s2Scores.length > 0 ? s2Scores.reduce((a: number, b: number) => a + b, 0) / s2Scores.length : null;
                                   }).filter(Boolean);
-                                  return s2Averages.length > 0 ? (s2Averages.reduce((a: number, b: number) => a + b, 0) / s2Averages.length).toFixed(1) : '-';
+                                  return s2Averages.length > 0 ? (Math.floor((s2Averages.reduce((a: number, b: number) => a + b, 0) / s2Averages.length) * 10) / 10).toFixed(1) : '-';
                                 })()}
                               </td>
                               <td className="p-2 text-xs text-center font-bold text-foreground">

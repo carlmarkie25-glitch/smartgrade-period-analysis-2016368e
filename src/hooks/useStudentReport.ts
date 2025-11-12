@@ -152,13 +152,13 @@ export const useStudentReport = (studentId: string, period: string) => {
 
           Object.keys(subject.periods).forEach(p => {
             const pData = subject.periods[p];
-            const percentage = pData.max > 0 ? Math.round((pData.score / pData.max) * 100) : 0;
+            const percentage = pData.max > 0 ? Math.floor((pData.score / pData.max) * 1000) / 10 : 0;
             periodData[p] = { ...pData, percentage };
             semesterTotal += pData.score;
             semesterMax += pData.max;
           });
 
-          const semesterAverage = semesterMax > 0 ? Math.round((semesterTotal / semesterMax) * 100) : 0;
+          const semesterAverage = semesterMax > 0 ? Math.floor((semesterTotal / semesterMax) * 1000) / 10 : 0;
 
           return {
             ...subject,
@@ -169,7 +169,7 @@ export const useStudentReport = (studentId: string, period: string) => {
 
         // Calculate overall average
         const overallTotal = subjects.reduce((sum, s) => sum + s.semesterAverage, 0);
-        const overallAverage = subjects.length > 0 ? Math.round(overallTotal / subjects.length) : 0;
+        const overallAverage = subjects.length > 0 ? Math.floor((overallTotal / subjects.length) * 10) / 10 : 0;
 
         return {
           student,
@@ -217,16 +217,13 @@ export const useStudentReport = (studentId: string, period: string) => {
           }
         });
 
-        // Convert to array and calculate percentages
-        const subjects = Array.from(subjectGrades.values()).map((subject) => ({
-          ...subject,
-          percentage: Math.round((subject.total / subject.max) * 100),
-        }));
+        // Convert to array without calculating percentage
+        const subjects = Array.from(subjectGrades.values());
 
-        // Calculate overall average
+        // Calculate overall average (truncate to 1 decimal)
         const overallTotal = subjects.reduce((sum, s) => sum + s.total, 0);
         const overallMax = subjects.reduce((sum, s) => sum + s.max, 0);
-        const overallAverage = overallMax > 0 ? Math.round((overallTotal / overallMax) * 100) : 0;
+        const overallAverage = overallMax > 0 ? Math.floor((overallTotal / overallMax) * 1000) / 10 : 0;
 
         return {
           student,
