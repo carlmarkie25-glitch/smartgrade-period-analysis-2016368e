@@ -129,7 +129,6 @@ export const StudentReportDialog = ({
                       ) : (
                         <>
                           <th className="text-center p-3 text-sm font-semibold text-foreground">Score</th>
-                          <th className="text-center p-3 text-sm font-semibold text-foreground">Average</th>
                         </>
                       )}
                     </tr>
@@ -207,9 +206,6 @@ export const StudentReportDialog = ({
                             <>
                               <td className="p-3 text-sm text-center text-foreground">
                                 {subject.total}
-                              </td>
-                              <td className="p-3 text-sm text-center font-semibold text-foreground">
-                                {subject.max > 0 ? (Math.floor((subject.total / subject.max) * 1000) / 10).toFixed(1) : '-'}
                               </td>
                             </>
                           )}
@@ -398,13 +394,13 @@ export const StudentReportDialog = ({
                       <>
                         <tr className="border-t-2 bg-muted/50">
                           <td className="p-3 text-sm font-bold text-foreground">Average</td>
-                          <td className="p-3 text-sm text-center font-semibold text-foreground" colSpan={2}>
+                          <td className="p-3 text-sm text-center font-semibold text-foreground">
                             {(Math.floor(report.overallAverage * 10) / 10).toFixed(1)}
                           </td>
                         </tr>
                         <tr className="border-t bg-muted/30">
                           <td className="p-3 text-sm font-bold text-foreground">Rank</td>
-                          <td className="p-3 text-sm text-center font-bold text-muted-foreground" colSpan={2}>
+                          <td className="p-3 text-sm text-center font-bold text-muted-foreground">
                             {(() => {
                               const periodTotal = report.periodTotals?.get(period as any);
                               const count = report.periodCounts?.[period];
