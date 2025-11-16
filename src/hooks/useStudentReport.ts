@@ -65,29 +65,20 @@ export const useStudentReport = (studentId: string, period: string) => {
 
       if (periodTotalsError) throw periodTotalsError;
 
-      // Get total count of students for each period (for rank display as "X/Y")
-      // First get all student IDs in the same class
+      // Get total count of students in the class (for rank display as "X/Y")
       const periodCounts: Record<string, number> = {};
       const studentClassId = student?.class_id;
       
       if (studentClassId) {
-        const { data: classStudents } = await supabase
+        const { count } = await supabase
           .from("students")
-          .select("id")
+          .select("id", { count: 'exact', head: true })
           .eq("class_id", studentClassId);
         
-        const studentIds = classStudents?.map(s => s.id) || [];
-        
+        // All periods use the same count (number of students in the class)
+        const totalStudents = count || 0;
         for (const p of periodsToFetch) {
-          const { count, error: countError } = await supabase
-            .from("student_period_totals")
-            .select("student_id", { count: 'exact', head: true })
-            .eq("period", p)
-            .in("student_id", studentIds);
-          
-          if (!countError && count !== null) {
-            periodCounts[p] = count;
-          }
+          periodCounts[p] = totalStudents;
         }
       }
 
