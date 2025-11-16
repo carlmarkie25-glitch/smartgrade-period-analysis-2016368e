@@ -44,6 +44,7 @@ export type Database = {
       assessment_types: {
         Row: {
           created_at: string
+          department_id: string | null
           display_order: number
           id: string
           max_points: number
@@ -51,6 +52,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          department_id?: string | null
           display_order?: number
           id?: string
           max_points?: number
@@ -58,12 +60,21 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          department_id?: string | null
           display_order?: number
           id?: string
           max_points?: number
           name?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "assessment_types_department_id_fkey"
+            columns: ["department_id"]
+            isOneToOne: false
+            referencedRelation: "departments"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       class_subjects: {
         Row: {
@@ -169,21 +180,18 @@ export type Database = {
           description: string | null
           id: string
           name: string
-          type: Database["public"]["Enums"]["department_type"]
         }
         Insert: {
           created_at?: string
           description?: string | null
           id?: string
           name: string
-          type: Database["public"]["Enums"]["department_type"]
         }
         Update: {
           created_at?: string
           description?: string | null
           id?: string
           name?: string
-          type?: Database["public"]["Enums"]["department_type"]
         }
         Relationships: []
       }

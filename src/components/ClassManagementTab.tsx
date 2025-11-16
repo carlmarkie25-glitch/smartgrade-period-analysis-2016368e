@@ -211,7 +211,7 @@ export const ClassManagementTab = () => {
                   <SelectContent>
                     {departments?.map((dept) => (
                       <SelectItem key={dept.id} value={dept.id}>
-                        {dept.name} ({dept.type})
+                        {dept.name}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -261,7 +261,7 @@ export const ClassManagementTab = () => {
                 <TableRow key={cls.id}>
                   <TableCell className="font-medium">{cls.name}</TableCell>
                   <TableCell>
-                    {cls.departments?.name} ({cls.departments?.type})
+                    {cls.departments?.name}
                   </TableCell>
                   <TableCell>{cls.academic_years?.year_name}</TableCell>
                   <TableCell className="text-right">
