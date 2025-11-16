@@ -11,8 +11,7 @@ export const useClasses = () => {
           *,
           departments:department_id (
             id,
-            name,
-            type
+            name
           ),
           academic_years:academic_year_id (
             id,

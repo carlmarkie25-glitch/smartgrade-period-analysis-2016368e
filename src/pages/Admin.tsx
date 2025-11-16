@@ -10,10 +10,11 @@ import { useUserManagement } from "@/hooks/useUserManagement";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { ArrowLeft, UserPlus, School, BookOpen, FileText, Users, GraduationCap, Building } from "lucide-react";
+import { ArrowLeft, UserPlus, School, BookOpen, Users, GraduationCap, Building } from "lucide-react";
 import { StudentManagementTab } from "@/components/StudentManagementTab";
 import { ClassManagementTab } from "@/components/ClassManagementTab";
 import { SubjectManagementTab } from "@/components/SubjectManagementTab";
+import { DepartmentManagementTab } from "@/components/DepartmentManagementTab";
 
 const Admin = () => {
   const navigate = useNavigate();
@@ -30,7 +31,6 @@ const Admin = () => {
 
   const [departmentForm, setDepartmentForm] = useState({
     name: "",
-    type: "elementary",
     description: "",
   });
 
@@ -38,12 +38,6 @@ const Admin = () => {
     name: "",
     code: "",
     description: "",
-  });
-
-  const [assessmentTypeForm, setAssessmentTypeForm] = useState({
-    name: "",
-    max_points: 100,
-    display_order: 0,
   });
 
   const handleCreateAcademicYear = async () => {
@@ -57,12 +51,12 @@ const Admin = () => {
   };
 
   const handleCreateDepartment = async () => {
-    const { error } = await supabase.from("departments").insert([departmentForm as any]);
+    const { error } = await supabase.from("departments").insert([departmentForm]);
     if (error) {
       toast({ title: "Error creating department", description: error.message, variant: "destructive" });
     } else {
       toast({ title: "Department created successfully" });
-      setDepartmentForm({ name: "", type: "elementary", description: "" });
+      setDepartmentForm({ name: "", description: "" });
     }
   };
 
@@ -76,15 +70,6 @@ const Admin = () => {
     }
   };
 
-  const handleCreateAssessmentType = async () => {
-    const { error } = await supabase.from("assessment_types").insert(assessmentTypeForm);
-    if (error) {
-      toast({ title: "Error creating assessment type", description: error.message, variant: "destructive" });
-    } else {
-      toast({ title: "Assessment type created successfully" });
-      setAssessmentTypeForm({ name: "", max_points: 100, display_order: 0 });
-    }
-  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -102,7 +87,7 @@ const Admin = () => {
 
       <div className="container mx-auto px-4 py-8">
         <Tabs defaultValue="users" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-7">
+          <TabsList className="grid w-full grid-cols-6">
             <TabsTrigger value="users">
               <UserPlus className="h-4 w-4 mr-2" />
               Users
@@ -126,10 +111,6 @@ const Admin = () => {
             <TabsTrigger value="departments">
               <Users className="h-4 w-4 mr-2" />
               Departments
-            </TabsTrigger>
-            <TabsTrigger value="assessments">
-              <FileText className="h-4 w-4 mr-2" />
-              Assessments
             </TabsTrigger>
           </TabsList>
 
@@ -234,118 +215,8 @@ const Admin = () => {
           </TabsContent>
 
           <TabsContent value="departments">
-            <div className="grid gap-6 md:grid-cols-2">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Create Department</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div>
-                    <Label>Name</Label>
-                    <Input
-                      placeholder="Mathematics Department"
-                      value={departmentForm.name}
-                      onChange={(e) => setDepartmentForm({ ...departmentForm, name: e.target.value })}
-                    />
-                  </div>
-                  <div>
-                    <Label>Type</Label>
-                    <Select value={departmentForm.type} onValueChange={(value) => setDepartmentForm({ ...departmentForm, type: value })}>
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="elementary">Elementary</SelectItem>
-                        <SelectItem value="middle">Middle School</SelectItem>
-                        <SelectItem value="high">High School</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div>
-                    <Label>Description</Label>
-                    <Input
-                      placeholder="Optional description"
-                      value={departmentForm.description}
-                      onChange={(e) => setDepartmentForm({ ...departmentForm, description: e.target.value })}
-                    />
-                  </div>
-                  <Button onClick={handleCreateDepartment}>Create Department</Button>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle>Create Subject</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div>
-                    <Label>Subject Name</Label>
-                    <Input
-                      placeholder="Mathematics"
-                      value={subjectForm.name}
-                      onChange={(e) => setSubjectForm({ ...subjectForm, name: e.target.value })}
-                    />
-                  </div>
-                  <div>
-                    <Label>Subject Code</Label>
-                    <Input
-                      placeholder="MATH101"
-                      value={subjectForm.code}
-                      onChange={(e) => setSubjectForm({ ...subjectForm, code: e.target.value })}
-                    />
-                  </div>
-                  <div>
-                    <Label>Description</Label>
-                    <Input
-                      placeholder="Optional description"
-                      value={subjectForm.description}
-                      onChange={(e) => setSubjectForm({ ...subjectForm, description: e.target.value })}
-                    />
-                  </div>
-                  <Button onClick={handleCreateSubject}>Create Subject</Button>
-                </CardContent>
-              </Card>
-            </div>
+            <DepartmentManagementTab />
           </TabsContent>
-
-          <TabsContent value="assessments">
-            <Card>
-              <CardHeader>
-                <CardTitle>Create Assessment Type</CardTitle>
-                <CardDescription>Define assessment types (Quiz, Test, Exam, etc.)</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <Label>Assessment Name</Label>
-                  <Input
-                    placeholder="Quiz, Test, Midterm, Final"
-                    value={assessmentTypeForm.name}
-                    onChange={(e) => setAssessmentTypeForm({ ...assessmentTypeForm, name: e.target.value })}
-                  />
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label>Max Points</Label>
-                    <Input
-                      type="number"
-                      value={assessmentTypeForm.max_points}
-                      onChange={(e) => setAssessmentTypeForm({ ...assessmentTypeForm, max_points: Number(e.target.value) })}
-                    />
-                  </div>
-                  <div>
-                    <Label>Display Order</Label>
-                    <Input
-                      type="number"
-                      value={assessmentTypeForm.display_order}
-                      onChange={(e) => setAssessmentTypeForm({ ...assessmentTypeForm, display_order: Number(e.target.value) })}
-                    />
-                  </div>
-                </div>
-                <Button onClick={handleCreateAssessmentType}>Create Assessment Type</Button>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
         </Tabs>
       </div>
     </div>
