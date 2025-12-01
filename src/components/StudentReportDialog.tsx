@@ -206,7 +206,7 @@ export const StudentReportDialog = ({
                                     {(() => {
                                       const s1Periods = ['p1', 'p2', 'p3', 'exam_s1'];
                                       const s1Scores = s1Periods.map(p => subject.periods?.[p]?.score).filter(Boolean);
-                                      return s1Scores.length > 0 ? (Math.floor((s1Scores.reduce((a: number, b: number) => a + b, 0) / s1Scores.length) * 10) / 10).toFixed(1) : '-';
+                                      return s1Scores.length === 4 ? (Math.floor((s1Scores.reduce((a: number, b: number) => a + b, 0) / s1Scores.length) * 10) / 10).toFixed(1) : '-';
                                     })()}
                                   </td>
                                   <td className="p-2 text-xs text-center text-foreground">
@@ -225,7 +225,7 @@ export const StudentReportDialog = ({
                                     {(() => {
                                       const s2Periods = ['p4', 'p5', 'p6', 'exam_s2'];
                                       const s2Scores = s2Periods.map(p => subject.periods?.[p]?.score).filter(Boolean);
-                                      return s2Scores.length > 0 ? (Math.floor((s2Scores.reduce((a: number, b: number) => a + b, 0) / s2Scores.length) * 10) / 10).toFixed(1) : '-';
+                                      return s2Scores.length === 4 ? (Math.floor((s2Scores.reduce((a: number, b: number) => a + b, 0) / s2Scores.length) * 10) / 10).toFixed(1) : '-';
                                     })()}
                                   </td>
                                   <td className="p-2 text-xs text-center font-semibold text-foreground">
@@ -342,7 +342,7 @@ export const StudentReportDialog = ({
                                   const s1Averages = report.subjects.map((s: any) => {
                                     const s1Periods = ['p1', 'p2', 'p3', 'exam_s1'];
                                     const s1Scores = s1Periods.map(p => s.periods?.[p]?.score).filter(Boolean);
-                                    return s1Scores.length > 0 ? s1Scores.reduce((a: number, b: number) => a + b, 0) / s1Scores.length : null;
+                                    return s1Scores.length === 4 ? s1Scores.reduce((a: number, b: number) => a + b, 0) / s1Scores.length : null;
                                   }).filter(Boolean);
                                   return s1Averages.length > 0 ? (Math.floor((s1Averages.reduce((a: number, b: number) => a + b, 0) / s1Averages.length) * 10) / 10).toFixed(1) : '-';
                                 })()}
@@ -376,7 +376,7 @@ export const StudentReportDialog = ({
                                   const s2Averages = report.subjects.map((s: any) => {
                                     const s2Periods = ['p4', 'p5', 'p6', 'exam_s2'];
                                     const s2Scores = s2Periods.map(p => s.periods?.[p]?.score).filter(Boolean);
-                                    return s2Scores.length > 0 ? s2Scores.reduce((a: number, b: number) => a + b, 0) / s2Scores.length : null;
+                                    return s2Scores.length === 4 ? s2Scores.reduce((a: number, b: number) => a + b, 0) / s2Scores.length : null;
                                   }).filter(Boolean);
                                   return s2Averages.length > 0 ? (Math.floor((s2Averages.reduce((a: number, b: number) => a + b, 0) / s2Averages.length) * 10) / 10).toFixed(1) : '-';
                                 })()}
