@@ -120,7 +120,15 @@ export const StudentReportDialog = ({
                           )}
                           {period === 'yearly' && (
                             <>
+                              <th className="text-center p-2 text-xs font-semibold text-foreground">P1</th>
+                              <th className="text-center p-2 text-xs font-semibold text-foreground">P2</th>
+                              <th className="text-center p-2 text-xs font-semibold text-foreground">P3</th>
+                              <th className="text-center p-2 text-xs font-semibold text-foreground">Ex S1</th>
                               <th className="text-center p-2 text-xs font-semibold text-foreground">S1 Avg</th>
+                              <th className="text-center p-2 text-xs font-semibold text-foreground">P4</th>
+                              <th className="text-center p-2 text-xs font-semibold text-foreground">P5</th>
+                              <th className="text-center p-2 text-xs font-semibold text-foreground">P6</th>
+                              <th className="text-center p-2 text-xs font-semibold text-foreground">Ex S2</th>
                               <th className="text-center p-2 text-xs font-semibold text-foreground">S2 Avg</th>
                               <th className="text-center p-2 text-xs font-semibold text-foreground">Year Avg</th>
                             </>
@@ -183,17 +191,41 @@ export const StudentReportDialog = ({
                               {period === 'yearly' && (
                                 <>
                                   <td className="p-2 text-xs text-center text-foreground">
+                                    {subject.periods?.p1?.score || '-'}
+                                  </td>
+                                  <td className="p-2 text-xs text-center text-foreground">
+                                    {subject.periods?.p2?.score || '-'}
+                                  </td>
+                                  <td className="p-2 text-xs text-center text-foreground">
+                                    {subject.periods?.p3?.score || '-'}
+                                  </td>
+                                  <td className="p-2 text-xs text-center text-foreground">
+                                    {subject.periods?.exam_s1?.score || '-'}
+                                  </td>
+                                  <td className="p-2 text-xs text-center font-semibold text-foreground">
                                     {(() => {
                                       const s1Periods = ['p1', 'p2', 'p3', 'exam_s1'];
-                                      const s1Scores = s1Periods.map(p => subject.periods?.[p]?.percentage).filter(Boolean);
-                                      return s1Scores.length > 0 ? (s1Scores.reduce((a: number, b: number) => a + b, 0) / s1Scores.length).toFixed(1) : '-';
+                                      const s1Scores = s1Periods.map(p => subject.periods?.[p]?.score).filter(Boolean);
+                                      return s1Scores.length > 0 ? (Math.floor((s1Scores.reduce((a: number, b: number) => a + b, 0) / s1Scores.length) * 10) / 10).toFixed(1) : '-';
                                     })()}
                                   </td>
                                   <td className="p-2 text-xs text-center text-foreground">
+                                    {subject.periods?.p4?.score || '-'}
+                                  </td>
+                                  <td className="p-2 text-xs text-center text-foreground">
+                                    {subject.periods?.p5?.score || '-'}
+                                  </td>
+                                  <td className="p-2 text-xs text-center text-foreground">
+                                    {subject.periods?.p6?.score || '-'}
+                                  </td>
+                                  <td className="p-2 text-xs text-center text-foreground">
+                                    {subject.periods?.exam_s2?.score || '-'}
+                                  </td>
+                                  <td className="p-2 text-xs text-center font-semibold text-foreground">
                                     {(() => {
                                       const s2Periods = ['p4', 'p5', 'p6', 'exam_s2'];
-                                      const s2Scores = s2Periods.map(p => subject.periods?.[p]?.percentage).filter(Boolean);
-                                      return s2Scores.length > 0 ? (s2Scores.reduce((a: number, b: number) => a + b, 0) / s2Scores.length).toFixed(1) : '-';
+                                      const s2Scores = s2Periods.map(p => subject.periods?.[p]?.score).filter(Boolean);
+                                      return s2Scores.length > 0 ? (Math.floor((s2Scores.reduce((a: number, b: number) => a + b, 0) / s2Scores.length) * 10) / 10).toFixed(1) : '-';
                                     })()}
                                   </td>
                                   <td className="p-2 text-xs text-center font-semibold text-foreground">
@@ -283,9 +315,33 @@ export const StudentReportDialog = ({
                             <>
                               <td className="p-2 text-xs text-center font-semibold text-foreground">
                                 {(() => {
+                                  const scores = report.subjects.map((s: any) => s.periods?.p1?.score).filter(Boolean);
+                                  return scores.length > 0 ? (Math.floor((scores.reduce((a: number, b: number) => a + b, 0) / scores.length) * 10) / 10).toFixed(1) : '-';
+                                })()}
+                              </td>
+                              <td className="p-2 text-xs text-center font-semibold text-foreground">
+                                {(() => {
+                                  const scores = report.subjects.map((s: any) => s.periods?.p2?.score).filter(Boolean);
+                                  return scores.length > 0 ? (Math.floor((scores.reduce((a: number, b: number) => a + b, 0) / scores.length) * 10) / 10).toFixed(1) : '-';
+                                })()}
+                              </td>
+                              <td className="p-2 text-xs text-center font-semibold text-foreground">
+                                {(() => {
+                                  const scores = report.subjects.map((s: any) => s.periods?.p3?.score).filter(Boolean);
+                                  return scores.length > 0 ? (Math.floor((scores.reduce((a: number, b: number) => a + b, 0) / scores.length) * 10) / 10).toFixed(1) : '-';
+                                })()}
+                              </td>
+                              <td className="p-2 text-xs text-center font-semibold text-foreground">
+                                {(() => {
+                                  const scores = report.subjects.map((s: any) => s.periods?.exam_s1?.score).filter(Boolean);
+                                  return scores.length > 0 ? (Math.floor((scores.reduce((a: number, b: number) => a + b, 0) / scores.length) * 10) / 10).toFixed(1) : '-';
+                                })()}
+                              </td>
+                              <td className="p-2 text-xs text-center font-semibold text-foreground">
+                                {(() => {
                                   const s1Averages = report.subjects.map((s: any) => {
                                     const s1Periods = ['p1', 'p2', 'p3', 'exam_s1'];
-                                    const s1Scores = s1Periods.map(p => s.periods?.[p]?.percentage).filter(Boolean);
+                                    const s1Scores = s1Periods.map(p => s.periods?.[p]?.score).filter(Boolean);
                                     return s1Scores.length > 0 ? s1Scores.reduce((a: number, b: number) => a + b, 0) / s1Scores.length : null;
                                   }).filter(Boolean);
                                   return s1Averages.length > 0 ? (Math.floor((s1Averages.reduce((a: number, b: number) => a + b, 0) / s1Averages.length) * 10) / 10).toFixed(1) : '-';
@@ -293,16 +349,40 @@ export const StudentReportDialog = ({
                               </td>
                               <td className="p-2 text-xs text-center font-semibold text-foreground">
                                 {(() => {
+                                  const scores = report.subjects.map((s: any) => s.periods?.p4?.score).filter(Boolean);
+                                  return scores.length > 0 ? (Math.floor((scores.reduce((a: number, b: number) => a + b, 0) / scores.length) * 10) / 10).toFixed(1) : '-';
+                                })()}
+                              </td>
+                              <td className="p-2 text-xs text-center font-semibold text-foreground">
+                                {(() => {
+                                  const scores = report.subjects.map((s: any) => s.periods?.p5?.score).filter(Boolean);
+                                  return scores.length > 0 ? (Math.floor((scores.reduce((a: number, b: number) => a + b, 0) / scores.length) * 10) / 10).toFixed(1) : '-';
+                                })()}
+                              </td>
+                              <td className="p-2 text-xs text-center font-semibold text-foreground">
+                                {(() => {
+                                  const scores = report.subjects.map((s: any) => s.periods?.p6?.score).filter(Boolean);
+                                  return scores.length > 0 ? (Math.floor((scores.reduce((a: number, b: number) => a + b, 0) / scores.length) * 10) / 10).toFixed(1) : '-';
+                                })()}
+                              </td>
+                              <td className="p-2 text-xs text-center font-semibold text-foreground">
+                                {(() => {
+                                  const scores = report.subjects.map((s: any) => s.periods?.exam_s2?.score).filter(Boolean);
+                                  return scores.length > 0 ? (Math.floor((scores.reduce((a: number, b: number) => a + b, 0) / scores.length) * 10) / 10).toFixed(1) : '-';
+                                })()}
+                              </td>
+                              <td className="p-2 text-xs text-center font-semibold text-foreground">
+                                {(() => {
                                   const s2Averages = report.subjects.map((s: any) => {
                                     const s2Periods = ['p4', 'p5', 'p6', 'exam_s2'];
-                                    const s2Scores = s2Periods.map(p => s.periods?.[p]?.percentage).filter(Boolean);
+                                    const s2Scores = s2Periods.map(p => s.periods?.[p]?.score).filter(Boolean);
                                     return s2Scores.length > 0 ? s2Scores.reduce((a: number, b: number) => a + b, 0) / s2Scores.length : null;
                                   }).filter(Boolean);
                                   return s2Averages.length > 0 ? (Math.floor((s2Averages.reduce((a: number, b: number) => a + b, 0) / s2Averages.length) * 10) / 10).toFixed(1) : '-';
                                 })()}
                               </td>
                               <td className="p-2 text-xs text-center font-bold text-foreground">
-                                {(Math.floor(report.overallAverage * 10) / 10).toFixed(1)}
+                                {report.overallAverage !== null ? (Math.floor(report.overallAverage * 10) / 10).toFixed(1) : '-'}
                               </td>
                             </>
                           )}
@@ -371,14 +451,50 @@ export const StudentReportDialog = ({
                           {period === 'yearly' && (
                             <>
                               <td className="p-2 text-xs text-center font-semibold text-muted-foreground">
-                                {report.yearlyTotal?.class_rank && report.periodCounts?.exam_s1 
-                                  ? `${report.yearlyTotal.class_rank}/${report.periodCounts.exam_s1}` 
+                                {report.periodTotals?.get('p1')?.class_rank && report.periodCounts?.p1 
+                                  ? `${report.periodTotals.get('p1').class_rank}/${report.periodCounts.p1}` 
                                   : '-'}
                               </td>
                               <td className="p-2 text-xs text-center font-semibold text-muted-foreground">
-                                {report.yearlyTotal?.class_rank && report.periodCounts?.exam_s2 
-                                  ? `${report.yearlyTotal.class_rank}/${report.periodCounts.exam_s2}` 
+                                {report.periodTotals?.get('p2')?.class_rank && report.periodCounts?.p2 
+                                  ? `${report.periodTotals.get('p2').class_rank}/${report.periodCounts.p2}` 
                                   : '-'}
+                              </td>
+                              <td className="p-2 text-xs text-center font-semibold text-muted-foreground">
+                                {report.periodTotals?.get('p3')?.class_rank && report.periodCounts?.p3 
+                                  ? `${report.periodTotals.get('p3').class_rank}/${report.periodCounts.p3}` 
+                                  : '-'}
+                              </td>
+                              <td className="p-2 text-xs text-center font-semibold text-muted-foreground">
+                                {report.periodTotals?.get('exam_s1')?.class_rank && report.periodCounts?.exam_s1 
+                                  ? `${report.periodTotals.get('exam_s1').class_rank}/${report.periodCounts.exam_s1}` 
+                                  : '-'}
+                              </td>
+                              <td className="p-2 text-xs text-center font-semibold text-muted-foreground">
+                                -
+                              </td>
+                              <td className="p-2 text-xs text-center font-semibold text-muted-foreground">
+                                {report.periodTotals?.get('p4')?.class_rank && report.periodCounts?.p4 
+                                  ? `${report.periodTotals.get('p4').class_rank}/${report.periodCounts.p4}` 
+                                  : '-'}
+                              </td>
+                              <td className="p-2 text-xs text-center font-semibold text-muted-foreground">
+                                {report.periodTotals?.get('p5')?.class_rank && report.periodCounts?.p5 
+                                  ? `${report.periodTotals.get('p5').class_rank}/${report.periodCounts.p5}` 
+                                  : '-'}
+                              </td>
+                              <td className="p-2 text-xs text-center font-semibold text-muted-foreground">
+                                {report.periodTotals?.get('p6')?.class_rank && report.periodCounts?.p6 
+                                  ? `${report.periodTotals.get('p6').class_rank}/${report.periodCounts.p6}` 
+                                  : '-'}
+                              </td>
+                              <td className="p-2 text-xs text-center font-semibold text-muted-foreground">
+                                {report.periodTotals?.get('exam_s2')?.class_rank && report.periodCounts?.exam_s2 
+                                  ? `${report.periodTotals.get('exam_s2').class_rank}/${report.periodCounts.exam_s2}` 
+                                  : '-'}
+                              </td>
+                              <td className="p-2 text-xs text-center font-semibold text-muted-foreground">
+                                -
                               </td>
                               <td className="p-2 text-xs text-center font-bold text-muted-foreground">
                                 {report.yearlyTotal?.class_rank && report.periodCounts?.exam_s2 
