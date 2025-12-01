@@ -197,7 +197,7 @@ export const StudentReportDialog = ({
                                     })()}
                                   </td>
                                   <td className="p-2 text-xs text-center font-semibold text-foreground">
-                                    {subject.semesterAverage.toFixed(1)}
+                                    {subject.semesterAverage !== null ? subject.semesterAverage.toFixed(1) : '-'}
                                   </td>
                                 </>
                               )}
@@ -244,7 +244,7 @@ export const StudentReportDialog = ({
                                 })()}
                               </td>
                               <td className="p-2 text-xs text-center font-bold text-foreground">
-                                {(Math.floor(report.overallAverage * 10) / 10).toFixed(1)}
+                                {report.overallAverage !== null ? (Math.floor(report.overallAverage * 10) / 10).toFixed(1) : '-'}
                               </td>
                             </>
                           )}
@@ -275,7 +275,7 @@ export const StudentReportDialog = ({
                                 })()}
                               </td>
                               <td className="p-2 text-xs text-center font-bold text-foreground">
-                                {(Math.floor(report.overallAverage * 10) / 10).toFixed(1)}
+                                {report.overallAverage !== null ? (Math.floor(report.overallAverage * 10) / 10).toFixed(1) : '-'}
                               </td>
                             </>
                           )}
@@ -395,7 +395,7 @@ export const StudentReportDialog = ({
                         <tr className="border-t-2 bg-muted/50">
                           <td className="p-3 text-sm font-bold text-foreground">Average</td>
                           <td className="p-3 text-sm text-center font-semibold text-foreground">
-                            {(Math.floor(report.overallAverage * 10) / 10).toFixed(1)}
+                            {report.overallAverage !== null ? (Math.floor(report.overallAverage * 10) / 10).toFixed(1) : '-'}
                           </td>
                         </tr>
                         <tr className="border-t bg-muted/30">
@@ -421,7 +421,9 @@ export const StudentReportDialog = ({
             <div className="grid grid-cols-2 gap-4">
               <div className="p-4 border rounded-lg bg-primary/5">
                 <p className="text-sm text-muted-foreground mb-1">Overall Average</p>
-                <p className="text-3xl font-bold text-primary">{report.overallAverage}</p>
+                <p className="text-3xl font-bold text-primary">
+                  {report.overallAverage !== null ? report.overallAverage.toFixed(1) : 'N/A'}
+                </p>
               </div>
               {report.yearlyTotal?.class_rank && (
                 <div className="p-4 border rounded-lg bg-secondary/5">
