@@ -157,7 +157,7 @@ export const StudentReportDialog = ({
                                     {subject.periods?.exam_s1?.score || '-'}
                                   </td>
                                   <td className="p-2 text-xs text-center font-semibold text-foreground">
-                                    {subject.semesterAverage.toFixed(1)}
+                                    {subject.semesterAverage !== null ? subject.semesterAverage.toFixed(1) : '-'}
                                   </td>
                                 </>
                               )}
@@ -176,7 +176,7 @@ export const StudentReportDialog = ({
                                     {subject.periods?.exam_s2?.score || '-'}
                                   </td>
                                   <td className="p-2 text-xs text-center font-semibold text-foreground">
-                                    {subject.semesterAverage.toFixed(1)}
+                                    {subject.semesterAverage !== null ? subject.semesterAverage.toFixed(1) : '-'}
                                   </td>
                                 </>
                               )}
