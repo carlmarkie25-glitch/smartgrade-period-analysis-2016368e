@@ -43,9 +43,10 @@ const Gradebook = () => {
   }, [grades, students, assessmentTypes]);
 
   const handleGradeChange = (studentId: string, assessmentTypeId: string, value: string) => {
-    const numValue = Math.max(0, Number(value) || 0);
+    const numValue = Number(value) || 0;
     const maxScore = assessmentTypes?.find(at => at.id === assessmentTypeId)?.max_points || 0;
-    const clampedValue = Math.min(numValue, maxScore);
+    // Enforce minimum of 60 and maximum of maxScore
+    const clampedValue = numValue === 0 ? 0 : Math.min(Math.max(60, numValue), maxScore);
     
     setEditedGrades(prev => ({
       ...prev,
@@ -238,20 +239,21 @@ const Gradebook = () => {
                               <TableCell className="font-medium">{student.full_name}</TableCell>
                               {assessmentTypes?.map((at) => {
                                 const currentValue = studentEditedGrades[at.id] || 0;
+                                const isRedGrade = currentValue >= 60 && currentValue <= 69;
                                 return (
                                   <TableCell key={at.id} className="text-center">
                                     {isLocked ? (
-                                      <span className="text-muted-foreground">
+                                      <span className={currentValue > 0 ? (isRedGrade ? "text-red-500 font-semibold" : "text-muted-foreground") : "text-muted-foreground"}>
                                         {currentValue > 0 ? currentValue : '-'}
                                       </span>
                                     ) : (
                                       <Input
                                         type="number"
-                                        min="0"
+                                        min="60"
                                         max={at.max_points}
                                         value={currentValue ?? ''}
                                         onChange={(e) => handleGradeChange(student.id, at.id, e.target.value)}
-                                        className="w-20 text-center mx-auto"
+                                        className={`w-20 text-center mx-auto ${isRedGrade ? 'text-red-500 font-semibold' : ''}`}
                                       />
                                     )}
                                   </TableCell>
