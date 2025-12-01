@@ -135,6 +135,11 @@ export const useStudentReport = (studentId: string, period: string) => {
           }
         });
 
+        // Check if all required periods have grades
+        const hasAllRequiredPeriods = periodsToFetch.every(p => 
+          Array.from(subjectGrades.values()).some(subject => subject.periods[p])
+        );
+
         // Convert to array and calculate percentages for each period
         const subjects = Array.from(subjectGrades.values()).map((subject) => {
           const periodData: any = {};
@@ -149,7 +154,11 @@ export const useStudentReport = (studentId: string, period: string) => {
             semesterMax += pData.max;
           });
 
-          const semesterAverage = semesterMax > 0 ? Math.floor((semesterTotal / semesterMax) * 1000) / 10 : 0;
+          // Only calculate semester average if all required periods have grades for this subject
+          const subjectHasAllPeriods = periodsToFetch.every(p => subject.periods[p]);
+          const semesterAverage = (subjectHasAllPeriods && semesterMax > 0) 
+            ? Math.floor((semesterTotal / semesterMax) * 1000) / 10 
+            : null;
 
           return {
             ...subject,
@@ -158,9 +167,12 @@ export const useStudentReport = (studentId: string, period: string) => {
           };
         });
 
-        // Calculate overall average
-        const overallTotal = subjects.reduce((sum, s) => sum + s.semesterAverage, 0);
-        const overallAverage = subjects.length > 0 ? Math.floor((overallTotal / subjects.length) * 10) / 10 : 0;
+        // Calculate overall average only if all subjects have their semester averages
+        const subjectsWithAverages = subjects.filter(s => s.semesterAverage !== null);
+        const overallTotal = subjectsWithAverages.reduce((sum, s) => sum + (s.semesterAverage || 0), 0);
+        const overallAverage = (subjectsWithAverages.length > 0 && subjectsWithAverages.length === subjects.length) 
+          ? Math.floor((overallTotal / subjects.length) * 10) / 10 
+          : null;
 
         return {
           student,
