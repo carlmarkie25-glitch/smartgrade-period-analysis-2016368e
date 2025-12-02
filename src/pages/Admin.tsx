@@ -10,7 +10,7 @@ import { useUserManagement } from "@/hooks/useUserManagement";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { ArrowLeft, UserPlus, School, BookOpen, Users, GraduationCap, Building } from "lucide-react";
+import { ArrowLeft, UserPlus, School, BookOpen, Users, GraduationCap, Building, X } from "lucide-react";
 import { StudentManagementTab } from "@/components/StudentManagementTab";
 import { ClassManagementTab } from "@/components/ClassManagementTab";
 import { SubjectManagementTab } from "@/components/SubjectManagementTab";
@@ -130,11 +130,17 @@ const Admin = () => {
                         <div>
                           <p className="font-medium">{user.full_name}</p>
                           <p className="text-sm text-muted-foreground">{user.email}</p>
-                          <div className="flex gap-2 mt-2">
+                          <div className="flex gap-2 mt-2 flex-wrap">
                             {user.user_roles && user.user_roles.length > 0 ? (
                               user.user_roles.map((ur: any) => (
-                                <span key={ur.role} className="text-xs bg-primary/10 text-primary px-2 py-1 rounded">
+                                <span key={ur.role} className="text-xs bg-primary/10 text-primary px-2 py-1 rounded flex items-center gap-1">
                                   {ur.role}
+                                  <button
+                                    onClick={() => removeRole.mutate({ userId: user.user_id, role: ur.role })}
+                                    className="hover:bg-destructive/20 rounded-full p-0.5"
+                                  >
+                                    <X className="h-3 w-3" />
+                                  </button>
                                 </span>
                               ))
                             ) : (
