@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -11,26 +11,92 @@ import { useClasses } from "@/hooks/useClasses";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
-import { Pencil, Trash2, UserPlus } from "lucide-react";
+import { Pencil, Trash2, UserPlus, Upload, X } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 
+interface StudentForm {
+  full_name: string;
+  student_id: string;
+  class_id: string;
+  department_id: string;
+  date_of_birth: string;
+  password: string;
+  photo_url: string;
+}
+
+const initialFormState: StudentForm = {
+  full_name: "",
+  student_id: "",
+  class_id: "",
+  department_id: "",
+  date_of_birth: "",
+  password: "",
+  photo_url: "",
+};
+
 export const StudentManagementTab = () => {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [editingStudentId, setEditingStudentId] = useState<string | null>(null);
   const [isCreating, setIsCreating] = useState(false);
-  const [newStudent, setNewStudent] = useState({
-    full_name: "",
-    student_id: "",
-    class_id: "",
-    department_id: "",
-    date_of_birth: "",
-    password: "",
-  });
+  const [isUploading, setIsUploading] = useState(false);
+  const [newStudent, setNewStudent] = useState<StudentForm>(initialFormState);
+  const [editStudent, setEditStudent] = useState<StudentForm>(initialFormState);
+  const [photoPreview, setPhotoPreview] = useState<string | null>(null);
+  const [editPhotoPreview, setEditPhotoPreview] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const editFileInputRef = useRef<HTMLInputElement>(null);
 
   const { data: students, isLoading } = useStudents();
   const { data: classes } = useClasses();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+
+  const uploadPhoto = async (file: File, studentId: string): Promise<string | null> => {
+    setIsUploading(true);
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${studentId}-${Date.now()}.${fileExt}`;
+      const filePath = `${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('student-photos')
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data } = supabase.storage
+        .from('student-photos')
+        .getPublicUrl(filePath);
+
+      return data.publicUrl;
+    } catch (error: any) {
+      toast({
+        title: "Error uploading photo",
+        description: error.message,
+        variant: "destructive",
+      });
+      return null;
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const handlePhotoSelect = (e: React.ChangeEvent<HTMLInputElement>, isEdit: boolean = false) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        if (isEdit) {
+          setEditPhotoPreview(reader.result as string);
+        } else {
+          setPhotoPreview(reader.result as string);
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   const handleAddStudent = async () => {
     if (!newStudent.password || newStudent.password.length < 6) {
@@ -46,6 +112,13 @@ export const StudentManagementTab = () => {
     try {
       const selectedClass = classes?.find(c => c.id === newStudent.class_id);
       
+      // Upload photo if selected
+      let photoUrl = "";
+      if (fileInputRef.current?.files?.[0]) {
+        const uploadedUrl = await uploadPhoto(fileInputRef.current.files[0], newStudent.student_id);
+        if (uploadedUrl) photoUrl = uploadedUrl;
+      }
+
       const { data, error } = await supabase.functions.invoke("create-student-account", {
         body: {
           student_id: newStudent.student_id,
@@ -54,11 +127,20 @@ export const StudentManagementTab = () => {
           class_id: newStudent.class_id,
           department_id: selectedClass?.department_id || newStudent.department_id,
           date_of_birth: newStudent.date_of_birth || null,
+          photo_url: photoUrl,
         },
       });
 
       if (error) throw error;
       if (data.error) throw new Error(data.error);
+
+      // Update photo_url if we have one
+      if (photoUrl && data.student?.id) {
+        await supabase
+          .from("students")
+          .update({ photo_url: photoUrl })
+          .eq("id", data.student.id);
+      }
 
       toast({
         title: "Success",
@@ -67,14 +149,73 @@ export const StudentManagementTab = () => {
 
       queryClient.invalidateQueries({ queryKey: ["students"] });
       setIsAddDialogOpen(false);
-      setNewStudent({
-        full_name: "",
-        student_id: "",
-        class_id: "",
-        department_id: "",
-        date_of_birth: "",
-        password: "",
+      setNewStudent(initialFormState);
+      setPhotoPreview(null);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
       });
+    } finally {
+      setIsCreating(false);
+    }
+  };
+
+  const handleEditClick = (student: any) => {
+    setEditingStudentId(student.id);
+    setEditStudent({
+      full_name: student.full_name,
+      student_id: student.student_id,
+      class_id: student.class_id,
+      department_id: student.department_id,
+      date_of_birth: student.date_of_birth || "",
+      password: "",
+      photo_url: student.photo_url || "",
+    });
+    setEditPhotoPreview(student.photo_url || null);
+    setIsEditDialogOpen(true);
+  };
+
+  const handleUpdateStudent = async () => {
+    if (!editingStudentId) return;
+
+    setIsCreating(true);
+    try {
+      const selectedClass = classes?.find(c => c.id === editStudent.class_id);
+      
+      // Upload new photo if selected
+      let photoUrl = editStudent.photo_url;
+      if (editFileInputRef.current?.files?.[0]) {
+        const uploadedUrl = await uploadPhoto(editFileInputRef.current.files[0], editStudent.student_id);
+        if (uploadedUrl) photoUrl = uploadedUrl;
+      }
+
+      const { error } = await supabase
+        .from("students")
+        .update({
+          full_name: editStudent.full_name,
+          class_id: editStudent.class_id,
+          department_id: selectedClass?.department_id || editStudent.department_id,
+          date_of_birth: editStudent.date_of_birth || null,
+          photo_url: photoUrl,
+        })
+        .eq("id", editingStudentId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Student updated successfully",
+      });
+
+      queryClient.invalidateQueries({ queryKey: ["students"] });
+      setIsEditDialogOpen(false);
+      setEditingStudentId(null);
+      setEditStudent(initialFormState);
+      setEditPhotoPreview(null);
+      if (editFileInputRef.current) editFileInputRef.current.value = "";
     } catch (error: any) {
       toast({
         title: "Error",
@@ -108,6 +249,68 @@ export const StudentManagementTab = () => {
     }
   };
 
+  const PhotoUploadSection = ({ 
+    preview, 
+    onSelect, 
+    inputRef,
+    isEdit = false 
+  }: { 
+    preview: string | null; 
+    onSelect: (e: React.ChangeEvent<HTMLInputElement>) => void;
+    inputRef: React.RefObject<HTMLInputElement>;
+    isEdit?: boolean;
+  }) => (
+    <div>
+      <Label>Student Photo</Label>
+      <div className="flex items-center gap-4 mt-2">
+        <Avatar className="h-20 w-20">
+          <AvatarImage src={preview || ""} />
+          <AvatarFallback className="text-xl">
+            {isEdit ? editStudent.full_name?.split(' ').map(n => n[0]).join('') : newStudent.full_name?.split(' ').map(n => n[0]).join('') || '?'}
+          </AvatarFallback>
+        </Avatar>
+        <div className="flex-1">
+          <input
+            type="file"
+            ref={inputRef}
+            onChange={onSelect}
+            accept="image/*"
+            className="hidden"
+          />
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => inputRef.current?.click()}
+            disabled={isUploading}
+            className="gap-2"
+          >
+            <Upload className="h-4 w-4" />
+            {preview ? "Change Photo" : "Upload Photo"}
+          </Button>
+          {preview && (
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                if (isEdit) {
+                  setEditPhotoPreview(null);
+                  setEditStudent({ ...editStudent, photo_url: "" });
+                } else {
+                  setPhotoPreview(null);
+                }
+                if (inputRef.current) inputRef.current.value = "";
+              }}
+              className="ml-2"
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
@@ -124,6 +327,11 @@ export const StudentManagementTab = () => {
               <DialogTitle>Add New Student</DialogTitle>
             </DialogHeader>
             <div className="space-y-4 pt-4">
+              <PhotoUploadSection
+                preview={photoPreview}
+                onSelect={(e) => handlePhotoSelect(e, false)}
+                inputRef={fileInputRef}
+              />
               <div>
                 <Label htmlFor="full_name">Full Name</Label>
                 <Input
@@ -176,7 +384,7 @@ export const StudentManagementTab = () => {
                   placeholder="Min 6 characters"
                 />
               </div>
-              <Button onClick={handleAddStudent} className="w-full" disabled={isCreating}>
+              <Button onClick={handleAddStudent} className="w-full" disabled={isCreating || isUploading}>
                 {isCreating ? "Creating..." : "Add Student"}
               </Button>
             </div>
@@ -220,7 +428,11 @@ export const StudentManagementTab = () => {
                   <TableCell>{student.departments?.name}</TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-2">
-                      <Button variant="outline" size="sm">
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => handleEditClick(student)}
+                      >
                         <Pencil className="h-4 w-4" />
                       </Button>
                       <Button
@@ -238,6 +450,68 @@ export const StudentManagementTab = () => {
           </Table>
         )}
       </CardContent>
+
+      {/* Edit Dialog */}
+      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Edit Student</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 pt-4">
+            <PhotoUploadSection
+              preview={editPhotoPreview}
+              onSelect={(e) => handlePhotoSelect(e, true)}
+              inputRef={editFileInputRef}
+              isEdit
+            />
+            <div>
+              <Label htmlFor="edit_full_name">Full Name</Label>
+              <Input
+                id="edit_full_name"
+                value={editStudent.full_name}
+                onChange={(e) => setEditStudent({ ...editStudent, full_name: e.target.value })}
+                placeholder="Enter full name"
+              />
+            </div>
+            <div>
+              <Label htmlFor="edit_student_id">Student ID</Label>
+              <Input
+                id="edit_student_id"
+                value={editStudent.student_id}
+                disabled
+                className="bg-muted"
+              />
+            </div>
+            <div>
+              <Label htmlFor="edit_class_id">Class</Label>
+              <Select value={editStudent.class_id} onValueChange={(value) => setEditStudent({ ...editStudent, class_id: value })}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select class" />
+                </SelectTrigger>
+                <SelectContent>
+                  {classes?.map((cls) => (
+                    <SelectItem key={cls.id} value={cls.id}>
+                      {cls.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label htmlFor="edit_date_of_birth">Date of Birth</Label>
+              <Input
+                id="edit_date_of_birth"
+                type="date"
+                value={editStudent.date_of_birth}
+                onChange={(e) => setEditStudent({ ...editStudent, date_of_birth: e.target.value })}
+              />
+            </div>
+            <Button onClick={handleUpdateStudent} className="w-full" disabled={isCreating || isUploading}>
+              {isCreating ? "Updating..." : "Update Student"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 };
