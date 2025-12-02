@@ -17,12 +17,14 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 export const StudentManagementTab = () => {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [isCreating, setIsCreating] = useState(false);
   const [newStudent, setNewStudent] = useState({
     full_name: "",
     student_id: "",
     class_id: "",
     department_id: "",
     date_of_birth: "",
+    password: "",
   });
 
   const { data: students, isLoading } = useStudents();
@@ -31,19 +33,36 @@ export const StudentManagementTab = () => {
   const queryClient = useQueryClient();
 
   const handleAddStudent = async () => {
+    if (!newStudent.password || newStudent.password.length < 6) {
+      toast({
+        title: "Error",
+        description: "Password must be at least 6 characters",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsCreating(true);
     try {
       const selectedClass = classes?.find(c => c.id === newStudent.class_id);
       
-      const { error } = await supabase.from("students").insert({
-        ...newStudent,
-        department_id: selectedClass?.department_id || newStudent.department_id,
+      const { data, error } = await supabase.functions.invoke("create-student-account", {
+        body: {
+          student_id: newStudent.student_id,
+          password: newStudent.password,
+          full_name: newStudent.full_name,
+          class_id: newStudent.class_id,
+          department_id: selectedClass?.department_id || newStudent.department_id,
+          date_of_birth: newStudent.date_of_birth || null,
+        },
       });
 
       if (error) throw error;
+      if (data.error) throw new Error(data.error);
 
       toast({
         title: "Success",
-        description: "Student added successfully",
+        description: "Student account created successfully",
       });
 
       queryClient.invalidateQueries({ queryKey: ["students"] });
@@ -54,6 +73,7 @@ export const StudentManagementTab = () => {
         class_id: "",
         department_id: "",
         date_of_birth: "",
+        password: "",
       });
     } catch (error: any) {
       toast({
@@ -61,6 +81,8 @@ export const StudentManagementTab = () => {
         description: error.message,
         variant: "destructive",
       });
+    } finally {
+      setIsCreating(false);
     }
   };
 
@@ -144,8 +166,18 @@ export const StudentManagementTab = () => {
                   onChange={(e) => setNewStudent({ ...newStudent, date_of_birth: e.target.value })}
                 />
               </div>
-              <Button onClick={handleAddStudent} className="w-full">
-                Add Student
+              <div>
+                <Label htmlFor="password">Initial Password</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  value={newStudent.password}
+                  onChange={(e) => setNewStudent({ ...newStudent, password: e.target.value })}
+                  placeholder="Min 6 characters"
+                />
+              </div>
+              <Button onClick={handleAddStudent} className="w-full" disabled={isCreating}>
+                {isCreating ? "Creating..." : "Add Student"}
               </Button>
             </div>
           </DialogContent>
