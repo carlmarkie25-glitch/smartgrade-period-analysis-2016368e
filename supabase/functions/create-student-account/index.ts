@@ -16,7 +16,7 @@ Deno.serve(async (req) => {
     
     const supabaseAdmin = createClient(supabaseUrl, serviceRoleKey);
 
-    const { student_id, password, full_name, class_id, department_id, date_of_birth } = await req.json();
+    const { student_id, password, full_name, class_id, department_id, date_of_birth, photo_url } = await req.json();
 
     if (!student_id || !password || !full_name || !class_id) {
       return new Response(
@@ -52,6 +52,7 @@ Deno.serve(async (req) => {
         department_id,
         date_of_birth: date_of_birth || null,
         user_id: authData.user.id,
+        photo_url: photo_url || null,
       })
       .select()
       .single();
