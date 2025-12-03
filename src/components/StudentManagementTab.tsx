@@ -181,6 +181,16 @@ export const StudentManagementTab = () => {
   const handleUpdateStudent = async () => {
     if (!editingStudentId) return;
 
+    // Validate password if provided
+    if (editStudent.password && editStudent.password.length < 6) {
+      toast({
+        title: "Error",
+        description: "Password must be at least 6 characters",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsCreating(true);
     try {
       const selectedClass = classes?.find(c => c.id === editStudent.class_id);
@@ -192,6 +202,7 @@ export const StudentManagementTab = () => {
         if (uploadedUrl) photoUrl = uploadedUrl;
       }
 
+      // Update student record
       const { error } = await supabase
         .from("students")
         .update({
@@ -204,6 +215,22 @@ export const StudentManagementTab = () => {
         .eq("id", editingStudentId);
 
       if (error) throw error;
+
+      // Update password if provided
+      if (editStudent.password) {
+        const { data: passwordData, error: passwordError } = await supabase.functions.invoke(
+          "update-student-password",
+          {
+            body: {
+              student_id: editingStudentId,
+              new_password: editStudent.password,
+            },
+          }
+        );
+
+        if (passwordError) throw passwordError;
+        if (passwordData?.error) throw new Error(passwordData.error);
+      }
 
       toast({
         title: "Success",
@@ -504,6 +531,16 @@ export const StudentManagementTab = () => {
                 type="date"
                 value={editStudent.date_of_birth}
                 onChange={(e) => setEditStudent({ ...editStudent, date_of_birth: e.target.value })}
+              />
+            </div>
+            <div>
+              <Label htmlFor="edit_password">New Password (leave blank to keep current)</Label>
+              <Input
+                id="edit_password"
+                type="password"
+                value={editStudent.password}
+                onChange={(e) => setEditStudent({ ...editStudent, password: e.target.value })}
+                placeholder="Min 6 characters"
               />
             </div>
             <Button onClick={handleUpdateStudent} className="w-full" disabled={isCreating || isUploading}>
