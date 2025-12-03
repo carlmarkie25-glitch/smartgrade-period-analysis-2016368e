@@ -1,4 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { decode } from "https://deno.land/std@0.168.0/encoding/base64.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -16,7 +17,7 @@ Deno.serve(async (req) => {
     
     const supabaseAdmin = createClient(supabaseUrl, serviceRoleKey);
 
-    const { student_id, password, full_name, class_id, department_id, date_of_birth, photo_url } = await req.json();
+    const { student_id, password, full_name, class_id, department_id, date_of_birth, photo_base64, photo_content_type } = await req.json();
 
     if (!student_id || !password || !full_name || !class_id) {
       return new Response(
@@ -42,6 +43,31 @@ Deno.serve(async (req) => {
       );
     }
 
+    // Upload photo if provided
+    let uploadedPhotoUrl: string | null = null;
+    if (photo_base64 && photo_content_type) {
+      try {
+        const photoData = decode(photo_base64);
+        const fileExt = photo_content_type.split('/')[1] || 'jpg';
+        const fileName = `${student_id}-${Date.now()}.${fileExt}`;
+        
+        const { error: uploadError } = await supabaseAdmin.storage
+          .from('student-photos')
+          .upload(fileName, photoData, {
+            contentType: photo_content_type,
+          });
+        
+        if (!uploadError) {
+          const { data: urlData } = supabaseAdmin.storage
+            .from('student-photos')
+            .getPublicUrl(fileName);
+          uploadedPhotoUrl = urlData.publicUrl;
+        }
+      } catch (photoError) {
+        console.error('Photo upload error:', photoError);
+      }
+    }
+
     // Create student record linked to the auth user
     const { data: studentData, error: studentError } = await supabaseAdmin
       .from("students")
@@ -52,7 +78,7 @@ Deno.serve(async (req) => {
         department_id,
         date_of_birth: date_of_birth || null,
         user_id: authData.user.id,
-        photo_url: photo_url || null,
+        photo_url: uploadedPhotoUrl,
       })
       .select()
       .single();
