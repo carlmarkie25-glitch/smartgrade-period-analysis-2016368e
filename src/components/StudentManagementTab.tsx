@@ -85,8 +85,13 @@ export const StudentManagementTab = () => {
       // Convert photo to base64 if selected
       let photoBase64 = "";
       let photoContentType = "";
+      console.log("Add file input:", fileInputRef.current);
+      console.log("Add file input files:", fileInputRef.current?.files);
+      console.log("Add file input file[0]:", fileInputRef.current?.files?.[0]);
+      
       if (fileInputRef.current?.files?.[0]) {
         const file = fileInputRef.current.files[0];
+        console.log("Uploading photo for add:", file.name, file.type, file.size);
         photoContentType = file.type;
         const arrayBuffer = await file.arrayBuffer();
         const bytes = new Uint8Array(arrayBuffer);
@@ -95,8 +100,10 @@ export const StudentManagementTab = () => {
           binary += String.fromCharCode(bytes[i]);
         }
         photoBase64 = btoa(binary);
+        console.log("Photo base64 length:", photoBase64.length);
       }
 
+      console.log("Sending to edge function with photo:", !!photoBase64);
       const { data, error } = await supabase.functions.invoke("create-student-account", {
         body: {
           student_id: newStudent.student_id,
@@ -110,6 +117,7 @@ export const StudentManagementTab = () => {
         },
       });
 
+      console.log("Create student response:", data, error);
       if (error) throw error;
       if (data.error) throw new Error(data.error);
 
@@ -168,8 +176,13 @@ export const StudentManagementTab = () => {
       
       // Upload new photo if selected via edge function
       let photoUrl = editStudent.photo_url;
+      console.log("Edit file input:", editFileInputRef.current);
+      console.log("Edit file input files:", editFileInputRef.current?.files);
+      console.log("Edit file input file[0]:", editFileInputRef.current?.files?.[0]);
+      
       if (editFileInputRef.current?.files?.[0]) {
         const file = editFileInputRef.current.files[0];
+        console.log("Uploading photo for edit:", file.name, file.type, file.size);
         const arrayBuffer = await file.arrayBuffer();
         const bytes = new Uint8Array(arrayBuffer);
         let binary = '';
@@ -177,6 +190,7 @@ export const StudentManagementTab = () => {
           binary += String.fromCharCode(bytes[i]);
         }
         const photoBase64 = btoa(binary);
+        console.log("Photo base64 length:", photoBase64.length);
         
         const { data: photoData, error: photoError } = await supabase.functions.invoke(
           "update-student-photo",
@@ -189,6 +203,7 @@ export const StudentManagementTab = () => {
           }
         );
         
+        console.log("Photo upload response:", photoData, photoError);
         if (photoError) throw photoError;
         if (photoData?.error) throw new Error(photoData.error);
         if (photoData?.photo_url) photoUrl = photoData.photo_url;

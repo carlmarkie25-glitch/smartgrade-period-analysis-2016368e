@@ -19,6 +19,9 @@ Deno.serve(async (req) => {
 
     const { student_id, password, full_name, class_id, department_id, date_of_birth, photo_base64, photo_content_type } = await req.json();
 
+    console.log("Received request with photo_base64 length:", photo_base64?.length || 0);
+    console.log("Photo content type:", photo_content_type);
+
     if (!student_id || !password || !full_name || !class_id) {
       return new Response(
         JSON.stringify({ error: "Missing required fields" }),
@@ -46,26 +49,36 @@ Deno.serve(async (req) => {
     // Upload photo if provided
     let uploadedPhotoUrl: string | null = null;
     if (photo_base64 && photo_content_type) {
+      console.log("Attempting to upload photo...");
       try {
         const photoData = decode(photo_base64);
+        console.log("Decoded photo data length:", photoData.length);
         const fileExt = photo_content_type.split('/')[1] || 'jpg';
         const fileName = `${student_id}-${Date.now()}.${fileExt}`;
+        console.log("Uploading to filename:", fileName);
         
-        const { error: uploadError } = await supabaseAdmin.storage
+        const { error: uploadError, data: uploadData } = await supabaseAdmin.storage
           .from('student-photos')
           .upload(fileName, photoData, {
             contentType: photo_content_type,
           });
+        
+        console.log("Upload result - error:", uploadError, "data:", uploadData);
         
         if (!uploadError) {
           const { data: urlData } = supabaseAdmin.storage
             .from('student-photos')
             .getPublicUrl(fileName);
           uploadedPhotoUrl = urlData.publicUrl;
+          console.log("Photo URL:", uploadedPhotoUrl);
+        } else {
+          console.error('Storage upload error:', uploadError);
         }
       } catch (photoError) {
         console.error('Photo upload error:', photoError);
       }
+    } else {
+      console.log("No photo provided - base64:", !!photo_base64, "contentType:", !!photo_content_type);
     }
 
     // Create student record linked to the auth user
