@@ -40,7 +40,6 @@ export const StudentManagementTab = () => {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [editingStudentId, setEditingStudentId] = useState<string | null>(null);
   const [isCreating, setIsCreating] = useState(false);
-  const [isUploading, setIsUploading] = useState(false);
   const [newStudent, setNewStudent] = useState<StudentForm>(initialFormState);
   const [editStudent, setEditStudent] = useState<StudentForm>(initialFormState);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
@@ -53,35 +52,6 @@ export const StudentManagementTab = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const uploadPhoto = async (file: File, studentId: string): Promise<string | null> => {
-    setIsUploading(true);
-    try {
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${studentId}-${Date.now()}.${fileExt}`;
-      const filePath = `${fileName}`;
-
-      const { error: uploadError } = await supabase.storage
-        .from('student-photos')
-        .upload(filePath, file);
-
-      if (uploadError) throw uploadError;
-
-      const { data } = supabase.storage
-        .from('student-photos')
-        .getPublicUrl(filePath);
-
-      return data.publicUrl;
-    } catch (error: any) {
-      toast({
-        title: "Error uploading photo",
-        description: error.message,
-        variant: "destructive",
-      });
-      return null;
-    } finally {
-      setIsUploading(false);
-    }
-  };
 
   const handlePhotoSelect = (e: React.ChangeEvent<HTMLInputElement>, isEdit: boolean = false) => {
     const file = e.target.files?.[0];
@@ -112,11 +82,19 @@ export const StudentManagementTab = () => {
     try {
       const selectedClass = classes?.find(c => c.id === newStudent.class_id);
       
-      // Upload photo if selected
-      let photoUrl = "";
+      // Convert photo to base64 if selected
+      let photoBase64 = "";
+      let photoContentType = "";
       if (fileInputRef.current?.files?.[0]) {
-        const uploadedUrl = await uploadPhoto(fileInputRef.current.files[0], newStudent.student_id);
-        if (uploadedUrl) photoUrl = uploadedUrl;
+        const file = fileInputRef.current.files[0];
+        photoContentType = file.type;
+        const arrayBuffer = await file.arrayBuffer();
+        const bytes = new Uint8Array(arrayBuffer);
+        let binary = '';
+        for (let i = 0; i < bytes.byteLength; i++) {
+          binary += String.fromCharCode(bytes[i]);
+        }
+        photoBase64 = btoa(binary);
       }
 
       const { data, error } = await supabase.functions.invoke("create-student-account", {
@@ -127,20 +105,13 @@ export const StudentManagementTab = () => {
           class_id: newStudent.class_id,
           department_id: selectedClass?.department_id || newStudent.department_id,
           date_of_birth: newStudent.date_of_birth || null,
-          photo_url: photoUrl,
+          photo_base64: photoBase64,
+          photo_content_type: photoContentType,
         },
       });
 
       if (error) throw error;
       if (data.error) throw new Error(data.error);
-
-      // Update photo_url if we have one
-      if (photoUrl && data.student?.id) {
-        await supabase
-          .from("students")
-          .update({ photo_url: photoUrl })
-          .eq("id", data.student.id);
-      }
 
       toast({
         title: "Success",
@@ -195,11 +166,32 @@ export const StudentManagementTab = () => {
     try {
       const selectedClass = classes?.find(c => c.id === editStudent.class_id);
       
-      // Upload new photo if selected
+      // Upload new photo if selected via edge function
       let photoUrl = editStudent.photo_url;
       if (editFileInputRef.current?.files?.[0]) {
-        const uploadedUrl = await uploadPhoto(editFileInputRef.current.files[0], editStudent.student_id);
-        if (uploadedUrl) photoUrl = uploadedUrl;
+        const file = editFileInputRef.current.files[0];
+        const arrayBuffer = await file.arrayBuffer();
+        const bytes = new Uint8Array(arrayBuffer);
+        let binary = '';
+        for (let i = 0; i < bytes.byteLength; i++) {
+          binary += String.fromCharCode(bytes[i]);
+        }
+        const photoBase64 = btoa(binary);
+        
+        const { data: photoData, error: photoError } = await supabase.functions.invoke(
+          "update-student-photo",
+          {
+            body: {
+              student_id: editStudent.student_id,
+              photo_base64: photoBase64,
+              photo_content_type: file.type,
+            },
+          }
+        );
+        
+        if (photoError) throw photoError;
+        if (photoData?.error) throw new Error(photoData.error);
+        if (photoData?.photo_url) photoUrl = photoData.photo_url;
       }
 
       // Update student record
@@ -308,7 +300,7 @@ export const StudentManagementTab = () => {
             type="button"
             variant="outline"
             onClick={() => inputRef.current?.click()}
-            disabled={isUploading}
+            disabled={isCreating}
             className="gap-2"
           >
             <Upload className="h-4 w-4" />
@@ -411,7 +403,7 @@ export const StudentManagementTab = () => {
                   placeholder="Min 6 characters"
                 />
               </div>
-              <Button onClick={handleAddStudent} className="w-full" disabled={isCreating || isUploading}>
+              <Button onClick={handleAddStudent} className="w-full" disabled={isCreating}>
                 {isCreating ? "Creating..." : "Add Student"}
               </Button>
             </div>
@@ -543,7 +535,7 @@ export const StudentManagementTab = () => {
                 placeholder="Min 6 characters"
               />
             </div>
-            <Button onClick={handleUpdateStudent} className="w-full" disabled={isCreating || isUploading}>
+            <Button onClick={handleUpdateStudent} className="w-full" disabled={isCreating}>
               {isCreating ? "Updating..." : "Update Student"}
             </Button>
           </div>
