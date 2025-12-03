@@ -1,4 +1,3 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
@@ -6,7 +5,7 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-serve(async (req) => {
+Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
@@ -34,10 +33,10 @@ serve(async (req) => {
       );
     }
 
-    // Get the student record to find the user_id
+    // Get the student record
     const { data: student, error: studentError } = await supabaseAdmin
       .from("students")
-      .select("user_id")
+      .select("user_id, student_id, full_name")
       .eq("id", student_id)
       .single();
 
@@ -48,16 +47,57 @@ serve(async (req) => {
       );
     }
 
-    if (!student.user_id) {
+    let userId = student.user_id;
+
+    // If student doesn't have a user account, create one
+    if (!userId) {
+      const email = `${student.student_id}@student.local`;
+      
+      const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
+        email,
+        password: new_password,
+        email_confirm: true,
+        user_metadata: { full_name: student.full_name, student_id: student.student_id },
+      });
+
+      if (authError) {
+        return new Response(
+          JSON.stringify({ error: authError.message }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      userId = authData.user.id;
+
+      // Link the user to the student record
+      await supabaseAdmin
+        .from("students")
+        .update({ user_id: userId })
+        .eq("id", student_id);
+
+      // Assign student role
+      await supabaseAdmin.from("user_roles").insert({
+        user_id: userId,
+        role: "student",
+      });
+
+      // Create profile
+      await supabaseAdmin.from("profiles").insert({
+        id: userId,
+        user_id: userId,
+        full_name: student.full_name,
+        email,
+      });
+
       return new Response(
-        JSON.stringify({ error: "Student does not have an associated user account" }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        JSON.stringify({ success: true, message: "User account created with password" }),
+        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    // Update the user's password
+    // Update the existing user's password
     const { error: updateError } = await supabaseAdmin.auth.admin.updateUserById(
-      student.user_id,
+      userId,
       { password: new_password }
     );
 
