@@ -107,6 +107,28 @@ Deno.serve(async (req) => {
       console.log("No photo provided - base64:", !!photo_base64, "contentType:", !!photo_content_type);
     }
 
+    // Create profile FIRST (students.user_id references profiles.id)
+    const { error: profileError } = await supabaseAdmin.from("profiles").insert({
+      id: authData.user.id,
+      user_id: authData.user.id,
+      full_name,
+      email: `${finalStudentId}@student.local`,
+    });
+
+    if (profileError) {
+      await supabaseAdmin.auth.admin.deleteUser(authData.user.id);
+      return new Response(
+        JSON.stringify({ error: profileError.message }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Assign student role
+    await supabaseAdmin.from("user_roles").insert({
+      user_id: authData.user.id,
+      role: "student",
+    });
+
     // Create student record linked to the auth user
     const { data: studentData, error: studentError } = await supabaseAdmin
       .from("students")
@@ -130,20 +152,6 @@ Deno.serve(async (req) => {
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
-
-    // Assign student role
-    await supabaseAdmin.from("user_roles").insert({
-      user_id: authData.user.id,
-      role: "student",
-    });
-
-    // Create profile for the student
-    await supabaseAdmin.from("profiles").insert({
-      id: authData.user.id,
-      user_id: authData.user.id,
-      full_name,
-      email: `${finalStudentId}@student.local`,
-    });
 
     return new Response(
       JSON.stringify({ success: true, student: studentData }),
