@@ -29,19 +29,45 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Create auth user with student_id as email (using a fake domain)
-    const email = `${student_id}@student.local`;
+    // Try to create auth user, handling duplicate email by trying next IDs
+    let currentId = parseInt(student_id);
+    let authData = null;
+    let finalStudentId = student_id;
     
-    const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
-      email,
-      password,
-      email_confirm: true,
-      user_metadata: { full_name, student_id },
-    });
+    for (let attempt = 0; attempt < 10; attempt++) {
+      const email = `${currentId}@student.local`;
+      console.log(`Attempting to create user with ID: ${currentId}, email: ${email}`);
+      
+      const result = await supabaseAdmin.auth.admin.createUser({
+        email,
+        password,
+        email_confirm: true,
+        user_metadata: { full_name, student_id: String(currentId) },
+      });
 
-    if (authError) {
+      if (!result.error) {
+        authData = result.data;
+        finalStudentId = String(currentId);
+        console.log(`Successfully created user with ID: ${finalStudentId}`);
+        break;
+      }
+      
+      if (result.error.message.includes("already been registered")) {
+        console.log(`ID ${currentId} already exists, trying next...`);
+        currentId++;
+        continue;
+      }
+      
+      // Other error, return it
       return new Response(
-        JSON.stringify({ error: authError.message }),
+        JSON.stringify({ error: result.error.message }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    if (!authData) {
+      return new Response(
+        JSON.stringify({ error: "Could not create user after multiple attempts" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
@@ -85,7 +111,7 @@ Deno.serve(async (req) => {
     const { data: studentData, error: studentError } = await supabaseAdmin
       .from("students")
       .insert({
-        student_id,
+        student_id: finalStudentId,
         full_name,
         class_id,
         department_id,
@@ -116,7 +142,7 @@ Deno.serve(async (req) => {
       id: authData.user.id,
       user_id: authData.user.id,
       full_name,
-      email,
+      email: `${finalStudentId}@student.local`,
     });
 
     return new Response(
