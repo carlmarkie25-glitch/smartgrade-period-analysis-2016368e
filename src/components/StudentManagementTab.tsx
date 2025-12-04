@@ -51,6 +51,7 @@ export const StudentManagementTab = () => {
   const [editingStudentId, setEditingStudentId] = useState<string | null>(null);
   const [editingStudentIdString, setEditingStudentIdString] = useState<string>("");
   const [isCreating, setIsCreating] = useState(false);
+  const [nextStudentId, setNextStudentId] = useState<string>("Loading...");
   const [newStudent, setNewStudent] = useState<StudentForm>(initialFormState);
   const [editStudent, setEditStudent] = useState<StudentForm>(initialFormState);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
@@ -361,7 +362,13 @@ export const StudentManagementTab = () => {
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle>Student Management</CardTitle>
-        <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+        <Dialog open={isAddDialogOpen} onOpenChange={(open) => {
+          setIsAddDialogOpen(open);
+          if (open) {
+            // Fetch next student ID when dialog opens
+            getNextStudentId().then(setNextStudentId);
+          }
+        }}>
           <DialogTrigger asChild>
             <Button className="gap-2">
               <UserPlus className="h-4 w-4" />
@@ -378,6 +385,15 @@ export const StudentManagementTab = () => {
                 onSelect={(e) => handlePhotoSelect(e, false)}
                 inputRef={fileInputRef}
               />
+              <div>
+                <Label htmlFor="next_student_id">Student ID</Label>
+                <Input
+                  id="next_student_id"
+                  value={nextStudentId}
+                  disabled
+                  className="bg-muted font-mono"
+                />
+              </div>
               <div>
                 <Label htmlFor="full_name">Full Name</Label>
                 <Input
