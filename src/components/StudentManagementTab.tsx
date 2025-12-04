@@ -17,7 +17,6 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 interface StudentForm {
   full_name: string;
-  student_id: string;
   class_id: string;
   department_id: string;
   date_of_birth: string;
@@ -27,7 +26,6 @@ interface StudentForm {
 
 const initialFormState: StudentForm = {
   full_name: "",
-  student_id: "",
   class_id: "",
   department_id: "",
   date_of_birth: "",
@@ -35,10 +33,23 @@ const initialFormState: StudentForm = {
   photo_url: "",
 };
 
+const getNextStudentId = async (): Promise<string> => {
+  const { data } = await supabase
+    .from("students")
+    .select("student_id")
+    .order("student_id", { ascending: false });
+  
+  if (!data || data.length === 0) return "100";
+  
+  const maxId = Math.max(...data.map(s => parseInt(s.student_id) || 0));
+  return String(Math.max(maxId + 1, 100));
+};
+
 export const StudentManagementTab = () => {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [editingStudentId, setEditingStudentId] = useState<string | null>(null);
+  const [editingStudentIdString, setEditingStudentIdString] = useState<string>("");
   const [isCreating, setIsCreating] = useState(false);
   const [newStudent, setNewStudent] = useState<StudentForm>(initialFormState);
   const [editStudent, setEditStudent] = useState<StudentForm>(initialFormState);
@@ -104,9 +115,10 @@ export const StudentManagementTab = () => {
       }
 
       console.log("Sending to edge function with photo:", !!photoBase64);
+      const studentId = await getNextStudentId();
       const { data, error } = await supabase.functions.invoke("create-student-account", {
         body: {
-          student_id: newStudent.student_id,
+          student_id: studentId,
           password: newStudent.password,
           full_name: newStudent.full_name,
           class_id: newStudent.class_id,
@@ -144,9 +156,9 @@ export const StudentManagementTab = () => {
 
   const handleEditClick = (student: any) => {
     setEditingStudentId(student.id);
+    setEditingStudentIdString(student.student_id);
     setEditStudent({
       full_name: student.full_name,
-      student_id: student.student_id,
       class_id: student.class_id,
       department_id: student.department_id,
       date_of_birth: student.date_of_birth || "",
@@ -196,7 +208,7 @@ export const StudentManagementTab = () => {
           "update-student-photo",
           {
             body: {
-              student_id: editStudent.student_id,
+              student_id: editingStudentIdString,
               photo_base64: photoBase64,
               photo_content_type: file.type,
             },
@@ -376,15 +388,6 @@ export const StudentManagementTab = () => {
                 />
               </div>
               <div>
-                <Label htmlFor="student_id">Student ID</Label>
-                <Input
-                  id="student_id"
-                  value={newStudent.student_id}
-                  onChange={(e) => setNewStudent({ ...newStudent, student_id: e.target.value })}
-                  placeholder="Enter student ID"
-                />
-              </div>
-              <div>
                 <Label htmlFor="class_id">Class</Label>
                 <Select value={newStudent.class_id} onValueChange={(value) => setNewStudent({ ...newStudent, class_id: value })}>
                   <SelectTrigger>
@@ -511,7 +514,7 @@ export const StudentManagementTab = () => {
               <Label htmlFor="edit_student_id">Student ID</Label>
               <Input
                 id="edit_student_id"
-                value={editStudent.student_id}
+                value={editingStudentIdString}
                 disabled
                 className="bg-muted"
               />
