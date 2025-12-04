@@ -116,10 +116,9 @@ export const StudentManagementTab = () => {
       }
 
       console.log("Sending to edge function with photo:", !!photoBase64);
-      const studentId = await getNextStudentId();
       const { data, error } = await supabase.functions.invoke("create-student-account", {
         body: {
-          student_id: studentId,
+          student_id: nextStudentId,
           password: newStudent.password,
           full_name: newStudent.full_name,
           class_id: newStudent.class_id,
