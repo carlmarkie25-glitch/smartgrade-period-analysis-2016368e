@@ -22,6 +22,7 @@ interface StudentForm {
   date_of_birth: string;
   password: string;
   photo_url: string;
+  phone_number: string;
 }
 
 const initialFormState: StudentForm = {
@@ -31,6 +32,7 @@ const initialFormState: StudentForm = {
   date_of_birth: "",
   password: "",
   photo_url: "",
+  phone_number: "",
 };
 
 const getNextStudentId = async (): Promise<string> => {
@@ -124,6 +126,7 @@ export const StudentManagementTab = () => {
           class_id: newStudent.class_id,
           department_id: selectedClass?.department_id || newStudent.department_id,
           date_of_birth: newStudent.date_of_birth || null,
+          phone_number: newStudent.phone_number || null,
           photo_base64: photoBase64,
           photo_content_type: photoContentType,
         },
@@ -164,6 +167,7 @@ export const StudentManagementTab = () => {
       date_of_birth: student.date_of_birth || "",
       password: "",
       photo_url: student.photo_url || "",
+      phone_number: student.phone_number || "",
     });
     setEditPhotoPreview(student.photo_url || null);
     setIsEditDialogOpen(true);
@@ -230,6 +234,7 @@ export const StudentManagementTab = () => {
           department_id: selectedClass?.department_id || editStudent.department_id,
           date_of_birth: editStudent.date_of_birth || null,
           photo_url: photoUrl,
+          phone_number: editStudent.phone_number || null,
         })
         .eq("id", editingStudentId);
 
@@ -427,6 +432,16 @@ export const StudentManagementTab = () => {
                 />
               </div>
               <div>
+                <Label htmlFor="phone_number">Phone Number (Student/Parent)</Label>
+                <Input
+                  id="phone_number"
+                  type="tel"
+                  value={newStudent.phone_number}
+                  onChange={(e) => setNewStudent({ ...newStudent, phone_number: e.target.value })}
+                  placeholder="Enter phone number"
+                />
+              </div>
+              <div>
                 <Label htmlFor="password">Initial Password</Label>
                 <Input
                   id="password"
@@ -556,6 +571,16 @@ export const StudentManagementTab = () => {
                 type="date"
                 value={editStudent.date_of_birth}
                 onChange={(e) => setEditStudent({ ...editStudent, date_of_birth: e.target.value })}
+              />
+            </div>
+            <div>
+              <Label htmlFor="edit_phone_number">Phone Number (Student/Parent)</Label>
+              <Input
+                id="edit_phone_number"
+                type="tel"
+                value={editStudent.phone_number}
+                onChange={(e) => setEditStudent({ ...editStudent, phone_number: e.target.value })}
+                placeholder="Enter phone number"
               />
             </div>
             <div>

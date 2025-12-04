@@ -393,6 +393,7 @@ export type Database = {
           department_id: string
           full_name: string
           id: string
+          phone_number: string | null
           photo_url: string | null
           student_id: string
           updated_at: string
@@ -405,6 +406,7 @@ export type Database = {
           department_id: string
           full_name: string
           id?: string
+          phone_number?: string | null
           photo_url?: string | null
           student_id: string
           updated_at?: string
@@ -417,6 +419,7 @@ export type Database = {
           department_id?: string
           full_name?: string
           id?: string
+          phone_number?: string | null
           photo_url?: string | null
           student_id?: string
           updated_at?: string
