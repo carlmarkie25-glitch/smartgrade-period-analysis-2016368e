@@ -17,7 +17,7 @@ Deno.serve(async (req) => {
     
     const supabaseAdmin = createClient(supabaseUrl, serviceRoleKey);
 
-    const { student_id, password, full_name, class_id, department_id, date_of_birth, photo_base64, photo_content_type } = await req.json();
+    const { student_id, password, full_name, class_id, department_id, date_of_birth, phone_number, photo_base64, photo_content_type } = await req.json();
 
     console.log("Received request with photo_base64 length:", photo_base64?.length || 0);
     console.log("Photo content type:", photo_content_type);
@@ -138,6 +138,7 @@ Deno.serve(async (req) => {
         class_id,
         department_id,
         date_of_birth: date_of_birth || null,
+        phone_number: phone_number || null,
         user_id: authData.user.id,
         photo_url: uploadedPhotoUrl,
       })
