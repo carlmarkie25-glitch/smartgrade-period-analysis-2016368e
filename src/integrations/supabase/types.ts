@@ -387,40 +387,94 @@ export type Database = {
       }
       students: {
         Row: {
+          address: string | null
           class_id: string
+          country: string | null
+          county: string | null
           created_at: string
           date_of_birth: string | null
           department_id: string
+          disability: string | null
+          emergency_contact_name: string | null
+          emergency_contact_phone: string | null
+          emergency_contact_relationship: string | null
+          ethnicity: string | null
+          father_contact: string | null
+          father_name: string | null
           full_name: string
+          gender: string | null
+          health_issues: string | null
           id: string
+          mother_contact: string | null
+          mother_name: string | null
+          nationality: string | null
           phone_number: string | null
           photo_url: string | null
+          previous_class: string | null
+          previous_school: string | null
+          religion: string | null
           student_id: string
           updated_at: string
           user_id: string | null
         }
         Insert: {
+          address?: string | null
           class_id: string
+          country?: string | null
+          county?: string | null
           created_at?: string
           date_of_birth?: string | null
           department_id: string
+          disability?: string | null
+          emergency_contact_name?: string | null
+          emergency_contact_phone?: string | null
+          emergency_contact_relationship?: string | null
+          ethnicity?: string | null
+          father_contact?: string | null
+          father_name?: string | null
           full_name: string
+          gender?: string | null
+          health_issues?: string | null
           id?: string
+          mother_contact?: string | null
+          mother_name?: string | null
+          nationality?: string | null
           phone_number?: string | null
           photo_url?: string | null
+          previous_class?: string | null
+          previous_school?: string | null
+          religion?: string | null
           student_id: string
           updated_at?: string
           user_id?: string | null
         }
         Update: {
+          address?: string | null
           class_id?: string
+          country?: string | null
+          county?: string | null
           created_at?: string
           date_of_birth?: string | null
           department_id?: string
+          disability?: string | null
+          emergency_contact_name?: string | null
+          emergency_contact_phone?: string | null
+          emergency_contact_relationship?: string | null
+          ethnicity?: string | null
+          father_contact?: string | null
+          father_name?: string | null
           full_name?: string
+          gender?: string | null
+          health_issues?: string | null
           id?: string
+          mother_contact?: string | null
+          mother_name?: string | null
+          nationality?: string | null
           phone_number?: string | null
           photo_url?: string | null
+          previous_class?: string | null
+          previous_school?: string | null
+          religion?: string | null
           student_id?: string
           updated_at?: string
           user_id?: string | null

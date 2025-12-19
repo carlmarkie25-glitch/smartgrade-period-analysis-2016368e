@@ -1,0 +1,20 @@
+-- Add comprehensive biodata columns to students table
+ALTER TABLE public.students 
+ADD COLUMN gender text,
+ADD COLUMN nationality text,
+ADD COLUMN ethnicity text,
+ADD COLUMN county text,
+ADD COLUMN country text,
+ADD COLUMN religion text,
+ADD COLUMN disability text,
+ADD COLUMN health_issues text,
+ADD COLUMN father_name text,
+ADD COLUMN father_contact text,
+ADD COLUMN mother_name text,
+ADD COLUMN mother_contact text,
+ADD COLUMN emergency_contact_name text,
+ADD COLUMN emergency_contact_phone text,
+ADD COLUMN emergency_contact_relationship text,
+ADD COLUMN previous_school text,
+ADD COLUMN previous_class text,
+ADD COLUMN address text;

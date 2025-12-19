@@ -17,10 +17,37 @@ Deno.serve(async (req) => {
     
     const supabaseAdmin = createClient(supabaseUrl, serviceRoleKey);
 
-    const { student_id, password, full_name, class_id, department_id, date_of_birth, phone_number, photo_base64, photo_content_type } = await req.json();
+    const { 
+      student_id, 
+      password, 
+      full_name, 
+      class_id, 
+      department_id, 
+      date_of_birth, 
+      phone_number,
+      gender,
+      nationality,
+      ethnicity,
+      county,
+      country,
+      religion,
+      disability,
+      health_issues,
+      father_name,
+      father_contact,
+      mother_name,
+      mother_contact,
+      emergency_contact_name,
+      emergency_contact_phone,
+      emergency_contact_relationship,
+      previous_school,
+      previous_class,
+      address,
+      photo_base64, 
+      photo_content_type 
+    } = await req.json();
 
-    console.log("Received request with photo_base64 length:", photo_base64?.length || 0);
-    console.log("Photo content type:", photo_content_type);
+    console.log("Received request for student:", student_id);
 
     if (!student_id || !password || !full_name || !class_id) {
       return new Response(
@@ -78,33 +105,27 @@ Deno.serve(async (req) => {
       console.log("Attempting to upload photo...");
       try {
         const photoData = decode(photo_base64);
-        console.log("Decoded photo data length:", photoData.length);
         const fileExt = photo_content_type.split('/')[1] || 'jpg';
         const fileName = `${student_id}-${Date.now()}.${fileExt}`;
-        console.log("Uploading to filename:", fileName);
         
-        const { error: uploadError, data: uploadData } = await supabaseAdmin.storage
+        const { error: uploadError } = await supabaseAdmin.storage
           .from('student-photos')
           .upload(fileName, photoData, {
             contentType: photo_content_type,
           });
-        
-        console.log("Upload result - error:", uploadError, "data:", uploadData);
         
         if (!uploadError) {
           const { data: urlData } = supabaseAdmin.storage
             .from('student-photos')
             .getPublicUrl(fileName);
           uploadedPhotoUrl = urlData.publicUrl;
-          console.log("Photo URL:", uploadedPhotoUrl);
+          console.log("Photo uploaded successfully");
         } else {
           console.error('Storage upload error:', uploadError);
         }
       } catch (photoError) {
         console.error('Photo upload error:', photoError);
       }
-    } else {
-      console.log("No photo provided - base64:", !!photo_base64, "contentType:", !!photo_content_type);
     }
 
     // Create profile FIRST (students.user_id references profiles.id)
@@ -129,7 +150,7 @@ Deno.serve(async (req) => {
       role: "student",
     });
 
-    // Create student record linked to the auth user
+    // Create student record with all biodata fields
     const { data: studentData, error: studentError } = await supabaseAdmin
       .from("students")
       .insert({
@@ -139,6 +160,24 @@ Deno.serve(async (req) => {
         department_id,
         date_of_birth: date_of_birth || null,
         phone_number: phone_number || null,
+        gender: gender || null,
+        nationality: nationality || null,
+        ethnicity: ethnicity || null,
+        county: county || null,
+        country: country || null,
+        religion: religion || null,
+        disability: disability || null,
+        health_issues: health_issues || null,
+        father_name: father_name || null,
+        father_contact: father_contact || null,
+        mother_name: mother_name || null,
+        mother_contact: mother_contact || null,
+        emergency_contact_name: emergency_contact_name || null,
+        emergency_contact_phone: emergency_contact_phone || null,
+        emergency_contact_relationship: emergency_contact_relationship || null,
+        previous_school: previous_school || null,
+        previous_class: previous_class || null,
+        address: address || null,
         user_id: authData.user.id,
         photo_url: uploadedPhotoUrl,
       })
@@ -154,12 +193,15 @@ Deno.serve(async (req) => {
       );
     }
 
+    console.log("Student created successfully:", finalStudentId);
+
     return new Response(
       JSON.stringify({ success: true, student: studentData }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : "Unknown error occurred";
+    console.error("Error creating student:", message);
     return new Response(
       JSON.stringify({ error: message }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
