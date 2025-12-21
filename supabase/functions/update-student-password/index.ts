@@ -98,6 +98,58 @@ Deno.serve(async (req) => {
 
       const email = `${student.student_id}@student.local`;
       
+      // First check if a user with this email already exists
+      const { data: existingUsers } = await supabaseAdmin.auth.admin.listUsers();
+      const existingUser = existingUsers?.users?.find(u => u.email === email);
+      
+      if (existingUser) {
+        // User already exists - link them to the student and update password
+        userId = existingUser.id;
+        console.log("Found existing user with email", email, "- linking to student", student_id);
+        
+        // Update the password
+        const { error: updateError } = await supabaseAdmin.auth.admin.updateUserById(
+          userId,
+          { password: new_password }
+        );
+        
+        if (updateError) {
+          return new Response(
+            JSON.stringify({ error: updateError.message }),
+            { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
+        
+        // Link the user to the student record
+        await supabaseAdmin
+          .from("students")
+          .update({ user_id: userId })
+          .eq("id", student_id);
+
+        // Ensure student role exists
+        const { data: existingRole } = await supabaseAdmin
+          .from("user_roles")
+          .select("id")
+          .eq("user_id", userId)
+          .eq("role", "student")
+          .maybeSingle();
+          
+        if (!existingRole) {
+          await supabaseAdmin.from("user_roles").insert({
+            user_id: userId,
+            role: "student",
+          });
+        }
+
+        console.log("Linked existing user to student", student_id, "and updated password");
+
+        return new Response(
+          JSON.stringify({ success: true, message: "User account linked and password updated" }),
+          { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+      
+      // Create new user
       const { data: authData, error: authCreateError } = await supabaseAdmin.auth.admin.createUser({
         email,
         password: new_password,
