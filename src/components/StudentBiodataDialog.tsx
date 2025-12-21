@@ -39,6 +39,28 @@ interface StudentBiodataDialogProps {
   onOpenChange: (open: boolean) => void;
 }
 
+// HTML escape utility to prevent XSS
+const escapeHtml = (unsafe: string | null | undefined): string => {
+  if (!unsafe) return '-';
+  return unsafe
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+};
+
+// Validate photo URL to prevent javascript: protocol attacks
+const isValidPhotoUrl = (url: string | null | undefined): boolean => {
+  if (!url) return false;
+  try {
+    const parsed = new URL(url);
+    return parsed.protocol === 'http:' || parsed.protocol === 'https:';
+  } catch {
+    return false;
+  }
+};
+
 export const StudentBiodataDialog = ({ student, open, onOpenChange }: StudentBiodataDialogProps) => {
   const printRef = useRef<HTMLDivElement>(null);
 
@@ -51,11 +73,18 @@ export const StudentBiodataDialog = ({ student, open, onOpenChange }: StudentBio
     const printWindow = window.open('', '_blank');
     if (!printWindow) return;
 
+    // Get safe initials for photo placeholder
+    const safeInitials = escapeHtml(student.full_name)
+      .split(' ')
+      .map(n => n[0] || '')
+      .join('');
+
     printWindow.document.write(`
       <!DOCTYPE html>
       <html>
         <head>
-          <title>Student Biodata - ${student.full_name}</title>
+          <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'none'; style-src 'unsafe-inline'; img-src https: data:;">
+          <title>Student Biodata - ${escapeHtml(student.full_name)}</title>
           <style>
             body {
               font-family: Arial, sans-serif;
@@ -163,9 +192,9 @@ export const StudentBiodataDialog = ({ student, open, onOpenChange }: StudentBio
           </div>
           
           <div class="photo-section">
-            ${student.photo_url 
-              ? `<img src="${student.photo_url}" alt="Student Photo" />`
-              : `<div class="photo-placeholder">${student.full_name.split(' ').map(n => n[0]).join('')}</div>`
+            ${isValidPhotoUrl(student.photo_url) 
+              ? `<img src="${escapeHtml(student.photo_url)}" alt="Student Photo" />`
+              : `<div class="photo-placeholder">${safeInitials}</div>`
             }
           </div>
 
@@ -174,48 +203,48 @@ export const StudentBiodataDialog = ({ student, open, onOpenChange }: StudentBio
             <div class="field-grid">
               <div class="field">
                 <div class="field-label">Student ID</div>
-                <div class="field-value">${student.student_id}</div>
+                <div class="field-value">${escapeHtml(student.student_id)}</div>
               </div>
               <div class="field">
                 <div class="field-label">Full Name</div>
-                <div class="field-value">${student.full_name}</div>
+                <div class="field-value">${escapeHtml(student.full_name)}</div>
               </div>
               <div class="field">
                 <div class="field-label">Date of Birth</div>
-                <div class="field-value">${student.date_of_birth || '-'}</div>
+                <div class="field-value">${escapeHtml(student.date_of_birth)}</div>
               </div>
               <div class="field">
                 <div class="field-label">Gender</div>
-                <div class="field-value">${student.gender || '-'}</div>
+                <div class="field-value">${escapeHtml(student.gender)}</div>
               </div>
               <div class="field">
                 <div class="field-label">Nationality</div>
-                <div class="field-value">${student.nationality || '-'}</div>
+                <div class="field-value">${escapeHtml(student.nationality)}</div>
               </div>
               <div class="field">
                 <div class="field-label">Ethnicity</div>
-                <div class="field-value">${student.ethnicity || '-'}</div>
+                <div class="field-value">${escapeHtml(student.ethnicity)}</div>
               </div>
               <div class="field">
                 <div class="field-label">Religion</div>
-                <div class="field-value">${student.religion || '-'}</div>
+                <div class="field-value">${escapeHtml(student.religion)}</div>
               </div>
               <div class="field">
                 <div class="field-label">Phone Number</div>
-                <div class="field-value">${student.phone_number || '-'}</div>
+                <div class="field-value">${escapeHtml(student.phone_number)}</div>
               </div>
               <div class="field">
                 <div class="field-label">Country</div>
-                <div class="field-value">${student.country || '-'}</div>
+                <div class="field-value">${escapeHtml(student.country)}</div>
               </div>
               <div class="field">
                 <div class="field-label">County/State</div>
-                <div class="field-value">${student.county || '-'}</div>
+                <div class="field-value">${escapeHtml(student.county)}</div>
               </div>
             </div>
             <div class="field" style="margin-top: 10px;">
               <div class="field-label">Address</div>
-              <div class="field-value">${student.address || '-'}</div>
+              <div class="field-value">${escapeHtml(student.address)}</div>
             </div>
           </div>
 
@@ -224,19 +253,19 @@ export const StudentBiodataDialog = ({ student, open, onOpenChange }: StudentBio
             <div class="field-grid">
               <div class="field">
                 <div class="field-label">Current Class</div>
-                <div class="field-value">${student.classes?.name || '-'}</div>
+                <div class="field-value">${escapeHtml(student.classes?.name)}</div>
               </div>
               <div class="field">
                 <div class="field-label">Department</div>
-                <div class="field-value">${student.departments?.name || '-'}</div>
+                <div class="field-value">${escapeHtml(student.departments?.name)}</div>
               </div>
               <div class="field">
                 <div class="field-label">Previous School</div>
-                <div class="field-value">${student.previous_school || '-'}</div>
+                <div class="field-value">${escapeHtml(student.previous_school)}</div>
               </div>
               <div class="field">
                 <div class="field-label">Class in Previous School</div>
-                <div class="field-value">${student.previous_class || '-'}</div>
+                <div class="field-value">${escapeHtml(student.previous_class)}</div>
               </div>
             </div>
           </div>
@@ -246,19 +275,19 @@ export const StudentBiodataDialog = ({ student, open, onOpenChange }: StudentBio
             <div class="field-grid">
               <div class="field">
                 <div class="field-label">Father's Name</div>
-                <div class="field-value">${student.father_name || '-'}</div>
+                <div class="field-value">${escapeHtml(student.father_name)}</div>
               </div>
               <div class="field">
                 <div class="field-label">Father's Contact</div>
-                <div class="field-value">${student.father_contact || '-'}</div>
+                <div class="field-value">${escapeHtml(student.father_contact)}</div>
               </div>
               <div class="field">
                 <div class="field-label">Mother's Name</div>
-                <div class="field-value">${student.mother_name || '-'}</div>
+                <div class="field-value">${escapeHtml(student.mother_name)}</div>
               </div>
               <div class="field">
                 <div class="field-label">Mother's Contact</div>
-                <div class="field-value">${student.mother_contact || '-'}</div>
+                <div class="field-value">${escapeHtml(student.mother_contact)}</div>
               </div>
             </div>
           </div>
@@ -268,15 +297,15 @@ export const StudentBiodataDialog = ({ student, open, onOpenChange }: StudentBio
             <div class="field-grid">
               <div class="field">
                 <div class="field-label">Contact Name</div>
-                <div class="field-value">${student.emergency_contact_name || '-'}</div>
+                <div class="field-value">${escapeHtml(student.emergency_contact_name)}</div>
               </div>
               <div class="field">
                 <div class="field-label">Phone Number</div>
-                <div class="field-value">${student.emergency_contact_phone || '-'}</div>
+                <div class="field-value">${escapeHtml(student.emergency_contact_phone)}</div>
               </div>
               <div class="field">
                 <div class="field-label">Relationship to Student</div>
-                <div class="field-value">${student.emergency_contact_relationship || '-'}</div>
+                <div class="field-value">${escapeHtml(student.emergency_contact_relationship)}</div>
               </div>
             </div>
           </div>
@@ -286,11 +315,11 @@ export const StudentBiodataDialog = ({ student, open, onOpenChange }: StudentBio
             <div class="field-grid">
               <div class="field">
                 <div class="field-label">Disability</div>
-                <div class="field-value">${student.disability || 'None'}</div>
+                <div class="field-value">${student.disability ? escapeHtml(student.disability) : 'None'}</div>
               </div>
               <div class="field">
                 <div class="field-label">Health Issues</div>
-                <div class="field-value">${student.health_issues || 'None'}</div>
+                <div class="field-value">${student.health_issues ? escapeHtml(student.health_issues) : 'None'}</div>
               </div>
             </div>
           </div>
