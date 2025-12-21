@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -7,18 +6,16 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useUserManagement } from "@/hooks/useUserManagement";
-import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { ArrowLeft, UserPlus, School, BookOpen, Users, GraduationCap, Building, X } from "lucide-react";
+import { UserPlus, School, BookOpen, Users, GraduationCap, Building, X } from "lucide-react";
 import { StudentManagementTab } from "@/components/StudentManagementTab";
 import { ClassManagementTab } from "@/components/ClassManagementTab";
 import { SubjectManagementTab } from "@/components/SubjectManagementTab";
 import { DepartmentManagementTab } from "@/components/DepartmentManagementTab";
+import MainLayout from "@/components/MainLayout";
 
 const Admin = () => {
-  const navigate = useNavigate();
-  const { signOut } = useAuth();
   const { toast } = useToast();
   const { users, usersLoading, assignRole, removeRole } = useUserManagement();
 
@@ -72,20 +69,13 @@ const Admin = () => {
 
 
   return (
-    <div className="min-h-screen bg-background">
-      <header className="border-b">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <Button variant="ghost" size="icon" onClick={() => navigate("/dashboard")}>
-              <ArrowLeft className="h-5 w-5" />
-            </Button>
-            <h1 className="text-2xl font-bold">Admin Panel</h1>
-          </div>
-          <Button variant="outline" onClick={signOut}>Sign Out</Button>
-        </div>
-      </header>
-
+    <MainLayout>
       <div className="container mx-auto px-4 py-8">
+        <div className="mb-8">
+          <h1 className="text-4xl font-bold text-foreground mb-2">Admin Panel</h1>
+          <p className="text-muted-foreground">Manage users, students, classes, and more</p>
+        </div>
+
         <Tabs defaultValue="users" className="space-y-6">
           <TabsList className="grid w-full grid-cols-6">
             <TabsTrigger value="users">
@@ -225,7 +215,7 @@ const Admin = () => {
           </TabsContent>
         </Tabs>
       </div>
-    </div>
+    </MainLayout>
   );
 };
 

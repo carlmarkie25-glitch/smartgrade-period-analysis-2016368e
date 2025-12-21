@@ -1,4 +1,4 @@
-import Navbar from "@/components/Navbar";
+import MainLayout from "@/components/MainLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { GraduationCap, Users, BookOpen, TrendingUp, FileText } from "lucide-react";
 import { useDashboardStats } from "@/hooks/useDashboardStats";
@@ -37,9 +37,8 @@ const Dashboard = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-background">
-      <Navbar />
-      <main className="container mx-auto px-4 py-8">
+    <MainLayout>
+      <div className="container mx-auto px-4 py-8">
         <div className="mb-8">
           <h1 className="text-4xl font-bold text-foreground mb-2">Dashboard</h1>
           <p className="text-muted-foreground">Welcome back! Here's your school overview.</p>
@@ -134,8 +133,8 @@ const Dashboard = () => {
             </CardContent>
           </Card>
         </div>
-      </main>
-    </div>
+      </div>
+    </MainLayout>
   );
 };
 
