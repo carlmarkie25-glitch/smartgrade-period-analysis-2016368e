@@ -17,6 +17,27 @@ Deno.serve(async (req) => {
       { auth: { autoRefreshToken: false, persistSession: false } }
     );
 
+    // Authentication check - verify the caller is authenticated
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader) {
+      console.error("No authorization header provided");
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized' }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    const token = authHeader.replace('Bearer ', '');
+    const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(token);
+
+    if (authError || !user) {
+      console.error("Auth error:", authError?.message);
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized' }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     const { student_id, new_password } = await req.json();
 
     if (!student_id || !new_password) {
@@ -47,22 +68,46 @@ Deno.serve(async (req) => {
       );
     }
 
+    // Authorization check - verify the user is admin OR is the student themselves
+    const { data: roles } = await supabaseAdmin
+      .from('user_roles')
+      .select('role')
+      .eq('user_id', user.id);
+
+    const isAdmin = roles?.some(r => r.role === 'admin');
+    const isSelfUpdate = student.user_id === user.id;
+
+    if (!isAdmin && !isSelfUpdate) {
+      console.error("User", user.id, "not authorized to update password for student", student_id);
+      return new Response(
+        JSON.stringify({ error: 'Forbidden - Admin access or own account required' }),
+        { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     let userId = student.user_id;
 
-    // If student doesn't have a user account, create one
+    // If student doesn't have a user account, create one (admin only)
     if (!userId) {
+      if (!isAdmin) {
+        return new Response(
+          JSON.stringify({ error: 'Forbidden - Only admins can create accounts' }),
+          { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
       const email = `${student.student_id}@student.local`;
       
-      const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
+      const { data: authData, error: authCreateError } = await supabaseAdmin.auth.admin.createUser({
         email,
         password: new_password,
         email_confirm: true,
         user_metadata: { full_name: student.full_name, student_id: student.student_id },
       });
 
-      if (authError) {
+      if (authCreateError) {
         return new Response(
-          JSON.stringify({ error: authError.message }),
+          JSON.stringify({ error: authCreateError.message }),
           { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
@@ -89,6 +134,8 @@ Deno.serve(async (req) => {
         email,
       });
 
+      console.log("User account created for student", student_id, "by", isAdmin ? "admin" : "self", user.id);
+
       return new Response(
         JSON.stringify({ success: true, message: "User account created with password" }),
         { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -108,11 +155,14 @@ Deno.serve(async (req) => {
       );
     }
 
+    console.log("Password updated for student", student_id, "by", isAdmin ? "admin" : "self", user.id);
+
     return new Response(
       JSON.stringify({ success: true }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (error: any) {
+    console.error("Error updating password:", error.message);
     return new Response(
       JSON.stringify({ error: error.message }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
