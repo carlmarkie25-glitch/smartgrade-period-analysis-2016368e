@@ -17,6 +17,42 @@ Deno.serve(async (req) => {
     
     const supabaseAdmin = createClient(supabaseUrl, serviceRoleKey);
 
+    // Authentication check - verify the caller is authenticated
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader) {
+      console.error("No authorization header provided");
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized' }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    const token = authHeader.replace('Bearer ', '');
+    const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(token);
+
+    if (authError || !user) {
+      console.error("Auth error:", authError?.message);
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized' }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Authorization check - verify the user has admin role
+    const { data: roles } = await supabaseAdmin
+      .from('user_roles')
+      .select('role')
+      .eq('user_id', user.id);
+
+    const isAdmin = roles?.some(r => r.role === 'admin');
+    if (!isAdmin) {
+      console.error("User is not an admin:", user.id);
+      return new Response(
+        JSON.stringify({ error: 'Forbidden - Admin access required' }),
+        { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     const { 
       student_id, 
       password, 
@@ -47,7 +83,7 @@ Deno.serve(async (req) => {
       photo_content_type 
     } = await req.json();
 
-    console.log("Received request for student:", student_id);
+    console.log("Admin", user.id, "creating student:", student_id);
 
     if (!student_id || !password || !full_name || !class_id) {
       return new Response(
@@ -193,7 +229,7 @@ Deno.serve(async (req) => {
       );
     }
 
-    console.log("Student created successfully:", finalStudentId);
+    console.log("Student created successfully by admin", user.id, ":", finalStudentId);
 
     return new Response(
       JSON.stringify({ success: true, student: studentData }),
