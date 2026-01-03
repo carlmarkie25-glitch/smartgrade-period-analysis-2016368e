@@ -1,6 +1,9 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import type { Database } from "@/integrations/supabase/types";
+
+type PeriodType = Database["public"]["Enums"]["period_type"];
 
 export const useGrades = (classSubjectId?: string, period?: string) => {
   return useQuery({
@@ -28,7 +31,7 @@ export const useGrades = (classSubjectId?: string, period?: string) => {
       }
 
       if (period) {
-        query = query.eq("period", period as any);
+        query = query.eq("period", period as PeriodType);
       }
 
       const { data, error } = await query;
