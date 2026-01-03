@@ -71,36 +71,6 @@ const Gradebook = () => {
     }));
   };
 
-  const handleSaveStudentGrades = (studentId: string) => {
-    const gradesToSave = [];
-    const studentGrades = editedGrades[studentId];
-    if (!studentGrades) return;
-    
-    for (const assessmentTypeId in studentGrades) {
-      const existingGrade = grades?.find(g => 
-        g.student_id === studentId && g.assessment_type_id === assessmentTypeId
-      );
-      const maxScore = assessmentTypes?.find(at => at.id === assessmentTypeId)?.max_points || 0;
-      
-      const gradeData: any = {
-        student_id: studentId,
-        class_subject_id: selectedSubject,
-        assessment_type_id: assessmentTypeId,
-        period: selectedPeriod,
-        score: studentGrades[assessmentTypeId],
-        max_score: maxScore,
-        is_locked: isLocked,
-      };
-
-      if (existingGrade?.id) {
-        gradeData.id = existingGrade.id;
-      }
-
-      gradesToSave.push(gradeData);
-    }
-    saveGradesMutation.mutate(gradesToSave);
-  };
-
   const handleSaveGrades = () => {
     const gradesToSave = [];
     for (const studentId in editedGrades) {
@@ -120,6 +90,7 @@ const Gradebook = () => {
           is_locked: isLocked,
         };
 
+        // Only include id if it exists (for updates)
         if (existingGrade?.id) {
           gradeData.id = existingGrade.id;
         }
@@ -269,7 +240,6 @@ const Gradebook = () => {
                             </TableHead>
                           ))}
                           <TableHead className="text-center font-bold">Total</TableHead>
-                          <TableHead className="text-center">Action</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
@@ -305,20 +275,6 @@ const Gradebook = () => {
                               })}
                               <TableCell className="text-center font-bold text-primary">
                                 {total > 0 ? total.toFixed(0) : '-'}
-                              </TableCell>
-                              <TableCell className="text-center">
-                                {!isLocked && (
-                                  <Button
-                                    size="sm"
-                                    variant="outline"
-                                    onClick={() => handleSaveStudentGrades(student.id)}
-                                    disabled={saveGradesMutation.isPending}
-                                    className="gap-1"
-                                  >
-                                    <Save className="h-3 w-3" />
-                                    Save
-                                  </Button>
-                                )}
                               </TableCell>
                             </TableRow>
                           );
