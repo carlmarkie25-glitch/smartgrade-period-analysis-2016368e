@@ -43,10 +43,24 @@ const Gradebook = () => {
   }, [grades, students, assessmentTypes]);
 
   const handleGradeChange = (studentId: string, assessmentTypeId: string, value: string) => {
-    const numValue = Number(value) || 0;
+    // Allow empty string during typing
+    if (value === '') {
+      setEditedGrades(prev => ({
+        ...prev,
+        [studentId]: {
+          ...prev[studentId],
+          [assessmentTypeId]: 0,
+        },
+      }));
+      return;
+    }
+    
+    const numValue = Number(value);
+    if (isNaN(numValue)) return;
+    
     const maxScore = assessmentTypes?.find(at => at.id === assessmentTypeId)?.max_points || 0;
-    // Enforce minimum of 60 and maximum of maxScore
-    const clampedValue = numValue === 0 ? 0 : Math.min(Math.max(60, numValue), maxScore);
+    // Clamp value between 0 and maxScore - validation happens on blur/save
+    const clampedValue = Math.min(Math.max(0, numValue), maxScore);
     
     setEditedGrades(prev => ({
       ...prev,
@@ -248,11 +262,12 @@ const Gradebook = () => {
                                     ) : (
                                       <Input
                                         type="number"
-                                        min="60"
+                                        min="0"
                                         max={at.max_points}
-                                        value={currentValue ?? ''}
+                                        value={currentValue === 0 ? '' : currentValue}
                                         onChange={(e) => handleGradeChange(student.id, at.id, e.target.value)}
                                         className={`w-20 text-center mx-auto ${isRedGrade ? 'text-red-500 font-semibold' : ''}`}
+                                        placeholder="0"
                                       />
                                     )}
                                   </TableCell>
