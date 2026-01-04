@@ -58,6 +58,7 @@ export const useSaveGrades = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["grades"] });
+      queryClient.invalidateQueries({ queryKey: ["student-report"] });
       toast({
         title: "Success",
         description: "Grades saved successfully",
