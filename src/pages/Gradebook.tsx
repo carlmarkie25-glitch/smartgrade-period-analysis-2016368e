@@ -16,7 +16,7 @@ const Gradebook = () => {
   const [selectedSubject, setSelectedSubject] = useState<string>("");
   const [selectedPeriod, setSelectedPeriod] = useState<string>("p1");
   const [isLocked, setIsLocked] = useState(true);
-  const [editedGrades, setEditedGrades] = useState<Record<string, Record<string, number>>>({});
+  const [editedGrades, setEditedGrades] = useState<Record<string, Record<string, number | null>>>({});
 
   const { data: classes, isLoading: classesLoading } = useClasses();
   const { data: classSubjects, isLoading: subjectsLoading } = useClassSubjects(selectedClass);
@@ -28,14 +28,19 @@ const Gradebook = () => {
   // Initialize edited grades when data loads
   useEffect(() => {
     if (grades && students && assessmentTypes) {
-      const initialGrades: Record<string, Record<string, number>> = {};
+      const initialGrades: Record<string, Record<string, number | null>> = {};
       students.forEach(student => {
         initialGrades[student.id] = {};
         assessmentTypes.forEach(at => {
           const existingGrade = grades.find(g => 
             g.student_id === student.id && g.assessment_type_id === at.id
           );
-          initialGrades[student.id][at.id] = existingGrade ? Number(existingGrade.score) : 0;
+          // null represents incomplete (score was not entered or below 60)
+          if (existingGrade && existingGrade.score !== null && existingGrade.score !== undefined) {
+            initialGrades[student.id][at.id] = Number(existingGrade.score);
+          } else {
+            initialGrades[student.id][at.id] = null;
+          }
         });
       });
       setEditedGrades(initialGrades);
@@ -43,13 +48,13 @@ const Gradebook = () => {
   }, [grades, students, assessmentTypes]);
 
   const handleGradeChange = (studentId: string, assessmentTypeId: string, value: string) => {
-    // Allow empty string during typing
+    // Allow empty string during typing - store as null (incomplete)
     if (value === '') {
       setEditedGrades(prev => ({
         ...prev,
         [studentId]: {
           ...prev[studentId],
-          [assessmentTypeId]: 0,
+          [assessmentTypeId]: null,
         },
       }));
       return;
@@ -59,9 +64,10 @@ const Gradebook = () => {
     if (isNaN(numValue)) return;
     
     const maxScore = assessmentTypes?.find(at => at.id === assessmentTypeId)?.max_points || 0;
-    // Clamp value between 0 and maxScore - validation happens on blur/save
+    // Clamp value between 0 and maxScore
     const clampedValue = Math.min(Math.max(0, numValue), maxScore);
     
+    // If grade is below 60, it will be saved but marked as incomplete on reports
     setEditedGrades(prev => ({
       ...prev,
       [studentId]: {
@@ -79,13 +85,15 @@ const Gradebook = () => {
           g.student_id === studentId && g.assessment_type_id === assessmentTypeId
         );
         const maxScore = assessmentTypes?.find(at => at.id === assessmentTypeId)?.max_points || 0;
+        const gradeValue = editedGrades[studentId][assessmentTypeId];
         
         const gradeData: any = {
           student_id: studentId,
           class_subject_id: selectedSubject,
           assessment_type_id: assessmentTypeId,
           period: selectedPeriod,
-          score: editedGrades[studentId][assessmentTypeId],
+          // Store null for empty grades, actual value otherwise (including < 60)
+          score: gradeValue,
           max_score: maxScore,
           is_locked: isLocked,
         };
@@ -221,7 +229,7 @@ const Gradebook = () => {
               </CardTitle>
               <CardDescription>
                 {assessmentTypes && assessmentTypes.length > 0 
-                  ? `Assessment breakdown: ${assessmentTypes.map(at => `${at.name} (${at.max_points})`).join(', ')}`
+                  ? `Assessment breakdown: ${assessmentTypes.map(at => `${at.name} (${at.max_points})`).join(', ')}. Grades below 60 or empty will show as "I" (Incomplete).`
                   : 'No assessment types configured'
                 }
               </CardDescription>
@@ -245,36 +253,55 @@ const Gradebook = () => {
                       <TableBody>
                         {students.map((student) => {
                           const studentEditedGrades = editedGrades[student.id] || {};
-                          const total = Object.values(studentEditedGrades).reduce((sum, score) => sum + score, 0);
+                          const gradeValues = Object.values(studentEditedGrades);
+                          const hasIncomplete = gradeValues.some(score => score === null || (score !== null && score < 60));
+                          const total = gradeValues.reduce((sum, score) => sum + (score || 0), 0);
                           
                           return (
                             <TableRow key={student.id}>
                               <TableCell className="font-medium">{student.full_name}</TableCell>
                               {assessmentTypes?.map((at) => {
-                                const currentValue = studentEditedGrades[at.id] || 0;
-                                const isRedGrade = currentValue >= 60 && currentValue <= 69;
+                                const currentValue = studentEditedGrades[at.id];
+                                const isIncomplete = currentValue === null || (currentValue !== null && currentValue < 60);
+                                const isRedGrade = currentValue !== null && currentValue >= 60 && currentValue <= 69;
                                 return (
                                   <TableCell key={at.id} className="text-center">
                                     {isLocked ? (
-                                      <span className={currentValue > 0 ? (isRedGrade ? "text-red-500 font-semibold" : "text-muted-foreground") : "text-muted-foreground"}>
-                                        {currentValue > 0 ? currentValue : '-'}
+                                      <span className={
+                                        isIncomplete 
+                                          ? "text-orange-500 font-bold" 
+                                          : isRedGrade 
+                                            ? "text-red-500 font-semibold" 
+                                            : "text-muted-foreground"
+                                      }>
+                                        {isIncomplete ? 'I' : currentValue}
                                       </span>
                                     ) : (
                                       <Input
                                         type="number"
                                         min="0"
                                         max={at.max_points}
-                                        value={currentValue === 0 ? '' : currentValue}
+                                        value={currentValue === null ? '' : currentValue}
                                         onChange={(e) => handleGradeChange(student.id, at.id, e.target.value)}
-                                        className={`w-20 text-center mx-auto ${isRedGrade ? 'text-red-500 font-semibold' : ''}`}
-                                        placeholder="0"
+                                        className={`w-20 text-center mx-auto ${
+                                          isIncomplete && currentValue !== null 
+                                            ? 'text-orange-500 font-bold border-orange-300' 
+                                            : isRedGrade 
+                                              ? 'text-red-500 font-semibold' 
+                                              : ''
+                                        }`}
+                                        placeholder=""
                                       />
                                     )}
                                   </TableCell>
                                 );
                               })}
-                              <TableCell className="text-center font-bold text-primary">
-                                {total > 0 ? total.toFixed(0) : '-'}
+                              <TableCell className="text-center font-bold">
+                                {hasIncomplete ? (
+                                  <span className="text-orange-500">I</span>
+                                ) : (
+                                  <span className="text-primary">{total > 0 ? total.toFixed(0) : '-'}</span>
+                                )}
                               </TableCell>
                             </TableRow>
                           );
@@ -288,14 +315,18 @@ const Gradebook = () => {
                       onClick={() => {
                         // Reset to original grades
                         if (grades && students && assessmentTypes) {
-                          const initialGrades: Record<string, Record<string, number>> = {};
+                          const initialGrades: Record<string, Record<string, number | null>> = {};
                           students.forEach(student => {
                             initialGrades[student.id] = {};
                             assessmentTypes.forEach(at => {
                               const existingGrade = grades.find(g => 
                                 g.student_id === student.id && g.assessment_type_id === at.id
                               );
-                              initialGrades[student.id][at.id] = existingGrade ? Number(existingGrade.score) : 0;
+                              if (existingGrade && existingGrade.score !== null && existingGrade.score !== undefined) {
+                                initialGrades[student.id][at.id] = Number(existingGrade.score);
+                              } else {
+                                initialGrades[student.id][at.id] = null;
+                              }
                             });
                           });
                           setEditedGrades(initialGrades);
