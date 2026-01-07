@@ -1,9 +1,20 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
-// Helper function to check if a score is incomplete (null, undefined, or below 60)
-const isIncompleteScore = (score: number | null | undefined): boolean => {
-  return score === null || score === undefined || score < 60;
+// Helper function to check if a score is missing (null/undefined)
+const isMissingScore = (score: number | null | undefined): boolean => {
+  return score === null || score === undefined;
+};
+
+// A subject-period is incomplete if any assessment is missing OR the overall percentage is below 60
+const isAggregateIncomplete = (
+  totalScore: number,
+  totalMax: number,
+  hasMissing: boolean
+): boolean => {
+  if (hasMissing) return true;
+  if (!totalMax || totalMax <= 0) return true;
+  return (totalScore / totalMax) * 100 < 60;
 };
 
 export const useStudentReport = (studentId: string, period: string) => {
@@ -61,8 +72,8 @@ export const useStudentReport = (studentId: string, period: string) => {
 
       if (gradesError) throw gradesError;
 
-      // Check if student has any incomplete grades (null, undefined, or < 60)
-      const hasIncompleteGrades = grades?.some((grade: any) => isIncompleteScore(grade.score)) || false;
+      // Check if student has any missing grades
+      const hasMissingGrades = grades?.some((grade: any) => isMissingScore(grade.score)) || false;
 
       // Get period totals (rank and total score) for all relevant periods
       const { data: periodTotals, error: periodTotalsError } = await supabase
@@ -113,79 +124,100 @@ export const useStudentReport = (studentId: string, period: string) => {
         const subjectGrades = new Map<string, {
           name: string;
           code: string;
-          periods: { [key: string]: { score: number | null; max: number; isIncomplete: boolean } };
+          periods: { [key: string]: { score: number; max: number; hasMissing: boolean } };
         }>();
 
         grades?.forEach((grade: any) => {
           const subjectName = grade.class_subjects?.subjects?.name || "Unknown";
           const subjectCode = grade.class_subjects?.subjects?.code || "N/A";
           const gradePeriod = grade.period;
-          const scoreValue = grade.score;
-          const isIncomplete = isIncompleteScore(scoreValue);
-          
+          const scoreValue: number | null = grade.score;
+          const isMissing = isMissingScore(scoreValue);
+
           const existing = subjectGrades.get(subjectName);
 
           if (existing) {
             if (!existing.periods[gradePeriod]) {
-              existing.periods[gradePeriod] = { score: 0, max: 0, isIncomplete: false };
+              existing.periods[gradePeriod] = { score: 0, max: 0, hasMissing: false };
             }
-            existing.periods[gradePeriod].score = (existing.periods[gradePeriod].score || 0) + (scoreValue || 0);
+            existing.periods[gradePeriod].score += scoreValue ?? 0;
             existing.periods[gradePeriod].max += Number(grade.max_score);
-            existing.periods[gradePeriod].isIncomplete = existing.periods[gradePeriod].isIncomplete || isIncomplete;
+            existing.periods[gradePeriod].hasMissing =
+              existing.periods[gradePeriod].hasMissing || isMissing;
           } else {
             subjectGrades.set(subjectName, {
               name: subjectName,
               code: subjectCode,
               periods: {
                 [gradePeriod]: {
-                  score: scoreValue || 0,
+                  score: scoreValue ?? 0,
                   max: Number(grade.max_score),
-                  isIncomplete,
-                }
+                  hasMissing: isMissing,
+                },
               },
             });
           }
         });
 
-        // Convert to array and calculate percentages for each period
+        // Convert to array and compute incomplete status per subject-period
         const subjects = Array.from(subjectGrades.values()).map((subject) => {
           const periodData: any = {};
           let semesterTotal = 0;
           let semesterMax = 0;
           let hasAnyIncomplete = false;
 
-          Object.keys(subject.periods).forEach(p => {
+          Object.keys(subject.periods).forEach((p) => {
             const pData = subject.periods[p];
-            const percentage = pData.max > 0 ? Math.floor((pData.score! / pData.max) * 1000) / 10 : 0;
-            periodData[p] = { ...pData, percentage };
-            semesterTotal += pData.score || 0;
+            const percentage =
+              pData.max > 0 ? Math.floor((pData.score / pData.max) * 1000) / 10 : 0;
+
+            const isIncomplete = isAggregateIncomplete(pData.score, pData.max, pData.hasMissing);
+
+            periodData[p] = {
+              ...pData,
+              // When incomplete, hide the numeric value (show "I" in UI)
+              score: isIncomplete ? null : pData.score,
+              isIncomplete,
+              percentage,
+            };
+
+            semesterTotal += pData.score;
             semesterMax += pData.max;
-            if (pData.isIncomplete) hasAnyIncomplete = true;
+            if (isIncomplete) hasAnyIncomplete = true;
           });
 
-          // Only calculate semester average if all required periods have grades and no incomplete
-          const subjectHasAllPeriods = periodsToFetch.every(p => subject.periods[p]);
-          const semesterAverage = (subjectHasAllPeriods && semesterMax > 0 && !hasAnyIncomplete) 
-            ? Math.floor((semesterTotal / semesterMax) * 1000) / 10 
-            : null;
+          // Only calculate semester average if all required periods exist and none are incomplete
+          const subjectHasAllPeriods = periodsToFetch.every((p) => subject.periods[p]);
+          const subjectIsIncomplete = hasAnyIncomplete || !subjectHasAllPeriods;
+
+          const semesterAverage =
+            subjectHasAllPeriods && semesterMax > 0 && !subjectIsIncomplete
+              ? Math.floor((semesterTotal / semesterMax) * 1000) / 10
+              : null;
 
           return {
             ...subject,
             periods: periodData,
             semesterAverage,
-            hasIncomplete: hasAnyIncomplete,
+            hasIncomplete: subjectIsIncomplete,
           };
         });
 
         // Check if any subject has incomplete grades
-        const anySubjectIncomplete = subjects.some(s => s.hasIncomplete);
+        const anySubjectIncomplete = subjects.some((s) => s.hasIncomplete);
 
         // Calculate overall average only if all subjects have their semester averages and no incomplete grades
-        const subjectsWithAverages = subjects.filter(s => s.semesterAverage !== null);
-        const overallTotal = subjectsWithAverages.reduce((sum, s) => sum + (s.semesterAverage || 0), 0);
-        const overallAverage = (subjectsWithAverages.length > 0 && subjectsWithAverages.length === subjects.length && !hasIncompleteGrades) 
-          ? Math.floor((overallTotal / subjects.length) * 10) / 10 
-          : null;
+        const subjectsWithAverages = subjects.filter((s) => s.semesterAverage !== null);
+        const overallTotal = subjectsWithAverages.reduce(
+          (sum, s) => sum + (s.semesterAverage || 0),
+          0
+        );
+        const overallAverage =
+          subjectsWithAverages.length > 0 &&
+          subjectsWithAverages.length === subjects.length &&
+          !anySubjectIncomplete
+            ? Math.floor((overallTotal / subjects.length) * 10) / 10
+            : null;
 
         return {
           student,
@@ -196,62 +228,79 @@ export const useStudentReport = (studentId: string, period: string) => {
           overallAverage,
           period,
           isSemesterReport: true,
-          hasIncomplete: hasIncompleteGrades || anySubjectIncomplete,
+          hasIncomplete: hasMissingGrades || anySubjectIncomplete,
         };
       } else {
         // Original logic for individual period reports
-        const subjectGrades = new Map<string, {
-          name: string;
-          code: string;
-          total: number;
-          max: number;
-          hasIncomplete: boolean;
-          assessments: Array<{ type: string; score: number | null; max: number; isIncomplete: boolean }>;
-        }>();
+        const subjectGrades = new Map<
+          string,
+          {
+            name: string;
+            code: string;
+            total: number;
+            max: number;
+            hasMissing: boolean;
+            assessments: Array<{
+              type: string;
+              score: number | null;
+              max: number;
+              isIncomplete: boolean;
+            }>;
+          }
+        >();
 
         grades?.forEach((grade: any) => {
           const subjectName = grade.class_subjects?.subjects?.name || "Unknown";
           const subjectCode = grade.class_subjects?.subjects?.code || "N/A";
-          const scoreValue = grade.score;
-          const isIncomplete = isIncompleteScore(scoreValue);
-          
+          const scoreValue: number | null = grade.score;
+          const isMissing = isMissingScore(scoreValue);
+
           const existing = subjectGrades.get(subjectName);
           const assessment = {
             type: grade.assessment_types?.name || "Assessment",
             score: scoreValue,
             max: Number(grade.max_score),
-            isIncomplete,
+            // For a single assessment entry, only "missing" counts as incomplete.
+            // The subject-period completeness is decided from the aggregate.
+            isIncomplete: isMissing,
           };
 
           if (existing) {
-            existing.total += scoreValue || 0;
+            existing.total += scoreValue ?? 0;
             existing.max += Number(grade.max_score);
-            existing.hasIncomplete = existing.hasIncomplete || isIncomplete;
+            existing.hasMissing = existing.hasMissing || isMissing;
             existing.assessments.push(assessment);
           } else {
             subjectGrades.set(subjectName, {
               name: subjectName,
               code: subjectCode,
-              total: scoreValue || 0,
+              total: scoreValue ?? 0,
               max: Number(grade.max_score),
-              hasIncomplete: isIncomplete,
+              hasMissing: isMissing,
               assessments: [assessment],
             });
           }
         });
 
-        // Convert to array without calculating percentage
-        const subjects = Array.from(subjectGrades.values());
+        // Convert to array and compute incomplete status from the aggregate
+        const subjects = Array.from(subjectGrades.values()).map((s) => {
+          const isIncomplete = isAggregateIncomplete(s.total, s.max, s.hasMissing);
+          return {
+            ...s,
+            hasIncomplete: isIncomplete,
+          };
+        });
 
         // Check if any subject has incomplete grades
-        const anySubjectIncomplete = subjects.some(s => s.hasIncomplete);
+        const anySubjectIncomplete = subjects.some((s) => s.hasIncomplete);
 
         // Calculate overall average only if no incomplete grades (truncate to 1 decimal)
         const overallTotal = subjects.reduce((sum, s) => sum + s.total, 0);
         const overallMax = subjects.reduce((sum, s) => sum + s.max, 0);
-        const overallAverage = (overallMax > 0 && !hasIncompleteGrades && !anySubjectIncomplete) 
-          ? Math.floor((overallTotal / overallMax) * 1000) / 10 
-          : null;
+        const overallAverage =
+          overallMax > 0 && !hasMissingGrades && !anySubjectIncomplete
+            ? Math.floor((overallTotal / overallMax) * 1000) / 10
+            : null;
 
         return {
           student,
@@ -262,7 +311,7 @@ export const useStudentReport = (studentId: string, period: string) => {
           overallAverage,
           period,
           isSemesterReport: false,
-          hasIncomplete: hasIncompleteGrades || anySubjectIncomplete,
+          hasIncomplete: hasMissingGrades || anySubjectIncomplete,
         };
       }
 

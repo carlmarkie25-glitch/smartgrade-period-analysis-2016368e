@@ -229,7 +229,7 @@ const Gradebook = () => {
               </CardTitle>
               <CardDescription>
                 {assessmentTypes && assessmentTypes.length > 0 
-                  ? `Assessment breakdown: ${assessmentTypes.map(at => `${at.name} (${at.max_points})`).join(', ')}. Grades below 60 or empty will show as "I" (Incomplete).`
+                  ? `Assessment breakdown: ${assessmentTypes.map(at => `${at.name} (${at.max_points})`).join(', ')}. Empty fields show as "I" (Incomplete). Totals under 60% show as "I".`
                   : 'No assessment types configured'
                 }
               </CardDescription>
@@ -253,42 +253,68 @@ const Gradebook = () => {
                       <TableBody>
                         {students.map((student) => {
                           const studentEditedGrades = editedGrades[student.id] || {};
-                          const gradeValues = Object.values(studentEditedGrades);
-                          const hasIncomplete = gradeValues.some(score => score === null || (score !== null && score < 60));
-                          const total = gradeValues.reduce((sum, score) => sum + (score || 0), 0);
-                          
+
+                          const hasAnyMissing =
+                            assessmentTypes?.some(
+                              (at) =>
+                                studentEditedGrades[at.id] === null ||
+                                studentEditedGrades[at.id] === undefined
+                            ) ?? false;
+
+                          const totalScore = (assessmentTypes ?? []).reduce(
+                            (sum, at) => sum + (studentEditedGrades[at.id] ?? 0),
+                            0
+                          );
+                          const totalMax = (assessmentTypes ?? []).reduce(
+                            (sum, at) => sum + (at.max_points ?? 0),
+                            0
+                          );
+                          const totalPercent = totalMax > 0 ? (totalScore / totalMax) * 100 : 0;
+
+                          const isTotalIncomplete = hasAnyMissing || totalPercent < 60;
+
                           return (
                             <TableRow key={student.id}>
                               <TableCell className="font-medium">{student.full_name}</TableCell>
                               {assessmentTypes?.map((at) => {
                                 const currentValue = studentEditedGrades[at.id];
-                                const isIncomplete = currentValue === null || (currentValue !== null && currentValue < 60);
-                                const isRedGrade = currentValue !== null && currentValue >= 60 && currentValue <= 69;
+                                const isIncomplete = currentValue === null || currentValue === undefined;
+                                const isRedGrade =
+                                  currentValue !== null &&
+                                  currentValue !== undefined &&
+                                  currentValue >= 60 &&
+                                  currentValue <= 69;
                                 return (
                                   <TableCell key={at.id} className="text-center">
                                     {isLocked ? (
-                                      <span className={
-                                        isIncomplete 
-                                          ? "text-orange-500 font-bold" 
-                                          : isRedGrade 
-                                            ? "text-red-500 font-semibold" 
-                                            : "text-muted-foreground"
-                                      }>
-                                        {isIncomplete ? 'I' : currentValue}
+                                      <span
+                                        className={
+                                          isIncomplete
+                                            ? "text-orange-500 font-bold"
+                                            : isRedGrade
+                                              ? "text-red-500 font-semibold"
+                                              : "text-muted-foreground"
+                                        }
+                                      >
+                                        {isIncomplete ? "I" : currentValue}
                                       </span>
                                     ) : (
                                       <Input
                                         type="number"
                                         min="0"
                                         max={at.max_points}
-                                        value={currentValue === null ? '' : currentValue}
-                                        onChange={(e) => handleGradeChange(student.id, at.id, e.target.value)}
+                                        value={currentValue === null || currentValue === undefined ? "" : currentValue}
+                                        onChange={(e) =>
+                                          handleGradeChange(student.id, at.id, e.target.value)
+                                        }
                                         className={`w-20 text-center mx-auto ${
-                                          isIncomplete && currentValue !== null 
-                                            ? 'text-orange-500 font-bold border-orange-300' 
-                                            : isRedGrade 
-                                              ? 'text-red-500 font-semibold' 
-                                              : ''
+                                          isIncomplete &&
+                                          currentValue !== null &&
+                                          currentValue !== undefined
+                                            ? "text-orange-500 font-bold border-orange-300"
+                                            : isRedGrade
+                                              ? "text-red-500 font-semibold"
+                                              : ""
                                         }`}
                                         placeholder=""
                                       />
@@ -297,10 +323,12 @@ const Gradebook = () => {
                                 );
                               })}
                               <TableCell className="text-center font-bold">
-                                {hasIncomplete ? (
+                                {isTotalIncomplete ? (
                                   <span className="text-orange-500">I</span>
                                 ) : (
-                                  <span className="text-primary">{total > 0 ? total.toFixed(0) : '-'}</span>
+                                  <span className="text-primary">
+                                    {totalScore > 0 ? totalScore.toFixed(0) : "-"}
+                                  </span>
                                 )}
                               </TableCell>
                             </TableRow>
