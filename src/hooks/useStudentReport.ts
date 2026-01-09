@@ -75,29 +75,27 @@ export const useStudentReport = (studentId: string, period: string) => {
       // Check if student has any missing grades
       const hasMissingGrades = grades?.some((grade: any) => isMissingScore(grade.score)) || false;
 
-      // Get period totals (rank and total score) for all relevant periods
-      const { data: periodTotals, error: periodTotalsError } = await supabase
-        .from("student_period_totals")
-        .select("*")
-        .eq("student_id", studentId)
-        .in("period", periodsToFetch);
+      // Get period ranks from the new RPC (computes overall class rank for each period)
+      const { data: periodRanks, error: periodRanksError } = await supabase
+        .rpc("get_student_period_ranks", {
+          p_student_id: studentId,
+          p_periods: periodsToFetch,
+        });
 
-      if (periodTotalsError) throw periodTotalsError;
+      if (periodRanksError) throw periodRanksError;
 
-      // Get total count of students in the class (for rank display as "X/Y")
+      // Build periodTotalsMap and periodCounts from the RPC result
+      const periodTotalsMap = new Map<string, { class_rank: number | null; total_score: number; is_incomplete: boolean }>();
       const periodCounts: Record<string, number> = {};
-      const studentClassId = student?.class_id;
-      
-      if (studentClassId) {
-        const { count } = await supabase
-          .from("students")
-          .select("id", { count: 'exact', head: true })
-          .eq("class_id", studentClassId);
-        
-        // All periods use the same count (number of students in the class)
-        const totalStudents = count || 0;
-        for (const p of periodsToFetch) {
-          periodCounts[p] = totalStudents;
+
+      if (periodRanks) {
+        for (const row of periodRanks) {
+          periodTotalsMap.set(row.period, {
+            class_rank: row.class_rank,
+            total_score: row.total_score,
+            is_incomplete: row.is_incomplete,
+          });
+          periodCounts[row.period] = row.total_students;
         }
       }
 
@@ -113,8 +111,8 @@ export const useStudentReport = (studentId: string, period: string) => {
         if (!yearlyError) yearlyTotal = yearlyData;
       }
 
-      // Create a map for easy lookup
-      const periodTotalsMap = new Map(periodTotals?.map(pt => [pt.period, pt]) || []);
+      // periodTotalsMap was already built above; this is a placeholder for clarity
+      // const periodTotalsMap was built from RPC results
 
       // Check if this is a semester report
       const isSemesterReport = period === 'semester1' || period === 'semester2' || period === 'yearly';

@@ -234,7 +234,7 @@ export type Database = {
           is_locked: boolean | null
           max_score: number
           period: Database["public"]["Enums"]["period_type"]
-          score: number
+          score: number | null
           student_id: string
           updated_at: string
         }
@@ -246,7 +246,7 @@ export type Database = {
           is_locked?: boolean | null
           max_score: number
           period: Database["public"]["Enums"]["period_type"]
-          score?: number
+          score?: number | null
           student_id: string
           updated_at?: string
         }
@@ -258,7 +258,7 @@ export type Database = {
           is_locked?: boolean | null
           max_score?: number
           period?: Database["public"]["Enums"]["period_type"]
-          score?: number
+          score?: number | null
           student_id?: string
           updated_at?: string
         }
@@ -580,6 +580,19 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_student_period_ranks: {
+        Args: {
+          p_periods: Database["public"]["Enums"]["period_type"][]
+          p_student_id: string
+        }
+        Returns: {
+          class_rank: number
+          is_incomplete: boolean
+          period: Database["public"]["Enums"]["period_type"]
+          total_score: number
+          total_students: number
+        }[]
+      }
       get_teacher_students: {
         Args: never
         Returns: {

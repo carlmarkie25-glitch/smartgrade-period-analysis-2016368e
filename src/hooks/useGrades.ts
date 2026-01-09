@@ -48,9 +48,13 @@ export const useSaveGrades = () => {
 
   return useMutation({
     mutationFn: async (grades: any[]) => {
+      // The table has a unique constraint on (student_id, class_subject_id, period, assessment_type_id)
+      // so we upsert on that composite key rather than just "id".
       const { data, error } = await supabase
         .from("student_grades")
-        .upsert(grades, { onConflict: "id" })
+        .upsert(grades, {
+          onConflict: "student_id,class_subject_id,period,assessment_type_id",
+        })
         .select();
 
       if (error) throw error;
