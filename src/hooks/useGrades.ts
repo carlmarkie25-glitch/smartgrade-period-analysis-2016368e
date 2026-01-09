@@ -48,11 +48,15 @@ export const useSaveGrades = () => {
 
   return useMutation({
     mutationFn: async (grades: any[]) => {
-      // The table has a unique constraint on (student_id, class_subject_id, period, assessment_type_id)
-      // so we upsert on that composite key rather than just "id".
+      // IMPORTANT:
+      // Do NOT send `id` in bulk upserts.
+      // If some rows include id and others don't, PostgREST can treat missing ids as NULL,
+      // causing "null value in column id" errors.
+      const sanitized = grades.map(({ id, ...rest }) => rest);
+
       const { data, error } = await supabase
         .from("student_grades")
-        .upsert(grades, {
+        .upsert(sanitized, {
           onConflict: "student_id,class_subject_id,period,assessment_type_id",
         })
         .select();

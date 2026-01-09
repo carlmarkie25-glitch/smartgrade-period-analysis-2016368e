@@ -100,12 +100,6 @@ const Gradebook = () => {
           max_score: maxScore,
           is_locked: isLocked,
         };
-
-        // Only include id if it exists (for updates)
-        if (existingGrade?.id) {
-          gradeData.id = existingGrade.id;
-        }
-
         gradesToSave.push(gradeData);
       }
     }
