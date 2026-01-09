@@ -87,12 +87,15 @@ const Gradebook = () => {
         const maxScore = assessmentTypes?.find(at => at.id === assessmentTypeId)?.max_points || 0;
         const gradeValue = editedGrades[studentId][assessmentTypeId];
         
-        const gradeData: any = {
+        // Skip if no change (existing null and still null without an id means student may not have a row yet)
+        // But we always send a row so students get their grade row created.
+
+        const gradeData: Record<string, unknown> = {
           student_id: studentId,
           class_subject_id: selectedSubject,
           assessment_type_id: assessmentTypeId,
           period: selectedPeriod,
-          // Store null for empty grades, actual value otherwise (including < 60)
+          // Store null for empty grades, actual value otherwise
           score: gradeValue,
           max_score: maxScore,
           is_locked: isLocked,
