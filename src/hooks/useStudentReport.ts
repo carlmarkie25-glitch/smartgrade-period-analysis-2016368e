@@ -27,6 +27,7 @@ export const useStudentReport = (studentId: string, period: string) => {
         .select(`
           *,
           classes (
+            id,
             name,
             academic_years (
               year_name
@@ -49,6 +50,20 @@ export const useStudentReport = (studentId: string, period: string) => {
         periodsToFetch = ['p1', 'p2', 'p3', 'exam_s1', 'p4', 'p5', 'p6', 'exam_s2'];
       }
 
+      // Get all subjects assigned to this class (even without grades)
+      const { data: classSubjects, error: classSubjectsError } = await supabase
+        .from("class_subjects")
+        .select(`
+          id,
+          subjects (
+            name,
+            code
+          )
+        `)
+        .eq("class_id", student.classes?.id);
+
+      if (classSubjectsError) throw classSubjectsError;
+
       // Get grades for this student and period(s)
       const { data: grades, error: gradesError } = await supabase
         .from("student_grades")
@@ -61,6 +76,7 @@ export const useStudentReport = (studentId: string, period: string) => {
             max_points
           ),
           class_subjects (
+            id,
             subjects (
               name,
               code
@@ -111,8 +127,17 @@ export const useStudentReport = (studentId: string, period: string) => {
         if (!yearlyError) yearlyTotal = yearlyData;
       }
 
-      // periodTotalsMap was already built above; this is a placeholder for clarity
-      // const periodTotalsMap was built from RPC results
+      // Build a map of all class subjects to ensure they all appear on the report
+      const allSubjectsMap = new Map<string, { name: string; code: string; classSubjectId: string }>();
+      classSubjects?.forEach((cs: any) => {
+        const subjectName = cs.subjects?.name || "Unknown";
+        const subjectCode = cs.subjects?.code || "N/A";
+        allSubjectsMap.set(subjectName, {
+          name: subjectName,
+          code: subjectCode,
+          classSubjectId: cs.id,
+        });
+      });
 
       // Check if this is a semester report
       const isSemesterReport = period === 'semester1' || period === 'semester2' || period === 'yearly';
@@ -122,8 +147,19 @@ export const useStudentReport = (studentId: string, period: string) => {
         const subjectGrades = new Map<string, {
           name: string;
           code: string;
+          hasAnyGrades: boolean;
           periods: { [key: string]: { score: number; max: number; hasMissing: boolean } };
         }>();
+
+        // Initialize all subjects from class_subjects (even those without grades)
+        allSubjectsMap.forEach((subjectInfo, subjectName) => {
+          subjectGrades.set(subjectName, {
+            name: subjectInfo.name,
+            code: subjectInfo.code,
+            hasAnyGrades: false,
+            periods: {},
+          });
+        });
 
         grades?.forEach((grade: any) => {
           const subjectName = grade.class_subjects?.subjects?.name || "Unknown";
@@ -132,29 +168,28 @@ export const useStudentReport = (studentId: string, period: string) => {
           const scoreValue: number | null = grade.score;
           const isMissing = isMissingScore(scoreValue);
 
-          const existing = subjectGrades.get(subjectName);
+          let existing = subjectGrades.get(subjectName);
 
-          if (existing) {
-            if (!existing.periods[gradePeriod]) {
-              existing.periods[gradePeriod] = { score: 0, max: 0, hasMissing: false };
-            }
-            existing.periods[gradePeriod].score += scoreValue ?? 0;
-            existing.periods[gradePeriod].max += Number(grade.max_score);
-            existing.periods[gradePeriod].hasMissing =
-              existing.periods[gradePeriod].hasMissing || isMissing;
-          } else {
-            subjectGrades.set(subjectName, {
+          if (!existing) {
+            // Subject might not be in class_subjects, add it anyway
+            existing = {
               name: subjectName,
               code: subjectCode,
-              periods: {
-                [gradePeriod]: {
-                  score: scoreValue ?? 0,
-                  max: Number(grade.max_score),
-                  hasMissing: isMissing,
-                },
-              },
-            });
+              hasAnyGrades: true,
+              periods: {},
+            };
+            subjectGrades.set(subjectName, existing);
+          } else {
+            existing.hasAnyGrades = true;
           }
+
+          if (!existing.periods[gradePeriod]) {
+            existing.periods[gradePeriod] = { score: 0, max: 0, hasMissing: false };
+          }
+          existing.periods[gradePeriod].score += scoreValue ?? 0;
+          existing.periods[gradePeriod].max += Number(grade.max_score);
+          existing.periods[gradePeriod].hasMissing =
+            existing.periods[gradePeriod].hasMissing || isMissing;
         });
 
         // Convert to array and compute incomplete status per subject-period
@@ -164,25 +199,55 @@ export const useStudentReport = (studentId: string, period: string) => {
           let semesterMax = 0;
           let hasAnyIncomplete = false;
 
-          Object.keys(subject.periods).forEach((p) => {
-            const pData = subject.periods[p];
-            const percentage =
-              pData.max > 0 ? Math.floor((pData.score / pData.max) * 1000) / 10 : 0;
+          // If no grades exist for this subject, mark all periods as "no grades"
+          if (!subject.hasAnyGrades) {
+            periodsToFetch.forEach((p) => {
+              periodData[p] = {
+                score: null,
+                max: 0,
+                hasMissing: true,
+                isIncomplete: true,
+                noGrades: true, // Special flag for subjects without any grades
+                percentage: 0,
+              };
+            });
+            hasAnyIncomplete = true;
+          } else {
+            Object.keys(subject.periods).forEach((p) => {
+              const pData = subject.periods[p];
+              const percentage =
+                pData.max > 0 ? Math.floor((pData.score / pData.max) * 1000) / 10 : 0;
 
-            const isIncomplete = isAggregateIncomplete(pData.score, pData.max, pData.hasMissing);
+              const isIncomplete = isAggregateIncomplete(pData.score, pData.max, pData.hasMissing);
 
-            periodData[p] = {
-              ...pData,
-              // When incomplete, hide the numeric value (show "I" in UI)
-              score: isIncomplete ? null : pData.score,
-              isIncomplete,
-              percentage,
-            };
+              periodData[p] = {
+                ...pData,
+                // When incomplete, hide the numeric value (show "I" in UI)
+                score: isIncomplete ? null : pData.score,
+                isIncomplete,
+                percentage,
+              };
 
-            semesterTotal += pData.score;
-            semesterMax += pData.max;
-            if (isIncomplete) hasAnyIncomplete = true;
-          });
+              semesterTotal += pData.score;
+              semesterMax += pData.max;
+              if (isIncomplete) hasAnyIncomplete = true;
+            });
+
+            // Mark periods without grades as noGrades
+            periodsToFetch.forEach((p) => {
+              if (!periodData[p]) {
+                periodData[p] = {
+                  score: null,
+                  max: 0,
+                  hasMissing: true,
+                  isIncomplete: true,
+                  noGrades: true,
+                  percentage: 0,
+                };
+                hasAnyIncomplete = true;
+              }
+            });
+          }
 
           // Only calculate semester average if all required periods exist and none are incomplete
           const subjectHasAllPeriods = periodsToFetch.every((p) => subject.periods[p]);
@@ -238,6 +303,7 @@ export const useStudentReport = (studentId: string, period: string) => {
             total: number;
             max: number;
             hasMissing: boolean;
+            hasAnyGrades: boolean;
             assessments: Array<{
               type: string;
               score: number | null;
@@ -247,45 +313,68 @@ export const useStudentReport = (studentId: string, period: string) => {
           }
         >();
 
+        // Initialize all subjects from class_subjects (even those without grades)
+        allSubjectsMap.forEach((subjectInfo, subjectName) => {
+          subjectGrades.set(subjectName, {
+            name: subjectInfo.name,
+            code: subjectInfo.code,
+            total: 0,
+            max: 0,
+            hasMissing: true,
+            hasAnyGrades: false,
+            assessments: [],
+          });
+        });
+
         grades?.forEach((grade: any) => {
           const subjectName = grade.class_subjects?.subjects?.name || "Unknown";
           const subjectCode = grade.class_subjects?.subjects?.code || "N/A";
           const scoreValue: number | null = grade.score;
           const isMissing = isMissingScore(scoreValue);
 
-          const existing = subjectGrades.get(subjectName);
+          let existing = subjectGrades.get(subjectName);
           const assessment = {
             type: grade.assessment_types?.name || "Assessment",
             score: scoreValue,
             max: Number(grade.max_score),
-            // For a single assessment entry, only "missing" counts as incomplete.
-            // The subject-period completeness is decided from the aggregate.
             isIncomplete: isMissing,
           };
 
-          if (existing) {
-            existing.total += scoreValue ?? 0;
-            existing.max += Number(grade.max_score);
-            existing.hasMissing = existing.hasMissing || isMissing;
-            existing.assessments.push(assessment);
-          } else {
-            subjectGrades.set(subjectName, {
+          if (!existing) {
+            existing = {
               name: subjectName,
               code: subjectCode,
               total: scoreValue ?? 0,
               max: Number(grade.max_score),
               hasMissing: isMissing,
+              hasAnyGrades: true,
               assessments: [assessment],
-            });
+            };
+            subjectGrades.set(subjectName, existing);
+          } else {
+            existing.total += scoreValue ?? 0;
+            existing.max += Number(grade.max_score);
+            existing.hasMissing = existing.hasAnyGrades ? (existing.hasMissing || isMissing) : isMissing;
+            existing.hasAnyGrades = true;
+            existing.assessments.push(assessment);
           }
         });
 
         // Convert to array and compute incomplete status from the aggregate
         const subjects = Array.from(subjectGrades.values()).map((s) => {
+          // If no grades exist, mark as incomplete with special flag
+          if (!s.hasAnyGrades) {
+            return {
+              ...s,
+              hasIncomplete: true,
+              noGrades: true,
+            };
+          }
           const isIncomplete = isAggregateIncomplete(s.total, s.max, s.hasMissing);
           return {
             ...s,
             hasIncomplete: isIncomplete,
+            noGrades: false,
           };
         });
 
@@ -293,8 +382,9 @@ export const useStudentReport = (studentId: string, period: string) => {
         const anySubjectIncomplete = subjects.some((s) => s.hasIncomplete);
 
         // Calculate overall average only if no incomplete grades (truncate to 1 decimal)
-        const overallTotal = subjects.reduce((sum, s) => sum + s.total, 0);
-        const overallMax = subjects.reduce((sum, s) => sum + s.max, 0);
+        const subjectsWithGrades = subjects.filter((s) => s.hasAnyGrades);
+        const overallTotal = subjectsWithGrades.reduce((sum, s) => sum + s.total, 0);
+        const overallMax = subjectsWithGrades.reduce((sum, s) => sum + s.max, 0);
         const overallAverage =
           overallMax > 0 && !hasMissingGrades && !anySubjectIncomplete
             ? Math.floor((overallTotal / overallMax) * 1000) / 10
