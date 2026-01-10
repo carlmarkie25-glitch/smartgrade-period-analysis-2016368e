@@ -24,8 +24,9 @@ const isIncompleteScore = (score: number | null | undefined): boolean => {
   return score === null || score === undefined || score < 60;
 };
 
-// Helper to display score or "I" for incomplete
-const displayScore = (score: number | null | undefined): string => {
+// Helper to display score or "I" for incomplete, "--" for no grades
+const displayScore = (score: number | null | undefined, noGrades?: boolean): string => {
+  if (noGrades) return '--';
   if (isIncompleteScore(score)) return 'I';
   return String(score);
 };
@@ -172,17 +173,17 @@ export const StudentReportDialog = ({
                             <>
                               {period === 'semester1' && (
                                 <>
-                                  <td className={`p-2 text-xs text-center ${subject.periods?.p1?.isIncomplete ? 'text-orange-500 font-bold' : 'text-foreground'}`}>
-                                    {displayScore(subject.periods?.p1?.score)}
+                                  <td className={`p-2 text-xs text-center ${subject.periods?.p1?.noGrades ? 'text-muted-foreground' : subject.periods?.p1?.isIncomplete ? 'text-orange-500 font-bold' : 'text-foreground'}`}>
+                                    {displayScore(subject.periods?.p1?.score, subject.periods?.p1?.noGrades)}
                                   </td>
-                                  <td className={`p-2 text-xs text-center ${subject.periods?.p2?.isIncomplete ? 'text-orange-500 font-bold' : 'text-foreground'}`}>
-                                    {displayScore(subject.periods?.p2?.score)}
+                                  <td className={`p-2 text-xs text-center ${subject.periods?.p2?.noGrades ? 'text-muted-foreground' : subject.periods?.p2?.isIncomplete ? 'text-orange-500 font-bold' : 'text-foreground'}`}>
+                                    {displayScore(subject.periods?.p2?.score, subject.periods?.p2?.noGrades)}
                                   </td>
-                                  <td className={`p-2 text-xs text-center ${subject.periods?.p3?.isIncomplete ? 'text-orange-500 font-bold' : 'text-foreground'}`}>
-                                    {displayScore(subject.periods?.p3?.score)}
+                                  <td className={`p-2 text-xs text-center ${subject.periods?.p3?.noGrades ? 'text-muted-foreground' : subject.periods?.p3?.isIncomplete ? 'text-orange-500 font-bold' : 'text-foreground'}`}>
+                                    {displayScore(subject.periods?.p3?.score, subject.periods?.p3?.noGrades)}
                                   </td>
-                                  <td className={`p-2 text-xs text-center ${subject.periods?.exam_s1?.isIncomplete ? 'text-orange-500 font-bold' : 'text-foreground'}`}>
-                                    {displayScore(subject.periods?.exam_s1?.score)}
+                                  <td className={`p-2 text-xs text-center ${subject.periods?.exam_s1?.noGrades ? 'text-muted-foreground' : subject.periods?.exam_s1?.isIncomplete ? 'text-orange-500 font-bold' : 'text-foreground'}`}>
+                                    {displayScore(subject.periods?.exam_s1?.score, subject.periods?.exam_s1?.noGrades)}
                                   </td>
                                   <td className="p-2 text-xs text-center font-semibold text-foreground">
                                     {subject.hasIncomplete ? '--' : (subject.semesterAverage !== null ? subject.semesterAverage.toFixed(1) : '-')}
@@ -191,17 +192,17 @@ export const StudentReportDialog = ({
                               )}
                               {period === 'semester2' && (
                                 <>
-                                  <td className={`p-2 text-xs text-center ${subject.periods?.p4?.isIncomplete ? 'text-orange-500 font-bold' : 'text-foreground'}`}>
-                                    {displayScore(subject.periods?.p4?.score)}
+                                  <td className={`p-2 text-xs text-center ${subject.periods?.p4?.noGrades ? 'text-muted-foreground' : subject.periods?.p4?.isIncomplete ? 'text-orange-500 font-bold' : 'text-foreground'}`}>
+                                    {displayScore(subject.periods?.p4?.score, subject.periods?.p4?.noGrades)}
                                   </td>
-                                  <td className={`p-2 text-xs text-center ${subject.periods?.p5?.isIncomplete ? 'text-orange-500 font-bold' : 'text-foreground'}`}>
-                                    {displayScore(subject.periods?.p5?.score)}
+                                  <td className={`p-2 text-xs text-center ${subject.periods?.p5?.noGrades ? 'text-muted-foreground' : subject.periods?.p5?.isIncomplete ? 'text-orange-500 font-bold' : 'text-foreground'}`}>
+                                    {displayScore(subject.periods?.p5?.score, subject.periods?.p5?.noGrades)}
                                   </td>
-                                  <td className={`p-2 text-xs text-center ${subject.periods?.p6?.isIncomplete ? 'text-orange-500 font-bold' : 'text-foreground'}`}>
-                                    {displayScore(subject.periods?.p6?.score)}
+                                  <td className={`p-2 text-xs text-center ${subject.periods?.p6?.noGrades ? 'text-muted-foreground' : subject.periods?.p6?.isIncomplete ? 'text-orange-500 font-bold' : 'text-foreground'}`}>
+                                    {displayScore(subject.periods?.p6?.score, subject.periods?.p6?.noGrades)}
                                   </td>
-                                  <td className={`p-2 text-xs text-center ${subject.periods?.exam_s2?.isIncomplete ? 'text-orange-500 font-bold' : 'text-foreground'}`}>
-                                    {displayScore(subject.periods?.exam_s2?.score)}
+                                  <td className={`p-2 text-xs text-center ${subject.periods?.exam_s2?.noGrades ? 'text-muted-foreground' : subject.periods?.exam_s2?.isIncomplete ? 'text-orange-500 font-bold' : 'text-foreground'}`}>
+                                    {displayScore(subject.periods?.exam_s2?.score, subject.periods?.exam_s2?.noGrades)}
                                   </td>
                                   <td className="p-2 text-xs text-center font-semibold text-foreground">
                                     {subject.hasIncomplete ? '--' : (subject.semesterAverage !== null ? subject.semesterAverage.toFixed(1) : '-')}
@@ -210,17 +211,17 @@ export const StudentReportDialog = ({
                               )}
                               {period === 'yearly' && (
                                 <>
-                                  <td className={`p-2 text-xs text-center ${subject.periods?.p1?.isIncomplete ? 'text-orange-500 font-bold' : 'text-foreground'}`}>
-                                    {displayScore(subject.periods?.p1?.score)}
+                                  <td className={`p-2 text-xs text-center ${subject.periods?.p1?.noGrades ? 'text-muted-foreground' : subject.periods?.p1?.isIncomplete ? 'text-orange-500 font-bold' : 'text-foreground'}`}>
+                                    {displayScore(subject.periods?.p1?.score, subject.periods?.p1?.noGrades)}
                                   </td>
-                                  <td className={`p-2 text-xs text-center ${subject.periods?.p2?.isIncomplete ? 'text-orange-500 font-bold' : 'text-foreground'}`}>
-                                    {displayScore(subject.periods?.p2?.score)}
+                                  <td className={`p-2 text-xs text-center ${subject.periods?.p2?.noGrades ? 'text-muted-foreground' : subject.periods?.p2?.isIncomplete ? 'text-orange-500 font-bold' : 'text-foreground'}`}>
+                                    {displayScore(subject.periods?.p2?.score, subject.periods?.p2?.noGrades)}
                                   </td>
-                                  <td className={`p-2 text-xs text-center ${subject.periods?.p3?.isIncomplete ? 'text-orange-500 font-bold' : 'text-foreground'}`}>
-                                    {displayScore(subject.periods?.p3?.score)}
+                                  <td className={`p-2 text-xs text-center ${subject.periods?.p3?.noGrades ? 'text-muted-foreground' : subject.periods?.p3?.isIncomplete ? 'text-orange-500 font-bold' : 'text-foreground'}`}>
+                                    {displayScore(subject.periods?.p3?.score, subject.periods?.p3?.noGrades)}
                                   </td>
-                                  <td className={`p-2 text-xs text-center ${subject.periods?.exam_s1?.isIncomplete ? 'text-orange-500 font-bold' : 'text-foreground'}`}>
-                                    {displayScore(subject.periods?.exam_s1?.score)}
+                                  <td className={`p-2 text-xs text-center ${subject.periods?.exam_s1?.noGrades ? 'text-muted-foreground' : subject.periods?.exam_s1?.isIncomplete ? 'text-orange-500 font-bold' : 'text-foreground'}`}>
+                                    {displayScore(subject.periods?.exam_s1?.score, subject.periods?.exam_s1?.noGrades)}
                                   </td>
                                   <td className="p-2 text-xs text-center font-semibold text-foreground">
                                     {(() => {
@@ -231,17 +232,17 @@ export const StudentReportDialog = ({
                                       return s1Scores.length === 4 ? (Math.floor((s1Scores.reduce((a: number, b: number) => a + b, 0) / s1Scores.length) * 10) / 10).toFixed(1) : '-';
                                     })()}
                                   </td>
-                                  <td className={`p-2 text-xs text-center ${subject.periods?.p4?.isIncomplete ? 'text-orange-500 font-bold' : 'text-foreground'}`}>
-                                    {displayScore(subject.periods?.p4?.score)}
+                                  <td className={`p-2 text-xs text-center ${subject.periods?.p4?.noGrades ? 'text-muted-foreground' : subject.periods?.p4?.isIncomplete ? 'text-orange-500 font-bold' : 'text-foreground'}`}>
+                                    {displayScore(subject.periods?.p4?.score, subject.periods?.p4?.noGrades)}
                                   </td>
-                                  <td className={`p-2 text-xs text-center ${subject.periods?.p5?.isIncomplete ? 'text-orange-500 font-bold' : 'text-foreground'}`}>
-                                    {displayScore(subject.periods?.p5?.score)}
+                                  <td className={`p-2 text-xs text-center ${subject.periods?.p5?.noGrades ? 'text-muted-foreground' : subject.periods?.p5?.isIncomplete ? 'text-orange-500 font-bold' : 'text-foreground'}`}>
+                                    {displayScore(subject.periods?.p5?.score, subject.periods?.p5?.noGrades)}
                                   </td>
-                                  <td className={`p-2 text-xs text-center ${subject.periods?.p6?.isIncomplete ? 'text-orange-500 font-bold' : 'text-foreground'}`}>
-                                    {displayScore(subject.periods?.p6?.score)}
+                                  <td className={`p-2 text-xs text-center ${subject.periods?.p6?.noGrades ? 'text-muted-foreground' : subject.periods?.p6?.isIncomplete ? 'text-orange-500 font-bold' : 'text-foreground'}`}>
+                                    {displayScore(subject.periods?.p6?.score, subject.periods?.p6?.noGrades)}
                                   </td>
-                                  <td className={`p-2 text-xs text-center ${subject.periods?.exam_s2?.isIncomplete ? 'text-orange-500 font-bold' : 'text-foreground'}`}>
-                                    {displayScore(subject.periods?.exam_s2?.score)}
+                                  <td className={`p-2 text-xs text-center ${subject.periods?.exam_s2?.noGrades ? 'text-muted-foreground' : subject.periods?.exam_s2?.isIncomplete ? 'text-orange-500 font-bold' : 'text-foreground'}`}>
+                                    {displayScore(subject.periods?.exam_s2?.score, subject.periods?.exam_s2?.noGrades)}
                                   </td>
                                   <td className="p-2 text-xs text-center font-semibold text-foreground">
                                     {(() => {
@@ -260,8 +261,8 @@ export const StudentReportDialog = ({
                             </>
                           ) : (
                             <>
-                              <td className={`p-3 text-sm text-center ${subject.hasIncomplete ? 'text-orange-500 font-bold' : 'text-foreground'}`}>
-                                {subject.hasIncomplete ? 'I' : subject.total}
+                              <td className={`p-3 text-sm text-center ${subject.noGrades ? 'text-muted-foreground' : subject.hasIncomplete ? 'text-orange-500 font-bold' : 'text-foreground'}`}>
+                                {subject.noGrades ? '--' : subject.hasIncomplete ? 'I' : subject.total}
                               </td>
                             </>
                           )}
