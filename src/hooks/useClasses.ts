@@ -1,11 +1,16 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
+import { useUserRoles } from "@/hooks/useUserRoles";
 
 export const useClasses = () => {
+  const { user } = useAuth();
+  const { isAdmin, isTeacher, isLoading: rolesLoading } = useUserRoles();
+
   return useQuery({
-    queryKey: ["classes"],
+    queryKey: ["classes", user?.id, isAdmin, isTeacher],
     queryFn: async () => {
-      const { data, error } = await supabase
+      let query = supabase
         .from("classes")
         .select(`
           *,
@@ -20,9 +25,16 @@ export const useClasses = () => {
         `)
         .order("name");
 
+      // If user is a teacher but not an admin, filter by their assigned classes
+      if (isTeacher && !isAdmin && user?.id) {
+        query = query.eq("teacher_id", user.id);
+      }
+
+      const { data, error } = await query;
       if (error) throw error;
       return data;
     },
+    enabled: !rolesLoading && !!user?.id,
   });
 };
 
