@@ -14,8 +14,6 @@ const Auth = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
-  const [studentId, setStudentId] = useState("");
-  const [loginMode, setLoginMode] = useState<"staff" | "student">("staff");
   const [loading, setLoading] = useState(false);
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -60,7 +58,7 @@ const Auth = () => {
 
         toast({
           title: "Account created!",
-          description: "You can now sign in to your account.",
+          description: "Please wait for an administrator to assign your role before signing in.",
         });
 
         setEmail("");
@@ -83,13 +81,8 @@ const Auth = () => {
     setLoading(true);
 
     try {
-      // For student login, convert student ID to email format
-      const loginEmail = loginMode === "student" 
-        ? `${studentId}@student.local` 
-        : email;
-
       const { error } = await supabase.auth.signInWithPassword({
-        email: loginEmail,
+        email,
         password,
       });
 
@@ -99,6 +92,8 @@ const Auth = () => {
         title: "Welcome back!",
         description: "You have successfully signed in.",
       });
+      
+      // Navigation will happen automatically via the useEffect when user state updates
     } catch (error: any) {
       toast({
         title: "Error",
@@ -130,56 +125,22 @@ const Auth = () => {
             <Tabs defaultValue="signin">
               <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="signin">Sign In</TabsTrigger>
-                <TabsTrigger value="signup">Sign Up (Staff)</TabsTrigger>
+                <TabsTrigger value="signup">Sign Up</TabsTrigger>
               </TabsList>
 
               <TabsContent value="signin">
-                <div className="mb-4">
-                  <div className="flex gap-2">
-                    <Button
-                      type="button"
-                      variant={loginMode === "staff" ? "default" : "outline"}
-                      className="flex-1"
-                      onClick={() => setLoginMode("staff")}
-                    >
-                      Staff Login
-                    </Button>
-                    <Button
-                      type="button"
-                      variant={loginMode === "student" ? "default" : "outline"}
-                      className="flex-1"
-                      onClick={() => setLoginMode("student")}
-                    >
-                      Student Login
-                    </Button>
-                  </div>
-                </div>
                 <form onSubmit={handleSignIn} className="space-y-4">
-                  {loginMode === "student" ? (
-                    <div className="space-y-2">
-                      <Label htmlFor="signin-studentid">Student ID</Label>
-                      <Input
-                        id="signin-studentid"
-                        type="text"
-                        placeholder="Enter your Student ID"
-                        value={studentId}
-                        onChange={(e) => setStudentId(e.target.value)}
-                        required
-                      />
-                    </div>
-                  ) : (
-                    <div className="space-y-2">
-                      <Label htmlFor="signin-email">Email</Label>
-                      <Input
-                        id="signin-email"
-                        type="email"
-                        placeholder="your.email@example.com"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        required
-                      />
-                    </div>
-                  )}
+                  <div className="space-y-2">
+                    <Label htmlFor="signin-email">Email</Label>
+                    <Input
+                      id="signin-email"
+                      type="email"
+                      placeholder="your.email@example.com"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      required
+                    />
+                  </div>
                   <div className="space-y-2">
                     <Label htmlFor="signin-password">Password</Label>
                     <Input
@@ -236,6 +197,9 @@ const Auth = () => {
                   <Button type="submit" className="w-full" disabled={loading}>
                     {loading ? "Creating account..." : "Create Account"}
                   </Button>
+                  <p className="text-xs text-muted-foreground text-center mt-2">
+                    After signing up, an administrator will assign your role.
+                  </p>
                 </form>
               </TabsContent>
             </Tabs>
