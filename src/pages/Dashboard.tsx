@@ -1,6 +1,6 @@
 import MainLayout from "@/components/MainLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { GraduationCap, Users, BookOpen, TrendingUp, FileText, Clock, CheckCircle } from "lucide-react";
+import { GraduationCap, Users, BookOpen, TrendingUp, FileText, Clock, CheckCircle, AlertCircle, User } from "lucide-react";
 import { useDashboardStats } from "@/hooks/useDashboardStats";
 import { useTeacherDashboardStats, useTeacherClasses, useTeacherRecentGrades } from "@/hooks/useTeacherData";
 import { useUserRoles } from "@/hooks/useUserRoles";
@@ -8,10 +8,11 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { formatDistanceToNow } from "date-fns";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  const { isAdmin, isTeacher, roles, isLoading: rolesLoading } = useUserRoles();
+  const { isAdmin, isTeacher, isStudent, roles, isLoading: rolesLoading } = useUserRoles();
 
   // Show loading while roles are being fetched
   if (rolesLoading) {
@@ -35,6 +36,16 @@ const Dashboard = () => {
         </div>
       </MainLayout>
     );
+  }
+
+  // If user has no roles, show a message that they need to wait for admin to assign a role
+  if (!roles || roles.length === 0) {
+    return <NoRoleDashboard />;
+  }
+
+  // If user is a student, show student dashboard
+  if (isStudent && !isAdmin && !isTeacher) {
+    return <StudentDashboard />;
   }
 
   // Determine which dashboard to show based on roles
@@ -386,6 +397,103 @@ const TeacherDashboard = () => {
                   );
                 })}
               </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    </MainLayout>
+  );
+};
+
+// Dashboard for users without any role assigned
+const NoRoleDashboard = () => {
+  const { signOut } = useAuth();
+  
+  return (
+    <MainLayout>
+      <div className="container mx-auto px-4 py-8">
+        <div className="max-w-lg mx-auto text-center">
+          <Card>
+            <CardHeader>
+              <div className="mx-auto h-16 w-16 rounded-full bg-amber-100 flex items-center justify-center mb-4">
+                <AlertCircle className="h-8 w-8 text-amber-600" />
+              </div>
+              <CardTitle className="text-2xl">Role Not Assigned</CardTitle>
+              <CardDescription className="text-base">
+                Your account has been created, but an administrator has not yet assigned you a role.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="p-4 bg-muted rounded-lg text-sm text-muted-foreground">
+                <p>Please contact your school administrator to have your role assigned. Once assigned, you'll be able to access your personalized dashboard.</p>
+              </div>
+              <button
+                onClick={signOut}
+                className="w-full px-4 py-2 text-sm font-medium text-destructive hover:text-destructive/80 transition-colors"
+              >
+                Sign Out
+              </button>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    </MainLayout>
+  );
+};
+
+// Dashboard for students
+const StudentDashboard = () => {
+  return (
+    <MainLayout>
+      <div className="container mx-auto px-4 py-8">
+        <div className="mb-8">
+          <h1 className="text-4xl font-bold text-foreground mb-2">Student Dashboard</h1>
+          <p className="text-muted-foreground">Welcome! View your academic progress here.</p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <Card>
+            <CardHeader>
+              <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center mb-2">
+                <User className="h-6 w-6 text-primary" />
+              </div>
+              <CardTitle>My Profile</CardTitle>
+              <CardDescription>View your personal information</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground">
+                Your personal details and academic information.
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <div className="h-12 w-12 rounded-lg bg-green-500/10 flex items-center justify-center mb-2">
+                <FileText className="h-6 w-6 text-green-600" />
+              </div>
+              <CardTitle>My Grades</CardTitle>
+              <CardDescription>View your academic performance</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground">
+                Check your grades across all subjects and periods.
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <div className="h-12 w-12 rounded-lg bg-blue-500/10 flex items-center justify-center mb-2">
+                <BookOpen className="h-6 w-6 text-blue-600" />
+              </div>
+              <CardTitle>My Report Card</CardTitle>
+              <CardDescription>View and download report cards</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground">
+                Access your complete report cards for each period.
+              </p>
             </CardContent>
           </Card>
         </div>
