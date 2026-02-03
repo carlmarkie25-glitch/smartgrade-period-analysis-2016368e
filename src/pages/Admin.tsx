@@ -8,11 +8,12 @@ import { Label } from "@/components/ui/label";
 import { useUserManagement } from "@/hooks/useUserManagement";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { UserPlus, School, BookOpen, Users, GraduationCap, Building, X } from "lucide-react";
+import { UserPlus, School, BookOpen, Users, GraduationCap, Building, X, Settings2 } from "lucide-react";
 import { StudentManagementTab } from "@/components/StudentManagementTab";
 import { ClassManagementTab } from "@/components/ClassManagementTab";
 import { SubjectManagementTab } from "@/components/SubjectManagementTab";
 import { DepartmentManagementTab } from "@/components/DepartmentManagementTab";
+import { TeacherAssignmentDialog } from "@/components/TeacherAssignmentDialog";
 import MainLayout from "@/components/MainLayout";
 
 const Admin = () => {
@@ -36,6 +37,26 @@ const Admin = () => {
     code: "",
     description: "",
   });
+
+  const [teacherAssignmentOpen, setTeacherAssignmentOpen] = useState(false);
+  const [selectedTeacher, setSelectedTeacher] = useState<{
+    id: string;
+    user_id: string;
+    full_name: string;
+  } | null>(null);
+
+  const handleOpenTeacherAssignment = (user: any) => {
+    setSelectedTeacher({
+      id: user.id,
+      user_id: user.user_id,
+      full_name: user.full_name,
+    });
+    setTeacherAssignmentOpen(true);
+  };
+
+  const isTeacher = (user: any) => {
+    return user.user_roles?.some((ur: any) => ur.role === "teacher");
+  };
 
   const handleCreateAcademicYear = async () => {
     const { error } = await supabase.from("academic_years").insert(academicYearForm);
@@ -139,6 +160,16 @@ const Admin = () => {
                           </div>
                         </div>
                         <div className="flex gap-2">
+                          {isTeacher(user) && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleOpenTeacherAssignment(user)}
+                            >
+                              <Settings2 className="h-4 w-4 mr-1" />
+                              Assign Classes
+                            </Button>
+                          )}
                           <Select onValueChange={(role) => assignRole.mutate({ userId: user.user_id, role })}>
                             <SelectTrigger className="w-[140px]">
                               <SelectValue placeholder="Add role" />
@@ -215,6 +246,12 @@ const Admin = () => {
           </TabsContent>
         </Tabs>
       </div>
+
+      <TeacherAssignmentDialog
+        open={teacherAssignmentOpen}
+        onOpenChange={setTeacherAssignmentOpen}
+        teacher={selectedTeacher}
+      />
     </MainLayout>
   );
 };
