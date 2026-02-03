@@ -20,14 +20,16 @@ import { cn } from "@/lib/utils";
 const AppSidebar = () => {
   const location = useLocation();
   const { signOut, user } = useAuth();
-  const { isAdmin, isTeacher } = useUserRoles();
+  const { isAdmin, isTeacher, isLoading: rolesLoading } = useUserRoles();
   const { state } = useSidebar();
   const isCollapsed = state === "collapsed";
 
+  // Define nav items - teachers and admins have different access
   const navItems = [
     { path: "/dashboard", icon: LayoutDashboard, label: "Dashboard", roles: ["all"] },
     { path: "/gradebook", icon: BookOpen, label: "Gradebook", roles: ["teacher", "admin"] },
     { path: "/reports", icon: FileText, label: "Reports", roles: ["teacher", "admin"] },
+    // Analytics is admin-only
     { path: "/analytics", icon: BarChart3, label: "Analytics", roles: ["admin"] },
   ];
 
@@ -37,10 +39,13 @@ const AppSidebar = () => {
 
   const isActive = (path: string) => location.pathname === path;
 
+  // Don't show any role-based items while roles are loading
   const canAccess = (roles: string[]) => {
+    if (rolesLoading) return roles.includes("all"); // Only show "all" items while loading
     if (roles.includes("all")) return true;
     if (roles.includes("admin") && isAdmin) return true;
-    if (roles.includes("teacher") && (isTeacher || isAdmin)) return true;
+    if (roles.includes("teacher") && isTeacher && !roles.includes("admin")) return true;
+    if (roles.includes("teacher") && isAdmin) return true; // Admin can access teacher items too
     return false;
   };
 
@@ -94,7 +99,8 @@ const AppSidebar = () => {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        {isAdmin && (
+        {/* Only show Administration section if user is admin and roles are loaded */}
+        {!rolesLoading && isAdmin && (
           <SidebarGroup>
             <SidebarGroupLabel className="text-sidebar-foreground/50 text-xs uppercase tracking-wider px-4">
               {!isCollapsed && "Administration"}
