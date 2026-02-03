@@ -11,11 +11,9 @@ import { formatDistanceToNow } from "date-fns";
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  const { isAdmin, isTeacher, isLoading: rolesLoading } = useUserRoles();
+  const { isAdmin, isTeacher, roles, isLoading: rolesLoading } = useUserRoles();
 
-  // Show teacher dashboard if user is a teacher but not an admin
-  const showTeacherView = isTeacher && !isAdmin;
-
+  // Show loading while roles are being fetched
   if (rolesLoading) {
     return (
       <MainLayout>
@@ -39,6 +37,10 @@ const Dashboard = () => {
     );
   }
 
+  // Determine which dashboard to show based on roles
+  // Admin sees admin dashboard, teacher (who is not admin) sees teacher dashboard
+  const showTeacherView = isTeacher && !isAdmin;
+  
   return showTeacherView ? <TeacherDashboard /> : <AdminDashboard />;
 };
 
