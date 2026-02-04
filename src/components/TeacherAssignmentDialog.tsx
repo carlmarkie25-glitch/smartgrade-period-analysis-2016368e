@@ -8,7 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
-import { ChevronDown, ChevronRight } from "lucide-react";
+import { ChevronDown, ChevronRight, UserCheck } from "lucide-react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 interface TeacherAssignmentDialogProps {
@@ -28,11 +28,10 @@ export const TeacherAssignmentDialog = ({
 }: TeacherAssignmentDialogProps) => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [selectedClasses, setSelectedClasses] = useState<string[]>([]);
   const [selectedSubjects, setSelectedSubjects] = useState<Record<string, string[]>>({});
   const [expandedClasses, setExpandedClasses] = useState<string[]>([]);
 
-  // Fetch all classes with their current teacher assignments
+  // Fetch all classes
   const { data: classes, isLoading: classesLoading } = useQuery({
     queryKey: ["all-classes-for-assignment"],
     queryFn: async () => {
@@ -53,7 +52,7 @@ export const TeacherAssignmentDialog = ({
     enabled: open,
   });
 
-  // Fetch all class subjects
+  // Fetch all class subjects with teacher info
   const { data: classSubjects } = useQuery({
     queryKey: ["class-subjects-for-teacher-assignment"],
     queryFn: async () => {
@@ -63,7 +62,8 @@ export const TeacherAssignmentDialog = ({
           id,
           class_id,
           teacher_id,
-          subject:subjects(id, name, code)
+          subject:subjects(id, name, code),
+          assigned_teacher:teacher_id(id, full_name)
         `);
 
       if (error) throw error;
@@ -72,16 +72,23 @@ export const TeacherAssignmentDialog = ({
     enabled: open,
   });
 
-  // Initialize selected classes and subjects when dialog opens
-  useEffect(() => {
-    if (classes && classSubjects && teacher) {
-      // Get classes where this teacher is the main teacher
-      const teacherClasses = classes
-        .filter((c) => c.teacher_id === teacher.id)
-        .map((c) => c.id);
-      setSelectedClasses(teacherClasses);
+  // Fetch all profiles for teacher names
+  const { data: profiles } = useQuery({
+    queryKey: ["profiles-for-assignment"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("id, full_name");
 
-      // Get subjects assigned to this teacher
+      if (error) throw error;
+      return data;
+    },
+    enabled: open,
+  });
+
+  // Initialize selected subjects when dialog opens
+  useEffect(() => {
+    if (classSubjects && teacher) {
       const teacherSubjects: Record<string, string[]> = {};
       classSubjects.forEach((cs) => {
         if (cs.teacher_id === teacher.id) {
@@ -95,21 +102,9 @@ export const TeacherAssignmentDialog = ({
 
       // Auto-expand classes that have assignments
       const classesWithAssignments = Object.keys(teacherSubjects);
-      setExpandedClasses([...teacherClasses, ...classesWithAssignments]);
+      setExpandedClasses(classesWithAssignments);
     }
-  }, [classes, classSubjects, teacher]);
-
-  // Mutation to update class teacher assignments
-  const updateClassAssignment = useMutation({
-    mutationFn: async ({ classId, teacherId }: { classId: string; teacherId: string | null }) => {
-      const { error } = await supabase
-        .from("classes")
-        .update({ teacher_id: teacherId })
-        .eq("id", classId);
-
-      if (error) throw error;
-    },
-  });
+  }, [classSubjects, teacher]);
 
   // Mutation to update subject teacher assignments
   const updateSubjectAssignment = useMutation({
@@ -124,26 +119,10 @@ export const TeacherAssignmentDialog = ({
   });
 
   const handleSave = async () => {
-    if (!teacher || !classes || !classSubjects) return;
+    if (!teacher || !classSubjects) return;
 
     try {
-      // Handle class assignments
-      const currentlyAssignedClasses = classes
-        .filter((c) => c.teacher_id === teacher.id)
-        .map((c) => c.id);
-
-      const classesToAdd = selectedClasses.filter((id) => !currentlyAssignedClasses.includes(id));
-      const classesToRemove = currentlyAssignedClasses.filter((id) => !selectedClasses.includes(id));
-
-      for (const classId of classesToAdd) {
-        await updateClassAssignment.mutateAsync({ classId, teacherId: teacher.id });
-      }
-
-      for (const classId of classesToRemove) {
-        await updateClassAssignment.mutateAsync({ classId, teacherId: null });
-      }
-
-      // Handle subject assignments
+      // Handle subject assignments only
       const currentlyAssignedSubjects = classSubjects
         .filter((cs) => cs.teacher_id === teacher.id)
         .map((cs) => cs.id);
@@ -165,8 +144,10 @@ export const TeacherAssignmentDialog = ({
       queryClient.invalidateQueries({ queryKey: ["class-subjects-for-teacher-assignment"] });
       queryClient.invalidateQueries({ queryKey: ["classes"] });
       queryClient.invalidateQueries({ queryKey: ["class-subjects"] });
+      queryClient.invalidateQueries({ queryKey: ["teacher-classes"] });
+      queryClient.invalidateQueries({ queryKey: ["teacher-class-subjects"] });
       
-      toast({ title: "Assignments updated successfully" });
+      toast({ title: "Subject assignments updated successfully" });
       onOpenChange(false);
     } catch (error: any) {
       toast({
@@ -175,23 +156,6 @@ export const TeacherAssignmentDialog = ({
         variant: "destructive",
       });
     }
-  };
-
-  const toggleClass = (classId: string) => {
-    setSelectedClasses((prev) => {
-      const isSelected = prev.includes(classId);
-      if (isSelected) {
-        // When deselecting a class, also deselect all its subjects
-        setSelectedSubjects((prevSubjects) => {
-          const newSubjects = { ...prevSubjects };
-          delete newSubjects[classId];
-          return newSubjects;
-        });
-        return prev.filter((id) => id !== classId);
-      } else {
-        return [...prev, classId];
-      }
-    });
   };
 
   const toggleSubject = (classId: string, classSubjectId: string) => {
@@ -211,6 +175,29 @@ export const TeacherAssignmentDialog = ({
         return { ...prev, [classId]: [...classSubjectIds, classSubjectId] };
       }
     });
+  };
+
+  const toggleAllSubjectsInClass = (classId: string) => {
+    const subjects = getClassSubjectsForClass(classId);
+    const availableSubjects = subjects.filter((cs) => !isSubjectAssignedToOther(cs));
+    const currentSelected = selectedSubjects[classId] || [];
+    
+    // If all available subjects are selected, deselect all
+    const allSelected = availableSubjects.every((cs) => currentSelected.includes(cs.id));
+    
+    if (allSelected) {
+      setSelectedSubjects((prev) => {
+        const newSubjects = { ...prev };
+        delete newSubjects[classId];
+        return newSubjects;
+      });
+    } else {
+      // Select all available subjects
+      setSelectedSubjects((prev) => ({
+        ...prev,
+        [classId]: availableSubjects.map((cs) => cs.id),
+      }));
+    }
   };
 
   const toggleExpanded = (classId: string) => {
@@ -233,13 +220,33 @@ export const TeacherAssignmentDialog = ({
     return classSubject.teacher_id && classSubject.teacher_id !== teacher?.id;
   };
 
+  const getTeacherName = (teacherId: string) => {
+    const profile = profiles?.find((p) => p.id === teacherId);
+    return profile?.full_name || "Unknown";
+  };
+
+  const getClassAssignmentSummary = (classId: string) => {
+    const subjects = getClassSubjectsForClass(classId);
+    const selectedCount = selectedSubjects[classId]?.length || 0;
+    const assignedToOthersCount = subjects.filter((cs) => isSubjectAssignedToOther(cs)).length;
+    
+    return { total: subjects.length, selected: selectedCount, assignedToOthers: assignedToOthersCount };
+  };
+
+  const areAllSubjectsSelected = (classId: string) => {
+    const subjects = getClassSubjectsForClass(classId);
+    const availableSubjects = subjects.filter((cs) => !isSubjectAssignedToOther(cs));
+    const currentSelected = selectedSubjects[classId] || [];
+    return availableSubjects.length > 0 && availableSubjects.every((cs) => currentSelected.includes(cs.id));
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[85vh]">
         <DialogHeader>
-          <DialogTitle>Assign Classes & Subjects to {teacher?.full_name}</DialogTitle>
+          <DialogTitle>Assign Subjects to {teacher?.full_name}</DialogTitle>
           <DialogDescription>
-            Select the classes and subjects this teacher will be responsible for. The teacher can only manage grades for their assigned subjects.
+            Assign specific subjects within classes. For self-contained classes (e.g., Kindergarten), use "Select All" to assign all subjects. For rotating classes, select individual subjects.
           </DialogDescription>
         </DialogHeader>
 
@@ -249,34 +256,43 @@ export const TeacherAssignmentDialog = ({
           ) : classes && classes.length > 0 ? (
             <div className="space-y-3">
               {classes.map((cls) => {
-                const isClassSelected = selectedClasses.includes(cls.id);
-                const isClassAssignedToOther = cls.teacher_id && cls.teacher_id !== teacher?.id;
                 const subjects = getClassSubjectsForClass(cls.id);
                 const isExpanded = expandedClasses.includes(cls.id);
-                const selectedSubjectCount = selectedSubjects[cls.id]?.length || 0;
+                const summary = getClassAssignmentSummary(cls.id);
+                const allSelected = areAllSubjectsSelected(cls.id);
+
+                if (subjects.length === 0) return null;
 
                 return (
                   <div
                     key={cls.id}
                     className={`border rounded-lg transition-colors ${
-                      isClassSelected ? "border-primary bg-primary/5" : "border-border"
-                    } ${isClassAssignedToOther ? "opacity-50" : ""}`}
+                      summary.selected > 0 ? "border-primary bg-primary/5" : "border-border"
+                    }`}
                   >
                     <div className="p-4">
                       <div className="flex items-start gap-3">
-                        <Checkbox
-                          id={cls.id}
-                          checked={isClassSelected}
-                          onCheckedChange={() => toggleClass(cls.id)}
-                          disabled={isClassAssignedToOther}
-                        />
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="p-0 h-auto"
+                          onClick={() => toggleExpanded(cls.id)}
+                        >
+                          {isExpanded ? (
+                            <ChevronDown className="h-5 w-5" />
+                          ) : (
+                            <ChevronRight className="h-5 w-5" />
+                          )}
+                        </Button>
                         <div className="flex-1">
-                          <Label
-                            htmlFor={cls.id}
-                            className="text-base font-medium cursor-pointer"
-                          >
-                            {cls.name}
-                          </Label>
+                          <div className="flex items-center gap-2">
+                            <span className="text-base font-medium">{cls.name}</span>
+                            {summary.selected > 0 && (
+                              <Badge className="text-xs">
+                                {summary.selected}/{summary.total} subjects
+                              </Badge>
+                            )}
+                          </div>
                           <div className="flex gap-2 mt-1 flex-wrap">
                             <Badge variant="outline" className="text-xs">
                               {cls.department?.name || "No Department"}
@@ -284,89 +300,74 @@ export const TeacherAssignmentDialog = ({
                             <Badge variant="secondary" className="text-xs">
                               {cls.academic_year?.year_name || "No Year"}
                             </Badge>
-                            {isClassAssignedToOther && (
-                              <Badge variant="destructive" className="text-xs">
-                                Assigned to another teacher
-                              </Badge>
-                            )}
-                            {selectedSubjectCount > 0 && (
-                              <Badge className="text-xs">
-                                {selectedSubjectCount} subject{selectedSubjectCount > 1 ? "s" : ""} assigned
-                              </Badge>
-                            )}
                           </div>
                         </div>
-                        {subjects.length > 0 && (
-                          <Collapsible open={isExpanded}>
-                            <CollapsibleTrigger asChild>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => toggleExpanded(cls.id)}
-                              >
-                                {isExpanded ? (
-                                  <ChevronDown className="h-4 w-4" />
-                                ) : (
-                                  <ChevronRight className="h-4 w-4" />
-                                )}
-                              </Button>
-                            </CollapsibleTrigger>
-                          </Collapsible>
-                        )}
+                        <Button
+                          variant={allSelected ? "default" : "outline"}
+                          size="sm"
+                          onClick={() => toggleAllSubjectsInClass(cls.id)}
+                          disabled={subjects.every((cs) => isSubjectAssignedToOther(cs))}
+                        >
+                          {allSelected ? "Deselect All" : "Select All"}
+                        </Button>
                       </div>
                     </div>
 
-                    {subjects.length > 0 && (
-                      <Collapsible open={isExpanded}>
-                        <CollapsibleContent>
-                          <div className="px-4 pb-4 pt-0 border-t bg-muted/30">
-                            <p className="text-sm font-medium text-muted-foreground py-2">
-                              Assign subjects in this class:
-                            </p>
-                            <div className="space-y-2">
-                              {subjects.map((cs) => {
-                                const isSelected = isSubjectSelected(cls.id, cs.id);
-                                const assignedToOther = isSubjectAssignedToOther(cs);
+                    <Collapsible open={isExpanded}>
+                      <CollapsibleContent>
+                        <div className="px-4 pb-4 pt-0 border-t bg-muted/30">
+                          <p className="text-sm font-medium text-muted-foreground py-2">
+                            Subjects in this class:
+                          </p>
+                          <div className="space-y-2">
+                            {subjects.map((cs) => {
+                              const isSelected = isSubjectSelected(cls.id, cs.id);
+                              const assignedToOther = isSubjectAssignedToOther(cs);
 
-                                return (
-                                  <div
-                                    key={cs.id}
-                                    className={`flex items-center gap-3 p-2 rounded ${
-                                      isSelected ? "bg-primary/10" : ""
-                                    } ${assignedToOther ? "opacity-50" : ""}`}
+                              return (
+                                <div
+                                  key={cs.id}
+                                  className={`flex items-center gap-3 p-2 rounded ${
+                                    isSelected ? "bg-primary/10" : ""
+                                  } ${assignedToOther ? "opacity-60" : ""}`}
+                                >
+                                  <Checkbox
+                                    id={cs.id}
+                                    checked={isSelected}
+                                    onCheckedChange={() => toggleSubject(cls.id, cs.id)}
+                                    disabled={assignedToOther}
+                                  />
+                                  <Label
+                                    htmlFor={cs.id}
+                                    className="text-sm cursor-pointer flex-1"
                                   >
-                                    <Checkbox
-                                      id={cs.id}
-                                      checked={isSelected}
-                                      onCheckedChange={() => toggleSubject(cls.id, cs.id)}
-                                      disabled={assignedToOther}
-                                    />
-                                    <Label
-                                      htmlFor={cs.id}
-                                      className="text-sm cursor-pointer flex-1"
-                                    >
-                                      {cs.subject?.name} ({cs.subject?.code})
-                                    </Label>
-                                    {assignedToOther && (
-                                      <Badge variant="outline" className="text-xs">
-                                        Assigned to another
-                                      </Badge>
-                                    )}
-                                  </div>
-                                );
-                              })}
-                            </div>
+                                    {cs.subject?.name} ({cs.subject?.code})
+                                  </Label>
+                                  {assignedToOther && (
+                                    <Badge variant="secondary" className="text-xs flex items-center gap-1">
+                                      <UserCheck className="h-3 w-3" />
+                                      {getTeacherName(cs.teacher_id)}
+                                    </Badge>
+                                  )}
+                                  {isSelected && (
+                                    <Badge variant="default" className="text-xs">
+                                      Assigned
+                                    </Badge>
+                                  )}
+                                </div>
+                              );
+                            })}
                           </div>
-                        </CollapsibleContent>
-                      </Collapsible>
-                    )}
+                        </div>
+                      </CollapsibleContent>
+                    </Collapsible>
                   </div>
                 );
               })}
             </div>
           ) : (
             <p className="text-muted-foreground">
-              No classes available. Create classes in the Classes tab first.
+              No classes with subjects available. Create classes and add subjects first.
             </p>
           )}
         </ScrollArea>
@@ -377,11 +378,9 @@ export const TeacherAssignmentDialog = ({
           </Button>
           <Button 
             onClick={handleSave} 
-            disabled={updateClassAssignment.isPending || updateSubjectAssignment.isPending}
+            disabled={updateSubjectAssignment.isPending}
           >
-            {updateClassAssignment.isPending || updateSubjectAssignment.isPending 
-              ? "Saving..." 
-              : "Save Assignments"}
+            {updateSubjectAssignment.isPending ? "Saving..." : "Save Assignments"}
           </Button>
         </div>
       </DialogContent>
