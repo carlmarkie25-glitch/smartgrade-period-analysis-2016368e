@@ -187,3 +187,90 @@ export const useAtRiskStudents = (period: string) => {
     },
   });
 };
+
+export const useClassPerformance = (period: string) => {
+  return useQuery({
+    queryKey: ["class-performance", period],
+    queryFn: async () => {
+      const { data: grades, error } = await supabase
+        .from("student_grades")
+        .select(`
+          score,
+          max_score,
+          students (
+            classes (
+              id,
+              name
+            )
+          )
+        `)
+        .eq("period", period as any);
+
+      if (error) throw error;
+
+      // Calculate average per class
+      const classScores = new Map<string, { name: string; total: number; max: number }>();
+
+      grades?.forEach((grade: any) => {
+        const classId = grade.students?.classes?.id;
+        const className = grade.students?.classes?.name;
+        
+        if (classId && className) {
+          const existing = classScores.get(classId);
+          if (existing) {
+            existing.total += Number(grade.score) || 0;
+            existing.max += Number(grade.max_score) || 0;
+          } else {
+            classScores.set(classId, {
+              name: className,
+              total: Number(grade.score) || 0,
+              max: Number(grade.max_score) || 0,
+            });
+          }
+        }
+      });
+
+      const classPerformance = Array.from(classScores.values())
+        .map((cls) => ({
+          className: cls.name,
+          average: cls.max > 0 ? (cls.total / cls.max) * 100 : 0,
+        }))
+        .sort((a, b) => b.average - a.average)
+        .slice(0, 10);
+
+      return classPerformance;
+    },
+  });
+};
+
+export const usePerformanceTrend = () => {
+  return useQuery({
+    queryKey: ["performance-trend"],
+    queryFn: async () => {
+      const periods = ["p1", "p2", "p3", "p4", "p5", "p6"] as const;
+      const trendData: { period: string; average: number }[] = [];
+
+      for (const period of periods) {
+        const { data: grades, error } = await supabase
+          .from("student_grades")
+          .select("score, max_score")
+          .eq("period", period);
+
+        if (error) continue;
+
+        if (grades && grades.length > 0) {
+          const totalScore = grades.reduce((sum, g) => sum + (Number(g.score) || 0), 0);
+          const totalMax = grades.reduce((sum, g) => sum + (Number(g.max_score) || 0), 0);
+          const average = totalMax > 0 ? (totalScore / totalMax) * 100 : 0;
+
+          trendData.push({
+            period: `Period ${period.replace("p", "")}`,
+            average: Math.floor(average * 10) / 10,
+          });
+        }
+      }
+
+      return trendData;
+    },
+  });
+};
