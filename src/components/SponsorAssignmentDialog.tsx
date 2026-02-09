@@ -40,29 +40,34 @@ export const SponsorAssignmentDialog = ({
         .select(`
           id,
           name,
-          department:departments(id, name),
-          academic_year:academic_years(year_name)
+          department_id,
+          departments(id, name),
+          academic_years(year_name)
         `)
         .order("name");
 
       if (error) throw error;
-      return data;
+      return (data as any[]) || [];
     },
     enabled: open,
   });
 
   // Fetch existing sponsor assignments for this user
   const { data: existingAssignments } = useQuery({
-    queryKey: ["sponsor-assignments-for-user", user?.id],
+    queryKey: ["sponsor-assignments-for-user", user?.user_id],
     queryFn: async () => {
-      if (!user) return [];
-      const { data, error } = await supabase
-        .from("sponsor_class_assignments")
-        .select("class_id")
-        .eq("user_id", user.id);
-
-      if (error) throw error;
-      return data.map((a) => a.class_id);
+      if (!user?.user_id) return [];
+      
+      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/rest/v1/sponsor_class_assignments?user_id=eq.${user.user_id}`, {
+        headers: {
+          'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY,
+          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+        }
+      });
+      
+      if (!response.ok) return [];
+      const data = await response.json();
+      return data.map((a: any) => a.class_id);
     },
     enabled: open && !!user,
   });
@@ -73,7 +78,7 @@ export const SponsorAssignmentDialog = ({
       setSelectedClasses(existingAssignments);
       // Expand all departments
       if (classes) {
-        const departments = [...new Set(classes.map((c) => c.department?.id))].filter(Boolean) as string[];
+        const departments = [...new Set((classes as any[]).map((c) => c.department_id))].filter(Boolean) as string[];
         setExpandedDepartments(departments);
       }
     }
@@ -82,28 +87,43 @@ export const SponsorAssignmentDialog = ({
   // Mutation to assign classes
   const assignMutation = useMutation({
     mutationFn: async (classIds: string[]) => {
-      if (!user) return;
+      if (!user?.user_id) return;
 
       // Delete all existing assignments
-      const { error: deleteError } = await supabase
-        .from("sponsor_class_assignments")
-        .delete()
-        .eq("user_id", user.id);
+      const deleteResponse = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/rest/v1/sponsor_class_assignments?user_id=eq.${user.user_id}`,
+        {
+          method: 'DELETE',
+          headers: {
+            'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY,
+            'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+          }
+        }
+      );
 
-      if (deleteError) throw deleteError;
+      if (!deleteResponse.ok) throw new Error("Failed to delete existing assignments");
 
       // Insert new assignments
       if (classIds.length > 0) {
-        const { error: insertError } = await supabase
-          .from("sponsor_class_assignments")
-          .insert(
-            classIds.map((classId) => ({
-              user_id: user.id,
-              class_id: classId,
-            }))
-          );
+        const insertResponse = await fetch(
+          `${import.meta.env.VITE_SUPABASE_URL}/rest/v1/sponsor_class_assignments`,
+          {
+            method: 'POST',
+            headers: {
+              'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY,
+              'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(
+              classIds.map((classId) => ({
+                user_id: user.user_id,
+                class_id: classId,
+              }))
+            )
+          }
+        );
 
-        if (insertError) throw insertError;
+        if (!insertResponse.ok) throw new Error("Failed to insert new assignments");
       }
     },
     onSuccess: () => {
@@ -135,9 +155,17 @@ export const SponsorAssignmentDialog = ({
     );
   };
 
-  const groupedClasses = classes
-    ? Object.groupBy(classes, (c) => c.department?.id || "unknown")
-    : {};
+  // Group classes by department
+  const groupedClasses: Record<string, any[]> = {};
+  if (classes) {
+    (classes as any[]).forEach((cls) => {
+      const deptId = cls.department_id || "unknown";
+      if (!groupedClasses[deptId]) {
+        groupedClasses[deptId] = [];
+      }
+      groupedClasses[deptId].push(cls);
+    });
+  }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -161,7 +189,7 @@ export const SponsorAssignmentDialog = ({
             <ScrollArea className="h-[400px] border rounded-lg p-4">
               <div className="space-y-4">
                 {Object.entries(groupedClasses).map(([departmentId, deptClasses]) => {
-                  const deptName = deptClasses?.[0]?.department?.name || "Uncategorized";
+                  const deptName = deptClasses?.[0]?.departments?.name || "Uncategorized";
                   const isExpanded = expandedDepartments.includes(departmentId);
 
                   return (
@@ -196,7 +224,7 @@ export const SponsorAssignmentDialog = ({
                             >
                               {cls.name}
                               <span className="text-xs text-muted-foreground ml-2">
-                                ({cls.academic_year?.year_name})
+                                ({cls.academic_years?.year_name})
                               </span>
                             </Label>
                           </div>
