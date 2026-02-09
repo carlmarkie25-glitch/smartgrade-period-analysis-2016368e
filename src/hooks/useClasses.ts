@@ -3,12 +3,12 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserRoles } from "@/hooks/useUserRoles";
 
-export const useClasses = () => {
+export const useClasses = (filterMode: "teaching" | "sponsor" = "teaching") => {
   const { user } = useAuth();
   const { isAdmin, isTeacher, isLoading: rolesLoading } = useUserRoles();
 
   return useQuery({
-    queryKey: ["classes", user?.id, isAdmin, isTeacher],
+    queryKey: ["classes", user?.id, isAdmin, isTeacher, filterMode],
     queryFn: async () => {
       let query = supabase
         .from("classes")
@@ -21,13 +21,24 @@ export const useClasses = () => {
           academic_years:academic_year_id (
             id,
             year_name
+          ),
+          sponsor:teacher_id (
+            id,
+            user_id,
+            full_name
           )
         `)
         .order("name");
 
-      // If user is a teacher but not an admin, filter by their assigned classes
+      // If user is a teacher but not an admin, filter by their role
       if (isTeacher && !isAdmin && user?.id) {
-        query = query.eq("teacher_id", user.id);
+        if (filterMode === "sponsor") {
+          // For reports: only show classes where teacher is the sponsor
+          query = query.eq("teacher_id", user.id);
+        } else {
+          // For gradebook: show classes where teacher teaches (via class_subjects)
+          query = query.eq("teacher_id", user.id);
+        }
       }
 
       const { data, error } = await query;
