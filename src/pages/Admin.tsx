@@ -13,6 +13,7 @@ import { ClassManagementTab } from "@/components/ClassManagementTab";
 import { SubjectManagementTab } from "@/components/SubjectManagementTab";
 import { DepartmentManagementTab } from "@/components/DepartmentManagementTab";
 import { TeacherAssignmentDialog } from "@/components/TeacherAssignmentDialog";
+import { SponsorAssignmentDialog } from "@/components/SponsorAssignmentDialog";
 import { UserRoleManagement } from "@/components/UserRoleManagement";
 import MainLayout from "@/components/MainLayout";
 
@@ -39,7 +40,13 @@ const Admin = () => {
   });
 
   const [teacherAssignmentOpen, setTeacherAssignmentOpen] = useState(false);
+  const [sponsorAssignmentOpen, setSponsorAssignmentOpen] = useState(false);
   const [selectedTeacher, setSelectedTeacher] = useState<{
+    id: string;
+    user_id: string;
+    full_name: string;
+  } | null>(null);
+  const [selectedSponsor, setSelectedSponsor] = useState<{
     id: string;
     user_id: string;
     full_name: string;
@@ -52,6 +59,15 @@ const Admin = () => {
       full_name: user.full_name,
     });
     setTeacherAssignmentOpen(true);
+  };
+
+  const handleOpenSponsorAssignment = (user: any) => {
+    setSelectedSponsor({
+      id: user.id,
+      user_id: user.user_id,
+      full_name: user.full_name,
+    });
+    setSponsorAssignmentOpen(true);
   };
 
 
@@ -114,6 +130,7 @@ const Admin = () => {
             </TabsTrigger>
             <TabsTrigger value="academic">
               <School className="h-4 w-4 mr-2" />
+              onOpenSponsorAssignment={handleOpenSponsorAssignment}
               Years
             </TabsTrigger>
             <TabsTrigger value="departments">
@@ -177,6 +194,12 @@ const Admin = () => {
                     />
                   </div>
                 </div>
+
+      <SponsorAssignmentDialog
+        open={sponsorAssignmentOpen}
+        onOpenChange={setSponsorAssignmentOpen}
+        user={selectedSponsor}
+      />
                 <Button onClick={handleCreateAcademicYear}>Create Academic Year</Button>
               </CardContent>
             </Card>

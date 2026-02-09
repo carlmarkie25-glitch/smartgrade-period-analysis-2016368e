@@ -30,20 +30,49 @@ export const useClasses = (filterMode: "teaching" | "sponsor" = "teaching") => {
         `)
         .order("name");
 
-      // If user is a teacher but not an admin, filter by their role
-      if (isTeacher && !isAdmin && user?.id) {
+      // If admin, show all classes
+      if (isAdmin) {
+        const { data, error } = await query;
+        if (error) throw error;
+        return data;
+      }
+
+      // If user is not admin
+      if (user?.id) {
         if (filterMode === "sponsor") {
-          // For reports: only show classes where teacher is the sponsor
-          query = query.eq("teacher_id", user.id);
+          // For reports: show classes where user is a sponsor (via sponsor_class_assignments)
+          const { data: sponsorClasses, error: sponsorError } = await supabase
+            .from("sponsor_class_assignments")
+            .select("class_id")
+            .eq("user_id", user.id);
+
+          if (sponsorError) throw sponsorError;
+
+          const classIds = sponsorClasses.map((s) => s.class_id);
+          if (classIds.length === 0) return [];
+
+          const { data, error } = await query.in("id", classIds);
+          if (error) throw error;
+          return data;
         } else {
-          // For gradebook: show classes where teacher teaches (via class_subjects)
-          query = query.eq("teacher_id", user.id);
+          // For gradebook/teaching: show classes where user teaches (via class_subjects)
+          const { data: teachingClasses, error: teachError } = await supabase
+            .from("class_subjects")
+            .select("class_id")
+            .eq("teacher_id", user.id);
+
+          if (teachError) throw teachError;
+
+          const classIds = [...new Set(teachingClasses.map((tc) => tc.class_id))];
+          if (classIds.length === 0) return [];
+
+          const { data, error } = await query.in("id", classIds);
+          if (error) throw error;
+          return data;
         }
       }
 
-      const { data, error } = await query;
-      if (error) throw error;
-      return data;
+      return [];
     },
     enabled: !rolesLoading && !!user?.id,
   });

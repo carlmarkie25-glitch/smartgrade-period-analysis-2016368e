@@ -2,7 +2,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { X, Settings2, ChevronDown, GraduationCap, Users, UserPlus } from "lucide-react";
+import { X, Settings2, ChevronDown, GraduationCap, Users, UserPlus, Shield } from "lucide-react";
 import { useState } from "react";
 
 interface UserRoleManagementProps {
@@ -11,6 +11,7 @@ interface UserRoleManagementProps {
   assignRole: any;
   removeRole: any;
   onOpenTeacherAssignment: (user: any) => void;
+  onOpenSponsorAssignment: (user: any) => void;
 }
 
 const UserCard = ({
@@ -18,12 +19,14 @@ const UserCard = ({
   assignRole,
   removeRole,
   onOpenTeacherAssignment,
+  onOpenSponsorAssignment,
   isTeacher,
 }: {
   user: any;
   assignRole: any;
   removeRole: any;
   onOpenTeacherAssignment: (user: any) => void;
+  onOpenSponsorAssignment: (user: any) => void;
   isTeacher: boolean;
 }) => (
   <div className="flex items-center justify-between p-4 border rounded-lg">
@@ -55,6 +58,10 @@ const UserCard = ({
           Assign Classes
         </Button>
       )}
+      <Button variant="outline" size="sm" onClick={() => onOpenSponsorAssignment(user)}>
+        <Shield className="h-4 w-4 mr-1" />
+        Assign Sponsor
+      </Button>
       <Select onValueChange={(role) => assignRole.mutate({ userId: user.user_id, role })}>
         <SelectTrigger className="w-[140px]">
           <SelectValue placeholder="Add role" />
@@ -71,12 +78,7 @@ const UserCard = ({
 
 const RoleGroup = ({
   title,
-  icon: Icon,
-  users,
-  defaultOpen,
-  assignRole,
-  removeRole,
-  onOpenTeacherAssignment,
+  onOpenSponsorAssignment,
 }: {
   title: string;
   icon: any;
@@ -85,6 +87,7 @@ const RoleGroup = ({
   assignRole: any;
   removeRole: any;
   onOpenTeacherAssignment: (user: any) => void;
+  onOpenSponsorAssignment: (user: any) => void;
 }) => {
   const [open, setOpen] = useState(defaultOpen);
 
@@ -107,6 +110,13 @@ const RoleGroup = ({
               assignRole={assignRole}
               removeRole={removeRole}
               onOpenTeacherAssignment={onOpenTeacherAssignment}
+              onOpenSponsorAssignment={onOpenSponso
+            <UserCard
+              key={user.id}
+              user={user}
+              assignRole={assignRole}
+              removeRole={removeRole}
+              onOpenTeacherAssignment={onOpenTeacherAssignment}
               isTeacher={user.user_roles?.some((ur: any) => ur.role === "teacher")}
             />
           ))
@@ -115,15 +125,7 @@ const RoleGroup = ({
         )}
       </CollapsibleContent>
     </Collapsible>
-  );
-};
-
-export const UserRoleManagement = ({
-  users,
-  usersLoading,
-  assignRole,
-  removeRole,
-  onOpenTeacherAssignment,
+  onOpenSponsorAssignment,
 }: UserRoleManagementProps) => {
   if (usersLoading) return <Card><CardContent className="p-6"><p>Loading users...</p></CardContent></Card>;
   if (!users || users.length === 0)
@@ -137,6 +139,15 @@ export const UserRoleManagement = ({
   return (
     <Card>
       <CardHeader>
+        <CardTitle>User & Role Management</CardTitle>
+        <CardDescription>Manage user roles, teacher classes, and sponsor assignments</CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <RoleGroup title="Teachers" icon={Users} users={teachers} defaultOpen={true} assignRole={assignRole} removeRole={removeRole} onOpenTeacherAssignment={onOpenTeacherAssignment} onOpenSponsorAssignment={onOpenSponsorAssignment} />
+        <RoleGroup title="Students" icon={GraduationCap} users={students} defaultOpen={false} assignRole={assignRole} removeRole={removeRole} onOpenTeacherAssignment={onOpenTeacherAssignment} onOpenSponsorAssignment={onOpenSponsorAssignment} />
+        <RoleGroup title="Admins" icon={Settings2} users={admins} defaultOpen={false} assignRole={assignRole} removeRole={removeRole} onOpenTeacherAssignment={onOpenTeacherAssignment} onOpenSponsorAssignment={onOpenSponsorAssignment} />
+        {unassigned.length > 0 && (
+          <RoleGroup title="Unassigned" icon={UserPlus} users={unassigned} defaultOpen={true} assignRole={assignRole} removeRole={removeRole} onOpenTeacherAssignment={onOpenTeacherAssignment} onOpenSponsorAssignment={onOpenSponso
         <CardTitle>User & Role Management</CardTitle>
         <CardDescription>Manage user roles grouped by category</CardDescription>
       </CardHeader>
