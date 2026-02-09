@@ -17,7 +17,7 @@ const Reports = () => {
   const [selectedStudent, setSelectedStudent] = useState<string>("");
   const [dialogOpen, setDialogOpen] = useState(false);
 
-  const { data: classes, isLoading: classesLoading } = useClasses();
+  const { data: classes, isLoading: classesLoading } = useClasses("sponsor");
   const { data: students, isLoading: studentsLoading } = useStudents(selectedClass);
   const { toast } = useToast();
 

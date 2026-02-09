@@ -10,8 +10,9 @@ import { useClasses } from "@/hooks/useClasses";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Pencil, Trash2, Plus, BookOpen } from "lucide-react";
+import { Pencil, Trash2, Plus, BookOpen, UserCheck } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Badge } from "@/components/ui/badge";
 
 export const ClassManagementTab = () => {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
@@ -63,6 +64,51 @@ export const ClassManagementTab = () => {
       return data;
     },
   });
+
+  // Fetch teachers (profiles with teacher role)
+  const { data: teachers } = useQuery({
+    queryKey: ["teachers-for-sponsor"],
+    queryFn: async () => {
+      const { data: roles, error: rolesError } = await supabase
+        .from("user_roles")
+        .select("user_id")
+        .eq("role", "teacher");
+      if (rolesError) throw rolesError;
+
+      const teacherUserIds = roles?.map(r => r.user_id) || [];
+      if (teacherUserIds.length === 0) return [];
+
+      const { data: profiles, error } = await supabase
+        .from("profiles")
+        .select("id, user_id, full_name")
+        .in("user_id", teacherUserIds)
+        .order("full_name");
+      if (error) throw error;
+      return profiles;
+    },
+  });
+
+  const handleAssignSponsor = async (classId: string, teacherUserId: string | null) => {
+    try {
+      const { error } = await supabase
+        .from("classes")
+        .update({ teacher_id: teacherUserId })
+        .eq("id", classId);
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: teacherUserId ? "Sponsor assigned successfully" : "Sponsor removed",
+      });
+      queryClient.invalidateQueries({ queryKey: ["classes"] });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
 
   const { data: classSubjects } = useQuery({
     queryKey: ["class-subjects", selectedClassId],
@@ -253,6 +299,7 @@ export const ClassManagementTab = () => {
                 <TableHead>Class Name</TableHead>
                 <TableHead>Department</TableHead>
                 <TableHead>Academic Year</TableHead>
+                <TableHead>Sponsor</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -264,6 +311,30 @@ export const ClassManagementTab = () => {
                     {cls.departments?.name}
                   </TableCell>
                   <TableCell>{cls.academic_years?.year_name}</TableCell>
+                  <TableCell>
+                    <Select
+                      value={cls.teacher_id || "none"}
+                      onValueChange={(value) => handleAssignSponsor(cls.id, value === "none" ? null : value)}
+                    >
+                      <SelectTrigger className="w-[180px]">
+                        <SelectValue placeholder="Assign sponsor" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="none">No Sponsor</SelectItem>
+                        {teachers?.map((teacher) => (
+                          <SelectItem key={teacher.user_id} value={teacher.user_id}>
+                            {teacher.full_name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    {cls.teacher_id && (
+                      <Badge variant="secondary" className="mt-1 gap-1">
+                        <UserCheck className="h-3 w-3" />
+                        {teachers?.find(t => t.user_id === cls.teacher_id)?.full_name || "Assigned"}
+                      </Badge>
+                    )}
+                  </TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-2">
                       <Button
