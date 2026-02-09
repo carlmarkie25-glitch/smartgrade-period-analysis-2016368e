@@ -1,7 +1,9 @@
-import { GraduationCap, LayoutDashboard, BookOpen, FileText, BarChart3, Settings, LogOut } from "lucide-react";
+import { GraduationCap, LayoutDashboard, BookOpen, FileText, BarChart3, Settings, LogOut, Sun, Moon } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserRoles } from "@/hooks/useUserRoles";
+import { useTheme } from "@/contexts/ThemeContext";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import {
   Sidebar,
   SidebarContent,
@@ -136,7 +138,11 @@ const AppSidebar = () => {
         )}
       </SidebarContent>
 
-      <SidebarFooter className="bg-sidebar p-4">
+      <SidebarFooter className="bg-sidebar p-4 space-y-2">
+        <div className="flex items-center justify-between px-3 py-2.5 rounded-lg bg-sidebar-accent/50">
+          {!isCollapsed && <span className="text-sm font-medium text-sidebar-foreground">Theme</span>}
+          <ThemeToggle />
+        </div>
         <button
           onClick={signOut}
           className={cn(

@@ -2,7 +2,6 @@ import { Button } from "@/components/ui/button";
 import { GraduationCap, LayoutDashboard, BookOpen, FileText, BarChart3 } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { ThemeToggle } from "@/components/ThemeToggle";
 
 const Navbar = () => {
   const location = useLocation();
@@ -43,7 +42,6 @@ const Navbar = () => {
           </div>
 
           <div className="flex items-center gap-2">
-            <ThemeToggle />
             <Button variant="outline" onClick={signOut}>Sign Out</Button>
           </div>
         </div>
