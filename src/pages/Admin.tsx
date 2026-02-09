@@ -130,7 +130,6 @@ const Admin = () => {
             </TabsTrigger>
             <TabsTrigger value="academic">
               <School className="h-4 w-4 mr-2" />
-              onOpenSponsorAssignment={handleOpenSponsorAssignment}
               Years
             </TabsTrigger>
             <TabsTrigger value="departments">
@@ -146,6 +145,7 @@ const Admin = () => {
               assignRole={assignRole}
               removeRole={removeRole}
               onOpenTeacherAssignment={handleOpenTeacherAssignment}
+              onOpenSponsorAssignment={handleOpenSponsorAssignment}
             />
           </TabsContent>
 
@@ -195,11 +195,6 @@ const Admin = () => {
                   </div>
                 </div>
 
-      <SponsorAssignmentDialog
-        open={sponsorAssignmentOpen}
-        onOpenChange={setSponsorAssignmentOpen}
-        user={selectedSponsor}
-      />
                 <Button onClick={handleCreateAcademicYear}>Create Academic Year</Button>
               </CardContent>
             </Card>
@@ -215,6 +210,12 @@ const Admin = () => {
         open={teacherAssignmentOpen}
         onOpenChange={setTeacherAssignmentOpen}
         teacher={selectedTeacher}
+      />
+
+      <SponsorAssignmentDialog
+        open={sponsorAssignmentOpen}
+        onOpenChange={setSponsorAssignmentOpen}
+        user={selectedSponsor}
       />
     </MainLayout>
   );
