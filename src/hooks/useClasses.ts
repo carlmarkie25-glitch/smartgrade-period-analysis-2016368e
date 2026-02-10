@@ -40,28 +40,23 @@ export const useClasses = (filterMode: "teaching" | "sponsor" = "teaching") => {
       // If user is not admin
       if (user?.id) {
         if (filterMode === "sponsor") {
-          // For reports: show classes where user is a sponsor (via sponsor_class_assignments REST API)
-          try {
-            const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/rest/v1/sponsor_class_assignments?user_id=eq.${user.id}`, {
-              headers: {
-                'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY,
-                'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
-              }
-            });
+          // For reports: show classes where user is a sponsor
+          const { data: sponsorData, error: sponsorError } = await supabase
+            .from("sponsor_class_assignments")
+            .select("class_id")
+            .eq("user_id", user.id);
 
-            if (!response.ok) return [];
-            const sponsorData = await response.json();
-            const classIds = sponsorData.map((s: any) => s.class_id);
-            
-            if (classIds.length === 0) return [];
-
-            const { data, error } = await query.in("id", classIds);
-            if (error) throw error;
-            return data;
-          } catch (error) {
-            console.error("Error fetching sponsor classes:", error);
+          if (sponsorError) {
+            console.error("Error fetching sponsor classes:", sponsorError);
             return [];
           }
+
+          const classIds = sponsorData?.map((s: any) => s.class_id) || [];
+          if (classIds.length === 0) return [];
+
+          const { data, error } = await query.in("id", classIds);
+          if (error) throw error;
+          return data;
         } else {
           // For gradebook/teaching: show classes where user teaches (via class_subjects)
           const { data: teachingClasses, error: teachError } = await supabase
