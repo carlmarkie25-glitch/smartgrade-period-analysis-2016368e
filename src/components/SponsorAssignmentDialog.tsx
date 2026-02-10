@@ -58,16 +58,16 @@ export const SponsorAssignmentDialog = ({
     queryFn: async () => {
       if (!user?.user_id) return [];
       
-      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/rest/v1/sponsor_class_assignments?user_id=eq.${user.user_id}`, {
-        headers: {
-          'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY,
-          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
-        }
-      });
+      const { data, error } = await supabase
+        .from("sponsor_class_assignments")
+        .select("class_id")
+        .eq("user_id", user.user_id);
       
-      if (!response.ok) return [];
-      const data = await response.json();
-      return data.map((a: any) => a.class_id);
+      if (error) {
+        console.error("Error fetching sponsor assignments:", error);
+        return [];
+      }
+      return data?.map((a: any) => a.class_id) || [];
     },
     enabled: open && !!user,
   });
@@ -90,40 +90,25 @@ export const SponsorAssignmentDialog = ({
       if (!user?.user_id) return;
 
       // Delete all existing assignments
-      const deleteResponse = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/rest/v1/sponsor_class_assignments?user_id=eq.${user.user_id}`,
-        {
-          method: 'DELETE',
-          headers: {
-            'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY,
-            'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
-          }
-        }
-      );
+      const { error: deleteError } = await supabase
+        .from("sponsor_class_assignments")
+        .delete()
+        .eq("user_id", user.user_id);
 
-      if (!deleteResponse.ok) throw new Error("Failed to delete existing assignments");
+      if (deleteError) throw new Error("Failed to delete existing assignments: " + deleteError.message);
 
       // Insert new assignments
       if (classIds.length > 0) {
-        const insertResponse = await fetch(
-          `${import.meta.env.VITE_SUPABASE_URL}/rest/v1/sponsor_class_assignments`,
-          {
-            method: 'POST',
-            headers: {
-              'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY,
-              'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(
-              classIds.map((classId) => ({
-                user_id: user.user_id,
-                class_id: classId,
-              }))
-            )
-          }
-        );
+        const { error: insertError } = await supabase
+          .from("sponsor_class_assignments")
+          .insert(
+            classIds.map((classId) => ({
+              user_id: user.user_id,
+              class_id: classId,
+            }))
+          );
 
-        if (!insertResponse.ok) throw new Error("Failed to insert new assignments");
+        if (insertError) throw new Error("Failed to insert new assignments: " + insertError.message);
       }
     },
     onSuccess: () => {
