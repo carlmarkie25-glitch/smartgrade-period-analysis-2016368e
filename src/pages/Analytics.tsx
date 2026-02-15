@@ -5,6 +5,8 @@ import { TrendingUp, Award, AlertTriangle } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAnalytics, useTopStudents, useAtRiskStudents, useClassPerformance, usePerformanceTrend } from "@/hooks/useAnalytics";
+import { useTeacherAnalytics, useTeacherTopStudents, useTeacherAtRiskStudents, useTeacherClassPerformance, useTeacherPerformanceTrend } from "@/hooks/useTeacherAnalytics";
+import { useUserRoles } from "@/hooks/useUserRoles";
 import { useState } from "react";
 import PassFailChart from "@/components/analytics/PassFailChart";
 import ClassPerformanceChart from "@/components/analytics/ClassPerformanceChart";
@@ -12,19 +14,44 @@ import SubjectTrendsChart from "@/components/analytics/SubjectTrendsChart";
 
 const Analytics = () => {
   const [selectedPeriod, setSelectedPeriod] = useState("p3");
-  
-  const { data: analyticsData, isLoading: analyticsLoading } = useAnalytics(selectedPeriod);
-  const { data: topStudents = [], isLoading: topStudentsLoading } = useTopStudents(selectedPeriod);
-  const { data: atRiskStudents = [], isLoading: atRiskLoading } = useAtRiskStudents(selectedPeriod);
-  const { data: classPerformance = [], isLoading: classPerformanceLoading } = useClassPerformance(selectedPeriod);
-  const { data: trendData = [], isLoading: trendLoading } = usePerformanceTrend();
+  const { isAdmin, isLoading: rolesLoading } = useUserRoles();
+
+  // Admin hooks
+  const { data: adminAnalytics, isLoading: adminAnalyticsLoading } = useAnalytics(selectedPeriod);
+  const { data: adminTopStudents = [], isLoading: adminTopLoading } = useTopStudents(selectedPeriod);
+  const { data: adminAtRisk = [], isLoading: adminAtRiskLoading } = useAtRiskStudents(selectedPeriod);
+  const { data: adminClassPerf = [], isLoading: adminClassPerfLoading } = useClassPerformance(selectedPeriod);
+  const { data: adminTrend = [], isLoading: adminTrendLoading } = usePerformanceTrend();
+
+  // Teacher hooks
+  const { data: teacherAnalytics, isLoading: teacherAnalyticsLoading } = useTeacherAnalytics(selectedPeriod);
+  const { data: teacherTopStudents = [], isLoading: teacherTopLoading } = useTeacherTopStudents(selectedPeriod);
+  const { data: teacherAtRisk = [], isLoading: teacherAtRiskLoading } = useTeacherAtRiskStudents(selectedPeriod);
+  const { data: teacherClassPerf = [], isLoading: teacherClassPerfLoading } = useTeacherClassPerformance(selectedPeriod);
+  const { data: teacherTrend = [], isLoading: teacherTrendLoading } = useTeacherPerformanceTrend();
+
+  // Select data based on role
+  const analyticsData = isAdmin ? adminAnalytics : teacherAnalytics;
+  const analyticsLoading = rolesLoading || (isAdmin ? adminAnalyticsLoading : teacherAnalyticsLoading);
+  const topStudents = isAdmin ? adminTopStudents : teacherTopStudents;
+  const topStudentsLoading = rolesLoading || (isAdmin ? adminTopLoading : teacherTopLoading);
+  const atRiskStudents = isAdmin ? adminAtRisk : teacherAtRisk;
+  const atRiskLoading = rolesLoading || (isAdmin ? adminAtRiskLoading : teacherAtRiskLoading);
+  const classPerformance = isAdmin ? adminClassPerf : teacherClassPerf;
+  const classPerformanceLoading = rolesLoading || (isAdmin ? adminClassPerfLoading : teacherClassPerfLoading);
+  const trendData = isAdmin ? adminTrend : teacherTrend;
+  const trendLoading = rolesLoading || (isAdmin ? adminTrendLoading : teacherTrendLoading);
+
+  const pageTitle = isAdmin ? "Analytics" : "My Class Analytics";
+  const pageDescription = isAdmin ? "School-wide performance analysis" : "Performance analysis for your classes";
+  const topLabel = isAdmin ? "School-Wide Top 5" : "Top 5 in My Classes";
 
   return (
     <MainLayout>
       <div className="container mx-auto px-4 py-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-foreground mb-1">Analytics</h1>
-          <p className="text-muted-foreground">School-wide performance analysis</p>
+          <h1 className="text-3xl font-bold text-foreground mb-1">{pageTitle}</h1>
+          <p className="text-muted-foreground">{pageDescription}</p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
@@ -58,13 +85,8 @@ const Analytics = () => {
           {analyticsLoading ? (
             Array(3).fill(0).map((_, i) => (
               <Card key={i}>
-                <CardHeader>
-                  <Skeleton className="h-4 w-24" />
-                </CardHeader>
-                <CardContent>
-                  <Skeleton className="h-8 w-16 mb-2" />
-                  <Skeleton className="h-3 w-32" />
-                </CardContent>
+                <CardHeader><Skeleton className="h-4 w-24" /></CardHeader>
+                <CardContent><Skeleton className="h-8 w-16 mb-2" /><Skeleton className="h-3 w-32" /></CardContent>
               </Card>
             ))
           ) : (
@@ -104,8 +126,8 @@ const Analytics = () => {
                   <div className="text-3xl font-bold text-foreground">{atRiskStudents.length}</div>
                   <p className="text-xs text-muted-foreground mt-1">Failing 3+ subjects</p>
                   <p className="text-sm text-muted-foreground mt-2">
-                    {analyticsData?.totalStudents ? 
-                      ((atRiskStudents.length / analyticsData.totalStudents) * 100).toFixed(1) 
+                    {analyticsData?.totalStudents ?
+                      ((atRiskStudents.length / analyticsData.totalStudents) * 100).toFixed(1)
                       : 0}% of total students
                   </p>
                 </CardContent>
@@ -116,10 +138,7 @@ const Analytics = () => {
 
         {/* Charts Row */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-          <PassFailChart 
-            passRate={analyticsData?.passRate || 0} 
-            failRate={analyticsData?.failRate || 0} 
-          />
+          <PassFailChart passRate={analyticsData?.passRate || 0} failRate={analyticsData?.failRate || 0} />
           <SubjectTrendsChart data={trendData} isLoading={trendLoading} />
           <ClassPerformanceChart data={classPerformance} isLoading={classPerformanceLoading} />
         </div>
@@ -130,7 +149,7 @@ const Analytics = () => {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Award className="h-5 w-5 text-secondary" />
-                School-Wide Top 5
+                {topLabel}
               </CardTitle>
               <CardDescription>Highest performing students</CardDescription>
             </CardHeader>
@@ -141,10 +160,7 @@ const Analytics = () => {
                     <div key={i} className="flex items-center gap-3 p-3">
                       <Skeleton className="h-8 w-8 rounded-full" />
                       <Skeleton className="h-10 w-10 rounded-full" />
-                      <div className="flex-1">
-                        <Skeleton className="h-4 w-32 mb-2" />
-                        <Skeleton className="h-3 w-24" />
-                      </div>
+                      <div className="flex-1"><Skeleton className="h-4 w-32 mb-2" /><Skeleton className="h-3 w-24" /></div>
                       <Skeleton className="h-8 w-12" />
                     </div>
                   ))}
@@ -190,10 +206,7 @@ const Analytics = () => {
                   {Array(3).fill(0).map((_, i) => (
                     <div key={i} className="flex items-center gap-3 p-3">
                       <Skeleton className="h-10 w-10 rounded-full" />
-                      <div className="flex-1">
-                        <Skeleton className="h-4 w-32 mb-2" />
-                        <Skeleton className="h-3 w-24" />
-                      </div>
+                      <div className="flex-1"><Skeleton className="h-4 w-32 mb-2" /><Skeleton className="h-3 w-24" /></div>
                       <Skeleton className="h-8 w-12" />
                     </div>
                   ))}
