@@ -32,7 +32,7 @@ const AppSidebar = () => {
     { path: "/gradebook", icon: BookOpen, label: "Gradebook", roles: ["teacher", "admin"] },
     { path: "/reports", icon: FileText, label: "Reports", roles: ["teacher", "admin"] },
     // Analytics is admin-only
-    { path: "/analytics", icon: BarChart3, label: "Analytics", roles: ["admin"] },
+    { path: "/analytics", icon: BarChart3, label: "Analytics", roles: ["teacher", "admin"] },
   ];
 
   const adminItems = [
