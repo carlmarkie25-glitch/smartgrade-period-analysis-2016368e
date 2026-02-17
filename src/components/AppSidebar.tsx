@@ -46,8 +46,7 @@ const AppSidebar = () => {
     if (rolesLoading) return roles.includes("all"); // Only show "all" items while loading
     if (roles.includes("all")) return true;
     if (roles.includes("admin") && isAdmin) return true;
-    if (roles.includes("teacher") && isTeacher && !roles.includes("admin")) return true;
-    if (roles.includes("teacher") && isAdmin) return true; // Admin can access teacher items too
+    if (roles.includes("teacher") && (isTeacher || isAdmin)) return true;
     return false;
   };
 
