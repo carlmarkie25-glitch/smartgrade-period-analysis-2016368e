@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
-import { GraduationCap, TrendingUp, FileText, BarChart3 } from "lucide-react";
+import { TrendingUp, FileText, BarChart3 } from "lucide-react";
+import syncraLogo from "@/assets/syncra-logo.png";
 import { Link } from "react-router-dom";
 
 const Hero = () => {
@@ -14,12 +15,12 @@ const Hero = () => {
       <div className="container relative z-10 px-4 py-20 mx-auto">
         <div className="max-w-4xl mx-auto text-center">
           <div className="inline-flex items-center gap-2 px-4 py-2 mb-6 rounded-full bg-white/10 backdrop-blur-sm border border-white/20">
-            <GraduationCap className="w-5 h-5 text-white" />
+            <img src={syncraLogo} alt="Syncra" className="w-5 h-5 object-contain" />
             <span className="text-sm font-medium text-white">Modern School Management Solution</span>
           </div>
 
           <h1 className="mb-6 text-5xl font-bold tracking-tight text-white md:text-7xl">
-            Welcome to <span className="text-secondary-glow">SmartGrade</span>
+            Welcome to <span className="text-secondary-glow">Syncra</span>
           </h1>
 
           <p className="mb-8 text-xl text-white/90 md:text-2xl max-w-3xl mx-auto leading-relaxed">

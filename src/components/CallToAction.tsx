@@ -16,7 +16,7 @@ const CallToAction = () => {
             Ready to Transform Your School Management?
           </h2>
           <p className="text-xl text-white/90 mb-10 max-w-2xl mx-auto">
-            Join leading educational institutions using SmartGrade to deliver exceptional academic tracking and insights.
+            Join leading educational institutions using Syncra to deliver exceptional academic tracking and insights.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
