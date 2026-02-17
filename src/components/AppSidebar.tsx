@@ -1,4 +1,5 @@
-import { GraduationCap, LayoutDashboard, BookOpen, FileText, BarChart3, Settings, LogOut, Sun, Moon } from "lucide-react";
+import { LayoutDashboard, BookOpen, FileText, BarChart3, Settings, LogOut, Sun, Moon } from "lucide-react";
+import syncraLogo from "@/assets/syncra-logo.png";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserRoles } from "@/hooks/useUserRoles";
@@ -54,13 +55,11 @@ const AppSidebar = () => {
     <Sidebar className="border-r-0 bg-sidebar">
       <SidebarHeader className="bg-sidebar p-4">
         <Link to="/dashboard" className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-sidebar-primary">
-            <GraduationCap className="h-6 w-6 text-sidebar-primary-foreground" />
-          </div>
+          <img src={syncraLogo} alt="Syncra" className="h-10 w-10 rounded-lg object-contain" />
           {!isCollapsed && (
             <div className="flex flex-col">
-              <span className="text-lg font-bold text-sidebar-foreground">SmartGrade</span>
-              <span className="text-xs text-sidebar-foreground/70">School Management</span>
+              <span className="text-lg font-bold text-sidebar-foreground">Syncra</span>
+              <span className="text-xs text-sidebar-foreground/70">Software Systems</span>
             </div>
           )}
         </Link>
