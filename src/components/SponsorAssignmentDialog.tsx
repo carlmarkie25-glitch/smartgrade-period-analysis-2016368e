@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect } from "react"; // fixed
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -185,7 +185,10 @@ export const SponsorAssignmentDialog = ({
               <Button variant="outline" onClick={() => onOpenChange(false)}>
                 Cancel
               </Button>
-              <Button onClick={() => assignMutation.mutate(selectedClasses)} disabled={assignMutation.isPending}>
+              <Button
+                onClick={() => assignMutation.mutate(selectedClasses)}
+                disabled={assignMutation.isPending}
+              >
                 {assignMutation.isPending ? "Saving..." : "Save Sponsor Assignments"}
               </Button>
             </div>
