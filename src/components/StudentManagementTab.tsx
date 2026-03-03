@@ -265,7 +265,7 @@ export const StudentManagementTab = () => {
           "update-student-photo",
           {
             body: {
-              student_id: editingStudentIdString,
+              student_id: editingStudentId,
               photo_base64: photoBase64,
               photo_content_type: file.type,
             },

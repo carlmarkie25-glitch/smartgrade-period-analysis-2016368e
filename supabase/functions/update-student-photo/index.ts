@@ -17,7 +17,7 @@ Deno.serve(async (req) => {
     
     const supabaseAdmin = createClient(supabaseUrl, serviceRoleKey);
 
-    // Authentication check - verify the caller is authenticated
+    // Authentication check
     const authHeader = req.headers.get('Authorization');
     if (!authHeader) {
       console.error("No authorization header provided");
@@ -40,28 +40,32 @@ Deno.serve(async (req) => {
 
     const { student_id, photo_base64, photo_content_type } = await req.json();
 
+    console.log("Received photo upload request for student_id:", student_id);
+
     if (!student_id || !photo_base64 || !photo_content_type) {
+      console.error("Missing fields:", { student_id: !!student_id, photo_base64: !!photo_base64, photo_content_type: !!photo_content_type });
       return new Response(
         JSON.stringify({ error: "student_id, photo_base64, and photo_content_type are required" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    // Get the student record to check ownership
+    // Get the student record - student_id here is the UUID primary key
     const { data: student, error: studentError } = await supabaseAdmin
       .from("students")
-      .select("user_id")
+      .select("id, user_id, student_id")
       .eq("id", student_id)
       .single();
 
     if (studentError || !student) {
+      console.error("Student not found:", studentError?.message, "for id:", student_id);
       return new Response(
         JSON.stringify({ error: "Student not found" }),
         { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    // Authorization check - verify the user is admin OR is the student themselves
+    // Authorization check - admin or student themselves
     const { data: roles } = await supabaseAdmin
       .from('user_roles')
       .select('role')
@@ -78,21 +82,24 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Upload photo
+    // Upload photo to storage
     const photoData = decode(photo_base64);
     const fileExt = photo_content_type.split('/')[1] || 'jpg';
-    const fileName = `${student_id}-${Date.now()}.${fileExt}`;
+    const fileName = `${student.student_id}-${Date.now()}.${fileExt}`;
     
+    console.log("Uploading photo:", fileName, "size:", photoData.byteLength, "bytes");
+
     const { error: uploadError } = await supabaseAdmin.storage
       .from('student-photos')
       .upload(fileName, photoData, {
         contentType: photo_content_type,
+        upsert: true,
       });
     
     if (uploadError) {
       console.error("Upload error:", uploadError.message);
       return new Response(
-        JSON.stringify({ error: uploadError.message }),
+        JSON.stringify({ error: "Storage upload failed: " + uploadError.message }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
@@ -103,7 +110,18 @@ Deno.serve(async (req) => {
     
     const photoUrl = urlData.publicUrl;
 
-    console.log("Photo uploaded for student", student_id, "by", isAdmin ? "admin" : "self", user.id);
+    // Update the student record with the new photo URL
+    const { error: updateError } = await supabaseAdmin
+      .from("students")
+      .update({ photo_url: photoUrl })
+      .eq("id", student_id);
+
+    if (updateError) {
+      console.error("Failed to update student photo_url:", updateError.message);
+      // Don't fail the whole request - photo was uploaded successfully
+    }
+
+    console.log("Photo uploaded and student updated:", student_id, "url:", photoUrl);
 
     return new Response(
       JSON.stringify({ success: true, photo_url: photoUrl }),
