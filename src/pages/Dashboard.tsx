@@ -1,6 +1,6 @@
 import MainLayout from "@/components/MainLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { GraduationCap, Users, BookOpen, TrendingUp, FileText, Clock, CheckCircle, AlertCircle, User } from "lucide-react";
+import { GraduationCap, Users, BookOpen, TrendingUp, FileText, Clock, CheckCircle, AlertCircle, User, CalendarDays } from "lucide-react";
 import { useDashboardStats } from "@/hooks/useDashboardStats";
 import { useTeacherDashboardStats, useTeacherClasses, useTeacherRecentGrades } from "@/hooks/useTeacherData";
 import { useUserRoles } from "@/hooks/useUserRoles";
@@ -121,6 +121,7 @@ const AdminDashboard = () => {
                 { label: "Enter Grades", icon: BookOpen, path: "/gradebook" },
                 { label: "Generate Report", icon: FileText, path: "/reports" },
                 { label: "View Analytics", icon: TrendingUp, path: "/analytics" },
+                { label: "View Schedule", icon: CalendarDays, path: "/schedule" },
                 { label: "Admin Panel", icon: Users, path: "/admin" },
               ].map((action) => {
                 const Icon = action.icon;
@@ -288,6 +289,7 @@ const TeacherDashboard = () => {
                 {[
                   { label: "Enter Grades", description: "Add or edit student grades", icon: BookOpen, path: "/gradebook", colorClass: "bg-secondary/10 text-secondary" },
                   { label: "View Reports", description: "Generate student report cards", icon: FileText, path: "/reports", colorClass: "bg-success/10 text-success" },
+                  { label: "View Schedule", description: "See today's classes", icon: CalendarDays, path: "/schedule", colorClass: "bg-accent/10 text-accent" },
                 ].map((action) => {
                   const Icon = action.icon;
                   return (

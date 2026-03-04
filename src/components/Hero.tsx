@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { TrendingUp, FileText, BarChart3 } from "lucide-react";
-import syncraLogo from "@/assets/syncra-logo.png";
+import logo from "@/assets/logo.png";
 import { Link } from "react-router-dom";
 
 const Hero = () => {
@@ -15,7 +15,7 @@ const Hero = () => {
       <div className="container relative z-10 px-4 py-20 mx-auto">
         <div className="max-w-4xl mx-auto text-center">
           <div className="inline-flex items-center gap-2 px-4 py-2 mb-6 rounded-full bg-white/10 backdrop-blur-sm border border-white/20">
-            <img src={syncraLogo} alt="Syncra" className="w-5 h-5 object-contain" />
+            <img src={logo} alt="Logo" className="w-12 h-13 object-contain" />
             <span className="text-sm font-medium text-white">Modern School Management Solution</span>
           </div>
 

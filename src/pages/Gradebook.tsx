@@ -4,8 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
-import { Lock, Unlock, Save } from "lucide-react";
-import { useState, useEffect } from "react";
+import { Lock, Unlock, Save, Search } from "lucide-react";
+import { useState, useEffect, useMemo } from "react";
 import { useClasses, useClassSubjects } from "@/hooks/useClasses";
 import { useStudents } from "@/hooks/useStudents";
 import { useGrades, useAssessmentTypes, useSaveGrades } from "@/hooks/useGrades";
@@ -15,6 +15,7 @@ const Gradebook = () => {
   const [selectedClass, setSelectedClass] = useState<string>("");
   const [selectedSubject, setSelectedSubject] = useState<string>("");
   const [selectedPeriod, setSelectedPeriod] = useState<string>("p1");
+  const [searchTerm, setSearchTerm] = useState<string>("");
   const [isLocked, setIsLocked] = useState(true);
   const [editedGrades, setEditedGrades] = useState<Record<string, Record<string, number | null>>>({});
 
@@ -24,6 +25,22 @@ const Gradebook = () => {
   const { data: assessmentTypes, isLoading: assessmentLoading } = useAssessmentTypes();
   const { data: grades, isLoading: gradesLoading } = useGrades(selectedSubject, selectedPeriod);
   const saveGradesMutation = useSaveGrades();
+
+  // Filter students based on search term
+  const filteredStudents = useMemo(() => {
+    if (!searchTerm || searchTerm.trim() === "") {
+      return students || [];
+    }
+
+    const term = searchTerm.toLowerCase().trim();
+    return (students || []).filter((student) => {
+      const nameMatch = (student.full_name || "").toLowerCase().includes(term);
+      const studentIdMatch = (student.student_id || "").toLowerCase().includes(term);
+      const emailMatch = (student.email || "").toLowerCase().includes(term);
+
+      return nameMatch || studentIdMatch || emailMatch;
+    });
+  }, [students, searchTerm]);
 
   // Initialize edited grades when data loads
   useEffect(() => {
@@ -230,25 +247,44 @@ const Gradebook = () => {
                   : 'No assessment types configured'
                 }
               </CardDescription>
+              <div className="mt-4">
+                <label className="text-sm font-medium text-foreground">Search Students</label>
+                <div className="relative mt-2">
+                  <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Search by name, student ID, or email..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-10"
+                  />
+                </div>
+              </div>
             </CardHeader>
             <CardContent>
               {students && students.length > 0 ? (
                 <>
-                  <div className="overflow-x-auto">
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>Student Name</TableHead>
-                          {assessmentTypes?.map((at) => (
-                            <TableHead key={at.id} className="text-center">
-                              {at.name}<br/>({at.max_points})
-                            </TableHead>
-                          ))}
-                          <TableHead className="text-center font-bold">Total</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {students.map((student) => {
+                  {filteredStudents.length === 0 ? (
+                    <div className="text-center py-8 text-muted-foreground">
+                      <p>No students found matching "{searchTerm}"</p>
+                      <p className="text-xs mt-1">Try a different search term</p>
+                    </div>
+                  ) : (
+                    <>
+                      <div className="overflow-x-auto">
+                        <Table>
+                          <TableHeader>
+                            <TableRow>
+                              <TableHead>Student Name</TableHead>
+                              {assessmentTypes?.map((at) => (
+                                <TableHead key={at.id} className="text-center">
+                                  {at.name}<br/>({at.max_points})
+                                </TableHead>
+                              ))}
+                              <TableHead className="text-center font-bold">Total</TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {filteredStudents.map((student) => {
                           const studentEditedGrades = editedGrades[student.id] || {};
 
                           const hasAnyMissing =
@@ -334,6 +370,15 @@ const Gradebook = () => {
                       </TableBody>
                     </Table>
                   </div>
+                  <div className="mt-4 text-sm text-muted-foreground">
+                    {searchTerm ? (
+                      <p>Showing {filteredStudents.length} of {students.length} students matching "{searchTerm}"</p>
+                    ) : (
+                      <p>Total students: {students.length}</p>
+                    )}
+                  </div>
+                    </>
+                  )}
                   <div className="mt-6 flex justify-end gap-4">
                     <Button 
                       variant="outline" 

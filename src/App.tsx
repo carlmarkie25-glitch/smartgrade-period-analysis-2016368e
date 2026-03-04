@@ -11,6 +11,7 @@ import { TeacherRoute } from "@/components/TeacherRoute";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
+import Schedule from "./pages/Schedule";
 import Gradebook from "./pages/Gradebook";
 import Reports from "./pages/Reports";
 import Analytics from "./pages/Analytics";
@@ -31,6 +32,7 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+            <Route path="/schedule" element={<ProtectedRoute><Schedule /></ProtectedRoute>} />
             <Route path="/gradebook" element={<TeacherRoute><Gradebook /></TeacherRoute>} />
             <Route path="/reports" element={<TeacherRoute><Reports /></TeacherRoute>} />
             <Route path="/analytics" element={<TeacherRoute><Analytics /></TeacherRoute>} />

@@ -1,5 +1,5 @@
-import { LayoutDashboard, BookOpen, FileText, BarChart3, Settings, LogOut, Sun, Moon } from "lucide-react";
-import syncraLogo from "@/assets/syncra-logo.png";
+import { LayoutDashboard, BookOpen, FileText, BarChart3, Settings, LogOut, Sun, Moon, CalendarDays } from "lucide-react";
+import logo from "@/assets/logo.png";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserRoles } from "@/hooks/useUserRoles";
@@ -30,6 +30,7 @@ const AppSidebar = () => {
   // Define nav items - teachers and admins have different access
   const navItems = [
     { path: "/dashboard", icon: LayoutDashboard, label: "Dashboard", roles: ["all"] },
+    { path: "/schedule", icon: CalendarDays, label: "Schedule", roles: ["all"] },
     { path: "/gradebook", icon: BookOpen, label: "Gradebook", roles: ["teacher", "admin"] },
     { path: "/reports", icon: FileText, label: "Reports", roles: ["teacher", "admin"] },
     // Analytics is admin-only
@@ -55,13 +56,7 @@ const AppSidebar = () => {
     <Sidebar className="border-r-0 bg-sidebar">
       <SidebarHeader className="bg-sidebar p-4">
         <Link to="/dashboard" className="flex items-center gap-3">
-          <img src={syncraLogo} alt="Syncra" className="h-10 w-10 rounded-lg object-contain" />
-          {!isCollapsed && (
-            <div className="flex flex-col">
-              <span className="text-lg font-bold text-sidebar-foreground">Syncra</span>
-              <span className="text-xs text-sidebar-foreground/70">Software Systems</span>
-            </div>
-          )}
+          <img src={logo} alt="Logo" className="h-16 w-16 rounded-lg object-contain" />
         </Link>
       </SidebarHeader>
 

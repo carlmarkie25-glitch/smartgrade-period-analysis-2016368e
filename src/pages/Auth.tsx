@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ArrowLeft } from "lucide-react";
-import syncraLogo from "@/assets/syncra-logo.png";
+import logo from "@/assets/logo.png";
 
 import { useToast } from "@/hooks/use-toast";
 
@@ -118,8 +118,7 @@ const Auth = () => {
         </div>
         <div className="text-center mb-8">
           <div className="flex items-center justify-center gap-2 mb-4">
-            <img src={syncraLogo} alt="Syncra" className="h-10 w-10 object-contain" />
-            <span className="text-3xl font-bold text-foreground">Syncra</span>
+            <img src={logo} alt="Logo" className="h-16 w-16 object-contain" />
           </div>
           <p className="text-muted-foreground">Software Systems</p>
         </div>
