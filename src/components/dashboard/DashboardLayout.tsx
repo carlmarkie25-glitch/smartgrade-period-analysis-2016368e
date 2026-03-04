@@ -28,16 +28,16 @@ export const DashboardLayout = () => {
 
       {/* Main Content */}
       <main className="pt-24 pl-32 pr-8 pb-8">
-        <div className="max-w-7xl mx-auto space-y-8">
+        <div className="max-w-7xl mx-auto space-y-6">
           {/* Section A: Overview Stats + Profile Summary (Single Row) */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
             {/* Enrollment grouping card - Left 2 columns */}
             <div className="lg:col-span-2">
               <div className="bg-white/70 backdrop-blur-md rounded-2xl border border-teal-200/30 p-6 shadow-lg">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">
                   Enrollment 2026
                 </h3>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <StatCard
                     title="Total Students"
                     value="1215"
@@ -81,14 +81,29 @@ export const DashboardLayout = () => {
           </div>
 
           {/* Section B & C: Analytics + Activities (Two Column Layout) */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
             {/* Analytics Chart wrapped card - Left 2 columns */}
             <div className="lg:col-span-2">
               <div className="bg-white/70 backdrop-blur-md rounded-2xl border border-teal-200/30 p-6 shadow-lg">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                <h3 className="text-lg font-semibold text-gray-900 mb-6">
                   Booking Rate
                 </h3>
-                <AnalyticsChart data={analyticsData} height={260} />
+                <div className="flex flex-col lg:flex-row items-start lg:items-end gap-6">
+                  {/* metrics section */}
+                  <div className="flex-1">
+                    <p className="text-5xl font-bold text-gray-900">58%</p>
+                    <p className="text-sm text-gray-600 mt-1">
+                      Your Total Patient on Friday
+                    </p>
+                    <p className="text-xs text-teal-600 mt-2">
+                      6% ↑ Your booking rate is higher than yesterday
+                    </p>
+                  </div>
+                  {/* chart section */}
+                  <div className="flex-1 flex justify-end items-end">
+                    <AnalyticsChart data={analyticsData} height={80} />
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -99,7 +114,7 @@ export const DashboardLayout = () => {
           </div>
 
           {/* Section D & E: Schedule + Empty (maintain balance) */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
             {/* Schedule - Left 2 columns */}
             <div className="lg:col-span-2">
               <Schedule />
