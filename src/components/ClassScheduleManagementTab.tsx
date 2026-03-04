@@ -85,7 +85,7 @@ export const ClassScheduleManagementTab = () => {
     try {
       if (form.id) {
         const { error } = await supabase
-          .from("class_schedules")
+          .from("class_schedules" as any)
           .update(form as Partial<ClassScheduleEntry>)
           .eq("id", form.id as string);
         if (error) throw error;
@@ -99,7 +99,7 @@ export const ClassScheduleManagementTab = () => {
           teacher_id: form.teacher_id || null,
           subject_id: form.subject_id || null,
         };
-        const { error } = await supabase.from("class_schedules").insert(newEntry);
+        const { error } = await supabase.from("class_schedules" as any).insert(newEntry);
         if (error) throw error;
       }
       toast({ title: "Success", description: "Schedule saved" });
@@ -114,7 +114,7 @@ export const ClassScheduleManagementTab = () => {
   const handleDelete = async (id: string) => {
     if (!confirm("Delete this entry?")) return;
     try {
-      const { error } = await supabase.from("class_schedules").delete().eq("id", id);
+      const { error } = await supabase.from("class_schedules" as any).delete().eq("id", id);
       if (error) throw error;
       toast({ title: "Deleted" });
       queryClient.invalidateQueries({ queryKey: ["class-schedules"] });

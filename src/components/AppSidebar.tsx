@@ -1,4 +1,4 @@
-import { LayoutDashboard, BookOpen, FileText, BarChart3, Settings, LogOut, Sun, Moon, CalendarDays } from "lucide-react";
+import { LayoutDashboard, BookOpen, FileText, BarChart3, Settings, LogOut, Sun, Moon, CalendarDays, Calendar } from "lucide-react";
 import logo from "@/assets/logo.png";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -31,6 +31,7 @@ const AppSidebar = () => {
   const navItems = [
     { path: "/dashboard", icon: LayoutDashboard, label: "Dashboard", roles: ["all"] },
     { path: "/schedule", icon: CalendarDays, label: "Schedule", roles: ["all"] },
+    { path: "/academic-calendar", icon: Calendar, label: "Calendar", roles: ["all"] },
     { path: "/gradebook", icon: BookOpen, label: "Gradebook", roles: ["teacher", "admin"] },
     { path: "/reports", icon: FileText, label: "Reports", roles: ["teacher", "admin"] },
     // Analytics is admin-only
