@@ -5,7 +5,7 @@ import { useAuth } from "@/contexts/AuthContext";
 interface ScheduleItem {
   id: string;
   user_id: string;
-  date: string; // ISO date string
+  date: string;
   start_time: string;
   end_time: string;
   subject?: string;
@@ -13,7 +13,6 @@ interface ScheduleItem {
   [key: string]: any;
 }
 
-// Fetches schedule entries for the current user (today by default).
 export const useSchedule = () => {
   const { user } = useAuth();
 
@@ -28,16 +27,15 @@ export const useSchedule = () => {
 
       // personal entries for user
       const { data: personal, error: err1 } = await supabase
-        .from<ScheduleItem>("schedules")
+        .from("schedules" as any)
         .select("*")
         .eq("user_id", user.id)
         .eq("date", today)
         .order("start_time");
 
       if (err1) throw err1;
-      let results: ScheduleItem[] = personal || [];
+      let results: ScheduleItem[] = (personal as any[]) || [];
 
-      // determine class_id or profile id for class schedule lookup
       let classId: string | null = null;
       let profileId: string | null = null;
 
@@ -55,9 +53,8 @@ export const useSchedule = () => {
         .single();
       classId = studentData?.class_id || null;
 
-      // fetch class schedules applicable to this user (by class or teacher)
       const scheduleQuery = supabase
-        .from("class_schedules")
+        .from("class_schedules" as any)
         .select("*, classes(name), teachers:profiles!class_schedules_teacher_id_fkey(id,full_name), subjects(name)")
         .eq("day_of_week", dayOfWeek);
 
@@ -71,25 +68,22 @@ export const useSchedule = () => {
       const { data: classSchedules, error: err2 } = await scheduleQuery;
       if (err2) throw err2;
 
-      if (classSchedules && classSchedules.length > 0) {
-        // map class schedule entries into ScheduleItem-like objects so page can render uniformly
-        const mapped = classSchedules.map((cs: any) => ({
+      if (classSchedules && (classSchedules as any[]).length > 0) {
+        const mapped = (classSchedules as any[]).map((cs: any) => ({
           id: cs.id,
           user_id: cs.teacher_id || "",
           date: today,
           start_time: cs.start_time,
           end_time: cs.end_time,
           subject: cs.subjects?.name || null,
-          location: cs.classes?.name || null, // maybe display class name
+          location: cs.classes?.name || null,
           teacher_name: cs.teachers?.full_name || null,
           isClassSchedule: true,
         }));
         results = results.concat(mapped);
       }
 
-      // sort by start_time
       results.sort((a, b) => a.start_time.localeCompare(b.start_time));
-
       return results;
     },
     enabled: !!user,

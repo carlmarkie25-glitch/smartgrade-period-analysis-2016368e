@@ -19,7 +19,7 @@ export const useClassSchedules = () => {
     queryKey: ["class-schedules"],
     queryFn: async (): Promise<ClassScheduleEntry[]> => {
       const { data, error } = await supabase
-        .from<ClassScheduleEntry>("class_schedules")
+        .from("class_schedules" as any)
         .select(
           `*,
             classes(id,name),
@@ -29,7 +29,7 @@ export const useClassSchedules = () => {
         .order("day_of_week")
         .order("start_time");
       if (error) throw error;
-      return data || [];
+      return (data as any[]) || [];
     },
     enabled: true,
   });

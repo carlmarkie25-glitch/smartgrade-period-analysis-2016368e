@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { useUserManagement } from "@/hooks/useUserManagement";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { UserPlus, School, CalendarDays, Users, GraduationCap, Building, FileText, BookOpen } from "lucide-react";
+import { UserPlus, School, CalendarDays, Users, GraduationCap, Building, FileText, BookOpen, Calendar } from "lucide-react";
 import { StudentManagementTab } from "@/components/StudentManagementTab";
 import { ClassManagementTab } from "@/components/ClassManagementTab";
 import { SubjectManagementTab } from "@/components/SubjectManagementTab";
@@ -18,6 +18,7 @@ import { TeacherAssignmentDialog } from "@/components/TeacherAssignmentDialog";
 import { SponsorAssignmentDialog } from "@/components/SponsorAssignmentDialog";
 import { UserRoleManagement } from "@/components/UserRoleManagement";
 import MainLayout from "@/components/MainLayout";
+import { AcademicEventManagementTab } from "@/components/AcademicEventManagementTab";
 
 const Admin = () => {
   const { toast } = useToast();
@@ -113,7 +114,7 @@ const Admin = () => {
         </div>
 
         <Tabs defaultValue="users" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-7">
+          <TabsList className="grid w-full grid-cols-8">
             <TabsTrigger value="users">
               <UserPlus className="h-4 w-4 mr-2" />
               Users
@@ -145,6 +146,10 @@ const Admin = () => {
             <TabsTrigger value="schedule">
               <CalendarDays className="h-4 w-4 mr-2" />
               Schedule
+            </TabsTrigger>
+            <TabsTrigger value="calendar">
+              <Calendar className="h-4 w-4 mr-2" />
+              Calendar
             </TabsTrigger>
           </TabsList>
 
@@ -219,6 +224,9 @@ const Admin = () => {
           </TabsContent>
           <TabsContent value="schedule">
             <ClassScheduleManagementTab />
+          </TabsContent>
+          <TabsContent value="calendar">
+            <AcademicEventManagementTab />
           </TabsContent>
         </Tabs>
       </div>

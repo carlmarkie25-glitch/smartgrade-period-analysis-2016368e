@@ -36,7 +36,7 @@ const Gradebook = () => {
     return (students || []).filter((student) => {
       const nameMatch = (student.full_name || "").toLowerCase().includes(term);
       const studentIdMatch = (student.student_id || "").toLowerCase().includes(term);
-      const emailMatch = (student.email || "").toLowerCase().includes(term);
+      const emailMatch = ((student as any).email || "").toLowerCase().includes(term);
 
       return nameMatch || studentIdMatch || emailMatch;
     });
