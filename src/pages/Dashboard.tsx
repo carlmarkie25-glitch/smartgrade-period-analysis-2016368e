@@ -1,3 +1,4 @@
+import { DashboardLayout } from "@/components/dashboard";
 import MainLayout from "@/components/MainLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { GraduationCap, Users, BookOpen, TrendingUp, FileText, Clock, CheckCircle, AlertCircle, User, CalendarDays } from "lucide-react";
@@ -55,95 +56,7 @@ const Dashboard = () => {
 };
 
 const AdminDashboard = () => {
-  const { data: stats, isLoading } = useDashboardStats();
-  const navigate = useNavigate();
-
-  const departmentStats = [
-    { label: "Class Completion", value: 85, colorClass: "bg-secondary" },
-    { label: "Teacher Activity", value: 72, colorClass: "bg-primary" },
-    { label: "Grade Submissions", value: 91, colorClass: "bg-success" },
-    { label: "Report Generation", value: 68, colorClass: "bg-chart-5" },
-  ];
-
-  return (
-    <MainLayout>
-      <div className="container mx-auto px-4 py-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-foreground mb-1">ACADEMY - EXECUTIVE OVERVIEW</h1>
-          <p className="text-muted-foreground">Welcome back! Here's your school overview.</p>
-        </div>
-
-        {/* Summary Cards */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-          <SummaryCard
-            title="Students"
-            subtitle={`Total enrolled - ${new Date().getFullYear()}`}
-            icon={Users}
-            stats={[
-              { value: stats?.totalStudents.toString() || "0", label: "Total" },
-              { value: stats?.totalClasses.toString() || "0", label: "Classes" },
-              { value: "95%", label: "Attendance" },
-            ]}
-          />
-          <SummaryCard
-            title="Faculty"
-            subtitle={`Academic year - ${stats?.currentYear || "N/A"}`}
-            icon={GraduationCap}
-            stats={[
-              { value: "24", label: "Teachers" },
-              { value: "8", label: "Departments" },
-              { value: "Active", label: "Status" },
-            ]}
-          />
-        </div>
-
-        {/* Main Charts Row */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-          <EnrollmentChart />
-          <StatsWidget title="Performance Metrics" stats={departmentStats} />
-        </div>
-
-        {/* Secondary Charts Row */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-          <GradeDistributionChart />
-          <PerformanceChart />
-        </div>
-
-        {/* Quick Actions */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Quick Actions</CardTitle>
-            <CardDescription>Frequently used features</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              {[
-                { label: "Enter Grades", icon: BookOpen, path: "/gradebook" },
-                { label: "Generate Report", icon: FileText, path: "/reports" },
-                { label: "View Analytics", icon: TrendingUp, path: "/analytics" },
-                { label: "View Schedule", icon: CalendarDays, path: "/schedule" },
-                { label: "Admin Panel", icon: Users, path: "/admin" },
-              ].map((action) => {
-                const Icon = action.icon;
-                return (
-                  <button
-                    key={action.label}
-                    onClick={() => navigate(action.path)}
-                    className="p-4 rounded-lg border bg-card hover:bg-accent transition-colors text-left group"
-                  >
-                    <div className="h-10 w-10 rounded-lg bg-secondary/10 flex items-center justify-center mb-3 group-hover:bg-secondary/20 transition-colors">
-                      <Icon className="h-5 w-5 text-secondary" />
-                    </div>
-                    <p className="text-sm font-medium text-foreground">{action.label}</p>
-                  </button>
-                );
-              })}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    </MainLayout>
-  );
+  return <DashboardLayout />;
 };
 
 const TeacherDashboard = () => {
