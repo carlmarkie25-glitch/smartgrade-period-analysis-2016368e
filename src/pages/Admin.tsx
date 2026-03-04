@@ -7,11 +7,13 @@ import { Label } from "@/components/ui/label";
 import { useUserManagement } from "@/hooks/useUserManagement";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { UserPlus, School, BookOpen, Users, GraduationCap, Building } from "lucide-react";
+import { UserPlus, School, CalendarDays, Users, GraduationCap, Building, FileText, BookOpen } from "lucide-react";
 import { StudentManagementTab } from "@/components/StudentManagementTab";
 import { ClassManagementTab } from "@/components/ClassManagementTab";
 import { SubjectManagementTab } from "@/components/SubjectManagementTab";
 import { DepartmentManagementTab } from "@/components/DepartmentManagementTab";
+import { ClassScheduleManagementTab } from "@/components/ClassScheduleManagementTab";
+import { UserBiodataManagementTab } from "@/components/UserBiodataManagementTab";
 import { TeacherAssignmentDialog } from "@/components/TeacherAssignmentDialog";
 import { SponsorAssignmentDialog } from "@/components/SponsorAssignmentDialog";
 import { UserRoleManagement } from "@/components/UserRoleManagement";
@@ -111,10 +113,14 @@ const Admin = () => {
         </div>
 
         <Tabs defaultValue="users" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-6">
+          <TabsList className="grid w-full grid-cols-7">
             <TabsTrigger value="users">
               <UserPlus className="h-4 w-4 mr-2" />
               Users
+            </TabsTrigger>
+            <TabsTrigger value="biodata">
+              <FileText className="h-4 w-4 mr-2" />
+              Biodata
             </TabsTrigger>
             <TabsTrigger value="students">
               <GraduationCap className="h-4 w-4 mr-2" />
@@ -136,6 +142,10 @@ const Admin = () => {
               <Users className="h-4 w-4 mr-2" />
               Departments
             </TabsTrigger>
+            <TabsTrigger value="schedule">
+              <CalendarDays className="h-4 w-4 mr-2" />
+              Schedule
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="users">
@@ -147,6 +157,10 @@ const Admin = () => {
               onOpenTeacherAssignment={handleOpenTeacherAssignment}
               onOpenSponsorAssignment={handleOpenSponsorAssignment}
             />
+          </TabsContent>
+
+          <TabsContent value="biodata">
+            <UserBiodataManagementTab />
           </TabsContent>
 
           <TabsContent value="students">
@@ -202,6 +216,9 @@ const Admin = () => {
 
           <TabsContent value="departments">
             <DepartmentManagementTab />
+          </TabsContent>
+          <TabsContent value="schedule">
+            <ClassScheduleManagementTab />
           </TabsContent>
         </Tabs>
       </div>
