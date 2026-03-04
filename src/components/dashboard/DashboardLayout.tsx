@@ -29,49 +29,76 @@ export const DashboardLayout = () => {
       {/* Main Content */}
       <main className="pt-24 pl-32 pr-8 pb-8">
         <div className="max-w-7xl mx-auto space-y-8">
-          {/* Section A: Overview Stats (3 cards only) */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <StatCard
-              title="Total Students"
-              value="1215"
-              icon={Users}
-              trend={{ value: 12, isPositive: true }}
-              backgroundColor="bg-blue-50/60"
-              iconBackgroundColor="bg-blue-100/60"
-              iconColor="text-blue-600"
-            />
-            <StatCard
-              title="Active Teachers"
-              value="345"
-              icon={BookOpen}
-              trend={{ value: 8, isPositive: true }}
-              backgroundColor="bg-emerald-50/60"
-              iconBackgroundColor="bg-emerald-100/60"
-              iconColor="text-emerald-600"
-            />
-            <StatCard
-              title="Classes Running"
-              value="93"
-              icon={School}
-              trend={{ value: 3, isPositive: true }}
-              backgroundColor="bg-purple-50/60"
-              iconBackgroundColor="bg-purple-100/60"
-              iconColor="text-purple-600"
-            />
+          {/* Section A: Overview Stats + Profile Summary (Single Row) */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Stats Cards - Left 2 columns */}
+            <div className="lg:col-span-2">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <StatCard
+                  title="Total Students"
+                  value="1215"
+                  icon={Users}
+                  trend={{ value: 12, isPositive: true }}
+                  backgroundColor="bg-blue-50/60"
+                  iconBackgroundColor="bg-blue-100/60"
+                  iconColor="text-blue-600"
+                />
+                <StatCard
+                  title="Active Teachers"
+                  value="345"
+                  icon={BookOpen}
+                  trend={{ value: 8, isPositive: true }}
+                  backgroundColor="bg-emerald-50/60"
+                  iconBackgroundColor="bg-emerald-100/60"
+                  iconColor="text-emerald-600"
+                />
+                <StatCard
+                  title="Classes Running"
+                  value="93"
+                  icon={School}
+                  trend={{ value: 3, isPositive: true }}
+                  backgroundColor="bg-purple-50/60"
+                  iconBackgroundColor="bg-purple-100/60"
+                  iconColor="text-purple-600"
+                />
+              </div>
+            </div>
+
+            {/* Profile Summary - Right 1 column */}
+            <div className="lg:col-span-1">
+              <ProfileSummary
+                adminName="Dr. John Jacob"
+                role="School Principal"
+                totalStudents={784}
+                studentPercentage={92}
+              />
+            </div>
           </div>
 
-          {/* Section B & C: Analytics + Profile (Two Column Layout) */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Analytics Chart - Left */}
-            <AnalyticsChart data={analyticsData} height={350} />
+          {/* Section B & C: Analytics + Activities (Two Column Layout) */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Analytics Chart - Left 2 columns */}
+            <div className="lg:col-span-2">
+              <AnalyticsChart data={analyticsData} height={320} />
+            </div>
 
-            {/* Profile Summary - Right */}
-            <ProfileSummary
-              adminName="Dr. John Jacob"
-              role="School Principal"
-              totalStudents={784}
-              studentPercentage={92}
-            />
+            {/* Today's Activities - Right 1 column */}
+            <div className="lg:col-span-1">
+              <ActivityList />
+            </div>
+          </div>
+
+          {/* Section D & E: Schedule + Empty (maintain balance) */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Schedule - Left 2 columns */}
+            <div className="lg:col-span-2">
+              <Schedule />
+            </div>
+
+            {/* Empty space or additional card - Right 1 column */}
+            <div className="lg:col-span-1">
+              {/* Placeholder for future content or additional stats */}
+            </div>
           </div>
         </div>
       </main>
