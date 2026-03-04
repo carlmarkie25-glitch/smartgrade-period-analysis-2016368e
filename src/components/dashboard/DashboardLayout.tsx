@@ -29,8 +29,8 @@ export const DashboardLayout = () => {
       {/* Main Content */}
       <main className="pt-24 pl-32 pr-8 pb-8">
         <div className="max-w-7xl mx-auto space-y-8">
-          {/* Section A: Overview Stats */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {/* Section A: Overview Stats (3 cards only) */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <StatCard
               title="Total Students"
               value="1215"
@@ -58,42 +58,20 @@ export const DashboardLayout = () => {
               iconBackgroundColor="bg-purple-100/60"
               iconColor="text-purple-600"
             />
-            <StatCard
-              title="Pending Admissions"
-              value="71"
-              icon={Clock}
-              trend={{ value: 5, isPositive: false }}
-              backgroundColor="bg-orange-50/60"
-              iconBackgroundColor="bg-orange-100/60"
-              iconColor="text-orange-600"
-            />
           </div>
 
           {/* Section B & C: Analytics + Profile (Two Column Layout) */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Analytics Chart - Left 2 columns */}
-            <div className="lg:col-span-2">
-              <AnalyticsChart data={analyticsData} height={350} />
-            </div>
-
-            {/* Profile Summary - Right 1 column */}
-            <div className="lg:col-span-1">
-              <ProfileSummary
-                adminName="Dr. John Jacob"
-                role="School Principal"
-                totalStudents={784}
-                studentPercentage={92}
-              />
-            </div>
-          </div>
-
-          {/* Section D & E: Schedule + Activities (Two Column Layout) */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Schedule - Left */}
-            <Schedule />
+            {/* Analytics Chart - Left */}
+            <AnalyticsChart data={analyticsData} height={350} />
 
-            {/* Today's Activities - Right */}
-            <ActivityList />
+            {/* Profile Summary - Right */}
+            <ProfileSummary
+              adminName="Dr. John Jacob"
+              role="School Principal"
+              totalStudents={784}
+              studentPercentage={92}
+            />
           </div>
         </div>
       </main>
