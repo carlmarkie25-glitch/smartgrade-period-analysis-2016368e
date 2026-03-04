@@ -59,6 +59,53 @@ export type Database = {
         }
         Relationships: []
       }
+      academic_periods: {
+        Row: {
+          academic_year_id: string | null
+          created_at: string
+          display_order: number
+          end_date: string
+          id: string
+          label: string
+          period_type: string
+          semester: string
+          start_date: string
+          updated_at: string
+        }
+        Insert: {
+          academic_year_id?: string | null
+          created_at?: string
+          display_order?: number
+          end_date: string
+          id?: string
+          label: string
+          period_type: string
+          semester?: string
+          start_date: string
+          updated_at?: string
+        }
+        Update: {
+          academic_year_id?: string | null
+          created_at?: string
+          display_order?: number
+          end_date?: string
+          id?: string
+          label?: string
+          period_type?: string
+          semester?: string
+          start_date?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "academic_periods_academic_year_id_fkey"
+            columns: ["academic_year_id"]
+            isOneToOne: false
+            referencedRelation: "academic_years"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       academic_years: {
         Row: {
           created_at: string

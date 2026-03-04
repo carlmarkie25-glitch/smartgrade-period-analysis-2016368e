@@ -1,161 +1,204 @@
-import { useState, useMemo } from "react";
+import { useMemo } from "react";
 import MainLayout from "@/components/MainLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useAcademicEvents, EVENT_TYPES, type AcademicEvent } from "@/hooks/useAcademicEvents";
-import { format, startOfMonth, endOfMonth, eachDayOfInterval, getDay, addMonths, subMonths, isSameDay, isSameMonth, isWithinInterval, parseISO } from "date-fns";
+import { useAcademicPeriods, type AcademicPeriod } from "@/hooks/useAcademicPeriods";
+import { format, parseISO, isWithinInterval } from "date-fns";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { useState } from "react";
+import { CalendarDays, Clock, BookOpen } from "lucide-react";
 
 const AcademicCalendar = () => {
-  const { data: events, isLoading } = useAcademicEvents();
-  const [currentMonth, setCurrentMonth] = useState(new Date());
+  const { data: events, isLoading: eventsLoading } = useAcademicEvents();
+  const { data: periods, isLoading: periodsLoading } = useAcademicPeriods();
   const [selectedEvent, setSelectedEvent] = useState<AcademicEvent | null>(null);
 
-  const calendarDays = useMemo(() => {
-    const monthStart = startOfMonth(currentMonth);
-    const monthEnd = endOfMonth(currentMonth);
-    const days = eachDayOfInterval({ start: monthStart, end: monthEnd });
+  const isLoading = eventsLoading || periodsLoading;
 
-    // Pad start with empty days
-    const startPadding = getDay(monthStart);
-    return { days, startPadding };
-  }, [currentMonth]);
-
-  const getEventsForDay = (day: Date) => {
+  const getEventsForPeriod = (period: AcademicPeriod) => {
     if (!events) return [];
+    const pStart = parseISO(period.start_date);
+    const pEnd = parseISO(period.end_date);
     return events.filter((event) => {
-      const start = parseISO(event.start_date);
-      const end = event.end_date ? parseISO(event.end_date) : start;
-      return isSameDay(day, start) || isSameDay(day, end) || isWithinInterval(day, { start, end });
+      const eStart = parseISO(event.start_date);
+      return isWithinInterval(eStart, { start: pStart, end: pEnd });
     });
   };
 
-  const weekDays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+  const semester1 = useMemo(() => periods?.filter((p) => p.semester === "semester1") || [], [periods]);
+  const semester2 = useMemo(() => periods?.filter((p) => p.semester === "semester2") || [], [periods]);
+
+  const unassignedEvents = useMemo(() => {
+    if (!events || !periods || periods.length === 0) return events || [];
+    return events.filter((event) => {
+      const eStart = parseISO(event.start_date);
+      return !periods.some((p) => {
+        try {
+          return isWithinInterval(eStart, { start: parseISO(p.start_date), end: parseISO(p.end_date) });
+        } catch { return false; }
+      });
+    });
+  }, [events, periods]);
+
+  const formatDateRange = (start: string, end: string) => {
+    return `${format(parseISO(start), "MMM d, yyyy")} — ${format(parseISO(end), "MMM d, yyyy")}`;
+  };
+
+  const getPeriodStatus = (period: AcademicPeriod) => {
+    const now = new Date();
+    const start = parseISO(period.start_date);
+    const end = parseISO(period.end_date);
+    if (now < start) return "upcoming";
+    if (now > end) return "completed";
+    return "active";
+  };
 
   return (
     <MainLayout>
       <div className="container mx-auto px-4 py-8">
         <div className="mb-6">
           <h1 className="text-3xl font-bold text-foreground">Academic Calendar</h1>
-          <p className="text-muted-foreground">View upcoming academic events and activities</p>
+          <p className="text-muted-foreground">Term-based overview of the academic year</p>
         </div>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <Button variant="ghost" size="icon" onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}>
-              <ChevronLeft className="h-5 w-5" />
-            </Button>
-            <CardTitle className="text-xl">{format(currentMonth, "MMMM yyyy")}</CardTitle>
-            <Button variant="ghost" size="icon" onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}>
-              <ChevronRight className="h-5 w-5" />
-            </Button>
-          </CardHeader>
-          <CardContent>
-            {isLoading ? (
-              <p className="text-muted-foreground py-8 text-center">Loading calendar...</p>
-            ) : (
-              <>
-                {/* Week header */}
-                <div className="grid grid-cols-7 mb-2">
-                  {weekDays.map((d) => (
-                    <div key={d} className="text-center text-xs font-medium text-muted-foreground py-2">{d}</div>
-                  ))}
+        {/* Legend */}
+        <div className="flex flex-wrap gap-3 mb-6">
+          {EVENT_TYPES.map((t) => (
+            <div key={t.value} className="flex items-center gap-1.5">
+              <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: t.color }} />
+              <span className="text-xs text-muted-foreground">{t.label}</span>
+            </div>
+          ))}
+        </div>
+
+        {isLoading ? (
+          <p className="text-muted-foreground py-8 text-center">Loading calendar...</p>
+        ) : !periods || periods.length === 0 ? (
+          <Card>
+            <CardContent className="py-12 text-center">
+              <CalendarDays className="h-12 w-12 mx-auto text-muted-foreground mb-3" />
+              <p className="text-muted-foreground">No academic periods configured yet.</p>
+              <p className="text-sm text-muted-foreground">Ask your administrator to set up period dates.</p>
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="space-y-8">
+            {[
+              { label: "Semester 1", periods: semester1 },
+              { label: "Semester 2", periods: semester2 },
+            ].map((sem) => (
+              <div key={sem.label}>
+                <div className="flex items-center gap-2 mb-4">
+                  <BookOpen className="h-5 w-5 text-primary" />
+                  <h2 className="text-xl font-bold text-foreground">{sem.label}</h2>
                 </div>
 
-                {/* Calendar grid */}
-                <div className="grid grid-cols-7 gap-px bg-border rounded-lg overflow-hidden">
-                  {/* Padding for start of month */}
-                  {Array.from({ length: calendarDays.startPadding }).map((_, i) => (
-                    <div key={`pad-${i}`} className="bg-muted/30 min-h-[90px] p-1" />
-                  ))}
-
-                  {calendarDays.days.map((day) => {
-                    const dayEvents = getEventsForDay(day);
-                    const isToday = isSameDay(day, new Date());
+                <div className="space-y-4">
+                  {sem.periods.map((period) => {
+                    const periodEvents = getEventsForPeriod(period);
+                    const status = getPeriodStatus(period);
 
                     return (
-                      <div
-                        key={day.toISOString()}
-                        className={`bg-card min-h-[90px] p-1 transition-colors ${isToday ? "ring-2 ring-primary ring-inset" : ""}`}
+                      <Card
+                        key={period.id}
+                        className={`overflow-hidden transition-all ${
+                          status === "active"
+                            ? "ring-2 ring-primary shadow-md"
+                            : status === "completed"
+                            ? "opacity-75"
+                            : ""
+                        }`}
                       >
-                        <div className={`text-xs font-medium mb-1 ${isToday ? "text-primary font-bold" : "text-foreground"}`}>
-                          {format(day, "d")}
-                        </div>
-                        <div className="space-y-0.5">
-                          {dayEvents.slice(0, 3).map((event) => (
-                            <button
-                              key={event.id}
-                              onClick={() => setSelectedEvent(event)}
-                              className="w-full text-left rounded px-1 py-0.5 text-[10px] leading-tight truncate hover:opacity-80 transition-opacity text-white"
-                              style={{ backgroundColor: event.color || "#64748b" }}
-                            >
-                              {event.title}
-                            </button>
-                          ))}
-                          {dayEvents.length > 3 && (
-                            <p className="text-[10px] text-muted-foreground px-1">+{dayEvents.length - 3} more</p>
+                        <CardHeader className="pb-2">
+                          <div className="flex items-center justify-between flex-wrap gap-2">
+                            <div className="flex items-center gap-3">
+                              <CardTitle className="text-base">{period.label}</CardTitle>
+                              <Badge
+                                variant={status === "active" ? "default" : "secondary"}
+                                className="text-[10px]"
+                              >
+                                {status === "active" ? "Current" : status === "completed" ? "Done" : "Upcoming"}
+                              </Badge>
+                            </div>
+                            <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                              <CalendarDays className="h-3.5 w-3.5" />
+                              {formatDateRange(period.start_date, period.end_date)}
+                            </div>
+                          </div>
+                        </CardHeader>
+                        <CardContent>
+                          {periodEvents.length === 0 ? (
+                            <p className="text-sm text-muted-foreground py-2">No events scheduled for this period.</p>
+                          ) : (
+                            <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                              {periodEvents.map((event) => (
+                                <button
+                                  key={event.id}
+                                  onClick={() => setSelectedEvent(event)}
+                                  className="flex items-start gap-2.5 p-2.5 rounded-lg border bg-muted/30 hover:bg-muted/60 transition-colors text-left"
+                                >
+                                  <div
+                                    className="w-2.5 h-2.5 rounded-full mt-1 shrink-0"
+                                    style={{ backgroundColor: event.color || "#64748b" }}
+                                  />
+                                  <div className="min-w-0 flex-1">
+                                    <p className="text-sm font-medium truncate">{event.title}</p>
+                                    <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                                      <span>{format(parseISO(event.start_date), "MMM d")}</span>
+                                      {event.end_date && event.end_date !== event.start_date && (
+                                        <span>— {format(parseISO(event.end_date), "MMM d")}</span>
+                                      )}
+                                      {event.start_time && (
+                                        <>
+                                          <Clock className="h-3 w-3 ml-1" />
+                                          <span>{event.start_time}</span>
+                                        </>
+                                      )}
+                                    </div>
+                                  </div>
+                                  <Badge variant="outline" className="text-[9px] shrink-0">
+                                    {EVENT_TYPES.find((t) => t.value === event.event_type)?.label || event.event_type}
+                                  </Badge>
+                                </button>
+                              ))}
+                            </div>
                           )}
-                        </div>
-                      </div>
+                        </CardContent>
+                      </Card>
                     );
                   })}
-
-                  {/* Padding for end of month */}
-                  {Array.from({ length: (7 - ((calendarDays.startPadding + calendarDays.days.length) % 7)) % 7 }).map((_, i) => (
-                    <div key={`endpad-${i}`} className="bg-muted/30 min-h-[90px] p-1" />
-                  ))}
                 </div>
+              </div>
+            ))}
 
-                {/* Legend */}
-                <div className="flex flex-wrap gap-3 mt-4">
-                  {EVENT_TYPES.map((t) => (
-                    <div key={t.value} className="flex items-center gap-1.5">
-                      <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: t.color }} />
-                      <span className="text-xs text-muted-foreground">{t.label}</span>
+            {/* Unassigned events */}
+            {unassignedEvents.length > 0 && (
+              <div>
+                <h2 className="text-lg font-semibold text-muted-foreground mb-3">Other Events</h2>
+                <Card>
+                  <CardContent className="pt-4">
+                    <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                      {unassignedEvents.map((event) => (
+                        <button
+                          key={event.id}
+                          onClick={() => setSelectedEvent(event)}
+                          className="flex items-start gap-2.5 p-2.5 rounded-lg border bg-muted/30 hover:bg-muted/60 transition-colors text-left"
+                        >
+                          <div className="w-2.5 h-2.5 rounded-full mt-1 shrink-0" style={{ backgroundColor: event.color || "#64748b" }} />
+                          <div className="min-w-0 flex-1">
+                            <p className="text-sm font-medium truncate">{event.title}</p>
+                            <p className="text-xs text-muted-foreground">{format(parseISO(event.start_date), "MMM d, yyyy")}</p>
+                          </div>
+                        </button>
+                      ))}
                     </div>
-                  ))}
-                </div>
-              </>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Upcoming events list */}
-        <Card className="mt-6">
-          <CardHeader>
-            <CardTitle className="text-lg">Upcoming Events</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {!events || events.filter((e) => new Date(e.start_date) >= new Date(new Date().toISOString().split("T")[0])).length === 0 ? (
-              <p className="text-muted-foreground">No upcoming events.</p>
-            ) : (
-              <div className="space-y-3">
-                {events
-                  .filter((e) => new Date(e.start_date) >= new Date(new Date().toISOString().split("T")[0]))
-                  .slice(0, 10)
-                  .map((event) => (
-                    <div key={event.id} className="flex items-start gap-3 p-3 rounded-lg border hover:bg-muted/50 transition-colors cursor-pointer" onClick={() => setSelectedEvent(event)}>
-                      <div className="w-3 h-3 rounded-full mt-1 shrink-0" style={{ backgroundColor: event.color || "#64748b" }} />
-                      <div className="flex-1 min-w-0">
-                        <p className="font-medium text-sm">{event.title}</p>
-                        <p className="text-xs text-muted-foreground">
-                          {format(parseISO(event.start_date), "MMM d, yyyy")}
-                          {event.end_date && event.end_date !== event.start_date && ` — ${format(parseISO(event.end_date), "MMM d, yyyy")}`}
-                          {event.start_time && ` · ${event.start_time}`}
-                        </p>
-                        {event.description && <p className="text-xs text-muted-foreground mt-0.5 truncate">{event.description}</p>}
-                      </div>
-                      <Badge variant="secondary" className="shrink-0 text-[10px]">
-                        {EVENT_TYPES.find((t) => t.value === event.event_type)?.label || event.event_type}
-                      </Badge>
-                    </div>
-                  ))}
+                  </CardContent>
+                </Card>
               </div>
             )}
-          </CardContent>
-        </Card>
+          </div>
+        )}
 
         {/* Event detail dialog */}
         <Dialog open={!!selectedEvent} onOpenChange={() => setSelectedEvent(null)}>
@@ -168,16 +211,15 @@ const AcademicCalendar = () => {
             </DialogHeader>
             {selectedEvent && (
               <div className="space-y-3">
-                <div>
-                  <Badge variant="secondary">
-                    {EVENT_TYPES.find((t) => t.value === selectedEvent.event_type)?.label || selectedEvent.event_type}
-                  </Badge>
-                </div>
+                <Badge variant="secondary">
+                  {EVENT_TYPES.find((t) => t.value === selectedEvent.event_type)?.label || selectedEvent.event_type}
+                </Badge>
                 <div className="text-sm">
                   <p className="font-medium text-muted-foreground">Date</p>
                   <p>
                     {format(parseISO(selectedEvent.start_date), "MMMM d, yyyy")}
-                    {selectedEvent.end_date && selectedEvent.end_date !== selectedEvent.start_date && ` — ${format(parseISO(selectedEvent.end_date), "MMMM d, yyyy")}`}
+                    {selectedEvent.end_date && selectedEvent.end_date !== selectedEvent.start_date &&
+                      ` — ${format(parseISO(selectedEvent.end_date), "MMMM d, yyyy")}`}
                   </p>
                 </div>
                 {(selectedEvent.start_time || selectedEvent.end_time) && (

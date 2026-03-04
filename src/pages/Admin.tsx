@@ -19,6 +19,7 @@ import { SponsorAssignmentDialog } from "@/components/SponsorAssignmentDialog";
 import { UserRoleManagement } from "@/components/UserRoleManagement";
 import MainLayout from "@/components/MainLayout";
 import { AcademicEventManagementTab } from "@/components/AcademicEventManagementTab";
+import { AcademicPeriodManagement } from "@/components/AcademicPeriodManagement";
 
 const Admin = () => {
   const { toast } = useToast();
@@ -225,7 +226,8 @@ const Admin = () => {
           <TabsContent value="schedule">
             <ClassScheduleManagementTab />
           </TabsContent>
-          <TabsContent value="calendar">
+          <TabsContent value="calendar" className="space-y-6">
+            <AcademicPeriodManagement />
             <AcademicEventManagementTab />
           </TabsContent>
         </Tabs>
