@@ -15,7 +15,7 @@ export const Topbar = ({
   const [searchFocus, setSearchFocus] = useState(false);
 
   return (
-    <nav className="fixed top-0 left-24 right-0 h-20 bg-white/70 backdrop-blur-md border-b border-teal-100/20 flex items-center justify-between px-8 shadow-sm">
+    <nav className="fixed top-0 left-24 right-0 h-20 z-50 bg-white/70 backdrop-blur-md border-b border-teal-100/20 flex items-center justify-between px-8 shadow-sm">
       {/* Search Bar */}
       <div
         className={`relative w-64 transition-all duration-300 ${searchFocus ? "ring-2 ring-teal-400/50" : ""}`}
