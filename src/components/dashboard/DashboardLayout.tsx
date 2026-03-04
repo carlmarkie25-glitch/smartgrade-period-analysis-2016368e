@@ -31,36 +31,41 @@ export const DashboardLayout = () => {
         <div className="max-w-7xl mx-auto space-y-8">
           {/* Section A: Overview Stats + Profile Summary (Single Row) */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Stats Cards - Left 2 columns */}
+            {/* Enrollment grouping card - Left 2 columns */}
             <div className="lg:col-span-2">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <StatCard
-                  title="Total Students"
-                  value="1215"
-                  icon={Users}
-                  trend={{ value: 12, isPositive: true }}
-                  backgroundColor="bg-blue-50/60"
-                  iconBackgroundColor="bg-blue-100/60"
-                  iconColor="text-blue-600"
-                />
-                <StatCard
-                  title="Active Teachers"
-                  value="345"
-                  icon={BookOpen}
-                  trend={{ value: 8, isPositive: true }}
-                  backgroundColor="bg-emerald-50/60"
-                  iconBackgroundColor="bg-emerald-100/60"
-                  iconColor="text-emerald-600"
-                />
-                <StatCard
-                  title="Classes Running"
-                  value="93"
-                  icon={School}
-                  trend={{ value: 3, isPositive: true }}
-                  backgroundColor="bg-purple-50/60"
-                  iconBackgroundColor="bg-purple-100/60"
-                  iconColor="text-purple-600"
-                />
+              <div className="bg-white/70 backdrop-blur-md rounded-2xl border border-teal-200/30 p-6 shadow-lg">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                  Enrollment 2026
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <StatCard
+                    title="Total Students"
+                    value="1215"
+                    icon={Users}
+                    trend={{ value: 12, isPositive: true }}
+                    backgroundColor="bg-blue-50/60"
+                    iconBackgroundColor="bg-blue-100/60"
+                    iconColor="text-blue-600"
+                  />
+                  <StatCard
+                    title="Active Teachers"
+                    value="345"
+                    icon={BookOpen}
+                    trend={{ value: 8, isPositive: true }}
+                    backgroundColor="bg-emerald-50/60"
+                    iconBackgroundColor="bg-emerald-100/60"
+                    iconColor="text-emerald-600"
+                  />
+                  <StatCard
+                    title="Classes Running"
+                    value="93"
+                    icon={School}
+                    trend={{ value: 3, isPositive: true }}
+                    backgroundColor="bg-purple-50/60"
+                    iconBackgroundColor="bg-purple-100/60"
+                    iconColor="text-purple-600"
+                  />
+                </div>
               </div>
             </div>
 
