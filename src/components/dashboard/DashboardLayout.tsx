@@ -82,9 +82,14 @@ export const DashboardLayout = () => {
 
           {/* Section B & C: Analytics + Activities (Two Column Layout) */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Analytics Chart - Left 2 columns */}
+            {/* Analytics Chart wrapped card - Left 2 columns */}
             <div className="lg:col-span-2">
-              <AnalyticsChart data={analyticsData} height={320} />
+              <div className="bg-white/70 backdrop-blur-md rounded-2xl border border-teal-200/30 p-6 shadow-lg">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                  Booking Rate
+                </h3>
+                <AnalyticsChart data={analyticsData} height={260} />
+              </div>
             </div>
 
             {/* Today's Activities - Right 1 column */}
