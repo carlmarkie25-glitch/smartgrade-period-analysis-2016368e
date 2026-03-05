@@ -7,56 +7,59 @@ import { ProfileSummary } from "./ProfileSummary";
 import { Schedule } from "./Schedule";
 import { ActivityList } from "./ActivityList";
 
-// Mock data for analytics
 const analyticsData = [
-  { month: "Jan", students: 320, capacity: 400 },
-  { month: "Feb", students: 380, capacity: 400 },
-  { month: "Mar", students: 420, capacity: 450 },
-  { month: "Apr", students: 450, capacity: 500 },
-  { month: "May", students: 520, capacity: 550 },
-  { month: "Jun", students: 580, capacity: 600 },
+  { month: "Sun", students: 120, capacity: 200 },
+  { month: "Mon", students: 280, capacity: 350 },
+  { month: "Tue", students: 180, capacity: 300 },
+  { month: "Wed", students: 350, capacity: 400 },
+  { month: "Thu", students: 420, capacity: 450 },
+  { month: "Fri", students: 380, capacity: 420 },
+  { month: "Sat", students: 220, capacity: 300 },
 ];
 
 export const DashboardLayout = () => {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50/50 via-teal-50/30 to-cyan-50/50">
+    <div className="min-h-screen bg-gradient-to-br from-[hsl(170,30%,96%)] via-[hsl(175,25%,95%)] to-[hsl(185,30%,94%)]">
       <Sidebar />
       <Topbar />
 
-      <main className="pt-[88px] pl-28 pr-6 pb-6">
-        <div className="max-w-[1400px] mx-auto space-y-4">
+      <main className="pt-[84px] pl-[104px] pr-5 pb-5">
+        <div className="max-w-[1400px] mx-auto space-y-3">
           {/* Row 1: Stats + Profile */}
-          <div className="grid grid-cols-1 lg:grid-cols-[1fr_280px] gap-4">
-            <div className="bg-white/70 backdrop-blur-md rounded-2xl border border-teal-200/30 p-5 shadow-lg">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-base font-semibold text-gray-900">Enrollment 2026</h3>
-                <span className="text-xs font-medium text-teal-600/70 px-2.5 py-1 bg-teal-50/50 rounded-lg">Weekly</span>
+          <div className="grid grid-cols-1 lg:grid-cols-[1fr_260px] gap-3">
+            <div className="bg-white/70 backdrop-blur-md rounded-2xl border border-[hsl(170,30%,85%)]/30 p-4 shadow-sm">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-sm font-semibold text-gray-900">Incoming Student History</h3>
+                <span className="text-[10px] font-medium text-[hsl(170,50%,35%)]/70 px-2 py-0.5 bg-[hsl(170,40%,95%)] rounded-md">Weekly</span>
               </div>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                <StatCard title="Total Students" value="1215" icon={Users} trend={{ value: 12, isPositive: true }} backgroundColor="bg-blue-50/60" iconBackgroundColor="bg-blue-100/60" iconColor="text-blue-600" />
-                <StatCard title="Active Teachers" value="345" icon={BookOpen} trend={{ value: 8, isPositive: true }} backgroundColor="bg-emerald-50/60" iconBackgroundColor="bg-emerald-100/60" iconColor="text-emerald-600" />
-                <StatCard title="Classes Running" value="93" icon={School} trend={{ value: 3, isPositive: true }} backgroundColor="bg-purple-50/60" iconBackgroundColor="bg-purple-100/60" iconColor="text-purple-600" />
-                <StatCard title="Pending Reviews" value="71" icon={Clock} trend={{ value: 5, isPositive: false }} backgroundColor="bg-amber-50/60" iconBackgroundColor="bg-amber-100/60" iconColor="text-amber-600" />
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5">
+                <StatCard title="Consultation" value="1215" icon={Users} trend={{ value: 12, isPositive: true }} backgroundColor="bg-[hsl(210,60%,96%)]" iconBackgroundColor="bg-[hsl(210,60%,90%)]" iconColor="text-[hsl(210,60%,45%)]" />
+                <StatCard title="In Progress" value="345" icon={BookOpen} trend={{ value: 8, isPositive: true }} backgroundColor="bg-[hsl(170,45%,95%)]" iconBackgroundColor="bg-[hsl(170,45%,88%)]" iconColor="text-[hsl(170,50%,35%)]" highlighted />
+                <StatCard title="In Review" value="93" icon={School} trend={{ value: 3, isPositive: true }} backgroundColor="bg-[hsl(270,40%,96%)]" iconBackgroundColor="bg-[hsl(270,40%,90%)]" iconColor="text-[hsl(270,40%,45%)]" />
+                <StatCard title="In Pending" value="71" icon={Clock} trend={{ value: 5, isPositive: false }} backgroundColor="bg-[hsl(35,60%,96%)]" iconBackgroundColor="bg-[hsl(35,60%,90%)]" iconColor="text-[hsl(35,60%,40%)]" />
               </div>
             </div>
-            <ProfileSummary adminName="Dr. John Jacob" role="School Principal" totalStudents={784} studentPercentage={92} />
+            <ProfileSummary adminName="Dr. John Jacob" role="Orthodontist" totalStudents={784} studentPercentage={92} />
           </div>
 
           {/* Row 2: Analytics + Activities */}
-          <div className="grid grid-cols-1 lg:grid-cols-[1fr_280px] gap-4">
-            <div className="bg-white/70 backdrop-blur-md rounded-2xl border border-teal-200/30 p-5 shadow-lg">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-base font-semibold text-gray-900">Enrollment Analytics</h3>
-                <span className="text-xs font-medium text-teal-600/70 px-2.5 py-1 bg-teal-50/50 rounded-lg">Weekly</span>
+          <div className="grid grid-cols-1 lg:grid-cols-[1fr_260px] gap-3">
+            <div className="bg-white/70 backdrop-blur-md rounded-2xl border border-[hsl(170,30%,85%)]/30 p-4 shadow-sm">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-sm font-semibold text-gray-900">Booking Rate</h3>
+                <span className="text-[10px] font-medium text-[hsl(170,50%,35%)]/70 px-2 py-0.5 bg-[hsl(170,40%,95%)] rounded-md">Weekly</span>
               </div>
-              <div className="flex flex-col lg:flex-row items-start lg:items-end gap-4">
+              <div className="flex flex-col lg:flex-row items-start lg:items-end gap-3">
                 <div className="flex-shrink-0">
-                  <p className="text-4xl font-bold text-gray-900">58%</p>
-                  <p className="text-sm text-gray-600 mt-1">Overall Enrollment Rate</p>
-                  <p className="text-xs text-teal-600 mt-1">6% ↑ Higher than last week</p>
+                  <p className="text-3xl font-bold text-gray-900">58%</p>
+                  <p className="text-xs text-gray-500 mt-0.5">Your Total Patient<br/>on Friday</p>
+                  <p className="text-[10px] text-[hsl(170,60%,35%)] mt-1 flex items-center gap-1">
+                    <span className="font-bold text-[hsl(170,60%,35%)]">6% ↑</span>
+                    <span className="text-gray-400">Your booking rate is 6% higher than yesterday</span>
+                  </p>
                 </div>
                 <div className="flex-1 w-full min-w-0">
-                  <AnalyticsChart data={analyticsData} height={140} />
+                  <AnalyticsChart data={analyticsData} height={120} />
                 </div>
               </div>
             </div>
@@ -64,7 +67,7 @@ export const DashboardLayout = () => {
           </div>
 
           {/* Row 3: Schedule */}
-          <div className="grid grid-cols-1 lg:grid-cols-[1fr_280px] gap-4">
+          <div className="grid grid-cols-1 lg:grid-cols-[1fr_260px] gap-3">
             <Schedule />
             <div />
           </div>

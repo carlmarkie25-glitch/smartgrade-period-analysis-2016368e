@@ -13,99 +13,71 @@ export const ProfileSummary = ({
   role = "School Principal",
   totalStudents = 784,
   studentPercentage = 92,
-  greeting = "Good Morning",
+  greeting = "Good Morning!",
   avatarUrl,
   initials = "JJ",
 }: ProfileSummaryProps) => {
-  const radius = 70;
+  const radius = 52;
   const circumference = 2 * Math.PI * radius;
   const offset = circumference - (studentPercentage / 100) * circumference;
 
   return (
-    <div className="bg-gradient-to-br from-teal-50/80 to-emerald-50/60 rounded-2xl backdrop-blur-md border border-teal-200/30 p-8 shadow-lg">
-      {/* Greeting */}
-      <p className="text-xs font-semibold text-teal-600/70 uppercase tracking-wide mb-6">
-        {greeting}
-      </p>
-
-      {/* Admin Info */}
-      <div className="mb-8">
-        <h2 className="text-2xl font-bold text-gray-900 mb-1">{adminName}</h2>
-        <p className="text-sm font-medium text-teal-600/70">{role}</p>
+    <div className="bg-gradient-to-br from-[hsl(170,30%,97%)] to-[hsl(160,25%,94%)] rounded-2xl backdrop-blur-md border border-[hsl(170,30%,85%)]/30 p-4 shadow-sm flex flex-col items-center justify-center text-center">
+      {/* Circular Progress with avatar */}
+      <div className="relative w-[120px] h-[120px] mb-2">
+        <svg
+          className="absolute inset-0 -rotate-90"
+          viewBox="0 0 120 120"
+          style={{ width: "100%", height: "100%" }}
+        >
+          <circle cx="60" cy="60" r={radius} fill="none" stroke="hsl(170,30%,90%)" strokeWidth="3" opacity={0.5} />
+          <circle
+            cx="60"
+            cy="60"
+            r={radius}
+            fill="none"
+            stroke="url(#profileGradient)"
+            strokeWidth="3"
+            strokeDasharray={circumference}
+            strokeDashoffset={offset}
+            strokeLinecap="round"
+            style={{ transition: "stroke-dashoffset 0.5s ease-out" }}
+          />
+          <defs>
+            <linearGradient id="profileGradient" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stopColor="hsl(170,60%,45%)" />
+              <stop offset="100%" stopColor="hsl(185,70%,45%)" />
+            </linearGradient>
+          </defs>
+        </svg>
+        <div className="absolute inset-0 flex flex-col items-center justify-center">
+          {avatarUrl ? (
+            <img src={avatarUrl} alt={adminName} className="w-10 h-10 rounded-full object-cover border-2 border-white shadow-sm mb-0.5" />
+          ) : (
+            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[hsl(170,50%,50%)] to-[hsl(160,50%,45%)] flex items-center justify-center text-white font-bold text-xs mb-0.5 border-2 border-white shadow-sm">
+              {initials}
+            </div>
+          )}
+          <span className="text-lg font-bold text-gray-900">{totalStudents}</span>
+          <span className="text-[9px] font-medium text-gray-500">Students</span>
+        </div>
       </div>
 
-      {/* Circular Progress */}
-      <div className="flex flex-col items-center">
-        <div className="relative w-44 h-44 mb-6">
-          {/* Background circle */}
-          <svg
-            className="absolute inset-0 -rotate-90"
-            viewBox="0 0 160 160"
-            style={{ width: "100%", height: "100%" }}
-          >
-            <circle
-              cx="80"
-              cy="80"
-              r={radius}
-              fill="none"
-              stroke="#e0f2f1"
-              strokeWidth="4"
-              opacity={0.5}
-            />
-            <circle
-              cx="80"
-              cy="80"
-              r={radius}
-              fill="none"
-              stroke="url(#progressGradient)"
-              strokeWidth="4"
-              strokeDasharray={circumference}
-              strokeDashoffset={offset}
-              strokeLinecap="round"
-              style={{
-                transition: "stroke-dashoffset 0.5s ease-out",
-              }}
-            />
-            <defs>
-              <linearGradient
-                id="progressGradient"
-                x1="0"
-                y1="0"
-                x2="1"
-                y2="1"
-              >
-                <stop offset="0%" stopColor="#14b8a6" />
-                <stop offset="100%" stopColor="#06b6d4" />
-              </linearGradient>
-            </defs>
-          </svg>
+      {/* Greeting + Info */}
+      <p className="text-[10px] font-medium text-gray-400 mb-0.5">{greeting}</p>
+      <h3 className="text-sm font-bold text-gray-900">{adminName}</h3>
+      <p className="text-[10px] font-medium text-[hsl(170,50%,40%)]">{role}</p>
 
-          {/* Center content */}
-          <div className="absolute inset-0 flex flex-col items-center justify-center">
-            {avatarUrl ? (
-              <img
-                src={avatarUrl}
-                alt={adminName}
-                className="w-16 h-16 rounded-full object-cover border-3 border-white shadow-md mb-2"
-              />
-            ) : (
-              <div className="w-16 h-16 rounded-full bg-gradient-to-br from-teal-400 to-emerald-400 flex items-center justify-center text-white font-bold text-lg mb-2 border-3 border-white shadow-md">
-                {initials}
-              </div>
-            )}
-            <span className="text-3xl font-bold text-gray-900">
-              {studentPercentage}%
-            </span>
-          </div>
+      {/* Gender indicators */}
+      <div className="flex items-center gap-3 mt-2">
+        <div className="flex items-center gap-1">
+          <span className="w-2 h-2 rounded-full bg-[hsl(210,60%,55%)]" />
+          <span className="text-[9px] text-gray-500">Male</span>
         </div>
-
-        {/* Label */}
-        <p className="text-center">
-          <span className="text-2xl font-bold text-gray-900">{totalStudents}</span>
-          <span className="block text-sm font-medium text-teal-600/70 mt-1">
-            Students
-          </span>
-        </p>
+        <div className="flex items-center gap-1">
+          <span className="w-2 h-2 rounded-full bg-[hsl(330,50%,60%)]" />
+          <span className="text-[9px] text-gray-500">Female</span>
+        </div>
       </div>
     </div>
   );

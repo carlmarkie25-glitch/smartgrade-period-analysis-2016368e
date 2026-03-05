@@ -11,6 +11,7 @@ interface StatCardProps {
   backgroundColor?: string;
   iconBackgroundColor?: string;
   iconColor?: string;
+  highlighted?: boolean;
 }
 
 export const StatCard = ({
@@ -18,31 +19,22 @@ export const StatCard = ({
   value,
   icon: Icon,
   trend,
-  backgroundColor = "bg-teal-50/60",
-  iconBackgroundColor = "bg-teal-100/60",
-  iconColor = "text-teal-600",
+  backgroundColor = "bg-[hsl(170,40%,95%)]",
+  iconBackgroundColor = "bg-[hsl(170,40%,88%)]",
+  iconColor = "text-[hsl(170,50%,35%)]",
+  highlighted = false,
 }: StatCardProps) => {
   return (
     <div
-      className={`${backgroundColor} rounded-xl backdrop-blur-sm border border-teal-200/30 p-4 shadow-sm hover:shadow-md transition-shadow duration-300 flex flex-col justify-between h-full`}
+      className={`${highlighted ? 'bg-[hsl(170,45%,92%)] border-[hsl(170,50%,75%)]' : backgroundColor + ' border-transparent'} rounded-xl border p-3 flex items-center gap-3 transition-shadow duration-300 hover:shadow-md`}
     >
-      <div className="flex items-start justify-between mb-2">
-        <div className="flex-1">
-          <p className="text-xs font-medium text-gray-600/80 mb-1">{title}</p>
-          <h3 className="text-2xl font-bold text-gray-900">{value}</h3>
-        </div>
-        <div className={`${iconBackgroundColor} rounded-full p-2 flex-shrink-0`}>
-          <Icon className={`${iconColor} size-4`} />
-        </div>
+      <div className={`${iconBackgroundColor} rounded-full p-2 flex-shrink-0`}>
+        <Icon className={`${iconColor} size-4`} />
       </div>
-      {trend && (
-        <div className="flex items-center gap-1 text-xs font-semibold">
-          <span className={trend.isPositive ? "text-green-600" : "text-red-600"}>
-            {trend.isPositive ? "↑" : "↓"} {Math.abs(trend.value)}%
-          </span>
-          <span className="text-gray-500">{trend.isPositive ? "increase" : "decrease"}</span>
-        </div>
-      )}
+      <div className="flex-1 min-w-0">
+        <h3 className="text-xl font-bold text-gray-900 leading-tight">{value}</h3>
+        <p className="text-[10px] font-medium text-gray-500 truncate">{title}</p>
+      </div>
     </div>
   );
 };
