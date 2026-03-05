@@ -21,19 +21,25 @@ export const ActivityList = ({
     { id: "5", time: "12:00", studentName: "Sara Watson", className: "Grade 10A" },
     { id: "6", time: "13:00", studentName: "Tressa Tiffony", className: "Grade 11A" },
     { id: "7", time: "14:00", studentName: "Meghon Morse", className: "Grade 9B" },
-    { id: "8", time: "17:00", studentName: "Wallace Stone", className: "Grade 10C" },
-    { id: "9", time: "18:00", studentName: "Jane Andrews", className: "Grade 8A" },
+    { id: "8", time: "15:00", studentName: "Wallace Stone", className: "Grade 10C" },
+    { id: "9", time: "16:00", studentName: "Jane Andrews", className: "Grade 8A" },
+    { id: "10", time: "16:30", studentName: "David Chen", className: "Grade 12A" },
+    { id: "11", time: "17:00", studentName: "Emma Rodriguez", className: "Grade 11C" },
+    { id: "12", time: "17:30", studentName: "Michael Brown", className: "Grade 10B" },
+    { id: "13", time: "18:00", studentName: "Lisa Patterson", className: "Grade 9C" },
+    { id: "14", time: "18:30", studentName: "Thomas Miller", className: "Grade 12C" },
+    { id: "15", time: "19:00", studentName: "Sophie Taylor", className: "Grade 11D" },
   ],
   title = "Your Patients Today",
 }: ActivityListProps) => {
   return (
-    <div className="bg-white/70 backdrop-blur-md rounded-2xl border border-[hsl(170,30%,85%)]/30 p-4 shadow-sm">
-      <div className="flex items-center justify-between mb-3">
+    <div className="bg-white/70 backdrop-blur-md rounded-2xl border border-[hsl(170,30%,85%)]/30 p-4 shadow-sm h-full flex flex-col">
+      <div className="flex items-center justify-between mb-3 flex-shrink-0">
         <h3 className="text-sm font-semibold text-gray-900">{title}</h3>
         <span className="text-[10px] font-medium text-[hsl(170,50%,35%)]/70 px-2 py-0.5 bg-[hsl(170,40%,95%)] rounded-md">Weekly</span>
       </div>
 
-      <div className="space-y-0.5 max-h-[280px] overflow-y-auto scrollbar-hide">
+      <div className="space-y-0.5 overflow-y-auto scrollbar-hide flex-1">
         {activities.map((activity) => (
           <div
             key={activity.id}

@@ -1,5 +1,6 @@
 import { LayoutDashboard, Users, BookOpen, Building2, Wallet, Settings } from "lucide-react";
 import { useState } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 
 interface SidebarProps {
   activeTab?: string;
@@ -7,20 +8,23 @@ interface SidebarProps {
 }
 
 export const Sidebar = ({ activeTab = "dashboard", onTabChange }: SidebarProps) => {
+  const navigate = useNavigate();
+  const location = useLocation();
   const [active, setActive] = useState(activeTab);
 
   const menuItems = [
-    { id: "dashboard", icon: LayoutDashboard, label: "Dashboard" },
-    { id: "students", icon: Users, label: "Students" },
-    { id: "teachers", icon: BookOpen, label: "Teachers" },
-    { id: "classes", icon: Building2, label: "Classes" },
-    { id: "finance", icon: Wallet, label: "Finance" },
-    { id: "settings", icon: Settings, label: "Settings" },
+    { id: "dashboard", icon: LayoutDashboard, label: "Dashboard", path: "/dashboard" },
+    { id: "students", icon: Users, label: "Students", path: "/admin" },
+    { id: "teachers", icon: BookOpen, label: "Analytics", path: "/analytics" },
+    { id: "classes", icon: Building2, label: "Classes", path: "/academic-calendar" },
+    { id: "finance", icon: Wallet, label: "Reports", path: "/reports" },
+    { id: "settings", icon: Settings, label: "Settings", path: "/admin" },
   ];
 
-  const handleClick = (id: string) => {
+  const handleClick = (id: string, path: string) => {
     setActive(id);
     onTabChange?.(id);
+    navigate(path);
   };
 
   return (
@@ -32,7 +36,7 @@ export const Sidebar = ({ activeTab = "dashboard", onTabChange }: SidebarProps) 
         return (
           <button
             key={item.id}
-            onClick={() => handleClick(item.id)}
+            onClick={() => handleClick(item.id, item.path)}
             title={item.label}
             className={`relative p-3 rounded-xl transition-all duration-300 group ${
               isActive

@@ -1,4 +1,4 @@
-import { Users, BookOpen, School, Clock } from "lucide-react";
+import { Users, BookOpen, Clock } from "lucide-react";
 import { Sidebar } from "./Sidebar";
 import { Topbar } from "./Topbar";
 import { StatCard } from "./StatCard";
@@ -24,26 +24,26 @@ export const DashboardLayout = () => {
       <Topbar />
 
       <main className="pt-[84px] pl-[104px] pr-5 pb-5">
-        <div className="max-w-[1400px] mx-auto space-y-3">
-          {/* Row 1: Stats + Profile */}
-          <div className="grid grid-cols-1 lg:grid-cols-[1fr_260px] gap-3">
+        <div className="max-w-[1400px] mx-auto">
+          {/* Main Grid Layout */}
+          <div className="grid grid-cols-1 lg:grid-cols-[3fr_2fr] gap-3 auto-rows-max lg:auto-rows-auto">
+            {/* Row 1: Stats */}
             <div className="bg-white/70 backdrop-blur-md rounded-2xl border border-[hsl(170,30%,85%)]/30 p-4 shadow-sm">
               <div className="flex items-center justify-between mb-3">
                 <h3 className="text-sm font-semibold text-gray-900">Incoming Student History</h3>
                 <span className="text-[10px] font-medium text-[hsl(170,50%,35%)]/70 px-2 py-0.5 bg-[hsl(170,40%,95%)] rounded-md">Weekly</span>
               </div>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5">
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-2.5">
                 <StatCard title="Consultation" value="1215" icon={Users} trend={{ value: 12, isPositive: true }} backgroundColor="bg-[hsl(210,60%,96%)]" iconBackgroundColor="bg-[hsl(210,60%,90%)]" iconColor="text-[hsl(210,60%,45%)]" />
                 <StatCard title="In Progress" value="345" icon={BookOpen} trend={{ value: 8, isPositive: true }} backgroundColor="bg-[hsl(170,45%,95%)]" iconBackgroundColor="bg-[hsl(170,45%,88%)]" iconColor="text-[hsl(170,50%,35%)]" highlighted />
-                <StatCard title="In Review" value="93" icon={School} trend={{ value: 3, isPositive: true }} backgroundColor="bg-[hsl(270,40%,96%)]" iconBackgroundColor="bg-[hsl(270,40%,90%)]" iconColor="text-[hsl(270,40%,45%)]" />
                 <StatCard title="In Pending" value="71" icon={Clock} trend={{ value: 5, isPositive: false }} backgroundColor="bg-[hsl(35,60%,96%)]" iconBackgroundColor="bg-[hsl(35,60%,90%)]" iconColor="text-[hsl(35,60%,40%)]" />
               </div>
             </div>
-            <ProfileSummary adminName="Dr. John Jacob" role="Orthodontist" totalStudents={784} studentPercentage={92} />
-          </div>
 
-          {/* Row 2: Analytics + Activities */}
-          <div className="grid grid-cols-1 lg:grid-cols-[1fr_260px] gap-3">
+            {/* Row 1 Right: Profile Summary */}
+            <ProfileSummary adminName="Dr. John Jacob" role="Orthodontist" totalStudents={784} studentPercentage={92} />
+
+            {/* Row 2: Analytics */}
             <div className="bg-white/70 backdrop-blur-md rounded-2xl border border-[hsl(170,30%,85%)]/30 p-4 shadow-sm">
               <div className="flex items-center justify-between mb-3">
                 <h3 className="text-sm font-semibold text-gray-900">Booking Rate</h3>
@@ -63,13 +63,14 @@ export const DashboardLayout = () => {
                 </div>
               </div>
             </div>
-            <ActivityList />
-          </div>
 
-          {/* Row 3: Schedule */}
-          <div className="grid grid-cols-1 lg:grid-cols-[1fr_260px] gap-3">
+            {/* Rows 2-3 Right: Activity List Spanning */}
+            <div className="lg:row-span-2">
+              <ActivityList />
+            </div>
+
+            {/* Row 3: Schedule */}
             <Schedule />
-            <div />
           </div>
         </div>
       </main>
