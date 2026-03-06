@@ -1,4 +1,4 @@
-import MainLayout from "@/components/MainLayout";
+import AppShell from "@/components/AppShell";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { TrendingUp, Award, AlertTriangle } from "lucide-react";
@@ -239,7 +239,7 @@ const Analytics = () => {
           </Card>
         </div>
       </div>
-    </MainLayout>
+    </AppShell>
   );
 };
 

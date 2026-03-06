@@ -1,4 +1,4 @@
-import MainLayout from "@/components/MainLayout";
+import AppShell from "@/components/AppShell";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -194,7 +194,7 @@ const Reports = () => {
           className={classes?.find(c => c.id === selectedClass)?.name || ""}
         />
       </div>
-    </MainLayout>
+    </AppShell>
   );
 };
 

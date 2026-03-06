@@ -1,4 +1,4 @@
-import MainLayout from "@/components/MainLayout";
+import AppShell from "@/components/AppShell";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -124,8 +124,8 @@ const Gradebook = () => {
   };
 
   return (
-    <MainLayout>
-      <div className="container mx-auto px-4 py-8">
+    <AppShell activeTab="gradebook">
+      <div className="py-4">
         <div className="mb-8 flex items-center justify-between">
           <div>
             <h1 className="text-4xl font-bold text-foreground mb-2">Gradebook</h1>
@@ -425,7 +425,7 @@ const Gradebook = () => {
           </Card>
         )}
       </div>
-    </MainLayout>
+    </AppShell>
   );
 };
 
