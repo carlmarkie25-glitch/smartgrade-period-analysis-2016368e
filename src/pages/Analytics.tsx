@@ -1,4 +1,4 @@
-import MainLayout from "@/components/MainLayout";
+import AppShell from "@/components/AppShell";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { TrendingUp, Award, AlertTriangle } from "lucide-react";
@@ -47,8 +47,8 @@ const Analytics = () => {
   const topLabel = isAdmin ? "School-Wide Top 5" : "Top 5 in My Classes";
 
   return (
-    <MainLayout>
-      <div className="container mx-auto px-4 py-8">
+    <AppShell activeTab="analytics">
+      <div className="py-4">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-foreground mb-1">{pageTitle}</h1>
           <p className="text-muted-foreground">{pageDescription}</p>
@@ -239,7 +239,7 @@ const Analytics = () => {
           </Card>
         </div>
       </div>
-    </MainLayout>
+    </AppShell>
   );
 };
 

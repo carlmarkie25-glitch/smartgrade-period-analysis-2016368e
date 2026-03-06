@@ -1,4 +1,4 @@
-import MainLayout from "@/components/MainLayout";
+import AppShell from "@/components/AppShell";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -52,8 +52,8 @@ const Reports = () => {
   };
 
   return (
-    <MainLayout>
-      <div className="container mx-auto px-4 py-8">
+    <AppShell activeTab="reports">
+      <div className="py-4">
         <div className="mb-8">
           <h1 className="text-4xl font-bold text-foreground mb-2">Reports</h1>
           <p className="text-muted-foreground">Generate and view student report cards</p>
@@ -194,7 +194,7 @@ const Reports = () => {
           className={classes?.find(c => c.id === selectedClass)?.name || ""}
         />
       </div>
-    </MainLayout>
+    </AppShell>
   );
 };
 

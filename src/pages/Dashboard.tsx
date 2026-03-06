@@ -1,5 +1,5 @@
 import { DashboardLayout } from "@/components/dashboard";
-import MainLayout from "@/components/MainLayout";
+import AppShell from "@/components/AppShell";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { GraduationCap, Users, BookOpen, TrendingUp, FileText, Clock, CheckCircle, AlertCircle, User, CalendarDays } from "lucide-react";
 import { useDashboardStats } from "@/hooks/useDashboardStats";
@@ -10,26 +10,19 @@ import { useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { formatDistanceToNow } from "date-fns";
 import { useAuth } from "@/contexts/AuthContext";
-import EnrollmentChart from "@/components/dashboard/EnrollmentChart";
-import GradeDistributionChart from "@/components/dashboard/GradeDistributionChart";
-import PerformanceChart from "@/components/dashboard/PerformanceChart";
-import StatsWidget from "@/components/dashboard/StatsWidget";
-import SummaryCard from "@/components/dashboard/SummaryCard";
 
 const Dashboard = () => {
   const { isAdmin, isTeacher, isStudent, roles, isLoading: rolesLoading } = useUserRoles();
 
   if (rolesLoading) {
     return (
-      <MainLayout>
-        <div className="container mx-auto px-4 py-8">
+      <AppShell activeTab="dashboard">
+        <div className="py-4">
           <Skeleton className="h-10 w-48 mb-8" />
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {Array(4).fill(0).map((_, i) => (
               <Card key={i}>
-                <CardHeader>
-                  <Skeleton className="h-4 w-24" />
-                </CardHeader>
+                <CardHeader><Skeleton className="h-4 w-24" /></CardHeader>
                 <CardContent>
                   <Skeleton className="h-8 w-16 mb-2" />
                   <Skeleton className="h-3 w-20" />
@@ -38,7 +31,7 @@ const Dashboard = () => {
             ))}
           </div>
         </div>
-      </MainLayout>
+      </AppShell>
     );
   }
 
@@ -75,158 +68,144 @@ const TeacherDashboard = () => {
   const isLoading = statsLoading || classesLoading;
 
   return (
-    <MainLayout>
-      <div className="container mx-auto px-4 py-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-foreground mb-1">Teacher Dashboard</h1>
-          <p className="text-muted-foreground">Welcome back! Here's your class overview.</p>
+    <AppShell activeTab="dashboard">
+      <div className="py-4">
+        <div className="mb-6">
+          <h1 className="text-2xl font-bold text-gray-900 mb-1">Teacher Dashboard</h1>
+          <p className="text-sm text-gray-500">Welcome back! Here's your class overview.</p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
           {isLoading ? (
             Array(4).fill(0).map((_, i) => (
-              <Card key={i}>
-                <CardHeader><Skeleton className="h-4 w-24" /></CardHeader>
-                <CardContent>
-                  <Skeleton className="h-8 w-16 mb-2" />
-                  <Skeleton className="h-3 w-20" />
-                </CardContent>
-              </Card>
+              <div key={i} className="bg-white/70 backdrop-blur-md rounded-2xl border border-[hsl(170,30%,85%)]/30 p-4 shadow-sm">
+                <Skeleton className="h-4 w-24 mb-3" />
+                <Skeleton className="h-8 w-16 mb-2" />
+                <Skeleton className="h-3 w-20" />
+              </div>
             ))
           ) : (
             statItems.map((stat) => {
               const Icon = stat.icon;
               return (
-                <Card key={stat.label}>
-                  <CardHeader className="flex flex-row items-center justify-between pb-2">
-                    <CardTitle className="text-sm font-medium text-muted-foreground">{stat.label}</CardTitle>
-                    <Icon className="h-4 w-4 text-secondary" />
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-3xl font-bold text-foreground">{stat.value}</div>
-                    <p className="text-xs text-muted-foreground mt-1">{stat.change}</p>
-                  </CardContent>
-                </Card>
+                <div key={stat.label} className="bg-white/70 backdrop-blur-md rounded-2xl border border-[hsl(170,30%,85%)]/30 p-4 shadow-sm">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-xs font-medium text-gray-500">{stat.label}</span>
+                    <div className="w-8 h-8 rounded-lg bg-[hsl(170,40%,93%)] flex items-center justify-center">
+                      <Icon className="h-4 w-4 text-[hsl(170,50%,35%)]" />
+                    </div>
+                  </div>
+                  <div className="text-2xl font-bold text-gray-900">{stat.value}</div>
+                  <p className="text-[10px] text-gray-400 mt-1">{stat.change}</p>
+                </div>
               );
             })
           )}
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <Card className="lg:col-span-1">
-            <CardHeader>
-              <CardTitle>My Classes</CardTitle>
-              <CardDescription>Classes assigned to you</CardDescription>
-            </CardHeader>
-            <CardContent>
-              {classesLoading ? (
-                <div className="space-y-3">
-                  {Array(3).fill(0).map((_, i) => <Skeleton key={i} className="h-16 w-full" />)}
-                </div>
-              ) : classes && classes.length > 0 ? (
-                <div className="space-y-3">
-                  {classes.map((cls) => (
-                    <div
-                      key={cls.id}
-                      className="p-3 rounded-lg border bg-card hover:bg-accent transition-colors cursor-pointer"
-                      onClick={() => navigate("/gradebook")}
-                    >
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <p className="font-medium text-foreground">{cls.name}</p>
-                          <p className="text-xs text-muted-foreground">{cls.departments?.name}</p>
-                        </div>
-                        <Badge variant="secondary">{cls.academic_years?.year_name}</Badge>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-8 text-muted-foreground">
-                  <BookOpen className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                  <p>No classes assigned yet</p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
-          <Card className="lg:col-span-1">
-            <CardHeader>
-              <CardTitle>Recent Activity</CardTitle>
-              <CardDescription>Your latest grading updates</CardDescription>
-            </CardHeader>
-            <CardContent>
-              {gradesLoading ? (
-                <div className="space-y-3">
-                  {Array(3).fill(0).map((_, i) => <Skeleton key={i} className="h-14 w-full" />)}
-                </div>
-              ) : recentGrades && recentGrades.length > 0 ? (
-                <div className="space-y-3">
-                  {recentGrades.map((grade) => (
-                    <div key={grade.id} className="flex items-start gap-3 pb-3 border-b last:border-0">
-                      <div className="h-8 w-8 rounded-full bg-secondary/10 flex items-center justify-center">
-                        <CheckCircle className="h-4 w-4 text-secondary" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="font-medium text-foreground text-sm truncate">{grade.students?.full_name}</p>
-                        <p className="text-xs text-muted-foreground truncate">
-                          {grade.class_subjects?.subjects?.name} • {grade.class_subjects?.classes?.name}
-                        </p>
-                        <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
-                          <Clock className="h-3 w-3" />
-                          {formatDistanceToNow(new Date(grade.updated_at), { addSuffix: true })}
-                        </p>
-                      </div>
-                      <Badge variant="outline" className="text-xs">
-                        {grade.score !== null ? `${grade.score}/${grade.max_score}` : "--"}
-                      </Badge>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-8 text-muted-foreground">
-                  <Clock className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                  <p>No recent activity</p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
-          <Card className="lg:col-span-1">
-            <CardHeader>
-              <CardTitle>Quick Actions</CardTitle>
-              <CardDescription>Frequently used features</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 gap-3">
-                {[
-                  { label: "Enter Grades", description: "Add or edit student grades", icon: BookOpen, path: "/gradebook", colorClass: "bg-secondary/10 text-secondary" },
-                  { label: "View Reports", description: "Generate student report cards", icon: FileText, path: "/reports", colorClass: "bg-success/10 text-success" },
-                  { label: "View Schedule", description: "See today's classes", icon: CalendarDays, path: "/schedule", colorClass: "bg-accent/10 text-accent" },
-                ].map((action) => {
-                  const Icon = action.icon;
-                  return (
-                    <button
-                      key={action.label}
-                      onClick={() => navigate(action.path)}
-                      className="p-4 rounded-lg border bg-card hover:bg-accent transition-colors text-left flex items-center gap-4"
-                    >
-                      <div className={`h-10 w-10 rounded-lg flex items-center justify-center ${action.colorClass}`}>
-                        <Icon className="h-5 w-5" />
-                      </div>
-                      <div>
-                        <p className="font-medium text-foreground">{action.label}</p>
-                        <p className="text-xs text-muted-foreground">{action.description}</p>
-                      </div>
-                    </button>
-                  );
-                })}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          <div className="bg-white/70 backdrop-blur-md rounded-2xl border border-[hsl(170,30%,85%)]/30 p-4 shadow-sm">
+            <h3 className="text-sm font-semibold text-gray-900 mb-3">My Classes</h3>
+            <p className="text-[10px] text-gray-400 mb-3">Classes assigned to you</p>
+            {classesLoading ? (
+              <div className="space-y-3">
+                {Array(3).fill(0).map((_, i) => <Skeleton key={i} className="h-14 w-full" />)}
               </div>
-            </CardContent>
-          </Card>
+            ) : classes && classes.length > 0 ? (
+              <div className="space-y-2">
+                {classes.map((cls) => (
+                  <div
+                    key={cls.id}
+                    className="p-3 rounded-xl border border-[hsl(170,30%,90%)] bg-[hsl(170,20%,98%)] hover:bg-[hsl(170,25%,95%)] transition-colors cursor-pointer"
+                    onClick={() => navigate("/gradebook")}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-gray-900">{cls.name}</p>
+                        <p className="text-[10px] text-gray-400">{cls.departments?.name}</p>
+                      </div>
+                      <Badge className="text-[9px] bg-[hsl(170,40%,93%)] text-[hsl(170,50%,30%)] border-0">{cls.academic_years?.year_name}</Badge>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-6 text-gray-400">
+                <BookOpen className="h-6 w-6 mx-auto mb-2 opacity-50" />
+                <p className="text-xs">No classes assigned yet</p>
+              </div>
+            )}
+          </div>
+
+          <div className="bg-white/70 backdrop-blur-md rounded-2xl border border-[hsl(170,30%,85%)]/30 p-4 shadow-sm">
+            <h3 className="text-sm font-semibold text-gray-900 mb-3">Recent Activity</h3>
+            <p className="text-[10px] text-gray-400 mb-3">Your latest grading updates</p>
+            {gradesLoading ? (
+              <div className="space-y-3">
+                {Array(3).fill(0).map((_, i) => <Skeleton key={i} className="h-12 w-full" />)}
+              </div>
+            ) : recentGrades && recentGrades.length > 0 ? (
+              <div className="space-y-2">
+                {recentGrades.map((grade) => (
+                  <div key={grade.id} className="flex items-start gap-2.5 pb-2.5 border-b border-[hsl(170,20%,92%)] last:border-0">
+                    <div className="h-7 w-7 rounded-full bg-[hsl(170,40%,93%)] flex items-center justify-center">
+                      <CheckCircle className="h-3.5 w-3.5 text-[hsl(170,50%,35%)]" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-medium text-gray-900 truncate">{grade.students?.full_name}</p>
+                      <p className="text-[10px] text-gray-400 truncate">
+                        {grade.class_subjects?.subjects?.name} • {grade.class_subjects?.classes?.name}
+                      </p>
+                      <p className="text-[9px] text-gray-400 flex items-center gap-1 mt-0.5">
+                        <Clock className="h-2.5 w-2.5" />
+                        {formatDistanceToNow(new Date(grade.updated_at), { addSuffix: true })}
+                      </p>
+                    </div>
+                    <span className="text-[10px] font-medium text-gray-500 bg-[hsl(170,20%,96%)] px-1.5 py-0.5 rounded">
+                      {grade.score !== null ? `${grade.score}/${grade.max_score}` : "--"}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-6 text-gray-400">
+                <Clock className="h-6 w-6 mx-auto mb-2 opacity-50" />
+                <p className="text-xs">No recent activity</p>
+              </div>
+            )}
+          </div>
+
+          <div className="bg-white/70 backdrop-blur-md rounded-2xl border border-[hsl(170,30%,85%)]/30 p-4 shadow-sm">
+            <h3 className="text-sm font-semibold text-gray-900 mb-3">Quick Actions</h3>
+            <p className="text-[10px] text-gray-400 mb-3">Frequently used features</p>
+            <div className="space-y-2">
+              {[
+                { label: "Enter Grades", description: "Add or edit student grades", icon: BookOpen, path: "/gradebook", color: "hsl(210,60%,50%)" },
+                { label: "View Reports", description: "Generate student report cards", icon: FileText, path: "/reports", color: "hsl(170,50%,40%)" },
+                { label: "View Schedule", description: "See today's classes", icon: CalendarDays, path: "/schedule", color: "hsl(35,60%,50%)" },
+              ].map((action) => {
+                const Icon = action.icon;
+                return (
+                  <button
+                    key={action.label}
+                    onClick={() => navigate(action.path)}
+                    className="p-3 rounded-xl border border-[hsl(170,30%,90%)] bg-[hsl(170,20%,98%)] hover:bg-[hsl(170,25%,95%)] transition-colors text-left flex items-center gap-3 w-full"
+                  >
+                    <div className="h-8 w-8 rounded-lg flex items-center justify-center" style={{ backgroundColor: `${action.color}15` }}>
+                      <Icon className="h-4 w-4" style={{ color: action.color }} />
+                    </div>
+                    <div>
+                      <p className="text-xs font-medium text-gray-900">{action.label}</p>
+                      <p className="text-[10px] text-gray-400">{action.description}</p>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
         </div>
       </div>
-    </MainLayout>
+    </AppShell>
   );
 };
 
@@ -234,88 +213,64 @@ const NoRoleDashboard = () => {
   const { signOut } = useAuth();
   
   return (
-    <MainLayout>
-      <div className="container mx-auto px-4 py-8">
+    <AppShell activeTab="dashboard">
+      <div className="py-4">
         <div className="max-w-lg mx-auto text-center">
-          <Card>
-            <CardHeader>
-              <div className="mx-auto h-16 w-16 rounded-full bg-secondary/10 flex items-center justify-center mb-4">
-                <AlertCircle className="h-8 w-8 text-secondary" />
-              </div>
-              <CardTitle className="text-2xl">Role Not Assigned</CardTitle>
-              <CardDescription className="text-base">
-                Your account has been created, but an administrator has not yet assigned you a role.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="p-4 bg-muted rounded-lg text-sm text-muted-foreground">
-                <p>Please contact your school administrator to have your role assigned. Once assigned, you'll be able to access your personalized dashboard.</p>
-              </div>
-              <button
-                onClick={signOut}
-                className="w-full px-4 py-2 text-sm font-medium text-destructive hover:text-destructive/80 transition-colors"
-              >
-                Sign Out
-              </button>
-            </CardContent>
-          </Card>
+          <div className="bg-white/70 backdrop-blur-md rounded-2xl border border-[hsl(170,30%,85%)]/30 p-8 shadow-sm">
+            <div className="mx-auto h-14 w-14 rounded-full bg-[hsl(35,60%,93%)] flex items-center justify-center mb-4">
+              <AlertCircle className="h-7 w-7 text-[hsl(35,60%,45%)]" />
+            </div>
+            <h2 className="text-xl font-bold text-gray-900 mb-2">Role Not Assigned</h2>
+            <p className="text-sm text-gray-500 mb-4">
+              Your account has been created, but an administrator has not yet assigned you a role.
+            </p>
+            <div className="p-3 bg-[hsl(170,20%,96%)] rounded-xl text-xs text-gray-500 mb-4">
+              <p>Please contact your school administrator to have your role assigned.</p>
+            </div>
+            <button
+              onClick={signOut}
+              className="text-sm font-medium text-red-500 hover:text-red-600 transition-colors"
+            >
+              Sign Out
+            </button>
+          </div>
         </div>
       </div>
-    </MainLayout>
+    </AppShell>
   );
 };
 
 const StudentDashboard = () => {
+  const navigate = useNavigate();
+  
   return (
-    <MainLayout>
-      <div className="container mx-auto px-4 py-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-foreground mb-1">Student Dashboard</h1>
-          <p className="text-muted-foreground">Welcome! View your academic progress here.</p>
+    <AppShell activeTab="dashboard">
+      <div className="py-4">
+        <div className="mb-6">
+          <h1 className="text-2xl font-bold text-gray-900 mb-1">Student Dashboard</h1>
+          <p className="text-sm text-gray-500">Welcome! View your academic progress here.</p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <Card>
-            <CardHeader>
-              <div className="h-12 w-12 rounded-lg bg-secondary/10 flex items-center justify-center mb-2">
-                <User className="h-6 w-6 text-secondary" />
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {[
+            { icon: User, label: "My Profile", desc: "View your personal information", color: "hsl(210,60%,50%)" },
+            { icon: FileText, label: "My Grades", desc: "View your academic performance", color: "hsl(170,50%,40%)" },
+            { icon: BookOpen, label: "My Report Card", desc: "View and download report cards", color: "hsl(35,60%,50%)" },
+          ].map((item) => {
+            const Icon = item.icon;
+            return (
+              <div key={item.label} className="bg-white/70 backdrop-blur-md rounded-2xl border border-[hsl(170,30%,85%)]/30 p-5 shadow-sm">
+                <div className="h-10 w-10 rounded-xl flex items-center justify-center mb-3" style={{ backgroundColor: `${item.color}15` }}>
+                  <Icon className="h-5 w-5" style={{ color: item.color }} />
+                </div>
+                <h3 className="text-sm font-bold text-gray-900 mb-1">{item.label}</h3>
+                <p className="text-[11px] text-gray-400">{item.desc}</p>
               </div>
-              <CardTitle>My Profile</CardTitle>
-              <CardDescription>View your personal information</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground">Your personal details and academic information.</p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <div className="h-12 w-12 rounded-lg bg-success/10 flex items-center justify-center mb-2">
-                <FileText className="h-6 w-6 text-success" />
-              </div>
-              <CardTitle>My Grades</CardTitle>
-              <CardDescription>View your academic performance</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground">Check your grades across all subjects and periods.</p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center mb-2">
-                <BookOpen className="h-6 w-6 text-primary" />
-              </div>
-              <CardTitle>My Report Card</CardTitle>
-              <CardDescription>View and download report cards</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground">Access your complete report cards for each period.</p>
-            </CardContent>
-          </Card>
+            );
+          })}
         </div>
       </div>
-    </MainLayout>
+    </AppShell>
   );
 };
 

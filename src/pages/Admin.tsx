@@ -17,7 +17,7 @@ import { UserBiodataManagementTab } from "@/components/UserBiodataManagementTab"
 import { TeacherAssignmentDialog } from "@/components/TeacherAssignmentDialog";
 import { SponsorAssignmentDialog } from "@/components/SponsorAssignmentDialog";
 import { UserRoleManagement } from "@/components/UserRoleManagement";
-import MainLayout from "@/components/MainLayout";
+import AppShell from "@/components/AppShell";
 import { AcademicEventManagementTab } from "@/components/AcademicEventManagementTab";
 import { AcademicPeriodManagement } from "@/components/AcademicPeriodManagement";
 
@@ -107,8 +107,8 @@ const Admin = () => {
 
 
   return (
-    <MainLayout>
-      <div className="container mx-auto px-4 py-8">
+    <AppShell activeTab="settings">
+      <div className="py-4">
         <div className="mb-8">
           <h1 className="text-4xl font-bold text-foreground mb-2">Admin Panel</h1>
           <p className="text-muted-foreground">Manage users, students, classes, and more</p>
@@ -244,7 +244,7 @@ const Admin = () => {
         onOpenChange={setSponsorAssignmentOpen}
         user={selectedSponsor}
       />
-    </MainLayout>
+    </AppShell>
   );
 };
 
