@@ -26,7 +26,7 @@ export const StatCard = ({
 }: StatCardProps) => {
   return (
     <div
-      className={`${highlighted ? 'bg-[hsl(170,45%,92%)] border-[hsl(170,50%,75%)]' : backgroundColor + ' border-transparent'} rounded-xl border p-3 flex items-center gap-3 transition-shadow duration-300 hover:shadow-md`}
+      className={`${highlighted ? 'bg-[hsl(170,45%,92%)] border-[hsl(170,50%,75%)]' : backgroundColor + ' border-transparent'} rounded-xl border p-4 py-5 flex items-center gap-3 transition-shadow duration-300 hover:shadow-md h-full`}
     >
       <div className={`${iconBackgroundColor} rounded-full p-2 flex-shrink-0`}>
         <Icon className={`${iconColor} size-4`} />

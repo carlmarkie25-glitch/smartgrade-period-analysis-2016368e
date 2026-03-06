@@ -1,4 +1,4 @@
-import { Users, BookOpen, Clock } from "lucide-react";
+import { Users, BookOpen, Clock, GraduationCap } from "lucide-react";
 import { Sidebar } from "./Sidebar";
 import { Topbar } from "./Topbar";
 import { StatCard } from "./StatCard";
@@ -28,15 +28,15 @@ export const DashboardLayout = () => {
           {/* Main Grid Layout */}
           <div className="grid grid-cols-1 lg:grid-cols-[3fr_2fr] gap-3 auto-rows-max lg:auto-rows-auto">
             {/* Row 1: Stats */}
-            <div className="bg-white/70 backdrop-blur-md rounded-2xl border border-[hsl(170,30%,85%)]/30 p-4 shadow-sm">
+            <div className="bg-white/70 backdrop-blur-md rounded-2xl border border-[hsl(170,30%,85%)]/30 p-4 shadow-sm flex flex-col">
               <div className="flex items-center justify-between mb-3">
-                <h3 className="text-sm font-semibold text-gray-900">Incoming Student History</h3>
-                <span className="text-[10px] font-medium text-[hsl(170,50%,35%)]/70 px-2 py-0.5 bg-[hsl(170,40%,95%)] rounded-md">Weekly</span>
+                <h3 className="text-sm font-semibold text-gray-900">Student Overview</h3>
+                <span className="text-[10px] font-medium text-[hsl(170,50%,35%)]/70 px-2 py-0.5 bg-[hsl(170,40%,95%)] rounded-md">This Term</span>
               </div>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-2.5">
-                <StatCard title="Consultation" value="1215" icon={Users} trend={{ value: 12, isPositive: true }} backgroundColor="bg-[hsl(210,60%,96%)]" iconBackgroundColor="bg-[hsl(210,60%,90%)]" iconColor="text-[hsl(210,60%,45%)]" />
-                <StatCard title="In Progress" value="345" icon={BookOpen} trend={{ value: 8, isPositive: true }} backgroundColor="bg-[hsl(170,45%,95%)]" iconBackgroundColor="bg-[hsl(170,45%,88%)]" iconColor="text-[hsl(170,50%,35%)]" highlighted />
-                <StatCard title="In Pending" value="71" icon={Clock} trend={{ value: 5, isPositive: false }} backgroundColor="bg-[hsl(35,60%,96%)]" iconBackgroundColor="bg-[hsl(35,60%,90%)]" iconColor="text-[hsl(35,60%,40%)]" />
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-2.5 flex-1">
+                <StatCard title="Total Students" value="1215" icon={Users} trend={{ value: 12, isPositive: true }} backgroundColor="bg-[hsl(210,60%,96%)]" iconBackgroundColor="bg-[hsl(210,60%,90%)]" iconColor="text-[hsl(210,60%,45%)]" />
+                <StatCard title="Active Classes" value="24" icon={GraduationCap} trend={{ value: 8, isPositive: true }} backgroundColor="bg-[hsl(170,45%,95%)]" iconBackgroundColor="bg-[hsl(170,45%,88%)]" iconColor="text-[hsl(170,50%,35%)]" highlighted />
+                <StatCard title="Pending Grades" value="71" icon={Clock} trend={{ value: 5, isPositive: false }} backgroundColor="bg-[hsl(35,60%,96%)]" iconBackgroundColor="bg-[hsl(35,60%,90%)]" iconColor="text-[hsl(35,60%,40%)]" />
               </div>
             </div>
 
@@ -46,16 +46,16 @@ export const DashboardLayout = () => {
             {/* Row 2: Analytics */}
             <div className="bg-white/70 backdrop-blur-md rounded-2xl border border-[hsl(170,30%,85%)]/30 p-4 shadow-sm">
               <div className="flex items-center justify-between mb-3">
-                <h3 className="text-sm font-semibold text-gray-900">Booking Rate</h3>
+                <h3 className="text-sm font-semibold text-gray-900">Enrollment Rate</h3>
                 <span className="text-[10px] font-medium text-[hsl(170,50%,35%)]/70 px-2 py-0.5 bg-[hsl(170,40%,95%)] rounded-md">Weekly</span>
               </div>
               <div className="flex flex-col lg:flex-row items-start lg:items-end gap-3">
                 <div className="flex-shrink-0">
-                  <p className="text-3xl font-bold text-gray-900">58%</p>
-                  <p className="text-xs text-gray-500 mt-0.5">Your Total Patient<br/>on Friday</p>
+                  <p className="text-3xl font-bold text-gray-900">92%</p>
+                  <p className="text-xs text-gray-500 mt-0.5">Total Enrollment<br/>this Week</p>
                   <p className="text-[10px] text-[hsl(170,60%,35%)] mt-1 flex items-center gap-1">
                     <span className="font-bold text-[hsl(170,60%,35%)]">6% ↑</span>
-                    <span className="text-gray-400">Your booking rate is 6% higher than yesterday</span>
+                    <span className="text-gray-400">Enrollment is 6% higher than last week</span>
                   </p>
                 </div>
                 <div className="flex-1 w-full min-w-0">
