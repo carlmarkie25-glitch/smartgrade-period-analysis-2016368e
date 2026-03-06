@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import MainLayout from "@/components/MainLayout";
+import AppShell from "@/components/AppShell";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useAcademicEvents, EVENT_TYPES, type AcademicEvent } from "@/hooks/useAcademicEvents";
@@ -55,8 +55,8 @@ const AcademicCalendar = () => {
   };
 
   return (
-    <MainLayout>
-      <div className="container mx-auto px-4 py-8">
+    <AppShell activeTab="schedule">
+      <div className="py-4">
         <div className="mb-6">
           <h1 className="text-3xl font-bold text-foreground">Academic Calendar</h1>
           <p className="text-muted-foreground">Term-based overview of the academic year</p>
@@ -239,7 +239,7 @@ const AcademicCalendar = () => {
           </DialogContent>
         </Dialog>
       </div>
-    </MainLayout>
+    </AppShell>
   );
 };
 

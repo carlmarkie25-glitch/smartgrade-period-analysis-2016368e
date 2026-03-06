@@ -1,5 +1,5 @@
 import React from "react";
-import MainLayout from "@/components/MainLayout";
+import AppShell from "@/components/AppShell";
 import { useSchedule } from "@/hooks/useSchedule";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -9,8 +9,8 @@ const Schedule = () => {
   const { data, isLoading, error } = useSchedule();
 
   return (
-    <MainLayout>
-      <div className="container mx-auto px-4 py-8">
+    <AppShell activeTab="schedule">
+      <div className="py-4">
         <h1 className="text-2xl font-bold mb-4">Today's Schedule</h1>
         {isLoading && <Skeleton className="h-6 w-40 mb-4" />}
         {error && <p className="text-red-500">Failed to load schedule.</p>}
@@ -39,7 +39,7 @@ const Schedule = () => {
           !isLoading && <p className="text-muted-foreground">No scheduled activities for today.</p>
         )}
       </div>
-    </MainLayout>
+    </AppShell>
   );
 };
 
