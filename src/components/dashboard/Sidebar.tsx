@@ -18,7 +18,7 @@ export const Sidebar = ({ activeTab, onTabChange }: SidebarProps) => {
 
   const menuItems = [
     { id: "dashboard", icon: LayoutDashboard, label: "Dashboard", path: "/dashboard", roles: ["all"] },
-    { id: "students", icon: GraduationCap, label: "Students", path: "/admin?tab=students", roles: ["admin"] },
+    { id: "students", icon: GraduationCap, label: "Students", path: "/students", roles: ["admin"] },
     { id: "gradebook", icon: BookOpen, label: "Gradebook", path: "/gradebook", roles: ["teacher", "admin"] },
     { id: "reports", icon: FileText, label: "Reports", path: "/reports", roles: ["teacher", "admin"] },
     { id: "analytics", icon: BarChart3, label: "Analytics", path: "/analytics", roles: ["teacher", "admin"] },
