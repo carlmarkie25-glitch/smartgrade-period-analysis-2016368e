@@ -18,6 +18,8 @@ import Reports from "./pages/Reports";
 import Analytics from "./pages/Analytics";
 import Admin from "./pages/Admin";
 import StudentPanel from "./pages/StudentPanel";
+import TeacherPanel from "./pages/TeacherPanel";
+import ParentPanel from "./pages/ParentPanel";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
