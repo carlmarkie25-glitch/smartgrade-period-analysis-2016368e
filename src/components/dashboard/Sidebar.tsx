@@ -1,4 +1,4 @@
-import { LayoutDashboard, Users, BookOpen, FileText, BarChart3, Settings, GraduationCap, CalendarDays, LogOut } from "lucide-react";
+import { LayoutDashboard, Users, BookOpen, FileText, BarChart3, Settings, GraduationCap, CalendarDays, LogOut, UserCog, Calendar } from "lucide-react";
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useUserRoles } from "@/hooks/useUserRoles";
@@ -19,10 +19,13 @@ export const Sidebar = ({ activeTab, onTabChange }: SidebarProps) => {
   const menuItems = [
     { id: "dashboard", icon: LayoutDashboard, label: "Dashboard", path: "/dashboard", roles: ["all"] },
     { id: "students", icon: GraduationCap, label: "Students", path: "/students", roles: ["admin"] },
+    { id: "teachers", icon: UserCog, label: "Teachers", path: "/teachers", roles: ["admin"] },
+    { id: "parents", icon: Users, label: "Parents", path: "/parents", roles: ["admin"] },
     { id: "gradebook", icon: BookOpen, label: "Gradebook", path: "/gradebook", roles: ["teacher", "admin"] },
     { id: "reports", icon: FileText, label: "Reports", path: "/reports", roles: ["teacher", "admin"] },
     { id: "analytics", icon: BarChart3, label: "Analytics", path: "/analytics", roles: ["teacher", "admin"] },
     { id: "schedule", icon: CalendarDays, label: "Schedule", path: "/schedule", roles: ["all"] },
+    { id: "calendar", icon: Calendar, label: "Calendar", path: "/academic-calendar", roles: ["all"] },
     { id: "settings", icon: Settings, label: "Settings", path: "/admin", roles: ["admin"] },
   ];
 

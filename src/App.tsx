@@ -18,6 +18,8 @@ import Reports from "./pages/Reports";
 import Analytics from "./pages/Analytics";
 import Admin from "./pages/Admin";
 import StudentPanel from "./pages/StudentPanel";
+import TeacherPanel from "./pages/TeacherPanel";
+import ParentPanel from "./pages/ParentPanel";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -40,6 +42,8 @@ const App = () => (
             <Route path="/reports" element={<TeacherRoute><Reports /></TeacherRoute>} />
             <Route path="/analytics" element={<TeacherRoute><Analytics /></TeacherRoute>} />
             <Route path="/students" element={<AdminRoute><StudentPanel /></AdminRoute>} />
+            <Route path="/teachers" element={<AdminRoute><TeacherPanel /></AdminRoute>} />
+            <Route path="/parents" element={<AdminRoute><ParentPanel /></AdminRoute>} />
             <Route path="/admin" element={<AdminRoute><Admin /></AdminRoute>} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
