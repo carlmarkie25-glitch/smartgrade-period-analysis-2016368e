@@ -24,9 +24,13 @@ const Payments = () => {
     },
   });
 
-  const currentYear = years?.find(y => y.is_current);
   const [selectedYear, setSelectedYear] = useState("");
-  useEffect(() => { if (currentYear && !selectedYear) setSelectedYear(currentYear.id); }, [currentYear, selectedYear]);
+  useEffect(() => {
+    if (!selectedYear && years?.length) {
+      const currentYear = years.find(y => y.is_current);
+      setSelectedYear(currentYear ? currentYear.id : years[0].id);
+    }
+  }, [years, selectedYear]);
 
   const { data: bills, isLoading } = useStudentBills(selectedYear);
   const { data: allPayments } = useAllStudentPayments(selectedYear);
