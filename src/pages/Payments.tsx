@@ -317,7 +317,7 @@ const BillDetailDialog = ({ bill, onClose }: { bill: any; onClose: () => void })
 
   return (
     <Dialog open={!!bill} onOpenChange={() => onClose()}>
-      <DialogContent className="max-w-lg">
+      <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto">
         <DialogHeader><DialogTitle>Bill Details</DialogTitle></DialogHeader>
         <div className="space-y-4">
           <div className="bg-muted rounded-lg p-3 text-sm space-y-1">
