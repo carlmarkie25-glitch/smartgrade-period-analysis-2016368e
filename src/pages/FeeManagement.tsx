@@ -55,6 +55,12 @@ const FeeManagement = () => {
   // Local editable state for the fee matrix
   const [rateEdits, setRateEdits] = useState<Record<string, number>>({});
   const [installEdits, setInstallEdits] = useState<Record<string, { label: string; period_label: string; amount: number }>>({});
+  const [installmentRows, setInstallmentRows] = useState<{ num: number; label: string; period_label: string }[]>([
+    { num: 1, label: "1st Installment", period_label: "October - December" },
+    { num: 2, label: "2nd Installment", period_label: "January - February" },
+    { num: 3, label: "3rd Installment", period_label: "March - May" },
+  ]);
+  const [regPeriod, setRegPeriod] = useState("July - September");
 
   // Build rate lookup: `${categoryId}_${deptId}` -> amount
   const rateLookup = useMemo(() => {
@@ -111,34 +117,55 @@ const FeeManagement = () => {
     setInstallEdits(prev => ({ ...prev, [key]: { ...current, [field]: val } }));
   };
 
-  const installmentNumbers = [1, 2, 3];
-  const installmentDefaults = [
-    { label: "1st Installment", period_label: "October - December" },
-    { label: "2nd Installment", period_label: "January - February" },
-    { label: "3rd Installment", period_label: "March - May" },
-  ];
+  // Sync installment rows from saved data
+  useEffect(() => {
+    if (installments && installments.length > 0) {
+      const sorted = [...installments].sort((a: any, b: any) => a.installment_number - b.installment_number);
+      const uniqueRows = sorted.reduce((acc: any[], inst: any) => {
+        if (!acc.find(r => r.num === inst.installment_number)) {
+          acc.push({ num: inst.installment_number, label: inst.label, period_label: inst.period_label });
+        }
+        return acc;
+      }, []);
+      if (uniqueRows.length > 0) setInstallmentRows(uniqueRows);
+    }
+  }, [installments]);
+
+  const addInstallmentRow = () => {
+    const nextNum = installmentRows.length > 0 ? Math.max(...installmentRows.map(r => r.num)) + 1 : 1;
+    setInstallmentRows(prev => [...prev, { num: nextNum, label: `${nextNum}${nextNum === 1 ? 'st' : nextNum === 2 ? 'nd' : nextNum === 3 ? 'rd' : 'th'} Installment`, period_label: "" }]);
+  };
+
+  const removeInstallmentRow = (num: number) => {
+    setInstallmentRows(prev => prev.filter(r => r.num !== num));
+  };
+
+  const updateInstallmentRowMeta = (num: number, field: "label" | "period_label", val: string) => {
+    setInstallmentRows(prev => prev.map(r => r.num === num ? { ...r, [field]: val } : r));
+  };
 
   const handleSaveInstallments = async () => {
-    const promises = Object.entries(installEdits).map(([key, vals]) => {
-      const [department_id, numStr] = key.split("_");
-      const installment_number = parseInt(numStr);
-      const defaults = installmentDefaults[installment_number - 1];
-      return upsertInstallment.mutateAsync({
-        department_id,
-        academic_year_id: selectedYear,
-        installment_number,
-        label: vals.label || defaults.label,
-        period_label: vals.period_label || defaults.period_label,
-        amount: vals.amount,
+    const promises: Promise<void>[] = [];
+    for (const row of installmentRows) {
+      departments?.forEach(dept => {
+        const val = getInstallValue(dept.id, row.num);
+        promises.push(upsertInstallment.mutateAsync({
+          department_id: dept.id,
+          academic_year_id: selectedYear,
+          installment_number: row.num,
+          label: row.label,
+          period_label: row.period_label,
+          amount: val.amount || 0,
+        }));
       });
-    });
+    }
     await Promise.all(promises);
     setInstallEdits({});
     toast.success("Installment plans saved successfully");
   };
 
   const getTuitionTotal = (deptId: string) => {
-    return installmentNumbers.reduce((sum, num) => sum + (getInstallValue(deptId, num).amount || 0), 0);
+    return installmentRows.reduce((sum, row) => sum + (getInstallValue(deptId, row.num).amount || 0), 0);
   };
 
   const getGrandTotal = (deptId: string) => {
@@ -258,9 +285,14 @@ const FeeManagement = () => {
                     <TableBody>
                       {/* Registration row - read only from requirements total */}
                       <TableRow className="bg-muted/30">
-                        <TableCell className="font-medium">
-                          <div>Registration / Requirements</div>
-                          <div className="text-xs text-muted-foreground">July - September</div>
+                        <TableCell className="font-medium p-2">
+                          <div className="font-medium mb-1">Registration / Requirements</div>
+                          <Input
+                            className="h-7 text-xs text-muted-foreground"
+                            value={regPeriod}
+                            onChange={e => setRegPeriod(e.target.value)}
+                            placeholder="e.g. July - September"
+                          />
                         </TableCell>
                         {departments?.map(dept => (
                           <TableCell key={dept.id} className="text-center font-medium">
@@ -270,25 +302,47 @@ const FeeManagement = () => {
                       </TableRow>
 
                       {/* Installment rows */}
-                      {installmentNumbers.map(num => (
-                        <TableRow key={num}>
-                          <TableCell className="font-medium">
-                            <div>{installmentDefaults[num - 1].label}</div>
-                            <div className="text-xs text-muted-foreground">{installmentDefaults[num - 1].period_label}</div>
+                      {installmentRows.map(row => (
+                        <TableRow key={row.num}>
+                          <TableCell className="font-medium p-2">
+                            <Input
+                              className="h-7 text-sm font-medium mb-1"
+                              value={row.label}
+                              onChange={e => updateInstallmentRowMeta(row.num, "label", e.target.value)}
+                              placeholder="e.g. 1st Installment"
+                            />
+                            <Input
+                              className="h-7 text-xs text-muted-foreground"
+                              value={row.period_label}
+                              onChange={e => updateInstallmentRowMeta(row.num, "period_label", e.target.value)}
+                              placeholder="e.g. October - December"
+                            />
+                            <Button variant="ghost" size="sm" className="h-6 text-xs text-destructive mt-1 p-0" onClick={() => removeInstallmentRow(row.num)}>
+                              <Trash2 className="h-3 w-3 mr-1" /> Remove
+                            </Button>
                           </TableCell>
                           {departments?.map(dept => (
                             <TableCell key={dept.id} className="text-center p-1">
                               <Input
                                 type="number"
                                 className="text-center h-8 w-full"
-                                value={getInstallValue(dept.id, num).amount || ""}
-                                onChange={e => setInstallValue(dept.id, num, "amount", parseFloat(e.target.value) || 0)}
+                                value={getInstallValue(dept.id, row.num).amount || ""}
+                                onChange={e => setInstallValue(dept.id, row.num, "amount", parseFloat(e.target.value) || 0)}
                                 placeholder="0"
                               />
                             </TableCell>
                           ))}
                         </TableRow>
                       ))}
+
+                      {/* Add installment button row */}
+                      <TableRow>
+                        <TableCell colSpan={(departments?.length || 0) + 1} className="text-center py-2">
+                          <Button variant="outline" size="sm" onClick={addInstallmentRow}>
+                            <Plus className="h-4 w-4 mr-1" /> Add Installment Period
+                          </Button>
+                        </TableCell>
+                      </TableRow>
 
                       {/* Total Tuition */}
                       <TableRow className="bg-muted/30 border-t">
