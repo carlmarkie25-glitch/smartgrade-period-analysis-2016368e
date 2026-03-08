@@ -6,8 +6,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { format } from "date-fns";
-import { CalendarDays, Eye } from "lucide-react";
+import { CalendarDays, Eye, LayoutGrid } from "lucide-react";
 import { ClassScheduleManagementTab } from "@/components/ClassScheduleManagementTab";
+import { ClassScheduleTimetable } from "@/components/ClassScheduleTimetable";
 
 const Schedule = () => {
   const { data, isLoading, error } = useSchedule();
