@@ -19,6 +19,7 @@ import { toast } from "sonner";
 const FeeManagement = () => {
   const { data: categories, isLoading: catLoading } = useFeeCategories();
   const createCategory = useCreateFeeCategory();
+  const generateBills = useGenerateAllBills();
   const deleteCategory = useDeleteFeeCategory();
 
   const { data: years } = useQuery({
