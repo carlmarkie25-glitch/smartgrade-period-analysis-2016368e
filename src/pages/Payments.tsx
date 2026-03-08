@@ -228,6 +228,7 @@ const Payments = () => {
                       <TableHead className="text-right">Amount</TableHead>
                       <TableHead>Method</TableHead>
                       <TableHead>Notes</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
