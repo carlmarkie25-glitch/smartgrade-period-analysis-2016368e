@@ -83,7 +83,7 @@ export const useMyStudentPayments = () => {
     queryKey: ["my-student-payments"],
     queryFn: async () => {
       // Get the student record for current user
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { user } } = await supabase.auth.getUser() as any;
       if (!user) return [];
       const { data: profile } = await supabase.from("profiles").select("id").eq("user_id", user.id).single();
       if (!profile) return [];

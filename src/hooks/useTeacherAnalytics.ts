@@ -195,7 +195,7 @@ export const useTeacherClassPerformance = (period: string) => {
         const cId = studentClassMap.get(g.student_id);
         if (!cId) return;
         const ex = classScores.get(cId) || { total: 0, max: 0 };
-        classScores.set(cId, { total: ex.total + Number(g.score), max: ex.max + Number(g.max_score) });
+        classScores.set(cId, { total: ex.total + Number(g.score as any), max: ex.max + Number(g.max_score as any) });
       });
 
       return Array.from(classScores.entries())

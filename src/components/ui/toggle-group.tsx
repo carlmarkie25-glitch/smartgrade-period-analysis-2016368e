@@ -11,19 +11,25 @@ const ToggleGroupContext = React.createContext<VariantProps<typeof toggleVariant
 });
 
 const ToggleGroup = React.forwardRef<
-  React.ElementRef<typeof ToggleGroupPrimitive.Root>,
-  React.ComponentPropsWithoutRef<typeof ToggleGroupPrimitive.Root> & VariantProps<typeof toggleVariants>
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement> & VariantProps<typeof toggleVariants> & {
+    type?: "single" | "multiple";
+    value?: string | string[];
+    defaultValue?: string | string[];
+    onValueChange?: (value: any) => void;
+    disabled?: boolean;
+  }
 >(({ className, variant, size, children, ...props }, ref) => (
-  <ToggleGroupPrimitive.Root ref={ref} className={cn("flex items-center justify-center gap-1", className)} {...props}>
+  <ToggleGroupPrimitive.Root ref={ref} className={cn("flex items-center justify-center gap-1", className)} {...(props as any)}>
     <ToggleGroupContext.Provider value={{ variant, size }}>{children}</ToggleGroupContext.Provider>
   </ToggleGroupPrimitive.Root>
 ));
 
-ToggleGroup.displayName = ToggleGroupPrimitive.Root.displayName;
+ToggleGroup.displayName = "ToggleGroup";
 
 const ToggleGroupItem = React.forwardRef<
-  React.ElementRef<typeof ToggleGroupPrimitive.Item>,
-  React.ComponentPropsWithoutRef<typeof ToggleGroupPrimitive.Item> & VariantProps<typeof toggleVariants>
+  HTMLButtonElement,
+  React.ButtonHTMLAttributes<HTMLButtonElement> & VariantProps<typeof toggleVariants> & { value: string }
 >(({ className, children, variant, size, ...props }, ref) => {
   const context = React.useContext(ToggleGroupContext);
 
@@ -37,13 +43,13 @@ const ToggleGroupItem = React.forwardRef<
         }),
         className,
       )}
-      {...props}
+      {...(props as any)}
     >
       {children}
     </ToggleGroupPrimitive.Item>
   );
 });
 
-ToggleGroupItem.displayName = ToggleGroupPrimitive.Item.displayName;
+ToggleGroupItem.displayName = "ToggleGroupItem";
 
 export { ToggleGroup, ToggleGroupItem };
