@@ -42,7 +42,7 @@ export const ProfileSummary = () => {
   const adminName = profile?.full_name || user?.email?.split("@")[0] || "Admin";
   const initials = adminName.split(" ").map((n: string) => n[0]).join("").toUpperCase().slice(0, 2);
 
-  const radius = 52;
+  const radius = 38;
   const circumference = 2 * Math.PI * radius;
   const fillPercent = totalStudents > 0 ? Math.min(100, malePercent + femalePercent) : 0;
   const offset = circumference - (fillPercent / 100) * circumference;
@@ -51,18 +51,18 @@ export const ProfileSummary = () => {
   const greeting = hour < 12 ? "Good Morning!" : hour < 17 ? "Good Afternoon!" : "Good Evening!";
 
   return (
-    <div className="bg-gradient-to-br from-[hsl(170,30%,97%)] to-[hsl(160,25%,94%)] rounded-2xl backdrop-blur-md border border-[hsl(170,30%,85%)]/30 p-4 shadow-sm flex flex-col items-center justify-center text-center">
+    <div className="bg-gradient-to-br from-[hsl(170,30%,97%)] to-[hsl(160,25%,94%)] rounded-2xl backdrop-blur-md border border-[hsl(170,30%,85%)]/30 p-3 shadow-sm flex flex-col items-center justify-center text-center">
       {/* Circular Progress with avatar */}
-      <div className="relative w-[120px] h-[120px] mb-2">
+      <div className="relative w-[90px] h-[90px] mb-1">
         <svg
           className="absolute inset-0 -rotate-90"
-          viewBox="0 0 120 120"
+          viewBox="0 0 90 90"
           style={{ width: "100%", height: "100%" }}
         >
-          <circle cx="60" cy="60" r={radius} fill="none" stroke="hsl(170,30%,90%)" strokeWidth="3" opacity={0.5} />
+          <circle cx="45" cy="45" r={radius} fill="none" stroke="hsl(170,30%,90%)" strokeWidth="3" opacity={0.5} />
           <circle
-            cx="60"
-            cy="60"
+            cx="45"
+            cy="45"
             r={radius}
             fill="none"
             stroke="url(#profileGradient)"
@@ -81,14 +81,14 @@ export const ProfileSummary = () => {
         </svg>
         <div className="absolute inset-0 flex flex-col items-center justify-center">
           {profile?.avatar_url ? (
-            <img src={profile.avatar_url} alt={adminName} className="w-10 h-10 rounded-full object-cover border-2 border-white shadow-sm mb-0.5" />
+            <img src={profile.avatar_url} alt={adminName} className="w-8 h-8 rounded-full object-cover border-2 border-white shadow-sm mb-0.5" />
           ) : (
-            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[hsl(170,50%,50%)] to-[hsl(160,50%,45%)] flex items-center justify-center text-white font-bold text-xs mb-0.5 border-2 border-white shadow-sm">
+            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[hsl(170,50%,50%)] to-[hsl(160,50%,45%)] flex items-center justify-center text-white font-bold text-[10px] mb-0.5 border-2 border-white shadow-sm">
               {initials}
             </div>
           )}
-          <span className="text-lg font-bold text-gray-900">{totalStudents}</span>
-          <span className="text-[9px] font-medium text-gray-500">Students</span>
+          <span className="text-sm font-bold text-gray-900">{totalStudents}</span>
+          <span className="text-[8px] font-medium text-gray-500">Students</span>
         </div>
       </div>
 
