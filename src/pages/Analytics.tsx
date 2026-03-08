@@ -154,20 +154,28 @@ const Analytics = () => {
             <span className="text-[10px] font-medium text-[hsl(170,50%,35%)]/70 px-2 py-0.5 bg-[hsl(170,40%,95%)] rounded-md">This Period</span>
           </div>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-            {renderStatCard(totalStudentsCard)}
+           {renderStatCard(totalStudentsCard)}
             {allGraded ? (
               gradeStatCards.map(renderStatCard)
             ) : (
-              <div className="col-span-1 lg:col-span-3 p-3 rounded-xl bg-[hsl(35,60%,96%)] flex items-center gap-3">
-                <ClipboardList className="h-5 w-5 text-[hsl(35,60%,45%)] flex-shrink-0" />
-                <div className="flex-1 min-w-0">
-                  <p className="text-[10px] font-semibold text-[hsl(35,50%,30%)]">Grading Incomplete</p>
-                  <p className="text-[10px] text-[hsl(35,40%,40%)]">{gradedCount}/{totalCount} students graded</p>
-                  <div className="w-full bg-[hsl(35,40%,88%)] rounded-full h-1.5 mt-1">
-                    <div className="bg-[hsl(35,60%,50%)] h-1.5 rounded-full transition-all" style={{ width: totalCount > 0 ? `${(gradedCount / totalCount) * 100}%` : '0%' }} />
+              gradeStatCards.map((stat) => {
+                const Icon = stat.icon;
+                return (
+                  <div key={stat.title} className={`p-3 rounded-xl ${stat.bgColor} transition-colors relative`}>
+                    <div className="flex items-center justify-between mb-1.5">
+                      <span className="text-[10px] font-medium text-gray-500">{stat.title}</span>
+                      <div className={`w-7 h-7 rounded-lg ${stat.iconBg} flex items-center justify-center`}>
+                        <Icon className={`h-3.5 w-3.5 ${stat.iconColor}`} />
+                      </div>
+                    </div>
+                    <div className="text-xl font-bold text-gray-300">--</div>
+                    <p className="text-[10px] text-gray-400 mt-0.5">Awaiting complete grades</p>
+                    <div className="absolute bottom-1.5 right-3">
+                      <ClipboardList className="h-3 w-3 text-[hsl(35,60%,65%)]" />
+                    </div>
                   </div>
-                </div>
-              </div>
+                );
+              })
             )}
           </div>
         </div>

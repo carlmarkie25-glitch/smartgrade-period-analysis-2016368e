@@ -30,7 +30,7 @@ const SubjectTrendsChart = ({ data, isLoading }: SubjectTrendsChartProps) => {
       <div className="h-[220px]">
         {data.length === 0 ? (
           <div className="h-full flex items-center justify-center text-gray-400">
-            <p className="text-xs">No trend data available</p>
+            <p className="text-xs">Awaiting complete grades to display trends</p>
           </div>
         ) : (
           <ResponsiveContainer width="100%" height="100%">

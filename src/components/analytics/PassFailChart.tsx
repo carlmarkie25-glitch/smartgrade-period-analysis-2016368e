@@ -3,9 +3,10 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from "recha
 interface PassFailChartProps {
   passRate: number;
   failRate: number;
+  awaitingGrades?: boolean;
 }
 
-const PassFailChart = ({ passRate, failRate }: PassFailChartProps) => {
+const PassFailChart = ({ passRate, failRate, awaitingGrades }: PassFailChartProps) => {
   const data = [
     { name: "Passing", value: passRate, color: "hsl(170,50%,40%)" },
     { name: "Failing", value: failRate, color: "hsl(0,60%,55%)" },
@@ -18,6 +19,13 @@ const PassFailChart = ({ passRate, failRate }: PassFailChartProps) => {
         <span className="text-[10px] font-medium text-[hsl(170,50%,35%)]/70 px-2 py-0.5 bg-[hsl(170,40%,95%)] rounded-md">Ratio</span>
       </div>
       <div className="h-[220px]">
+        {awaitingGrades ? (
+          <div className="h-full flex flex-col items-center justify-center text-gray-400">
+            <div className="w-[160px] h-[160px] rounded-full border-[16px] border-gray-200 flex items-center justify-center">
+              <span className="text-xs text-gray-300">No data yet</span>
+            </div>
+          </div>
+        ) : (
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
             <Pie
@@ -50,6 +58,7 @@ const PassFailChart = ({ passRate, failRate }: PassFailChartProps) => {
             />
           </PieChart>
         </ResponsiveContainer>
+        )}
       </div>
       <div className="flex justify-center gap-6 mt-1">
         <div className="flex items-center gap-1.5">
