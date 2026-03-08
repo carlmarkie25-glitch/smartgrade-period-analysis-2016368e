@@ -285,9 +285,14 @@ const FeeManagement = () => {
                     <TableBody>
                       {/* Registration row - read only from requirements total */}
                       <TableRow className="bg-muted/30">
-                        <TableCell className="font-medium">
-                          <div>Registration / Requirements</div>
-                          <div className="text-xs text-muted-foreground">July - September</div>
+                        <TableCell className="font-medium p-2">
+                          <div className="font-medium mb-1">Registration / Requirements</div>
+                          <Input
+                            className="h-7 text-xs text-muted-foreground"
+                            value={regPeriod}
+                            onChange={e => setRegPeriod(e.target.value)}
+                            placeholder="e.g. July - September"
+                          />
                         </TableCell>
                         {departments?.map(dept => (
                           <TableCell key={dept.id} className="text-center font-medium">
