@@ -457,6 +457,55 @@ export const ClassManagementTab = () => {
           </div>
         </DialogContent>
       </Dialog>
+
+      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Edit Class</DialogTitle>
+          </DialogHeader>
+          {editingClass && (
+            <div className="space-y-4 pt-4">
+              <div>
+                <Label htmlFor="edit-name">Class Name</Label>
+                <Input
+                  id="edit-name"
+                  value={editingClass.name}
+                  onChange={(e) => setEditingClass({ ...editingClass, name: e.target.value })}
+                />
+              </div>
+              <div>
+                <Label htmlFor="edit-department">Department</Label>
+                <Select value={editingClass.department_id} onValueChange={(value) => setEditingClass({ ...editingClass, department_id: value })}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select department" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {departments?.map((dept) => (
+                      <SelectItem key={dept.id} value={dept.id}>{dept.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label htmlFor="edit-year">Academic Year</Label>
+                <Select value={editingClass.academic_year_id} onValueChange={(value) => setEditingClass({ ...editingClass, academic_year_id: value })}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select academic year" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {academicYears?.map((year) => (
+                      <SelectItem key={year.id} value={year.id}>
+                        {year.year_name} {year.is_current && "(Current)"}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <Button onClick={handleEditClass} className="w-full">Save Changes</Button>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 };
