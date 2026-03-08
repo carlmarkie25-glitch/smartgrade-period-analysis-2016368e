@@ -34,8 +34,6 @@ export const Sidebar = ({ activeTab, onTabChange }: SidebarProps) => {
 
   const topItems: MenuItem[] = [
     { id: "dashboard", icon: LayoutDashboard, label: "Dashboard", path: "/dashboard", roles: ["all"] },
-    { id: "schedule", icon: CalendarDays, label: "Schedule", path: "/schedule", roles: ["all"] },
-    { id: "calendar", icon: Calendar, label: "Calendar", path: "/academic-calendar", roles: ["all"] },
   ];
 
   const academicsGroup: MenuGroup = {
@@ -53,13 +51,21 @@ export const Sidebar = ({ activeTab, onTabChange }: SidebarProps) => {
     ],
   };
 
-  const bottomItems: MenuItem[] = [
-    { id: "students", icon: GraduationCap, label: "Students", path: "/students", roles: ["admin"] },
-    { id: "teachers", icon: UserCog, label: "Teachers", path: "/teachers", roles: ["admin"] },
-    { id: "parents", icon: Users, label: "Parents", path: "/parents", roles: ["admin"] },
-    { id: "analytics", icon: BarChart3, label: "Analytics", path: "/analytics", roles: ["teacher", "admin"] },
-    { id: "settings", icon: Settings, label: "Settings", path: "/admin", roles: ["admin"] },
-  ];
+  const adminGroup: MenuGroup = {
+    id: "administration",
+    icon: Settings,
+    label: "Administration",
+    roles: ["admin"],
+    children: [
+      { id: "students", icon: GraduationCap, label: "Students", path: "/students", roles: ["admin"] },
+      { id: "teachers", icon: UserCog, label: "Teachers", path: "/teachers", roles: ["admin"] },
+      { id: "parents", icon: Users, label: "Parents", path: "/parents", roles: ["admin"] },
+      { id: "schedule", icon: CalendarDays, label: "Schedule", path: "/schedule", roles: ["admin"] },
+      { id: "calendar", icon: Calendar, label: "Calendar", path: "/academic-calendar", roles: ["admin"] },
+      { id: "analytics", icon: BarChart3, label: "Analytics", path: "/analytics", roles: ["teacher", "admin"] },
+      { id: "settings", icon: Settings, label: "Settings", path: "/admin", roles: ["admin"] },
+    ],
+  };
 
   const academicsChildIds = academicsGroup.children.map((c) => c.id);
   const isAcademicsActive = academicsChildIds.some(
