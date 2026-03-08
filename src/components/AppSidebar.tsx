@@ -1,10 +1,11 @@
-import { LayoutDashboard, BookOpen, FileText, BarChart3, Settings, LogOut, Sun, Moon, CalendarDays, Calendar } from "lucide-react";
+import { useState } from "react";
+import { LayoutDashboard, BookOpen, FileText, BarChart3, Settings, LogOut, CalendarDays, Calendar, ClipboardList, ChevronDown } from "lucide-react";
 import logo from "@/assets/logo.png";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserRoles } from "@/hooks/useUserRoles";
-import { useTheme } from "@/contexts/ThemeContext";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import {
   Sidebar,
   SidebarContent,
@@ -22,35 +23,62 @@ import { cn } from "@/lib/utils";
 
 const AppSidebar = () => {
   const location = useLocation();
-  const { signOut, user } = useAuth();
+  const { signOut } = useAuth();
   const { isAdmin, isTeacher, isLoading: rolesLoading } = useUserRoles();
   const { state } = useSidebar();
   const isCollapsed = state === "collapsed";
 
-  // Define nav items - teachers and admins have different access
-  const navItems = [
-    { path: "/dashboard", icon: LayoutDashboard, label: "Dashboard", roles: ["all"] },
-    { path: "/schedule", icon: CalendarDays, label: "Schedule", roles: ["all"] },
-    { path: "/academic-calendar", icon: Calendar, label: "Calendar", roles: ["all"] },
-    { path: "/gradebook", icon: BookOpen, label: "Gradebook", roles: ["teacher", "admin"] },
-    { path: "/reports", icon: FileText, label: "Reports", roles: ["teacher", "admin"] },
-    // Analytics is admin-only
-    { path: "/analytics", icon: BarChart3, label: "Analytics", roles: ["teacher", "admin"] },
-  ];
-
-  const adminItems = [
-    { path: "/admin", icon: Settings, label: "Admin Panel", roles: ["admin"] },
-  ];
-
   const isActive = (path: string) => location.pathname === path;
+  const isAcademicsActive = isActive("/gradebook") || isActive("/reports");
 
-  // Don't show any role-based items while roles are loading
+  const [academicsOpen, setAcademicsOpen] = useState(isAcademicsActive);
+
   const canAccess = (roles: string[]) => {
-    if (rolesLoading) return roles.includes("all"); // Only show "all" items while loading
+    if (rolesLoading) return roles.includes("all");
     if (roles.includes("all")) return true;
     if (roles.includes("admin") && isAdmin) return true;
     if (roles.includes("teacher") && (isTeacher || isAdmin)) return true;
     return false;
+  };
+
+  const mainItems = [
+    { path: "/dashboard", icon: LayoutDashboard, label: "Dashboard", roles: ["all"] },
+    { path: "/schedule", icon: CalendarDays, label: "Schedule", roles: ["all"] },
+    { path: "/academic-calendar", icon: Calendar, label: "Calendar", roles: ["all"] },
+  ];
+
+  const academicsItems = [
+    { path: "/gradebook", icon: BookOpen, label: "Gradebook" },
+    { path: "/reports", icon: FileText, label: "Reports" },
+  ];
+
+  const adminItems = [
+    { path: "/analytics", icon: BarChart3, label: "Analytics", roles: ["teacher", "admin"] },
+    { path: "/admin", icon: Settings, label: "Admin Panel", roles: ["admin"] },
+  ];
+
+  const renderMenuItem = (item: { path: string; icon: any; label: string }) => {
+    const Icon = item.icon;
+    const active = isActive(item.path);
+    return (
+      <SidebarMenuItem key={item.path}>
+        <SidebarMenuButton
+          asChild
+          isActive={active}
+          className={cn(
+            "mx-2 rounded-lg transition-all duration-200",
+            active
+              ? "bg-sidebar-primary text-sidebar-primary-foreground font-medium"
+              : "text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-foreground"
+          )}
+        >
+          <Link to={item.path} className="flex items-center gap-3 px-3 py-2.5">
+            <Icon className="h-5 w-5" />
+            {!isCollapsed && <span>{item.label}</span>}
+          </Link>
+        </SidebarMenuButton>
+      </SidebarMenuItem>
+    );
   };
 
   return (
@@ -62,70 +90,59 @@ const AppSidebar = () => {
       </SidebarHeader>
 
       <SidebarContent className="bg-sidebar">
+        {/* Main Menu */}
         <SidebarGroup>
           <SidebarGroupLabel className="text-sidebar-foreground/50 text-xs uppercase tracking-wider px-4">
             {!isCollapsed && "Main Menu"}
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {navItems.filter(item => canAccess(item.roles)).map((item) => {
-                const Icon = item.icon;
-                const active = isActive(item.path);
-                return (
-                  <SidebarMenuItem key={item.path}>
-                    <SidebarMenuButton
-                      asChild
-                      isActive={active}
-                      className={cn(
-                        "mx-2 rounded-lg transition-all duration-200",
-                        active
-                          ? "bg-sidebar-primary text-sidebar-primary-foreground font-medium"
-                          : "text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-foreground"
-                      )}
-                    >
-                      <Link to={item.path} className="flex items-center gap-3 px-3 py-2.5">
-                        <Icon className="h-5 w-5" />
-                        {!isCollapsed && <span>{item.label}</span>}
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                );
-              })}
+              {mainItems.filter(item => canAccess(item.roles)).map(renderMenuItem)}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
 
-        {/* Only show Administration section if user is admin and roles are loaded */}
-        {!rolesLoading && isAdmin && (
+        {/* Academics Group - Gradebook & Reports */}
+        {!rolesLoading && canAccess(["teacher", "admin"]) && (
+          <SidebarGroup>
+            <Collapsible open={isCollapsed ? false : academicsOpen} onOpenChange={setAcademicsOpen}>
+              <CollapsibleTrigger className={cn(
+                "flex items-center justify-between w-full mx-2 px-3 py-2.5 rounded-lg transition-all duration-200",
+                isAcademicsActive
+                  ? "text-sidebar-foreground font-medium"
+                  : "text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-foreground"
+              )}>
+                <div className="flex items-center gap-3">
+                  <ClipboardList className="h-5 w-5" />
+                  {!isCollapsed && <span>Academics</span>}
+                </div>
+                {!isCollapsed && (
+                  <ChevronDown className={cn(
+                    "h-4 w-4 transition-transform duration-200",
+                    academicsOpen ? "rotate-180" : ""
+                  )} />
+                )}
+              </CollapsibleTrigger>
+              <CollapsibleContent>
+                <SidebarGroupContent>
+                  <SidebarMenu className="pl-4">
+                    {academicsItems.map(renderMenuItem)}
+                  </SidebarMenu>
+                </SidebarGroupContent>
+              </CollapsibleContent>
+            </Collapsible>
+          </SidebarGroup>
+        )}
+
+        {/* Administration */}
+        {!rolesLoading && (isAdmin || isTeacher) && (
           <SidebarGroup>
             <SidebarGroupLabel className="text-sidebar-foreground/50 text-xs uppercase tracking-wider px-4">
               {!isCollapsed && "Administration"}
             </SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
-                {adminItems.map((item) => {
-                  const Icon = item.icon;
-                  const active = isActive(item.path);
-                  return (
-                    <SidebarMenuItem key={item.path}>
-                      <SidebarMenuButton
-                        asChild
-                        isActive={active}
-                        className={cn(
-                          "mx-2 rounded-lg transition-all duration-200",
-                          active
-                            ? "bg-sidebar-primary text-sidebar-primary-foreground font-medium"
-                            : "text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-foreground"
-                        )}
-                      >
-                        <Link to={item.path} className="flex items-center gap-3 px-3 py-2.5">
-                          <Icon className="h-5 w-5" />
-                          {!isCollapsed && <span>{item.label}</span>}
-                        </Link>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  );
-                })}
+                {adminItems.filter(item => canAccess(item.roles)).map(renderMenuItem)}
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>
