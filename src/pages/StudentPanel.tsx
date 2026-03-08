@@ -17,7 +17,7 @@ const StudentPanel = () => {
         </div>
 
         <Tabs defaultValue="users" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="users">
               <Users className="h-4 w-4 mr-2" />
               Users
@@ -29,10 +29,6 @@ const StudentPanel = () => {
             <TabsTrigger value="students">
               <GraduationCap className="h-4 w-4 mr-2" />
               Students
-            </TabsTrigger>
-            <TabsTrigger value="classes">
-              <Building className="h-4 w-4 mr-2" />
-              Classes
             </TabsTrigger>
           </TabsList>
 
@@ -46,10 +42,6 @@ const StudentPanel = () => {
 
           <TabsContent value="students">
             <StudentManagementTab />
-          </TabsContent>
-
-          <TabsContent value="classes">
-            <ClassManagementTab />
           </TabsContent>
         </Tabs>
       </div>
