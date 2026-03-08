@@ -7,26 +7,52 @@ import { useAnalytics, useTopStudents, useAtRiskStudents, useClassPerformance, u
 import { useTeacherAnalytics, useTeacherTopStudents, useTeacherAtRiskStudents, useTeacherClassPerformance, useTeacherPerformanceTrend } from "@/hooks/useTeacherAnalytics";
 import { useStudentDemographics } from "@/hooks/useStudentDemographics";
 import { useUserRoles } from "@/hooks/useUserRoles";
-import { useState } from "react";
+import { useAcademicPeriods } from "@/hooks/useAcademicPeriods";
+import { useState, useEffect, useMemo } from "react";
 import PassFailChart from "@/components/analytics/PassFailChart";
 import ClassPerformanceChart from "@/components/analytics/ClassPerformanceChart";
 import SubjectTrendsChart from "@/components/analytics/SubjectTrendsChart";
 import DemographicsChart from "@/components/analytics/DemographicsChart";
 
 const Analytics = () => {
-  const [selectedPeriod, setSelectedPeriod] = useState("p3");
+  const { data: academicPeriods = [] } = useAcademicPeriods();
+
+  const currentActivePeriod = useMemo(() => {
+    const today = new Date().toISOString().split("T")[0];
+    // Find period where today falls between start and end date
+    const activePeriod = academicPeriods.find(
+      (p) => p.start_date <= today && p.end_date >= today && ["p1","p2","p3","p4","p5","p6"].includes(p.period_type)
+    );
+    if (activePeriod) return activePeriod.period_type;
+    // Fallback: find the most recent period that has already started
+    const pastPeriods = academicPeriods
+      .filter((p) => p.start_date <= today && ["p1","p2","p3","p4","p5","p6"].includes(p.period_type))
+      .sort((a, b) => b.start_date.localeCompare(a.start_date));
+    if (pastPeriods.length > 0) return pastPeriods[0].period_type;
+    return "p1";
+  }, [academicPeriods]);
+
+  const [selectedPeriod, setSelectedPeriod] = useState<string | null>(null);
+  
+  useEffect(() => {
+    if (!selectedPeriod && currentActivePeriod) {
+      setSelectedPeriod(currentActivePeriod);
+    }
+  }, [currentActivePeriod, selectedPeriod]);
+
+  const activePeriod = selectedPeriod || currentActivePeriod;
   const { isAdmin, isLoading: rolesLoading } = useUserRoles();
 
-  const { data: adminAnalytics, isLoading: adminAnalyticsLoading } = useAnalytics(selectedPeriod);
-  const { data: adminTopStudents = [], isLoading: adminTopLoading } = useTopStudents(selectedPeriod);
-  const { data: adminAtRisk = [], isLoading: adminAtRiskLoading } = useAtRiskStudents(selectedPeriod);
-  const { data: adminClassPerf = [], isLoading: adminClassPerfLoading } = useClassPerformance(selectedPeriod);
+  const { data: adminAnalytics, isLoading: adminAnalyticsLoading } = useAnalytics(activePeriod);
+  const { data: adminTopStudents = [], isLoading: adminTopLoading } = useTopStudents(activePeriod);
+  const { data: adminAtRisk = [], isLoading: adminAtRiskLoading } = useAtRiskStudents(activePeriod);
+  const { data: adminClassPerf = [], isLoading: adminClassPerfLoading } = useClassPerformance(activePeriod);
   const { data: adminTrend = [], isLoading: adminTrendLoading } = usePerformanceTrend();
 
-  const { data: teacherAnalytics, isLoading: teacherAnalyticsLoading } = useTeacherAnalytics(selectedPeriod);
-  const { data: teacherTopStudents = [], isLoading: teacherTopLoading } = useTeacherTopStudents(selectedPeriod);
-  const { data: teacherAtRisk = [], isLoading: teacherAtRiskLoading } = useTeacherAtRiskStudents(selectedPeriod);
-  const { data: teacherClassPerf = [], isLoading: teacherClassPerfLoading } = useTeacherClassPerformance(selectedPeriod);
+  const { data: teacherAnalytics, isLoading: teacherAnalyticsLoading } = useTeacherAnalytics(activePeriod);
+  const { data: teacherTopStudents = [], isLoading: teacherTopLoading } = useTeacherTopStudents(activePeriod);
+  const { data: teacherAtRisk = [], isLoading: teacherAtRiskLoading } = useTeacherAtRiskStudents(activePeriod);
+  const { data: teacherClassPerf = [], isLoading: teacherClassPerfLoading } = useTeacherClassPerformance(activePeriod);
   const { data: teacherTrend = [], isLoading: teacherTrendLoading } = useTeacherPerformanceTrend();
 
   const { data: demographics, isLoading: demographicsLoading } = useStudentDemographics();
@@ -131,7 +157,7 @@ const Analytics = () => {
                 <SelectItem value="2023-2024">2023-2024</SelectItem>
               </SelectContent>
             </Select>
-            <Select value={selectedPeriod} onValueChange={setSelectedPeriod}>
+            <Select value={activePeriod} onValueChange={setSelectedPeriod}>
               <SelectTrigger className="w-[120px] h-8 text-xs bg-white/70 border-[hsl(170,30%,85%)]/30">
                 <SelectValue placeholder="Period" />
               </SelectTrigger>
