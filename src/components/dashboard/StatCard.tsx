@@ -26,13 +26,13 @@ export const StatCard = ({
 }: StatCardProps) => {
   return (
     <div
-      className={`${highlighted ? 'bg-[hsl(170,45%,92%)] border-[hsl(170,50%,75%)]' : backgroundColor + ' border-transparent'} rounded-xl border p-4 py-5 flex items-center gap-3 transition-shadow duration-300 hover:shadow-md h-full`}
+      className={`${highlighted ? 'bg-[hsl(170,45%,92%)] border-[hsl(170,50%,75%)]' : backgroundColor + ' border-transparent'} rounded-xl border p-3 flex items-center gap-3 transition-shadow duration-300 hover:shadow-md h-full`}
     >
       <div className={`${iconBackgroundColor} rounded-full p-2 flex-shrink-0`}>
         <Icon className={`${iconColor} size-4`} />
       </div>
       <div className="flex-1 min-w-0">
-        <h3 className="text-xl font-bold text-gray-900 leading-tight">{value}</h3>
+        <h3 className="text-2xl font-bold text-gray-900 leading-tight">{value}</h3>
         <p className="text-[10px] font-medium text-gray-500 truncate">{title}</p>
       </div>
     </div>

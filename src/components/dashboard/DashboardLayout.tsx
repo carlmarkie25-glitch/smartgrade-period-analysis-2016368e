@@ -24,8 +24,8 @@ export const DashboardLayout = () => {
     <AppShell activeTab="dashboard">
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_260px] gap-3 auto-rows-max">
         {/* Row 1: Stats */}
-        <div className="bg-white/70 backdrop-blur-md rounded-2xl border border-[hsl(170,30%,85%)]/30 p-4 shadow-sm flex flex-col">
-          <div className="flex items-center justify-between mb-3">
+        <div className="bg-white/70 backdrop-blur-md rounded-2xl border border-[hsl(170,30%,85%)]/30 p-3 shadow-sm flex flex-col">
+          <div className="flex items-center justify-between mb-2">
             <h3 className="text-sm font-semibold text-gray-900">Student Overview</h3>
             <span className="text-[10px] font-medium text-[hsl(170,50%,35%)]/70 px-2 py-0.5 bg-[hsl(170,40%,95%)] rounded-md">This Term</span>
           </div>
