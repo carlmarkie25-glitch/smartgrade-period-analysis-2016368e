@@ -267,7 +267,7 @@ export const TeacherAssignmentDialog = ({
                   <div
                     key={cls.id}
                     className={`border rounded-lg transition-colors ${
-                      summary.selected > 0 ? "border-primary bg-primary/5" : "border-border"
+                      summary.selected > 0 ? "border-primary bg-primary/10" : "border-border"
                     }`}
                   >
                     <div className="p-4">
@@ -328,7 +328,7 @@ export const TeacherAssignmentDialog = ({
                                 <div
                                   key={cs.id}
                                   className={`flex items-center gap-3 p-2 rounded ${
-                                    isSelected ? "bg-primary/10" : ""
+                                    isSelected ? "bg-primary/15" : ""
                                   } ${assignedToOther ? "opacity-60" : ""}`}
                                 >
                                   <Checkbox
