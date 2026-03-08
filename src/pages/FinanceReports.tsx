@@ -1,4 +1,4 @@
-import { AppShell } from "@/components/AppShell";
+import AppShell from "@/components/AppShell";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useFeeAssignments, usePayments, useExpenses } from "@/hooks/useFinance";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from "recharts";

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { AppShell } from "@/components/AppShell";
+import AppShell from "@/components/AppShell";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
