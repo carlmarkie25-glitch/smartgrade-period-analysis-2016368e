@@ -157,7 +157,7 @@ const Analytics = () => {
                 <SelectItem value="2023-2024">2023-2024</SelectItem>
               </SelectContent>
             </Select>
-            <Select value={selectedPeriod} onValueChange={setSelectedPeriod}>
+            <Select value={activePeriod} onValueChange={setSelectedPeriod}>
               <SelectTrigger className="w-[120px] h-8 text-xs bg-white/70 border-[hsl(170,30%,85%)]/30">
                 <SelectValue placeholder="Period" />
               </SelectTrigger>
