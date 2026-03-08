@@ -1,13 +1,12 @@
 import { useState, useEffect } from "react";
 import AppShell from "@/components/AppShell";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useExpenses } from "@/hooks/useFinance";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from "recharts";
 import { DollarSign, TrendingUp, TrendingDown, AlertCircle } from "lucide-react";
 
-const COLORS = ["hsl(var(--primary))", "hsl(var(--secondary))", "hsl(var(--accent))", "hsl(var(--destructive))", "#f59e0b", "#8b5cf6", "#06b6d4", "#ec4899"];
+const COLORS = ["hsl(170,50%,40%)", "hsl(35,60%,50%)", "hsl(0,60%,55%)", "hsl(210,60%,50%)", "#f59e0b", "#8b5cf6", "#06b6d4", "#ec4899"];
 
 const FinanceReports = () => {
   const { data: years } = useQuery({
@@ -25,8 +24,6 @@ const FinanceReports = () => {
       setSelectedYear(current ? current.id : years[0].id);
     }
   }, [years, selectedYear]);
-
-  const selectedYearName = years?.find(y => y.id === selectedYear)?.year_name || "";
 
   const { data: bills } = useQuery({
     queryKey: ["finance-report-bills", selectedYear],
@@ -68,23 +65,23 @@ const FinanceReports = () => {
   const expenseCategoryData = Object.entries(expenseByCategory).map(([name, value]) => ({ name, value }));
 
   const stats = [
-    { label: "Total Billed", value: totalBilled, icon: DollarSign, color: "text-primary" },
-    { label: "Total Collected", value: totalRevenue, icon: TrendingUp, color: "text-green-600" },
-    { label: "Outstanding", value: totalOutstanding, icon: AlertCircle, color: "text-amber-600" },
-    { label: "Total Expenses", value: totalExpenses, icon: TrendingDown, color: "text-red-600" },
+    { label: "Total Billed", value: totalBilled, icon: DollarSign, bgColor: "bg-[hsl(210,60%,96%)]", iconBg: "bg-[hsl(210,60%,90%)]", iconColor: "text-[hsl(210,60%,45%)]" },
+    { label: "Total Collected", value: totalRevenue, icon: TrendingUp, bgColor: "bg-[hsl(170,45%,95%)]", iconBg: "bg-[hsl(170,45%,88%)]", iconColor: "text-[hsl(170,50%,35%)]" },
+    { label: "Outstanding", value: totalOutstanding, icon: AlertCircle, bgColor: "bg-[hsl(35,60%,96%)]", iconBg: "bg-[hsl(35,60%,90%)]", iconColor: "text-[hsl(35,60%,40%)]" },
+    { label: "Total Expenses", value: totalExpenses, icon: TrendingDown, bgColor: "bg-[hsl(0,60%,96%)]", iconBg: "bg-[hsl(0,60%,90%)]", iconColor: "text-[hsl(0,50%,45%)]" },
   ];
 
   return (
     <AppShell>
-      <div className="p-6 space-y-6">
+      <div className="py-4 space-y-4">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-foreground">Financial Reports</h1>
-            <p className="text-muted-foreground">Overview of school finances</p>
+            <h1 className="text-2xl font-bold text-gray-900 mb-1">Financial Reports</h1>
+            <p className="text-sm text-gray-500">Overview of school finances</p>
           </div>
           {years && years.length > 0 && (
             <select
-              className="border rounded-md px-3 py-2 text-sm bg-background text-foreground"
+              className="border border-[hsl(170,30%,85%)] rounded-lg px-3 py-1.5 text-xs bg-white/70 text-gray-900"
               value={selectedYear}
               onChange={e => setSelectedYear(e.target.value)}
             >
@@ -95,72 +92,86 @@ const FinanceReports = () => {
           )}
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {stats.map(s => (
-            <Card key={s.label}>
-              <CardContent className="p-4 flex items-center gap-4">
-                <div className={`p-2 rounded-lg bg-muted ${s.color}`}>
-                  <s.icon className="h-5 w-5" />
+        {/* Stats */}
+        <div className="bg-white/70 backdrop-blur-md rounded-2xl border border-[hsl(170,30%,85%)]/30 p-4 shadow-sm">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-sm font-semibold text-gray-900">Financial Overview</h3>
+            <span className="text-[10px] font-medium text-[hsl(170,50%,35%)]/70 px-2 py-0.5 bg-[hsl(170,40%,95%)] rounded-md">Summary</span>
+          </div>
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+            {stats.map(s => {
+              const Icon = s.icon;
+              return (
+                <div key={s.label} className={`p-3 rounded-xl ${s.bgColor} transition-colors`}>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <span className="text-[10px] font-medium text-gray-500">{s.label}</span>
+                    <div className={`w-7 h-7 rounded-lg ${s.iconBg} flex items-center justify-center`}>
+                      <Icon className={`h-3.5 w-3.5 ${s.iconColor}`} />
+                    </div>
+                  </div>
+                  <div className="text-xl font-bold text-gray-900">{s.value.toLocaleString()}</div>
                 </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">{s.label}</p>
-                  <p className="text-xl font-bold text-foreground">{s.value.toLocaleString()}</p>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+              );
+            })}
+          </div>
         </div>
 
-        <Card className={netIncome >= 0 ? "border-green-500/30 bg-green-500/5" : "border-destructive/30 bg-destructive/5"}>
-          <CardContent className="p-4 flex items-center justify-between">
+        {/* Net Income */}
+        <div className={`bg-white/70 backdrop-blur-md rounded-2xl border p-4 shadow-sm ${netIncome >= 0 ? "border-[hsl(170,40%,80%)]/50" : "border-[hsl(0,40%,85%)]/50"}`}>
+          <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-muted-foreground">Net Income (Collected − Expenses)</p>
-              <p className={`text-2xl font-bold ${netIncome >= 0 ? "text-green-600" : "text-destructive"}`}>
+              <p className="text-[10px] font-medium text-gray-500">Net Income (Collected − Expenses)</p>
+              <p className={`text-2xl font-bold mt-1 ${netIncome >= 0 ? "text-[hsl(170,50%,35%)]" : "text-[hsl(0,60%,50%)]"}`}>
                 {netIncome.toLocaleString()}
               </p>
             </div>
-            <DollarSign className={`h-8 w-8 ${netIncome >= 0 ? "text-green-600" : "text-destructive"}`} />
-          </CardContent>
-        </Card>
+            <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${netIncome >= 0 ? "bg-[hsl(170,45%,92%)]" : "bg-[hsl(0,50%,94%)]"}`}>
+              <DollarSign className={`h-5 w-5 ${netIncome >= 0 ? "text-[hsl(170,50%,35%)]" : "text-[hsl(0,60%,50%)]"}`} />
+            </div>
+          </div>
+        </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <Card>
-            <CardHeader><CardTitle className="text-base">Student Bill Status</CardTitle></CardHeader>
-            <CardContent>
-              {statusData.length === 0 ? (
-                <p className="text-muted-foreground text-center py-8">No data yet</p>
-              ) : (
-                <ResponsiveContainer width="100%" height={250}>
-                  <PieChart>
-                    <Pie data={statusData} cx="50%" cy="50%" outerRadius={80} dataKey="value" label>
-                      {statusData.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
-                    </Pie>
-                    <Legend />
-                    <Tooltip />
-                  </PieChart>
-                </ResponsiveContainer>
-              )}
-            </CardContent>
-          </Card>
+        {/* Charts */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <div className="bg-white/70 backdrop-blur-md rounded-2xl border border-[hsl(170,30%,85%)]/30 p-4 shadow-sm">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-sm font-semibold text-gray-900">Student Bill Status</h3>
+              <span className="text-[10px] font-medium text-[hsl(170,50%,35%)]/70 px-2 py-0.5 bg-[hsl(170,40%,95%)] rounded-md">Distribution</span>
+            </div>
+            {statusData.length === 0 ? (
+              <p className="text-gray-400 text-center py-8 text-xs">No data yet</p>
+            ) : (
+              <ResponsiveContainer width="100%" height={220}>
+                <PieChart>
+                  <Pie data={statusData} cx="50%" cy="50%" innerRadius={50} outerRadius={75} paddingAngle={5} dataKey="value" label>
+                    {statusData.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
+                  </Pie>
+                  <Legend formatter={(value) => <span className="text-xs text-gray-600">{value}</span>} />
+                  <Tooltip contentStyle={{ backgroundColor: "rgba(255,255,255,0.9)", borderColor: "hsl(170,30%,85%)", borderRadius: "12px", fontSize: "11px" }} />
+                </PieChart>
+              </ResponsiveContainer>
+            )}
+          </div>
 
-          <Card>
-            <CardHeader><CardTitle className="text-base">Expenses by Category</CardTitle></CardHeader>
-            <CardContent>
-              {expenseCategoryData.length === 0 ? (
-                <p className="text-muted-foreground text-center py-8">No data yet</p>
-              ) : (
-                <ResponsiveContainer width="100%" height={250}>
-                  <BarChart data={expenseCategoryData}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="name" fontSize={12} />
-                    <YAxis />
-                    <Tooltip />
-                    <Bar dataKey="value" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
-                  </BarChart>
-                </ResponsiveContainer>
-              )}
-            </CardContent>
-          </Card>
+          <div className="bg-white/70 backdrop-blur-md rounded-2xl border border-[hsl(170,30%,85%)]/30 p-4 shadow-sm">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-sm font-semibold text-gray-900">Expenses by Category</h3>
+              <span className="text-[10px] font-medium text-[hsl(170,50%,35%)]/70 px-2 py-0.5 bg-[hsl(170,40%,95%)] rounded-md">Breakdown</span>
+            </div>
+            {expenseCategoryData.length === 0 ? (
+              <p className="text-gray-400 text-center py-8 text-xs">No data yet</p>
+            ) : (
+              <ResponsiveContainer width="100%" height={220}>
+                <BarChart data={expenseCategoryData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(170,20%,90%)" />
+                  <XAxis dataKey="name" fontSize={11} tick={{ fill: "#9ca3af" }} />
+                  <YAxis tick={{ fill: "#9ca3af", fontSize: 11 }} />
+                  <Tooltip contentStyle={{ backgroundColor: "rgba(255,255,255,0.9)", borderColor: "hsl(170,30%,85%)", borderRadius: "12px", fontSize: "11px" }} />
+                  <Bar dataKey="value" fill="hsl(170,50%,40%)" radius={[4, 4, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            )}
+          </div>
         </div>
       </div>
     </AppShell>

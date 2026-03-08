@@ -1,7 +1,6 @@
 import AppShell from "@/components/AppShell";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { TrendingUp, Award, AlertTriangle, Users, BarChart3, Target } from "lucide-react";
+import { TrendingUp, Award, AlertTriangle, Users, Target } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAnalytics, useTopStudents, useAtRiskStudents, useClassPerformance, usePerformanceTrend } from "@/hooks/useAnalytics";
@@ -53,49 +52,51 @@ const Analytics = () => {
       value: analyticsData?.totalStudents ?? 0,
       subtitle: "enrolled this period",
       icon: Users,
-      iconBg: "bg-primary/10",
-      iconColor: "text-primary",
+      bgColor: "bg-[hsl(210,60%,96%)]",
+      iconBg: "bg-[hsl(210,60%,90%)]",
+      iconColor: "text-[hsl(210,60%,45%)]",
     },
     {
       title: "Pass Rate",
       value: `${analyticsData?.passRate ?? 0}%`,
       subtitle: `${analyticsData?.passingStudents ?? 0} students passing`,
       icon: TrendingUp,
-      iconBg: "bg-success/10",
-      iconColor: "text-success",
-      trend: analyticsData?.passRate ? { value: analyticsData.passRate, isPositive: analyticsData.passRate >= 50 } : undefined,
+      bgColor: "bg-[hsl(145,45%,95%)]",
+      iconBg: "bg-[hsl(145,45%,88%)]",
+      iconColor: "text-[hsl(145,50%,35%)]",
     },
     {
       title: "Fail Rate",
       value: `${analyticsData?.failRate ?? 0}%`,
       subtitle: `${analyticsData?.failingStudents ?? 0} students failing`,
       icon: AlertTriangle,
-      iconBg: "bg-destructive/10",
-      iconColor: "text-destructive",
-      trend: analyticsData?.failRate ? { value: analyticsData.failRate, isPositive: false } : undefined,
+      bgColor: "bg-[hsl(0,60%,96%)]",
+      iconBg: "bg-[hsl(0,60%,90%)]",
+      iconColor: "text-[hsl(0,50%,45%)]",
     },
     {
       title: "At Risk",
       value: atRiskStudents.length,
       subtitle: `${atRiskPercent}% of total`,
       icon: Target,
-      iconBg: "bg-secondary/10",
-      iconColor: "text-secondary",
+      bgColor: "bg-[hsl(35,60%,96%)]",
+      iconBg: "bg-[hsl(35,60%,90%)]",
+      iconColor: "text-[hsl(35,60%,40%)]",
     },
   ];
 
   return (
     <AppShell activeTab="analytics">
-      <div className="py-4 space-y-6">
+      <div className="py-4 space-y-4">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold text-foreground">{pageTitle}</h1>
-            <p className="text-sm text-muted-foreground">{pageDescription}</p>
+            <h1 className="text-2xl font-bold text-gray-900 mb-1">{pageTitle}</h1>
+            <p className="text-sm text-gray-500">{pageDescription}</p>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
             <Select defaultValue="2024-2025">
-              <SelectTrigger className="w-[140px] h-9 text-sm">
+              <SelectTrigger className="w-[130px] h-8 text-xs bg-white/70 border-[hsl(170,30%,85%)]/30">
                 <SelectValue placeholder="Year" />
               </SelectTrigger>
               <SelectContent>
@@ -104,7 +105,7 @@ const Analytics = () => {
               </SelectContent>
             </Select>
             <Select value={selectedPeriod} onValueChange={setSelectedPeriod}>
-              <SelectTrigger className="w-[130px] h-9 text-sm">
+              <SelectTrigger className="w-[120px] h-8 text-xs bg-white/70 border-[hsl(170,30%,85%)]/30">
                 <SelectValue placeholder="Period" />
               </SelectTrigger>
               <SelectContent>
@@ -119,32 +120,37 @@ const Analytics = () => {
           </div>
         </div>
 
-        {/* Stat Cards Row */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          {analyticsLoading
-            ? Array(4).fill(0).map((_, i) => (
-                <Card key={i} className="border border-border/50">
-                  <CardContent className="p-4">
-                    <Skeleton className="h-4 w-20 mb-3" />
-                    <Skeleton className="h-7 w-16 mb-2" />
-                    <Skeleton className="h-3 w-24" />
-                  </CardContent>
-                </Card>
-              ))
-            : statCards.map((stat) => (
-                <Card key={stat.title} className="border border-border/50 hover:shadow-md transition-shadow">
-                  <CardContent className="p-4 flex items-start gap-3">
-                    <div className={`p-2.5 rounded-xl ${stat.iconBg} shrink-0`}>
-                      <stat.icon className={`h-5 w-5 ${stat.iconColor}`} />
+        {/* Stat Cards */}
+        <div className="bg-white/70 backdrop-blur-md rounded-2xl border border-[hsl(170,30%,85%)]/30 p-4 shadow-sm">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-sm font-semibold text-gray-900">Performance Overview</h3>
+            <span className="text-[10px] font-medium text-[hsl(170,50%,35%)]/70 px-2 py-0.5 bg-[hsl(170,40%,95%)] rounded-md">This Period</span>
+          </div>
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+            {analyticsLoading
+              ? Array(4).fill(0).map((_, i) => (
+                  <div key={i} className="p-3 rounded-xl bg-gray-50">
+                    <Skeleton className="h-3 w-16 mb-2" />
+                    <Skeleton className="h-6 w-12 mb-1" />
+                    <Skeleton className="h-2.5 w-20" />
+                  </div>
+                ))
+              : statCards.map((stat) => {
+                  const Icon = stat.icon;
+                  return (
+                    <div key={stat.title} className={`p-3 rounded-xl ${stat.bgColor} transition-colors`}>
+                      <div className="flex items-center justify-between mb-1.5">
+                        <span className="text-[10px] font-medium text-gray-500">{stat.title}</span>
+                        <div className={`w-7 h-7 rounded-lg ${stat.iconBg} flex items-center justify-center`}>
+                          <Icon className={`h-3.5 w-3.5 ${stat.iconColor}`} />
+                        </div>
+                      </div>
+                      <div className="text-xl font-bold text-gray-900">{stat.value}</div>
+                      <p className="text-[10px] text-gray-400 mt-0.5">{stat.subtitle}</p>
                     </div>
-                    <div className="min-w-0">
-                      <p className="text-xs font-medium text-muted-foreground truncate">{stat.title}</p>
-                      <p className="text-xl font-bold text-foreground mt-0.5">{stat.value}</p>
-                      <p className="text-[11px] text-muted-foreground mt-1">{stat.subtitle}</p>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+                  );
+                })}
+          </div>
         </div>
 
         {/* Charts: Performance Trend (large) + Pass/Fail Donut */}
@@ -153,107 +159,111 @@ const Analytics = () => {
           <PassFailChart passRate={analyticsData?.passRate || 0} failRate={analyticsData?.failRate || 0} />
         </div>
 
-        {/* Class Performance (full width) */}
+        {/* Class Performance */}
         <ClassPerformanceChart data={classPerformance} isLoading={classPerformanceLoading} />
 
         {/* Top Students and At Risk */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          <Card className="border border-border/50">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base flex items-center gap-2">
-                <div className="p-1.5 rounded-lg bg-secondary/10">
-                  <Award className="h-4 w-4 text-secondary" />
-                </div>
-                {topLabel}
-              </CardTitle>
-              <CardDescription className="text-xs">Highest performing students</CardDescription>
-            </CardHeader>
-            <CardContent className="pt-0">
-              {topStudentsLoading ? (
-                <div className="space-y-3">
-                  {Array(5).fill(0).map((_, i) => (
-                    <div key={i} className="flex items-center gap-3 p-2.5">
-                      <Skeleton className="h-7 w-7 rounded-full" />
-                      <Skeleton className="h-8 w-8 rounded-full" />
-                      <div className="flex-1"><Skeleton className="h-3.5 w-28 mb-1.5" /><Skeleton className="h-3 w-20" /></div>
-                      <Skeleton className="h-6 w-10" />
-                    </div>
-                  ))}
-                </div>
-              ) : topStudents.length === 0 ? (
-                <p className="text-muted-foreground text-center py-8 text-sm">No data available for this period</p>
-              ) : (
-                <div className="space-y-2">
-                  {topStudents.map((student, index) => (
-                    <div key={index} className="flex items-center justify-between p-2.5 rounded-xl bg-muted/30 hover:bg-muted/50 transition-colors">
-                      <div className="flex items-center gap-2.5">
-                        <div className="flex items-center justify-center w-7 h-7 rounded-full bg-secondary/15 text-secondary font-bold text-xs">
-                          {index + 1}
-                        </div>
-                        <Avatar className="h-8 w-8">
-                          <AvatarImage src="" />
-                          <AvatarFallback className="text-[10px] bg-primary/10 text-primary">{student.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
-                        </Avatar>
-                        <div>
-                          <p className="font-medium text-foreground text-sm leading-tight">{student.name}</p>
-                          <p className="text-[11px] text-muted-foreground">{student.class}</p>
-                        </div>
+          <div className="bg-white/70 backdrop-blur-md rounded-2xl border border-[hsl(170,30%,85%)]/30 p-4 shadow-sm">
+            <div className="flex items-center justify-between mb-3">
+              <div>
+                <h3 className="text-sm font-semibold text-gray-900 flex items-center gap-2">
+                  <Award className="h-4 w-4 text-[hsl(170,50%,35%)]" />
+                  {topLabel}
+                </h3>
+                <p className="text-[10px] text-gray-400 mt-0.5">Highest performing students</p>
+              </div>
+              <span className="text-[10px] font-medium text-[hsl(170,50%,35%)]/70 px-2 py-0.5 bg-[hsl(170,40%,95%)] rounded-md">Top 5</span>
+            </div>
+            {topStudentsLoading ? (
+              <div className="space-y-2.5">
+                {Array(5).fill(0).map((_, i) => (
+                  <div key={i} className="flex items-center gap-2.5 p-2.5 rounded-xl bg-gray-50">
+                    <Skeleton className="h-6 w-6 rounded-full" />
+                    <Skeleton className="h-7 w-7 rounded-full" />
+                    <div className="flex-1"><Skeleton className="h-3 w-24 mb-1" /><Skeleton className="h-2.5 w-16" /></div>
+                    <Skeleton className="h-5 w-10" />
+                  </div>
+                ))}
+              </div>
+            ) : topStudents.length === 0 ? (
+              <div className="text-center py-8 text-gray-400">
+                <Award className="h-6 w-6 mx-auto mb-2 opacity-50" />
+                <p className="text-xs">No data available for this period</p>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {topStudents.map((student, index) => (
+                  <div key={index} className="flex items-center justify-between p-2.5 rounded-xl border border-[hsl(170,30%,90%)] bg-[hsl(170,20%,98%)] hover:bg-[hsl(170,25%,95%)] transition-colors">
+                    <div className="flex items-center gap-2.5">
+                      <div className="flex items-center justify-center w-6 h-6 rounded-full bg-[hsl(170,40%,93%)] text-[hsl(170,50%,30%)] font-bold text-[10px]">
+                        {index + 1}
                       </div>
-                      <span className="text-lg font-bold text-secondary">{student.average}%</span>
+                      <Avatar className="h-7 w-7">
+                        <AvatarImage src="" />
+                        <AvatarFallback className="text-[9px] bg-[hsl(170,30%,90%)] text-[hsl(170,50%,30%)]">{student.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <p className="font-medium text-gray-900 text-xs leading-tight">{student.name}</p>
+                        <p className="text-[10px] text-gray-400">{student.class}</p>
+                      </div>
                     </div>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
+                    <span className="text-sm font-bold text-[hsl(170,50%,35%)]">{student.average}%</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
 
-          <Card className="border border-border/50">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base flex items-center gap-2">
-                <div className="p-1.5 rounded-lg bg-destructive/10">
-                  <AlertTriangle className="h-4 w-4 text-destructive" />
-                </div>
-                Students Needing Attention
-              </CardTitle>
-              <CardDescription className="text-xs">Students failing 3 or more subjects</CardDescription>
-            </CardHeader>
-            <CardContent className="pt-0">
-              {atRiskLoading ? (
-                <div className="space-y-3">
-                  {Array(3).fill(0).map((_, i) => (
-                    <div key={i} className="flex items-center gap-3 p-2.5">
-                      <Skeleton className="h-8 w-8 rounded-full" />
-                      <div className="flex-1"><Skeleton className="h-3.5 w-28 mb-1.5" /><Skeleton className="h-3 w-20" /></div>
-                      <Skeleton className="h-6 w-10" />
-                    </div>
-                  ))}
-                </div>
-              ) : atRiskStudents.length === 0 ? (
-                <p className="text-muted-foreground text-center py-8 text-sm">No at-risk students found</p>
-              ) : (
-                <div className="space-y-2">
-                  {atRiskStudents.map((student, index) => (
-                    <div key={index} className="flex items-center justify-between p-2.5 rounded-xl bg-destructive/5 border border-destructive/10 hover:bg-destructive/10 transition-colors">
-                      <div className="flex items-center gap-2.5">
-                        <Avatar className="h-8 w-8">
-                          <AvatarImage src="" />
-                          <AvatarFallback className="text-[10px] bg-destructive/10 text-destructive">{student.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
-                        </Avatar>
-                        <div>
-                          <p className="font-medium text-foreground text-sm leading-tight">{student.name}</p>
-                          <p className="text-[11px] text-muted-foreground">{student.class}</p>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-lg font-bold text-destructive">{student.failingSubjects}</p>
-                        <p className="text-[10px] text-muted-foreground">failing</p>
+          <div className="bg-white/70 backdrop-blur-md rounded-2xl border border-[hsl(170,30%,85%)]/30 p-4 shadow-sm">
+            <div className="flex items-center justify-between mb-3">
+              <div>
+                <h3 className="text-sm font-semibold text-gray-900 flex items-center gap-2">
+                  <AlertTriangle className="h-4 w-4 text-[hsl(0,60%,50%)]" />
+                  Students Needing Attention
+                </h3>
+                <p className="text-[10px] text-gray-400 mt-0.5">Failing 3 or more subjects</p>
+              </div>
+              <span className="text-[10px] font-medium text-[hsl(0,50%,50%)]/70 px-2 py-0.5 bg-[hsl(0,50%,96%)] rounded-md">At Risk</span>
+            </div>
+            {atRiskLoading ? (
+              <div className="space-y-2.5">
+                {Array(3).fill(0).map((_, i) => (
+                  <div key={i} className="flex items-center gap-2.5 p-2.5 rounded-xl bg-gray-50">
+                    <Skeleton className="h-7 w-7 rounded-full" />
+                    <div className="flex-1"><Skeleton className="h-3 w-24 mb-1" /><Skeleton className="h-2.5 w-16" /></div>
+                    <Skeleton className="h-5 w-10" />
+                  </div>
+                ))}
+              </div>
+            ) : atRiskStudents.length === 0 ? (
+              <div className="text-center py-8 text-gray-400">
+                <AlertTriangle className="h-6 w-6 mx-auto mb-2 opacity-50" />
+                <p className="text-xs">No at-risk students found</p>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {atRiskStudents.map((student, index) => (
+                  <div key={index} className="flex items-center justify-between p-2.5 rounded-xl border border-[hsl(0,40%,90%)] bg-[hsl(0,30%,98%)] hover:bg-[hsl(0,30%,95%)] transition-colors">
+                    <div className="flex items-center gap-2.5">
+                      <Avatar className="h-7 w-7">
+                        <AvatarImage src="" />
+                        <AvatarFallback className="text-[9px] bg-[hsl(0,30%,92%)] text-[hsl(0,50%,45%)]">{student.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <p className="font-medium text-gray-900 text-xs leading-tight">{student.name}</p>
+                        <p className="text-[10px] text-gray-400">{student.class}</p>
                       </div>
                     </div>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
+                    <div className="text-right">
+                      <p className="text-sm font-bold text-[hsl(0,60%,50%)]">{student.failingSubjects}</p>
+                      <p className="text-[9px] text-gray-400">failing</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </AppShell>
