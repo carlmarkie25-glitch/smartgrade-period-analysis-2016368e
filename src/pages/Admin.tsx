@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useUserManagement } from "@/hooks/useUserManagement";
-import { UserPlus, FileText, CalendarDays, Calendar } from "lucide-react";
+import { UserPlus, FileText, CalendarDays, Calendar, Palette } from "lucide-react";
 import { ClassScheduleManagementTab } from "@/components/ClassScheduleManagementTab";
 import { UserBiodataManagementTab } from "@/components/UserBiodataManagementTab";
 import { TeacherAssignmentDialog } from "@/components/TeacherAssignmentDialog";
@@ -55,7 +55,7 @@ const Admin = () => {
         </div>
 
         <Tabs defaultValue="users" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="users">
               <UserPlus className="h-4 w-4 mr-2" />
               Users
@@ -71,6 +71,10 @@ const Admin = () => {
             <TabsTrigger value="calendar">
               <Calendar className="h-4 w-4 mr-2" />
               Calendar
+            </TabsTrigger>
+            <TabsTrigger value="theme">
+              <Palette className="h-4 w-4 mr-2" />
+              Theme
             </TabsTrigger>
           </TabsList>
 
@@ -96,6 +100,10 @@ const Admin = () => {
           <TabsContent value="calendar" className="space-y-6">
             <AcademicPeriodManagement />
             <AcademicEventManagementTab />
+          </TabsContent>
+
+          <TabsContent value="theme">
+            <SettingsTab />
           </TabsContent>
         </Tabs>
       </div>
