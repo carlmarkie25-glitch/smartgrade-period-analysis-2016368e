@@ -1,6 +1,6 @@
 import AppShell from "@/components/AppShell";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { TrendingUp, Award, AlertTriangle, Users, Target } from "lucide-react";
+import { TrendingUp, Award, AlertTriangle, Users, Target, ClipboardList } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAnalytics, useTopStudents, useAtRiskStudents, useClassPerformance, usePerformanceTrend } from "@/hooks/useAnalytics";
@@ -41,6 +41,10 @@ const Analytics = () => {
   const pageTitle = isAdmin ? "Analytics" : "My Class Analytics";
   const pageDescription = isAdmin ? "School-wide performance analysis" : "Performance analysis for your classes";
   const topLabel = isAdmin ? "School-Wide Top 5" : "Top 5 in My Classes";
+
+  const allGraded = analyticsData?.allGraded ?? false;
+  const gradedCount = analyticsData?.gradedStudents ?? 0;
+  const totalCount = analyticsData?.totalStudents ?? 0;
 
   const atRiskPercent = analyticsData?.totalStudents
     ? ((atRiskStudents.length / analyticsData.totalStudents) * 100).toFixed(1)
