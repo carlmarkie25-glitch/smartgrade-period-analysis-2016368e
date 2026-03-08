@@ -46,10 +46,23 @@ export const ClassScheduleManagementTab = () => {
     subject_id: null,
   });
 
-  const { data: classes } = useQuery({
-    queryKey: ["classes"],
+  const { data: departments } = useQuery({
+    queryKey: ["departments-for-schedule"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("classes").select("id,name").order("name");
+      const { data, error } = await supabase.from("departments").select("id,name").order("name");
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const { data: classes } = useQuery({
+    queryKey: ["classes", selectedDepartment],
+    queryFn: async () => {
+      let query = supabase.from("classes").select("id,name,department_id").order("name");
+      if (selectedDepartment) {
+        query = query.eq("department_id", selectedDepartment);
+      }
+      const { data, error } = await query;
       if (error) throw error;
       return data;
     },
