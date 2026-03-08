@@ -117,12 +117,32 @@ const FeeManagement = () => {
     setInstallEdits(prev => ({ ...prev, [key]: { ...current, [field]: val } }));
   };
 
-  const installmentNumbers = [1, 2, 3];
-  const installmentDefaults = [
-    { label: "1st Installment", period_label: "October - December" },
-    { label: "2nd Installment", period_label: "January - February" },
-    { label: "3rd Installment", period_label: "March - May" },
-  ];
+  // Sync installment rows from saved data
+  useEffect(() => {
+    if (installments && installments.length > 0) {
+      const sorted = [...installments].sort((a: any, b: any) => a.installment_number - b.installment_number);
+      const uniqueRows = sorted.reduce((acc: any[], inst: any) => {
+        if (!acc.find(r => r.num === inst.installment_number)) {
+          acc.push({ num: inst.installment_number, label: inst.label, period_label: inst.period_label });
+        }
+        return acc;
+      }, []);
+      if (uniqueRows.length > 0) setInstallmentRows(uniqueRows);
+    }
+  }, [installments]);
+
+  const addInstallmentRow = () => {
+    const nextNum = installmentRows.length > 0 ? Math.max(...installmentRows.map(r => r.num)) + 1 : 1;
+    setInstallmentRows(prev => [...prev, { num: nextNum, label: `${nextNum}${nextNum === 1 ? 'st' : nextNum === 2 ? 'nd' : nextNum === 3 ? 'rd' : 'th'} Installment`, period_label: "" }]);
+  };
+
+  const removeInstallmentRow = (num: number) => {
+    setInstallmentRows(prev => prev.filter(r => r.num !== num));
+  };
+
+  const updateInstallmentRowMeta = (num: number, field: "label" | "period_label", val: string) => {
+    setInstallmentRows(prev => prev.map(r => r.num === num ? { ...r, [field]: val } : r));
+  };
 
   const handleSaveInstallments = async () => {
     const promises = Object.entries(installEdits).map(([key, vals]) => {
