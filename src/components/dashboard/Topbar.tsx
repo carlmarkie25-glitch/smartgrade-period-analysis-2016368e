@@ -5,17 +5,19 @@ interface TopbarProps {
   userName?: string;
   userRole?: string;
   userAvatar?: string;
+  sidebarCollapsed?: boolean;
 }
 
 export const Topbar = ({
   userName = "Dr. John Jacob",
   userRole = "Principal",
   userAvatar = "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=400&fit=crop",
+  sidebarCollapsed = false,
 }: TopbarProps) => {
   const [searchFocus, setSearchFocus] = useState(false);
 
   return (
-    <nav className="fixed top-0 left-20 right-0 h-16 z-40 bg-white/60 backdrop-blur-md border-b border-[hsl(170,25%,90%)]/40 flex items-center justify-between px-5 shadow-sm">
+    <nav className={`fixed top-0 right-0 h-16 z-40 bg-white/60 backdrop-blur-md border-b border-[hsl(170,25%,90%)]/40 flex items-center justify-between px-5 shadow-sm transition-all duration-300 ${sidebarCollapsed ? "left-20" : "left-56"}`}>
       {/* Search Bar */}
       <div className={`relative w-56 transition-all duration-300 ${searchFocus ? "ring-1 ring-[hsl(170,50%,60%)]/40" : ""} rounded-xl`}>
         <Search className="absolute left-2.5 top-1/2 transform -translate-y-1/2 text-gray-400 size-4" />
