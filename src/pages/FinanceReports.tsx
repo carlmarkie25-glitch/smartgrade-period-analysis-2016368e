@@ -10,17 +10,24 @@ import { DollarSign, TrendingUp, TrendingDown, AlertCircle } from "lucide-react"
 const COLORS = ["hsl(var(--primary))", "hsl(var(--secondary))", "hsl(var(--accent))", "hsl(var(--destructive))", "#f59e0b", "#8b5cf6", "#06b6d4", "#ec4899"];
 
 const FinanceReports = () => {
-  // Get current academic year
+  // Get current academic year with fallback
   const { data: currentYear } = useQuery({
-    queryKey: ["current-academic-year"],
+    queryKey: ["current-academic-year-fallback"],
     queryFn: async () => {
-      const { data } = await supabase
+      const { data: current } = await supabase
         .from("academic_years")
         .select("*")
         .eq("is_current", true)
         .limit(1)
         .maybeSingle();
-      return data;
+      if (current) return current;
+      const { data: fallback } = await supabase
+        .from("academic_years")
+        .select("*")
+        .order("start_date", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      return fallback;
     },
   });
 
