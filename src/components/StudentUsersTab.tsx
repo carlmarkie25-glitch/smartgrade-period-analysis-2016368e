@@ -354,32 +354,6 @@ export const StudentUsersTab = () => {
         </CardContent>
       </Card>
 
-      {/* Unassigned Users */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Unassigned Users ({unassignedUsers.length})</CardTitle>
-          <CardDescription>Users without any role — assign them as students</CardDescription>
-        </CardHeader>
-        <CardContent>
-          {unassignedUsers.length === 0 ? (
-            <p className="text-sm text-muted-foreground">All users have roles assigned</p>
-          ) : (
-            <div className="space-y-3">
-              {unassignedUsers.map((user: any) => (
-                <div key={user.id} className="flex items-center justify-between p-4 border rounded-lg">
-                  <div>
-                    <p className="font-medium">{user.full_name}</p>
-                    <p className="text-sm text-muted-foreground">{user.email}</p>
-                  </div>
-                  <Button size="sm" onClick={() => assignRole.mutate({ userId: user.user_id, role: "student" })}>
-                    Assign Student Role
-                  </Button>
-                </div>
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
 
       {/* Edit Dialog */}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
