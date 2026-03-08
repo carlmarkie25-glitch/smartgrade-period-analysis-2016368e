@@ -244,13 +244,22 @@ const Payments = () => {
                         <TableCell className="text-muted-foreground">{p.notes || "—"}</TableCell>
                         <TableCell className="text-right">
                           <Button variant="ghost" size="icon" title="View Receipt" onClick={() => {
+                            const bill = (p as any).bill;
+                            const billStudent = bill?.students;
+                            // Calculate previousPaid: total paid at the time = bill.amount_paid - all later payments
+                            // Simpler: we know total paid on bill, and this payment's amount
                             setReceiptData({
                               receipt_number: p.receipt_number,
                               payment_date: p.payment_date,
                               amount: p.amount,
                               payment_method: p.payment_method,
-                              studentName: (p as any).students?.full_name,
-                              studentId: (p as any).students?.student_id,
+                              studentName: billStudent?.full_name || (p as any).students?.full_name,
+                              studentId: billStudent?.student_id || (p as any).students?.student_id,
+                              className: billStudent?.classes?.name || "—",
+                              departmentName: billStudent?.departments?.name || "—",
+                              grandTotal: bill?.grand_total,
+                              previousPaid: (bill?.amount_paid || 0) - p.amount,
+                              newBalance: bill?.balance,
                             });
                           }}>
                             <Receipt className="h-4 w-4" />
