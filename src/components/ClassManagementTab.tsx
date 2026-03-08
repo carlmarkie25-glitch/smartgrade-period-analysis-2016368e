@@ -16,9 +16,11 @@ import { Badge } from "@/components/ui/badge";
 
 export const ClassManagementTab = () => {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isSubjectsDialogOpen, setIsSubjectsDialogOpen] = useState(false);
   const [selectedClassId, setSelectedClassId] = useState<string>("");
   const [selectedSubjectId, setSelectedSubjectId] = useState<string>("");
+  const [editingClass, setEditingClass] = useState<{ id: string; name: string; department_id: string; academic_year_id: string } | null>(null);
   const [newClass, setNewClass] = useState({
     name: "",
     department_id: "",
@@ -157,18 +159,32 @@ export const ClassManagementTab = () => {
       const { error } = await supabase.from("classes").delete().eq("id", id);
       if (error) throw error;
 
-      toast({
-        title: "Success",
-        description: "Class deleted successfully",
-      });
-
+      toast({ title: "Success", description: "Class deleted successfully" });
       queryClient.invalidateQueries({ queryKey: ["classes"] });
     } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    }
+  };
+
+  const handleEditClass = async () => {
+    if (!editingClass) return;
+    try {
+      const { error } = await supabase
+        .from("classes")
+        .update({
+          name: editingClass.name,
+          department_id: editingClass.department_id,
+          academic_year_id: editingClass.academic_year_id,
+        })
+        .eq("id", editingClass.id);
+      if (error) throw error;
+
+      toast({ title: "Success", description: "Class updated successfully" });
+      queryClient.invalidateQueries({ queryKey: ["classes"] });
+      setIsEditDialogOpen(false);
+      setEditingClass(null);
+    } catch (error: any) {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
     }
   };
 
@@ -347,7 +363,19 @@ export const ClassManagementTab = () => {
                       >
                         <BookOpen className="h-4 w-4" />
                       </Button>
-                      <Button variant="outline" size="sm">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          setEditingClass({
+                            id: cls.id,
+                            name: cls.name,
+                            department_id: cls.department_id,
+                            academic_year_id: cls.academic_year_id,
+                          });
+                          setIsEditDialogOpen(true);
+                        }}
+                      >
                         <Pencil className="h-4 w-4" />
                       </Button>
                       <Button
@@ -427,6 +455,55 @@ export const ClassManagementTab = () => {
               </Table>
             </div>
           </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Edit Class</DialogTitle>
+          </DialogHeader>
+          {editingClass && (
+            <div className="space-y-4 pt-4">
+              <div>
+                <Label htmlFor="edit-name">Class Name</Label>
+                <Input
+                  id="edit-name"
+                  value={editingClass.name}
+                  onChange={(e) => setEditingClass({ ...editingClass, name: e.target.value })}
+                />
+              </div>
+              <div>
+                <Label htmlFor="edit-department">Department</Label>
+                <Select value={editingClass.department_id} onValueChange={(value) => setEditingClass({ ...editingClass, department_id: value })}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select department" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {departments?.map((dept) => (
+                      <SelectItem key={dept.id} value={dept.id}>{dept.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label htmlFor="edit-year">Academic Year</Label>
+                <Select value={editingClass.academic_year_id} onValueChange={(value) => setEditingClass({ ...editingClass, academic_year_id: value })}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select academic year" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {academicYears?.map((year) => (
+                      <SelectItem key={year.id} value={year.id}>
+                        {year.year_name} {year.is_current && "(Current)"}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <Button onClick={handleEditClass} className="w-full">Save Changes</Button>
+            </div>
+          )}
         </DialogContent>
       </Dialog>
     </Card>
