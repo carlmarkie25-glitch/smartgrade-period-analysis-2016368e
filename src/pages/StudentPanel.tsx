@@ -1,8 +1,7 @@
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Users, FileText, GraduationCap, Building } from "lucide-react";
+import { Users, FileText, GraduationCap } from "lucide-react";
 import { StudentManagementTab } from "@/components/StudentManagementTab";
-import { ClassManagementTab } from "@/components/ClassManagementTab";
 import { UserBiodataManagementTab } from "@/components/UserBiodataManagementTab";
 import { StudentUsersTab } from "@/components/StudentUsersTab";
 import AppShell from "@/components/AppShell";
