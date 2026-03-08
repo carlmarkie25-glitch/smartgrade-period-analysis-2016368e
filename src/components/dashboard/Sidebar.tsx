@@ -72,7 +72,13 @@ export const Sidebar = ({ activeTab, onTabChange }: SidebarProps) => {
     (id) => activeTab === id || academicsGroup.children.find((c) => c.id === id)?.path === location.pathname
   );
 
+  const adminChildIds = adminGroup.children.map((c) => c.id);
+  const isAdminActive = adminChildIds.some(
+    (id) => activeTab === id || adminGroup.children.find((c) => c.id === id)?.path === location.pathname
+  );
+
   const [academicsOpen, setAcademicsOpen] = useState(isAcademicsActive);
+  const [adminOpen, setAdminOpen] = useState(isAdminActive);
 
   const canAccess = (roles: string[]) => {
     if (rolesLoading) return roles.includes("all");
