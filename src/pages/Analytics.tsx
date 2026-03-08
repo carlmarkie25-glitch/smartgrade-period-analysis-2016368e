@@ -1,15 +1,17 @@
 import AppShell from "@/components/AppShell";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { TrendingUp, Award, AlertTriangle, Users, Target, ClipboardList } from "lucide-react";
+import { TrendingUp, Award, AlertTriangle, Users, Target, ClipboardList, UserCheck, Globe, Church, MapPin } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAnalytics, useTopStudents, useAtRiskStudents, useClassPerformance, usePerformanceTrend } from "@/hooks/useAnalytics";
 import { useTeacherAnalytics, useTeacherTopStudents, useTeacherAtRiskStudents, useTeacherClassPerformance, useTeacherPerformanceTrend } from "@/hooks/useTeacherAnalytics";
+import { useStudentDemographics } from "@/hooks/useStudentDemographics";
 import { useUserRoles } from "@/hooks/useUserRoles";
 import { useState } from "react";
 import PassFailChart from "@/components/analytics/PassFailChart";
 import ClassPerformanceChart from "@/components/analytics/ClassPerformanceChart";
 import SubjectTrendsChart from "@/components/analytics/SubjectTrendsChart";
+import DemographicsChart from "@/components/analytics/DemographicsChart";
 
 const Analytics = () => {
   const [selectedPeriod, setSelectedPeriod] = useState("p3");
@@ -26,6 +28,8 @@ const Analytics = () => {
   const { data: teacherAtRisk = [], isLoading: teacherAtRiskLoading } = useTeacherAtRiskStudents(selectedPeriod);
   const { data: teacherClassPerf = [], isLoading: teacherClassPerfLoading } = useTeacherClassPerformance(selectedPeriod);
   const { data: teacherTrend = [], isLoading: teacherTrendLoading } = useTeacherPerformanceTrend();
+
+  const { data: demographics, isLoading: demographicsLoading } = useStudentDemographics();
 
   const analyticsData = isAdmin ? adminAnalytics : teacherAnalytics;
   const analyticsLoading = rolesLoading || (isAdmin ? adminAnalyticsLoading : teacherAnalyticsLoading);
@@ -50,16 +54,19 @@ const Analytics = () => {
     ? ((atRiskStudents.length / analyticsData.totalStudents) * 100).toFixed(1)
     : "0";
 
-  const statCards = [
-    {
-      title: "Total Students",
-      value: analyticsData?.totalStudents ?? 0,
-      subtitle: "enrolled this period",
-      icon: Users,
-      bgColor: "bg-[hsl(210,60%,96%)]",
-      iconBg: "bg-[hsl(210,60%,90%)]",
-      iconColor: "text-[hsl(210,60%,45%)]",
-    },
+  // Total Students card is always visible
+  const totalStudentsCard = {
+    title: "Total Students",
+    value: analyticsData?.totalStudents ?? 0,
+    subtitle: "enrolled this period",
+    icon: Users,
+    bgColor: "bg-[hsl(210,60%,96%)]",
+    iconBg: "bg-[hsl(210,60%,90%)]",
+    iconColor: "text-[hsl(210,60%,45%)]",
+  };
+
+  // Grade-dependent stat cards
+  const gradeStatCards = [
     {
       title: "Pass Rate",
       value: `${analyticsData?.passRate ?? 0}%`,
@@ -88,6 +95,22 @@ const Analytics = () => {
       iconColor: "text-[hsl(35,60%,40%)]",
     },
   ];
+
+  const renderStatCard = (stat: typeof totalStudentsCard) => {
+    const Icon = stat.icon;
+    return (
+      <div key={stat.title} className={`p-3 rounded-xl ${stat.bgColor} transition-colors`}>
+        <div className="flex items-center justify-between mb-1.5">
+          <span className="text-[10px] font-medium text-gray-500">{stat.title}</span>
+          <div className={`w-7 h-7 rounded-lg ${stat.iconBg} flex items-center justify-center`}>
+            <Icon className={`h-3.5 w-3.5 ${stat.iconColor}`} />
+          </div>
+        </div>
+        <div className="text-xl font-bold text-gray-900">{stat.value}</div>
+        <p className="text-[10px] text-gray-400 mt-0.5">{stat.subtitle}</p>
+      </div>
+    );
+  };
 
   return (
     <AppShell activeTab="analytics">
@@ -124,55 +147,42 @@ const Analytics = () => {
           </div>
         </div>
 
-        {/* Incomplete Grading Notice */}
-        {!analyticsLoading && !allGraded && (
-          <div className="bg-[hsl(35,60%,96%)] border border-[hsl(35,50%,85%)] rounded-2xl p-6 text-center space-y-2">
-            <ClipboardList className="h-10 w-10 mx-auto text-[hsl(35,60%,45%)] opacity-70" />
-            <h3 className="text-sm font-semibold text-[hsl(35,50%,30%)]">Grading Incomplete for This Period</h3>
-            <p className="text-xs text-[hsl(35,40%,40%)] max-w-md mx-auto">
-              Analytics will be available once all students have complete grades for all subjects and assessments.
-              Currently {gradedCount} of {totalCount} students have complete grades.
-            </p>
-            <div className="w-full max-w-xs mx-auto bg-[hsl(35,40%,88%)] rounded-full h-2 mt-3">
-              <div
-                className="bg-[hsl(35,60%,50%)] h-2 rounded-full transition-all"
-                style={{ width: totalCount > 0 ? `${(gradedCount / totalCount) * 100}%` : '0%' }}
-              />
-            </div>
-            <p className="text-[10px] text-[hsl(35,40%,50%)]">
-              {totalCount > 0 ? Math.round((gradedCount / totalCount) * 100) : 0}% complete
-            </p>
+        {/* Total Students Card - always visible */}
+        <div className="bg-white/70 backdrop-blur-md rounded-2xl border border-[hsl(170,30%,85%)]/30 p-4 shadow-sm">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-sm font-semibold text-gray-900">Student Overview</h3>
+            <span className="text-[10px] font-medium text-[hsl(170,50%,35%)]/70 px-2 py-0.5 bg-[hsl(170,40%,95%)] rounded-md">This Period</span>
           </div>
-        )}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+            {renderStatCard(totalStudentsCard)}
+            {allGraded ? (
+              gradeStatCards.map(renderStatCard)
+            ) : (
+              <div className="col-span-1 lg:col-span-3 p-3 rounded-xl bg-[hsl(35,60%,96%)] flex items-center gap-3">
+                <ClipboardList className="h-5 w-5 text-[hsl(35,60%,45%)] flex-shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-[10px] font-semibold text-[hsl(35,50%,30%)]">Grading Incomplete</p>
+                  <p className="text-[10px] text-[hsl(35,40%,40%)]">{gradedCount}/{totalCount} students graded</p>
+                  <div className="w-full bg-[hsl(35,40%,88%)] rounded-full h-1.5 mt-1">
+                    <div className="bg-[hsl(35,60%,50%)] h-1.5 rounded-full transition-all" style={{ width: totalCount > 0 ? `${(gradedCount / totalCount) * 100}%` : '0%' }} />
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
 
-        {/* Analytics Content - only shown when all grades are in */}
+        {/* Demographics Charts - always visible (not grade-dependent) */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <DemographicsChart title="Gender Distribution" data={demographics?.gender ?? []} isLoading={demographicsLoading} icon={<UserCheck className="h-4 w-4 text-[hsl(210,60%,50%)]" />} />
+          <DemographicsChart title="Ethnicity Distribution" data={demographics?.ethnicity ?? []} isLoading={demographicsLoading} icon={<Globe className="h-4 w-4 text-[hsl(280,50%,50%)]" />} />
+          <DemographicsChart title="Religion Distribution" data={demographics?.religion ?? []} isLoading={demographicsLoading} icon={<Church className="h-4 w-4 text-[hsl(35,60%,45%)]" />} />
+          <DemographicsChart title="County Distribution" data={demographics?.county ?? []} isLoading={demographicsLoading} icon={<MapPin className="h-4 w-4 text-[hsl(145,50%,40%)]" />} />
+        </div>
+
+        {/* Grade-dependent analytics - only shown when all grades are in */}
         {allGraded && (
           <>
-            {/* Stat Cards */}
-            <div className="bg-white/70 backdrop-blur-md rounded-2xl border border-[hsl(170,30%,85%)]/30 p-4 shadow-sm">
-              <div className="flex items-center justify-between mb-3">
-                <h3 className="text-sm font-semibold text-gray-900">Performance Overview</h3>
-                <span className="text-[10px] font-medium text-[hsl(170,50%,35%)]/70 px-2 py-0.5 bg-[hsl(170,40%,95%)] rounded-md">This Period</span>
-              </div>
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-                {statCards.map((stat) => {
-                  const Icon = stat.icon;
-                  return (
-                    <div key={stat.title} className={`p-3 rounded-xl ${stat.bgColor} transition-colors`}>
-                      <div className="flex items-center justify-between mb-1.5">
-                        <span className="text-[10px] font-medium text-gray-500">{stat.title}</span>
-                        <div className={`w-7 h-7 rounded-lg ${stat.iconBg} flex items-center justify-center`}>
-                          <Icon className={`h-3.5 w-3.5 ${stat.iconColor}`} />
-                        </div>
-                      </div>
-                      <div className="text-xl font-bold text-gray-900">{stat.value}</div>
-                      <p className="text-[10px] text-gray-400 mt-0.5">{stat.subtitle}</p>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-
             {/* Charts */}
             <div className="grid grid-cols-1 lg:grid-cols-[1fr_340px] gap-4">
               <SubjectTrendsChart data={trendData} isLoading={trendLoading} />
