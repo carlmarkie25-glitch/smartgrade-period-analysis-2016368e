@@ -1,6 +1,7 @@
 import { useAuth } from "@/contexts/AuthContext";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { User, Users } from "lucide-react";
 
 export const ProfileSummary = () => {
   const { user } = useAuth();
@@ -42,70 +43,120 @@ export const ProfileSummary = () => {
   const adminName = profile?.full_name || user?.email?.split("@")[0] || "Admin";
   const initials = adminName.split(" ").map((n: string) => n[0]).join("").toUpperCase().slice(0, 2);
 
-  const radius = 38;
-  const circumference = 2 * Math.PI * radius;
   const fillPercent = totalStudents > 0 ? Math.min(100, malePercent + femalePercent) : 0;
-  const offset = circumference - (fillPercent / 100) * circumference;
-
-  const hour = new Date().getHours();
-  const greeting = hour < 12 ? "Good Morning!" : hour < 17 ? "Good Afternoon!" : "Good Evening!";
 
   return (
-    <div className="bg-gradient-to-br from-[hsl(170,30%,97%)] to-[hsl(160,25%,94%)] rounded-2xl backdrop-blur-md border border-[hsl(170,30%,85%)]/30 p-3 shadow-sm flex flex-col items-center justify-center text-center">
-      {/* Circular Progress with avatar */}
-      <div className="relative w-[90px] h-[90px] mb-1">
-        <svg
-          className="absolute inset-0 -rotate-90"
-          viewBox="0 0 90 90"
-          style={{ width: "100%", height: "100%" }}
-        >
-          <circle cx="45" cy="45" r={radius} fill="none" stroke="hsl(170,30%,90%)" strokeWidth="3" opacity={0.5} />
-          <circle
-            cx="45"
-            cy="45"
-            r={radius}
-            fill="none"
-            stroke="url(#profileGradient)"
-            strokeWidth="3"
-            strokeDasharray={circumference}
-            strokeDashoffset={offset}
-            strokeLinecap="round"
-            style={{ transition: "stroke-dashoffset 0.5s ease-out" }}
-          />
-          <defs>
-            <linearGradient id="profileGradient" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0%" stopColor="hsl(170,60%,45%)" />
-              <stop offset="100%" stopColor="hsl(185,70%,45%)" />
-            </linearGradient>
-          </defs>
-        </svg>
-        <div className="absolute inset-0 flex flex-col items-center justify-center">
+    <div 
+      className="flex flex-col items-center justify-between p-5 md:p-6 rounded-[20px] h-full"
+      style={{
+        background: 'hsl(220, 20%, 96%)',
+        boxShadow: '8px 8px 16px hsl(220, 20%, 88%), -8px -8px 16px hsl(0, 0%, 100%)'
+      }}
+    >
+      {/* Top Area: Pill status + Profile */}
+      <div className="flex items-center justify-between w-full mb-4">
+        <div className="flex items-center gap-2">
           {profile?.avatar_url ? (
-            <img src={profile.avatar_url} alt={adminName} className="w-8 h-8 rounded-full object-cover border-2 border-white shadow-sm mb-0.5" />
+            <img src={profile.avatar_url} alt={adminName} className="w-10 h-10 rounded-full object-cover shadow-sm" />
           ) : (
-            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[hsl(170,50%,50%)] to-[hsl(160,50%,45%)] flex items-center justify-center text-white font-bold text-[10px] mb-0.5 border-2 border-white shadow-sm">
+            <div 
+              className="w-10 h-10 rounded-full flex items-center justify-center text-gray-700 font-black text-xs tracking-wider"
+              style={{
+                background: 'hsl(220, 20%, 96%)',
+                boxShadow: '4px 4px 8px hsl(220, 20%, 88%), -4px -4px 8px hsl(0, 0%, 100%)'
+              }}
+            >
               {initials}
             </div>
           )}
-          <span className="text-sm font-bold text-gray-900">{totalStudents}</span>
-          <span className="text-[8px] font-medium text-gray-500">Students</span>
+          <div className="flex flex-col">
+            <span className="text-xs font-black text-gray-700 leading-tight tracking-tight">{adminName}</span>
+            <span className="text-[9px] text-gray-400 font-bold uppercase tracking-widest mt-0.5">Admin</span>
+          </div>
+        </div>
+        <div 
+          className="px-3 py-1.5 rounded-full flex items-center gap-1.5"
+          style={{
+            background: 'hsl(220, 20%, 96%)',
+            boxShadow: 'inset 2px 2px 4px hsl(220, 20%, 88%), inset -2px -2px 4px hsl(0, 0%, 100%)'
+          }}
+        >
+          <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_6px_#34d399]" />
+          <span className="text-[9px] font-bold text-gray-500 uppercase tracking-widest">Active</span>
         </div>
       </div>
 
-      {/* Greeting + Info */}
-      <p className="text-[10px] font-medium text-gray-400 mb-0.5">{greeting}</p>
-      <h3 className="text-sm font-bold text-gray-900">{adminName}</h3>
-      <p className="text-[10px] font-medium text-[hsl(170,50%,40%)]">Administrator</p>
-
-      {/* Gender indicators with counts */}
-      <div className="flex items-center gap-3 mt-2">
-        <div className="flex items-center gap-1">
-          <span className="w-2 h-2 rounded-full bg-[hsl(210,60%,55%)]" />
-          <span className="text-[9px] text-gray-500">Male {maleCount} ({malePercent}%)</span>
+      {/* Center Area: Donut Chart */}
+      <div 
+        className="relative w-[120px] h-[120px] flex items-center justify-center rounded-full my-2"
+        style={{
+          background: 'hsl(220, 20%, 96%)',
+          boxShadow: 'inset 6px 6px 12px hsl(220, 20%, 88%), inset -6px -6px 12px hsl(0, 0%, 100%)'
+        }}
+      >
+        <svg
+          className="absolute inset-0 -rotate-90 w-full h-full drop-shadow-sm"
+          viewBox="0 0 120 120"
+        >
+          <circle 
+            cx="60" cy="60" r="46" 
+            fill="none" 
+            stroke="hsl(220, 20%, 90%)" 
+            strokeWidth="10" 
+          />
+          <circle
+            cx="60" cy="60" r="46"
+            fill="none"
+            stroke="url(#neumorphicGradient)"
+            strokeWidth="10"
+            strokeDasharray={2 * Math.PI * 46}
+            strokeDashoffset={(2 * Math.PI * 46) - (fillPercent / 100) * (2 * Math.PI * 46)}
+            strokeLinecap="round"
+            style={{ transition: "stroke-dashoffset 1s ease-out" }}
+          />
+          <defs>
+            <linearGradient id="neumorphicGradient" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stopColor="hsl(210, 100%, 65%)" />
+              <stop offset="100%" stopColor="hsl(280, 80%, 65%)" />
+            </linearGradient>
+          </defs>
+        </svg>
+        <div className="absolute inset-0 flex flex-col items-center justify-center pt-1">
+           <span className="text-3xl font-black text-gray-700 leading-none">{totalStudents}</span>
+           <span className="text-[9px] font-bold text-gray-400 uppercase tracking-widest mt-1">Total</span>
         </div>
-        <div className="flex items-center gap-1">
-          <span className="w-2 h-2 rounded-full bg-[hsl(330,50%,60%)]" />
-          <span className="text-[9px] text-gray-500">Female {femaleCount} ({femalePercent}%)</span>
+      </div>
+
+      {/* Bottom Area: Info rows horizontally spaced */}
+      <div className="w-full flex items-center justify-between px-2 mt-4">
+        <div className="flex flex-col items-center flex-1">
+          <div 
+            className="w-10 h-10 rounded-full flex items-center justify-center mb-2"
+            style={{
+              background: 'hsl(220, 20%, 96%)',
+              boxShadow: '4px 4px 8px hsl(220, 20%, 88%), -4px -4px 8px hsl(0, 0%, 100%)'
+            }}
+          >
+            <User className="size-4 text-[hsl(210,100%,65%)]" />
+          </div>
+          <span className="text-xs font-black text-gray-700">{maleCount}</span>
+          <span className="text-[9px] text-gray-400 font-bold uppercase tracking-widest mt-0.5">Male</span>
+        </div>
+        
+        <div className="h-10 w-px bg-gray-200/60" />
+        
+        <div className="flex flex-col items-center flex-1">
+          <div 
+            className="w-10 h-10 rounded-full flex items-center justify-center mb-2"
+            style={{
+              background: 'hsl(220, 20%, 96%)',
+              boxShadow: '4px 4px 8px hsl(220, 20%, 88%), -4px -4px 8px hsl(0, 0%, 100%)'
+            }}
+          >
+            <User className="size-4 text-[hsl(280,80%,65%)]" />
+          </div>
+          <span className="text-xs font-black text-gray-700">{femaleCount}</span>
+          <span className="text-[9px] text-gray-400 font-bold uppercase tracking-widest mt-0.5">Female</span>
         </div>
       </div>
     </div>
