@@ -1,5 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
+import { useUserRoles } from "@/hooks/useUserRoles";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -35,13 +37,79 @@ const formatTime = (t: string) => {
 };
 
 export const ClassScheduleTimetable = () => {
+  const { user } = useAuth();
+  const { isAdmin, isTeacher, isStudent } = useUserRoles();
+
+  // Get relevant department IDs for this user
+  const { data: userDeptIds, isLoading: userDeptLoading } = useQuery({
+    queryKey: ["user-department-ids", user?.id, isAdmin, isTeacher, isStudent],
+    queryFn: async (): Promise<string[] | null> => {
+      if (!user) return null;
+      // Admins see all departments
+      if (isAdmin) return null;
+
+      const deptIds = new Set<string>();
+
+      if (isTeacher) {
+        // Get departments of classes assigned to this teacher (via class_subjects or classes.teacher_id)
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("id")
+          .eq("user_id", user.id)
+          .single();
+        if (profile) {
+          const { data: classSubjects } = await supabase
+            .from("class_subjects")
+            .select("classes(department_id)")
+            .eq("teacher_id", profile.id);
+          classSubjects?.forEach((cs: any) => {
+            if (cs.classes?.department_id) deptIds.add(cs.classes.department_id);
+          });
+
+          const { data: teacherClasses } = await supabase
+            .from("classes")
+            .select("department_id")
+            .eq("teacher_id", profile.id);
+          teacherClasses?.forEach((c: any) => {
+            if (c.department_id) deptIds.add(c.department_id);
+          });
+
+          const { data: sponsorAssignments } = await supabase
+            .from("sponsor_class_assignments")
+            .select("classes(department_id)")
+            .eq("user_id", user.id);
+          sponsorAssignments?.forEach((sa: any) => {
+            if (sa.classes?.department_id) deptIds.add(sa.classes.department_id);
+          });
+        }
+      }
+
+      if (isStudent) {
+        const { data: student } = await supabase
+          .from("students")
+          .select("department_id")
+          .eq("user_id", user.id)
+          .single();
+        if (student?.department_id) deptIds.add(student.department_id);
+      }
+
+      return deptIds.size > 0 ? Array.from(deptIds) : [];
+    },
+    enabled: !!user,
+  });
+
   const { data: departments, isLoading: deptLoading } = useQuery({
-    queryKey: ["departments-for-timetable"],
+    queryKey: ["departments-for-timetable", userDeptIds],
     queryFn: async () => {
-      const { data, error } = await supabase.from("departments").select("id,name").order("name");
+      let query = supabase.from("departments").select("id,name").order("name");
+      if (userDeptIds && userDeptIds.length > 0) {
+        query = query.in("id", userDeptIds);
+      }
+      const { data, error } = await query;
       if (error) throw error;
       return data as Department[];
     },
+    enabled: userDeptIds !== undefined, // wait for dept filter to resolve
   });
 
   const { data: schedules, isLoading: schedLoading } = useQuery({
@@ -61,7 +129,7 @@ export const ClassScheduleTimetable = () => {
     },
   });
 
-  const isLoading = deptLoading || schedLoading;
+  const isLoading = deptLoading || schedLoading || userDeptLoading;
 
   if (isLoading) {
     return (
