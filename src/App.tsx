@@ -20,6 +20,10 @@ import Admin from "./pages/Admin";
 import StudentPanel from "./pages/StudentPanel";
 import TeacherPanel from "./pages/TeacherPanel";
 import ParentPanel from "./pages/ParentPanel";
+import ClassesPage from "./pages/ClassesPage";
+import SubjectsPage from "./pages/SubjectsPage";
+import DepartmentsPage from "./pages/DepartmentsPage";
+import AcademicYearsPage from "./pages/AcademicYearsPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -41,6 +45,10 @@ const App = () => (
             <Route path="/gradebook" element={<TeacherRoute><Gradebook /></TeacherRoute>} />
             <Route path="/reports" element={<TeacherRoute><Reports /></TeacherRoute>} />
             <Route path="/analytics" element={<TeacherRoute><Analytics /></TeacherRoute>} />
+            <Route path="/classes" element={<AdminRoute><ClassesPage /></AdminRoute>} />
+            <Route path="/subjects" element={<AdminRoute><SubjectsPage /></AdminRoute>} />
+            <Route path="/departments" element={<AdminRoute><DepartmentsPage /></AdminRoute>} />
+            <Route path="/academic-years" element={<AdminRoute><AcademicYearsPage /></AdminRoute>} />
             <Route path="/students" element={<AdminRoute><StudentPanel /></AdminRoute>} />
             <Route path="/teachers" element={<AdminRoute><TeacherPanel /></AdminRoute>} />
             <Route path="/parents" element={<AdminRoute><ParentPanel /></AdminRoute>} />
