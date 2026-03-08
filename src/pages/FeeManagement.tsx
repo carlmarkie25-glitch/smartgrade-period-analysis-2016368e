@@ -145,26 +145,27 @@ const FeeManagement = () => {
   };
 
   const handleSaveInstallments = async () => {
-    const promises = Object.entries(installEdits).map(([key, vals]) => {
-      const [department_id, numStr] = key.split("_");
-      const installment_number = parseInt(numStr);
-      const defaults = installmentDefaults[installment_number - 1];
-      return upsertInstallment.mutateAsync({
-        department_id,
-        academic_year_id: selectedYear,
-        installment_number,
-        label: vals.label || defaults.label,
-        period_label: vals.period_label || defaults.period_label,
-        amount: vals.amount,
+    const promises: Promise<void>[] = [];
+    for (const row of installmentRows) {
+      departments?.forEach(dept => {
+        const val = getInstallValue(dept.id, row.num);
+        promises.push(upsertInstallment.mutateAsync({
+          department_id: dept.id,
+          academic_year_id: selectedYear,
+          installment_number: row.num,
+          label: row.label,
+          period_label: row.period_label,
+          amount: val.amount || 0,
+        }));
       });
-    });
+    }
     await Promise.all(promises);
     setInstallEdits({});
     toast.success("Installment plans saved successfully");
   };
 
   const getTuitionTotal = (deptId: string) => {
-    return installmentNumbers.reduce((sum, num) => sum + (getInstallValue(deptId, num).amount || 0), 0);
+    return installmentRows.reduce((sum, row) => sum + (getInstallValue(deptId, row.num).amount || 0), 0);
   };
 
   const getGrandTotal = (deptId: string) => {
@@ -296,25 +297,47 @@ const FeeManagement = () => {
                       </TableRow>
 
                       {/* Installment rows */}
-                      {installmentNumbers.map(num => (
-                        <TableRow key={num}>
-                          <TableCell className="font-medium">
-                            <div>{installmentDefaults[num - 1].label}</div>
-                            <div className="text-xs text-muted-foreground">{installmentDefaults[num - 1].period_label}</div>
+                      {installmentRows.map(row => (
+                        <TableRow key={row.num}>
+                          <TableCell className="font-medium p-2">
+                            <Input
+                              className="h-7 text-sm font-medium mb-1"
+                              value={row.label}
+                              onChange={e => updateInstallmentRowMeta(row.num, "label", e.target.value)}
+                              placeholder="e.g. 1st Installment"
+                            />
+                            <Input
+                              className="h-7 text-xs text-muted-foreground"
+                              value={row.period_label}
+                              onChange={e => updateInstallmentRowMeta(row.num, "period_label", e.target.value)}
+                              placeholder="e.g. October - December"
+                            />
+                            <Button variant="ghost" size="sm" className="h-6 text-xs text-destructive mt-1 p-0" onClick={() => removeInstallmentRow(row.num)}>
+                              <Trash2 className="h-3 w-3 mr-1" /> Remove
+                            </Button>
                           </TableCell>
                           {departments?.map(dept => (
                             <TableCell key={dept.id} className="text-center p-1">
                               <Input
                                 type="number"
                                 className="text-center h-8 w-full"
-                                value={getInstallValue(dept.id, num).amount || ""}
-                                onChange={e => setInstallValue(dept.id, num, "amount", parseFloat(e.target.value) || 0)}
+                                value={getInstallValue(dept.id, row.num).amount || ""}
+                                onChange={e => setInstallValue(dept.id, row.num, "amount", parseFloat(e.target.value) || 0)}
                                 placeholder="0"
                               />
                             </TableCell>
                           ))}
                         </TableRow>
                       ))}
+
+                      {/* Add installment button row */}
+                      <TableRow>
+                        <TableCell colSpan={(departments?.length || 0) + 1} className="text-center py-2">
+                          <Button variant="outline" size="sm" onClick={addInstallmentRow}>
+                            <Plus className="h-4 w-4 mr-1" /> Add Installment Period
+                          </Button>
+                        </TableCell>
+                      </TableRow>
 
                       {/* Total Tuition */}
                       <TableRow className="bg-muted/30 border-t">
