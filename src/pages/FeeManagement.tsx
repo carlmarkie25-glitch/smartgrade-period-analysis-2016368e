@@ -42,8 +42,14 @@ const FeeManagement = () => {
   const [selectedYear, setSelectedYear] = useState("");
 
   useEffect(() => {
-    if (currentYear && !selectedYear) setSelectedYear(currentYear.id);
-  }, [currentYear, selectedYear]);
+    if (!selectedYear) {
+      if (currentYear) {
+        setSelectedYear(currentYear.id);
+      } else if (years?.length) {
+        setSelectedYear(years[0].id);
+      }
+    }
+  }, [currentYear, years, selectedYear]);
 
   const { data: rates } = useDivisionFeeRates(selectedYear);
   const upsertRate = useUpsertDivisionFeeRate();
