@@ -10,6 +10,8 @@ interface ScheduleItem {
   end_time: string;
   subject?: string;
   location?: string;
+  teacher_name?: string;
+  isClassSchedule?: boolean;
   [key: string]: any;
 }
 
@@ -27,7 +29,7 @@ export const useSchedule = () => {
 
       // personal entries for user
       const { data: personal, error: err1 } = await supabase
-        .from("schedules" as any)
+        .from("schedules")
         .select("*")
         .eq("user_id", user.id)
         .eq("date", today)
@@ -53,23 +55,29 @@ export const useSchedule = () => {
         .single();
       classId = studentData?.class_id || null;
 
-      const scheduleQuery = supabase
-        .from("class_schedules" as any)
+      // Build class schedule query
+      let query = supabase
+        .from("class_schedules")
         .select("*, classes(name), teachers:profiles!class_schedules_teacher_id_fkey(id,full_name), subjects(name)")
         .eq("day_of_week", dayOfWeek);
 
-      if (classId) {
-        scheduleQuery.eq("class_id", classId);
-      }
-      if (profileId) {
-        scheduleQuery.or(`teacher_id.eq.${profileId}`);
+      if (classId && profileId) {
+        query = query.or(`class_id.eq.${classId},teacher_id.eq.${profileId}`);
+      } else if (classId) {
+        query = query.eq("class_id", classId);
+      } else if (profileId) {
+        query = query.eq("teacher_id", profileId);
+      } else {
+        // No class or profile, skip class schedules
+        results.sort((a, b) => a.start_time.localeCompare(b.start_time));
+        return results;
       }
 
-      const { data: classSchedules, error: err2 } = await scheduleQuery;
+      const { data: classSchedules, error: err2 } = await query;
       if (err2) throw err2;
 
-      if (classSchedules && (classSchedules as any[]).length > 0) {
-        const mapped = (classSchedules as any[]).map((cs: any) => ({
+      if (classSchedules && classSchedules.length > 0) {
+        const mapped = classSchedules.map((cs: any) => ({
           id: cs.id,
           user_id: cs.teacher_id || "",
           date: today,

@@ -19,7 +19,7 @@ export const useClassSchedules = () => {
     queryKey: ["class-schedules"],
     queryFn: async (): Promise<ClassScheduleEntry[]> => {
       const { data, error } = await supabase
-        .from("class_schedules" as any)
+        .from("class_schedules")
         .select(
           `*,
             classes(id,name),
