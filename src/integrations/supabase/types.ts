@@ -345,6 +345,140 @@ export type Database = {
         }
         Relationships: []
       }
+      expenses: {
+        Row: {
+          amount: number
+          category: string
+          created_at: string
+          created_by: string | null
+          description: string | null
+          expense_date: string
+          id: string
+          paid_to: string | null
+          payment_method: string | null
+          receipt_url: string | null
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          category: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          expense_date?: string
+          id?: string
+          paid_to?: string | null
+          payment_method?: string | null
+          receipt_url?: string | null
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          category?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          expense_date?: string
+          id?: string
+          paid_to?: string | null
+          payment_method?: string | null
+          receipt_url?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      fee_assignments: {
+        Row: {
+          amount_due: number
+          amount_paid: number
+          created_at: string
+          due_date: string | null
+          fee_structure_id: string
+          id: string
+          status: string
+          student_id: string
+          updated_at: string
+        }
+        Insert: {
+          amount_due?: number
+          amount_paid?: number
+          created_at?: string
+          due_date?: string | null
+          fee_structure_id: string
+          id?: string
+          status?: string
+          student_id: string
+          updated_at?: string
+        }
+        Update: {
+          amount_due?: number
+          amount_paid?: number
+          created_at?: string
+          due_date?: string | null
+          fee_structure_id?: string
+          id?: string
+          status?: string
+          student_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fee_assignments_fee_structure_id_fkey"
+            columns: ["fee_structure_id"]
+            isOneToOne: false
+            referencedRelation: "fee_structures"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fee_assignments_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      fee_structures: {
+        Row: {
+          academic_year_id: string | null
+          amount: number
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          academic_year_id?: string | null
+          amount?: number
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          academic_year_id?: string | null
+          amount?: number
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fee_structures_academic_year_id_fkey"
+            columns: ["academic_year_id"]
+            isOneToOne: false
+            referencedRelation: "academic_years"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       parent_student_assignments: {
         Row: {
           created_at: string
@@ -367,6 +501,60 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "parent_student_assignments_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      payments: {
+        Row: {
+          amount: number
+          created_at: string
+          created_by: string | null
+          fee_assignment_id: string
+          id: string
+          notes: string | null
+          payment_date: string
+          payment_method: string
+          receipt_number: string | null
+          student_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          created_by?: string | null
+          fee_assignment_id: string
+          id?: string
+          notes?: string | null
+          payment_date?: string
+          payment_method?: string
+          receipt_number?: string | null
+          student_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          created_by?: string | null
+          fee_assignment_id?: string
+          id?: string
+          notes?: string | null
+          payment_date?: string
+          payment_method?: string
+          receipt_number?: string | null
+          student_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payments_fee_assignment_id_fkey"
+            columns: ["fee_assignment_id"]
+            isOneToOne: false
+            referencedRelation: "fee_assignments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payments_student_id_fkey"
             columns: ["student_id"]
             isOneToOne: false
             referencedRelation: "students"
