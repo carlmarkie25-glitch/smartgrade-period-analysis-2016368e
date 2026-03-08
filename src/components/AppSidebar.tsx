@@ -140,14 +140,32 @@ const AppSidebar = () => {
         {/* Administration */}
         {!rolesLoading && (isAdmin || isTeacher) && (
           <SidebarGroup>
-            <SidebarGroupLabel className="text-sidebar-foreground/50 text-xs uppercase tracking-wider px-4">
-              {!isCollapsed && "Administration"}
-            </SidebarGroupLabel>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                {adminItems.filter(item => canAccess(item.roles)).map(renderMenuItem)}
-              </SidebarMenu>
-            </SidebarGroupContent>
+            <Collapsible open={isCollapsed ? false : adminOpen} onOpenChange={setAdminOpen}>
+              <CollapsibleTrigger className={cn(
+                "flex items-center justify-between w-full mx-2 px-3 py-2.5 rounded-lg transition-all duration-200",
+                isAdminActive
+                  ? "text-sidebar-foreground font-medium"
+                  : "text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-foreground"
+              )}>
+                <div className="flex items-center gap-3">
+                  <Settings className="h-5 w-5" />
+                  {!isCollapsed && <span>Administration</span>}
+                </div>
+                {!isCollapsed && (
+                  <ChevronDown className={cn(
+                    "h-4 w-4 transition-transform duration-200",
+                    adminOpen ? "rotate-180" : ""
+                  )} />
+                )}
+              </CollapsibleTrigger>
+              <CollapsibleContent>
+                <SidebarGroupContent>
+                  <SidebarMenu className="pl-4">
+                    {adminItems.map(renderMenuItem)}
+                  </SidebarMenu>
+                </SidebarGroupContent>
+              </CollapsibleContent>
+            </Collapsible>
           </SidebarGroup>
         )}
       </SidebarContent>
