@@ -9,9 +9,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Trash2, Save, DollarSign, Calendar, ClipboardList } from "lucide-react";
+import { Plus, Trash2, Save, DollarSign, Calendar, ClipboardList, Zap } from "lucide-react";
 import { useFeeCategories, useCreateFeeCategory, useDeleteFeeCategory, useDivisionFeeRates, useUpsertDivisionFeeRate, useInstallmentPlans, useUpsertInstallmentPlan } from "@/hooks/useFeeSetup";
-import { useFeeAssignments, useCreateFeeAssignment } from "@/hooks/useFinance";
+import { useGenerateAllBills } from "@/hooks/useStudentBilling";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -19,6 +19,7 @@ import { toast } from "sonner";
 const FeeManagement = () => {
   const { data: categories, isLoading: catLoading } = useFeeCategories();
   const createCategory = useCreateFeeCategory();
+  const generateBills = useGenerateAllBills();
   const deleteCategory = useDeleteFeeCategory();
 
   const { data: years } = useQuery({
@@ -181,6 +182,9 @@ const FeeManagement = () => {
             <p className="text-muted-foreground">Set fee standards by division and manage installment plans</p>
           </div>
           <div className="flex items-center gap-3">
+            <Button onClick={() => generateBills.mutate()} disabled={generateBills.isPending} variant="default">
+              <Zap className="h-4 w-4 mr-1" /> {generateBills.isPending ? "Generating..." : "Generate Bills for All Students"}
+            </Button>
             <Select value={selectedYear} onValueChange={setSelectedYear}>
               <SelectTrigger className="w-[200px]">
                 <SelectValue placeholder="Select academic year" />

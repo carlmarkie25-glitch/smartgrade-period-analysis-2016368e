@@ -787,6 +787,98 @@ export type Database = {
           },
         ]
       }
+      student_bill_items: {
+        Row: {
+          amount: number
+          bill_id: string
+          created_at: string
+          id: string
+          item_name: string
+          item_type: string
+        }
+        Insert: {
+          amount?: number
+          bill_id: string
+          created_at?: string
+          id?: string
+          item_name: string
+          item_type?: string
+        }
+        Update: {
+          amount?: number
+          bill_id?: string
+          created_at?: string
+          id?: string
+          item_name?: string
+          item_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "student_bill_items_bill_id_fkey"
+            columns: ["bill_id"]
+            isOneToOne: false
+            referencedRelation: "student_bills"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      student_bills: {
+        Row: {
+          academic_year_id: string
+          amount_paid: number
+          balance: number
+          created_at: string
+          grand_total: number
+          id: string
+          registration_total: number
+          status: string
+          student_id: string
+          tuition_total: number
+          updated_at: string
+        }
+        Insert: {
+          academic_year_id: string
+          amount_paid?: number
+          balance?: number
+          created_at?: string
+          grand_total?: number
+          id?: string
+          registration_total?: number
+          status?: string
+          student_id: string
+          tuition_total?: number
+          updated_at?: string
+        }
+        Update: {
+          academic_year_id?: string
+          amount_paid?: number
+          balance?: number
+          created_at?: string
+          grand_total?: number
+          id?: string
+          registration_total?: number
+          status?: string
+          student_id?: string
+          tuition_total?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "student_bills_academic_year_id_fkey"
+            columns: ["academic_year_id"]
+            isOneToOne: false
+            referencedRelation: "academic_years"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "student_bills_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       student_grades: {
         Row: {
           assessment_type_id: string
@@ -841,6 +933,60 @@ export type Database = {
           },
           {
             foreignKeyName: "student_grades_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      student_payments: {
+        Row: {
+          amount: number
+          bill_id: string
+          created_at: string
+          created_by: string | null
+          id: string
+          notes: string | null
+          payment_date: string
+          payment_method: string
+          receipt_number: string | null
+          student_id: string
+        }
+        Insert: {
+          amount: number
+          bill_id: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          notes?: string | null
+          payment_date?: string
+          payment_method?: string
+          receipt_number?: string | null
+          student_id: string
+        }
+        Update: {
+          amount?: number
+          bill_id?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          notes?: string | null
+          payment_date?: string
+          payment_method?: string
+          receipt_number?: string | null
+          student_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "student_payments_bill_id_fkey"
+            columns: ["bill_id"]
+            isOneToOne: false
+            referencedRelation: "student_bills"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "student_payments_student_id_fkey"
             columns: ["student_id"]
             isOneToOne: false
             referencedRelation: "students"
@@ -1142,6 +1288,11 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      generate_all_student_bills: { Args: never; Returns: number }
+      generate_student_bill: {
+        Args: { p_student_id: string }
+        Returns: undefined
+      }
       get_student_period_ranks: {
         Args: {
           p_periods: Database["public"]["Enums"]["period_type"][]
