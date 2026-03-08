@@ -1,13 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
-export interface StudentClassification {
-  name: string;
-  class: string;
-  average: number;
-  category: "needing_attention" | "at_risk" | "failed";
-}
-
 export const useAnalytics = (period: string) => {
   return useQuery({
     queryKey: ["analytics", period],
@@ -34,33 +27,17 @@ export const useAnalytics = (period: string) => {
 
       let passingStudents = 0;
       let failingStudents = 0;
-      let needingAttentionCount = 0;
-      let atRiskCount = 0;
-      let failedCount = 0;
 
       studentScores.forEach((scores) => {
         const pct = scores.max > 0 ? (scores.total / scores.max) * 100 : 0;
         if (pct > 60) passingStudents++;
         else failingStudents++;
-
-        if (pct <= 75 && pct > 72) needingAttentionCount++;
-        if (pct <= 72 && pct > 60) atRiskCount++;
-        if (pct <= 60) failedCount++;
       });
 
       const passRate = totalStudents ? Math.round((passingStudents / totalStudents) * 100) : 0;
       const failRate = totalStudents ? Math.round((failingStudents / totalStudents) * 100) : 0;
 
-      return {
-        totalStudents: totalStudents || 0,
-        passingStudents,
-        failingStudents,
-        passRate,
-        failRate,
-        needingAttentionCount,
-        atRiskCount,
-        failedCount,
-      };
+      return { totalStudents: totalStudents || 0, passingStudents, failingStudents, passRate, failRate };
     },
   });
 };
@@ -71,53 +48,7 @@ export const useTopStudents = (period: string, limit: number = 5) => {
     queryFn: async () => {
       const { data: grades, error } = await supabase
         .from("student_grades")
-        .select(`
-          score, max_score, student_id,
-          students ( id, full_name, classes ( name ) )
-        `)
-        .eq("period", period as any);
-      if (error) throw error;
-
-      const studentAverages = new Map<string, { name: string; class: string; total: number; max: number }>();
-      grades?.forEach((grade: any) => {
-        const studentId = grade.student_id;
-        const existing = studentAverages.get(studentId);
-        if (existing) {
-          existing.total += Number(grade.score);
-          existing.max += Number(grade.max_score);
-        } else {
-          studentAverages.set(studentId, {
-            name: grade.students.full_name,
-            class: grade.students.classes?.name || "N/A",
-            total: Number(grade.score),
-            max: Number(grade.max_score),
-          });
-        }
-      });
-
-      return Array.from(studentAverages.values())
-        .map((s) => ({
-          name: s.name,
-          class: s.class,
-          average: s.max > 0 ? Math.round((s.total / s.max) * 100) : 0,
-        }))
-        .filter((s) => s.average >= 90)
-        .sort((a, b) => b.average - a.average)
-        .slice(0, limit);
-    },
-  });
-};
-
-export const useClassifiedStudents = (period: string) => {
-  return useQuery({
-    queryKey: ["classified-students", period],
-    queryFn: async () => {
-      const { data: grades, error } = await supabase
-        .from("student_grades")
-        .select(`
-          score, max_score, student_id,
-          students ( id, full_name, classes ( name ) )
-        `)
+        .select(`score, max_score, student_id, students ( id, full_name, classes ( name ) )`)
         .eq("period", period as any);
       if (error) throw error;
 
@@ -137,28 +68,11 @@ export const useClassifiedStudents = (period: string) => {
         }
       });
 
-      const needingAttention: StudentClassification[] = [];
-      const atRisk: StudentClassification[] = [];
-      const failed: StudentClassification[] = [];
-
-      studentAverages.forEach((s) => {
-        const avg = s.max > 0 ? Math.round((s.total / s.max) * 100) : 0;
-        const entry = { name: s.name, class: s.class, average: avg };
-
-        if (avg <= 60) {
-          failed.push({ ...entry, category: "failed" });
-        } else if (avg <= 72) {
-          atRisk.push({ ...entry, category: "at_risk" });
-        } else if (avg <= 75) {
-          needingAttention.push({ ...entry, category: "needing_attention" });
-        }
-      });
-
-      needingAttention.sort((a, b) => a.average - b.average);
-      atRisk.sort((a, b) => a.average - b.average);
-      failed.sort((a, b) => a.average - b.average);
-
-      return { needingAttention, atRisk, failed };
+      return Array.from(studentAverages.values())
+        .map((s) => ({ name: s.name, class: s.class, average: s.max > 0 ? Math.round((s.total / s.max) * 100) : 0 }))
+        .filter((s) => s.average >= 90)
+        .sort((a, b) => b.average - a.average)
+        .slice(0, limit);
     },
   });
 };
@@ -169,10 +83,7 @@ export const useAtRiskStudents = (period: string) => {
     queryFn: async () => {
       const { data: grades, error } = await supabase
         .from("student_grades")
-        .select(`
-          score, max_score, student_id,
-          students ( id, full_name, classes ( name ) )
-        `)
+        .select(`score, max_score, student_id, students ( id, full_name, classes ( name ) )`)
         .eq("period", period as any);
       if (error) throw error;
 
@@ -199,7 +110,7 @@ export const useAtRiskStudents = (period: string) => {
           average: s.max > 0 ? Math.round((s.total / s.max) * 100) : 0,
           failingSubjects: 0,
         }))
-        .filter((s) => s.average <= 72)
+        .filter((s) => s.average <= 75)
         .sort((a, b) => a.average - b.average);
     },
   });
