@@ -1,4 +1,4 @@
-import { LayoutDashboard, Users, BookOpen, FileText, BarChart3, Settings, GraduationCap, CalendarDays, LogOut, UserCog, Calendar, Building, School, Layers, ChevronDown, PanelLeftClose, PanelLeft, UsersRound } from "lucide-react";
+import { LayoutDashboard, Users, BookOpen, FileText, BarChart3, Settings, GraduationCap, CalendarDays, LogOut, UserCog, Calendar, Building, School, Layers, ChevronDown, PanelLeftClose, PanelLeft, UsersRound, Wallet, DollarSign, Receipt, TrendingUp, PieChart } from "lucide-react";
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useUserRoles } from "@/hooks/useUserRoles";
@@ -65,6 +65,19 @@ export const Sidebar = ({ activeTab, onTabChange, collapsed = false, onToggle }:
     ],
   };
 
+  const financeGroup: MenuGroup = {
+    id: "finance",
+    icon: Wallet,
+    label: "Finance",
+    roles: ["admin"],
+    children: [
+      { id: "fees", icon: DollarSign, label: "Fee Management", path: "/fees", roles: ["admin"] },
+      { id: "payments", icon: Receipt, label: "Payments", path: "/payments", roles: ["admin"] },
+      { id: "expenses", icon: TrendingUp, label: "Expenses", path: "/expenses", roles: ["admin"] },
+      { id: "finance-reports", icon: PieChart, label: "Finance Reports", path: "/finance-reports", roles: ["admin"] },
+    ],
+  };
+
   const adminGroup: MenuGroup = {
     id: "administration",
     icon: Settings,
@@ -74,7 +87,6 @@ export const Sidebar = ({ activeTab, onTabChange, collapsed = false, onToggle }:
       { id: "schedule", icon: CalendarDays, label: "Schedule", path: "/schedule", roles: ["admin"] },
       { id: "calendar", icon: Calendar, label: "Calendar", path: "/academic-calendar", roles: ["admin"] },
       { id: "analytics", icon: BarChart3, label: "Analytics", path: "/analytics", roles: ["teacher", "admin"] },
-      
     ],
   };
 
@@ -88,6 +100,11 @@ export const Sidebar = ({ activeTab, onTabChange, collapsed = false, onToggle }:
     (id) => activeTab === id || usersGroup.children.find((c) => c.id === id)?.path === location.pathname
   );
 
+  const financeChildIds = financeGroup.children.map((c) => c.id);
+  const isFinanceActive = financeChildIds.some(
+    (id) => activeTab === id || financeGroup.children.find((c) => c.id === id)?.path === location.pathname
+  );
+
   const adminChildIds = adminGroup.children.map((c) => c.id);
   const isAdminActive = adminChildIds.some(
     (id) => activeTab === id || adminGroup.children.find((c) => c.id === id)?.path === location.pathname
@@ -95,6 +112,7 @@ export const Sidebar = ({ activeTab, onTabChange, collapsed = false, onToggle }:
 
   const [academicsOpen, setAcademicsOpen] = useState(isAcademicsActive);
   const [usersOpen, setUsersOpen] = useState(isUsersActive);
+  const [financeOpen, setFinanceOpen] = useState(isFinanceActive);
   const [adminOpen, setAdminOpen] = useState(isAdminActive);
 
   const canAccess = (roles: string[]) => {
@@ -235,6 +253,7 @@ export const Sidebar = ({ activeTab, onTabChange, collapsed = false, onToggle }:
 
         {renderGroup(academicsGroup, academicsOpen, setAcademicsOpen, isAcademicsActive)}
         {renderGroup(usersGroup, usersOpen, setUsersOpen, isUsersActive)}
+        {renderGroup(financeGroup, financeOpen, setFinanceOpen, isFinanceActive)}
         {renderGroup(adminGroup, adminOpen, setAdminOpen, isAdminActive)}
       </div>
 
