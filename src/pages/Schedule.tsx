@@ -6,8 +6,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { format } from "date-fns";
-import { CalendarDays, Eye } from "lucide-react";
+import { CalendarDays, Eye, LayoutGrid } from "lucide-react";
 import { ClassScheduleManagementTab } from "@/components/ClassScheduleManagementTab";
+import { ClassScheduleTimetable } from "@/components/ClassScheduleTimetable";
 
 const Schedule = () => {
   const { data, isLoading, error } = useSchedule();
@@ -66,6 +67,10 @@ const Schedule = () => {
                 <CalendarDays className="h-4 w-4 mr-2" />
                 Manage Timetable
               </TabsTrigger>
+              <TabsTrigger value="timetable">
+                <LayoutGrid className="h-4 w-4 mr-2" />
+                Timetable View
+              </TabsTrigger>
               <TabsTrigger value="preview">
                 <Eye className="h-4 w-4 mr-2" />
                 Today's Preview
@@ -74,12 +79,17 @@ const Schedule = () => {
             <TabsContent value="manage">
               <ClassScheduleManagementTab />
             </TabsContent>
+            <TabsContent value="timetable">
+              <ClassScheduleTimetable />
+            </TabsContent>
             <TabsContent value="preview">
               {schedulePreview}
             </TabsContent>
           </Tabs>
         ) : (
-          schedulePreview
+          <div className="space-y-6">
+            <ClassScheduleTimetable />
+          </div>
         )}
       </div>
     </AppShell>
