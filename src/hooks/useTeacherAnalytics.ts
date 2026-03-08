@@ -106,7 +106,7 @@ export const useTeacherAnalytics = (period: string) => {
   return useQuery({
     queryKey: ["teacher-analytics", user?.id, period],
     queryFn: async () => {
-      const empty = { totalStudents: 0, passingStudents: 0, failingStudents: 0, passRate: 0, failRate: 0, needingAttentionCount: 0, atRiskCount: 0, failedCount: 0 };
+      const empty = { totalStudents: 0, passingStudents: 0, failingStudents: 0, passRate: 0, failRate: 0, needingAttentionCount: 0, atRiskCount: 0, failedCount: 0, allGraded: false, gradedStudents: 0 };
       if (!user?.id) return empty;
 
       const { completeStudents, allStudents } = await getCompleteTeacherStudents(user.id, period);
@@ -121,11 +121,12 @@ export const useTeacherAnalytics = (period: string) => {
         if (s.average <= 60) failedCount++;
       });
 
+      const allGraded = totalStudents > 0 && gradedStudents === totalStudents;
       return {
         totalStudents, passingStudents, failingStudents,
         passRate: gradedStudents ? Math.round((passingStudents / gradedStudents) * 100) : 0,
         failRate: gradedStudents ? Math.round((failingStudents / gradedStudents) * 100) : 0,
-        needingAttentionCount, atRiskCount, failedCount,
+        needingAttentionCount, atRiskCount, failedCount, allGraded, gradedStudents,
       };
     },
     enabled: !!user?.id,
