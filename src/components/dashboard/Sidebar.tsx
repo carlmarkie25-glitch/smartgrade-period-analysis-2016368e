@@ -34,8 +34,6 @@ export const Sidebar = ({ activeTab, onTabChange }: SidebarProps) => {
 
   const topItems: MenuItem[] = [
     { id: "dashboard", icon: LayoutDashboard, label: "Dashboard", path: "/dashboard", roles: ["all"] },
-    { id: "schedule", icon: CalendarDays, label: "Schedule", path: "/schedule", roles: ["all"] },
-    { id: "calendar", icon: Calendar, label: "Calendar", path: "/academic-calendar", roles: ["all"] },
   ];
 
   const academicsGroup: MenuGroup = {
@@ -53,20 +51,34 @@ export const Sidebar = ({ activeTab, onTabChange }: SidebarProps) => {
     ],
   };
 
-  const bottomItems: MenuItem[] = [
-    { id: "students", icon: GraduationCap, label: "Students", path: "/students", roles: ["admin"] },
-    { id: "teachers", icon: UserCog, label: "Teachers", path: "/teachers", roles: ["admin"] },
-    { id: "parents", icon: Users, label: "Parents", path: "/parents", roles: ["admin"] },
-    { id: "analytics", icon: BarChart3, label: "Analytics", path: "/analytics", roles: ["teacher", "admin"] },
-    { id: "settings", icon: Settings, label: "Settings", path: "/admin", roles: ["admin"] },
-  ];
+  const adminGroup: MenuGroup = {
+    id: "administration",
+    icon: Settings,
+    label: "Administration",
+    roles: ["admin"],
+    children: [
+      { id: "students", icon: GraduationCap, label: "Students", path: "/students", roles: ["admin"] },
+      { id: "teachers", icon: UserCog, label: "Teachers", path: "/teachers", roles: ["admin"] },
+      { id: "parents", icon: Users, label: "Parents", path: "/parents", roles: ["admin"] },
+      { id: "schedule", icon: CalendarDays, label: "Schedule", path: "/schedule", roles: ["admin"] },
+      { id: "calendar", icon: Calendar, label: "Calendar", path: "/academic-calendar", roles: ["admin"] },
+      { id: "analytics", icon: BarChart3, label: "Analytics", path: "/analytics", roles: ["teacher", "admin"] },
+      { id: "settings", icon: Settings, label: "Settings", path: "/admin", roles: ["admin"] },
+    ],
+  };
 
   const academicsChildIds = academicsGroup.children.map((c) => c.id);
   const isAcademicsActive = academicsChildIds.some(
     (id) => activeTab === id || academicsGroup.children.find((c) => c.id === id)?.path === location.pathname
   );
 
+  const adminChildIds = adminGroup.children.map((c) => c.id);
+  const isAdminActive = adminChildIds.some(
+    (id) => activeTab === id || adminGroup.children.find((c) => c.id === id)?.path === location.pathname
+  );
+
   const [academicsOpen, setAcademicsOpen] = useState(isAcademicsActive);
+  const [adminOpen, setAdminOpen] = useState(isAdminActive);
 
   const canAccess = (roles: string[]) => {
     if (rolesLoading) return roles.includes("all");
@@ -153,10 +165,40 @@ export const Sidebar = ({ activeTab, onTabChange }: SidebarProps) => {
           </div>
         )}
 
-        {/* Divider */}
-        <div className="w-8 h-px bg-white/10 my-1" />
-
-        {bottomItems.filter((item) => canAccess(item.roles)).map((item) => renderItem(item))}
+        {/* Administration Group */}
+        {canAccess(adminGroup.roles) && (
+          <div className="flex flex-col items-center">
+            <button
+              onClick={() => setAdminOpen(!adminOpen)}
+              title="Administration"
+              className={`relative p-3 rounded-xl transition-all duration-300 group ${
+                isAdminActive && !adminOpen
+                  ? "bg-white/20 text-white shadow-lg"
+                  : isAdminActive
+                  ? "text-white"
+                  : "text-[hsl(170,30%,70%)] hover:text-white hover:bg-white/10"
+              }`}
+            >
+              <Settings size={20} />
+              <ChevronDown
+                size={10}
+                className={`absolute bottom-1 left-1/2 -translate-x-1/2 transition-transform duration-200 ${
+                  adminOpen ? "rotate-180" : ""
+                }`}
+              />
+              <div className="absolute left-full ml-2 px-2 py-1 bg-[hsl(170,30%,20%)]/90 text-white text-[10px] rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
+                Administration
+              </div>
+            </button>
+            {adminOpen && (
+              <div className="flex flex-col items-center gap-1 mt-1 py-1 px-1 rounded-xl bg-white/5">
+                {adminGroup.children
+                  .filter((item) => canAccess(item.roles))
+                  .map((item) => renderItem(item, 16))}
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Sign Out */}
