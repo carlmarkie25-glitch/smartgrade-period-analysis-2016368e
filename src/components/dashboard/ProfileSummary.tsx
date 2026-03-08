@@ -1,25 +1,54 @@
-interface ProfileSummaryProps {
-  adminName?: string;
-  role?: string;
-  totalStudents?: number;
-  studentPercentage?: number;
-  greeting?: string;
-  avatarUrl?: string;
-  initials?: string;
-}
+import { useAuth } from "@/contexts/AuthContext";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
-export const ProfileSummary = ({
-  adminName = "Dr. John Jacob",
-  role = "School Principal",
-  totalStudents = 784,
-  studentPercentage = 92,
-  greeting = "Good Morning!",
-  avatarUrl,
-  initials = "JJ",
-}: ProfileSummaryProps) => {
+export const ProfileSummary = () => {
+  const { user } = useAuth();
+
+  const { data: profile } = useQuery({
+    queryKey: ["admin-profile", user?.id],
+    queryFn: async () => {
+      if (!user?.id) return null;
+      const { data } = await supabase
+        .from("profiles")
+        .select("full_name, avatar_url")
+        .eq("user_id", user.id)
+        .single();
+      return data;
+    },
+    enabled: !!user?.id,
+  });
+
+  const { data: stats } = useQuery({
+    queryKey: ["dashboard-profile-stats"],
+    queryFn: async () => {
+      const { data: students, error } = await supabase
+        .from("students")
+        .select("gender");
+      if (error) throw error;
+      const total = students?.length || 0;
+      const male = students?.filter(s => s.gender?.toLowerCase() === "male").length || 0;
+      const female = students?.filter(s => s.gender?.toLowerCase() === "female").length || 0;
+      return { total, male, female };
+    },
+  });
+
+  const totalStudents = stats?.total || 0;
+  const maleCount = stats?.male || 0;
+  const femaleCount = stats?.female || 0;
+  const malePercent = totalStudents > 0 ? Math.round((maleCount / totalStudents) * 100) : 0;
+  const femalePercent = totalStudents > 0 ? Math.round((femaleCount / totalStudents) * 100) : 0;
+
+  const adminName = profile?.full_name || user?.email?.split("@")[0] || "Admin";
+  const initials = adminName.split(" ").map((n: string) => n[0]).join("").toUpperCase().slice(0, 2);
+
   const radius = 52;
   const circumference = 2 * Math.PI * radius;
-  const offset = circumference - (studentPercentage / 100) * circumference;
+  const fillPercent = totalStudents > 0 ? Math.min(100, malePercent + femalePercent) : 0;
+  const offset = circumference - (fillPercent / 100) * circumference;
+
+  const hour = new Date().getHours();
+  const greeting = hour < 12 ? "Good Morning!" : hour < 17 ? "Good Afternoon!" : "Good Evening!";
 
   return (
     <div className="bg-gradient-to-br from-[hsl(170,30%,97%)] to-[hsl(160,25%,94%)] rounded-2xl backdrop-blur-md border border-[hsl(170,30%,85%)]/30 p-4 shadow-sm flex flex-col items-center justify-center text-center">
@@ -51,8 +80,8 @@ export const ProfileSummary = ({
           </defs>
         </svg>
         <div className="absolute inset-0 flex flex-col items-center justify-center">
-          {avatarUrl ? (
-            <img src={avatarUrl} alt={adminName} className="w-10 h-10 rounded-full object-cover border-2 border-white shadow-sm mb-0.5" />
+          {profile?.avatar_url ? (
+            <img src={profile.avatar_url} alt={adminName} className="w-10 h-10 rounded-full object-cover border-2 border-white shadow-sm mb-0.5" />
           ) : (
             <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[hsl(170,50%,50%)] to-[hsl(160,50%,45%)] flex items-center justify-center text-white font-bold text-xs mb-0.5 border-2 border-white shadow-sm">
               {initials}
@@ -66,17 +95,17 @@ export const ProfileSummary = ({
       {/* Greeting + Info */}
       <p className="text-[10px] font-medium text-gray-400 mb-0.5">{greeting}</p>
       <h3 className="text-sm font-bold text-gray-900">{adminName}</h3>
-      <p className="text-[10px] font-medium text-[hsl(170,50%,40%)]">{role}</p>
+      <p className="text-[10px] font-medium text-[hsl(170,50%,40%)]">Administrator</p>
 
-      {/* Gender indicators */}
+      {/* Gender indicators with counts */}
       <div className="flex items-center gap-3 mt-2">
         <div className="flex items-center gap-1">
           <span className="w-2 h-2 rounded-full bg-[hsl(210,60%,55%)]" />
-          <span className="text-[9px] text-gray-500">Male</span>
+          <span className="text-[9px] text-gray-500">Male {maleCount} ({malePercent}%)</span>
         </div>
         <div className="flex items-center gap-1">
           <span className="w-2 h-2 rounded-full bg-[hsl(330,50%,60%)]" />
-          <span className="text-[9px] text-gray-500">Female</span>
+          <span className="text-[9px] text-gray-500">Female {femaleCount} ({femalePercent}%)</span>
         </div>
       </div>
     </div>
