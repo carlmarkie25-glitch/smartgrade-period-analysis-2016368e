@@ -9,9 +9,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Trash2, Save, DollarSign, Calendar, ClipboardList } from "lucide-react";
+import { Plus, Trash2, Save, DollarSign, Calendar, ClipboardList, Zap } from "lucide-react";
 import { useFeeCategories, useCreateFeeCategory, useDeleteFeeCategory, useDivisionFeeRates, useUpsertDivisionFeeRate, useInstallmentPlans, useUpsertInstallmentPlan } from "@/hooks/useFeeSetup";
-import { useFeeAssignments, useCreateFeeAssignment } from "@/hooks/useFinance";
+import { useGenerateAllBills } from "@/hooks/useStudentBilling";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
