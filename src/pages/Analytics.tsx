@@ -7,14 +7,40 @@ import { useAnalytics, useTopStudents, useAtRiskStudents, useClassPerformance, u
 import { useTeacherAnalytics, useTeacherTopStudents, useTeacherAtRiskStudents, useTeacherClassPerformance, useTeacherPerformanceTrend } from "@/hooks/useTeacherAnalytics";
 import { useStudentDemographics } from "@/hooks/useStudentDemographics";
 import { useUserRoles } from "@/hooks/useUserRoles";
-import { useState } from "react";
+import { useAcademicPeriods } from "@/hooks/useAcademicPeriods";
+import { useState, useEffect, useMemo } from "react";
 import PassFailChart from "@/components/analytics/PassFailChart";
 import ClassPerformanceChart from "@/components/analytics/ClassPerformanceChart";
 import SubjectTrendsChart from "@/components/analytics/SubjectTrendsChart";
 import DemographicsChart from "@/components/analytics/DemographicsChart";
 
 const Analytics = () => {
-  const [selectedPeriod, setSelectedPeriod] = useState("p3");
+  const { data: academicPeriods = [] } = useAcademicPeriods();
+
+  const currentActivePeriod = useMemo(() => {
+    const today = new Date().toISOString().split("T")[0];
+    // Find period where today falls between start and end date
+    const activePeriod = academicPeriods.find(
+      (p) => p.start_date <= today && p.end_date >= today && ["p1","p2","p3","p4","p5","p6"].includes(p.period_type)
+    );
+    if (activePeriod) return activePeriod.period_type;
+    // Fallback: find the most recent period that has already started
+    const pastPeriods = academicPeriods
+      .filter((p) => p.start_date <= today && ["p1","p2","p3","p4","p5","p6"].includes(p.period_type))
+      .sort((a, b) => b.start_date.localeCompare(a.start_date));
+    if (pastPeriods.length > 0) return pastPeriods[0].period_type;
+    return "p1";
+  }, [academicPeriods]);
+
+  const [selectedPeriod, setSelectedPeriod] = useState<string | null>(null);
+  
+  useEffect(() => {
+    if (!selectedPeriod && currentActivePeriod) {
+      setSelectedPeriod(currentActivePeriod);
+    }
+  }, [currentActivePeriod, selectedPeriod]);
+
+  const activePeriod = selectedPeriod || currentActivePeriod;
   const { isAdmin, isLoading: rolesLoading } = useUserRoles();
 
   const { data: adminAnalytics, isLoading: adminAnalyticsLoading } = useAnalytics(selectedPeriod);
