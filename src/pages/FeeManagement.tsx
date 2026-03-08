@@ -182,6 +182,9 @@ const FeeManagement = () => {
             <p className="text-muted-foreground">Set fee standards by division and manage installment plans</p>
           </div>
           <div className="flex items-center gap-3">
+            <Button onClick={() => generateBills.mutate()} disabled={generateBills.isPending} variant="default">
+              <Zap className="h-4 w-4 mr-1" /> {generateBills.isPending ? "Generating..." : "Generate Bills for All Students"}
+            </Button>
             <Select value={selectedYear} onValueChange={setSelectedYear}>
               <SelectTrigger className="w-[200px]">
                 <SelectValue placeholder="Select academic year" />
