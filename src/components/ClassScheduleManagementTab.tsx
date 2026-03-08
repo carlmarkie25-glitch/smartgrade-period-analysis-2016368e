@@ -36,6 +36,7 @@ export const ClassScheduleManagementTab = () => {
   const { toast } = useToast();
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [selectedDepartment, setSelectedDepartment] = useState<string>("");
   const [form, setForm] = useState<Partial<ClassScheduleEntry>>({
     class_id: "",
     teacher_id: null,
@@ -45,10 +46,23 @@ export const ClassScheduleManagementTab = () => {
     subject_id: null,
   });
 
-  const { data: classes } = useQuery({
-    queryKey: ["classes"],
+  const { data: departments } = useQuery({
+    queryKey: ["departments-for-schedule"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("classes").select("id,name").order("name");
+      const { data, error } = await supabase.from("departments").select("id,name").order("name");
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const { data: classes } = useQuery({
+    queryKey: ["classes", selectedDepartment],
+    queryFn: async () => {
+      let query = supabase.from("classes").select("id,name,department_id").order("name");
+      if (selectedDepartment) {
+        query = query.eq("department_id", selectedDepartment);
+      }
+      const { data, error } = await query;
       if (error) throw error;
       return data;
     },
@@ -125,6 +139,7 @@ export const ClassScheduleManagementTab = () => {
 
   const openNew = () => {
     setForm({ class_id: "", teacher_id: null, day_of_week: 1, start_time: "", end_time: "", subject_id: null });
+    setSelectedDepartment("");
     setIsDialogOpen(true);
   };
 
@@ -211,13 +226,34 @@ export const ClassScheduleManagementTab = () => {
           </DialogHeader>
           <div className="space-y-4">
             <div>
+              <Label>Department</Label>
+              <Select
+                value={selectedDepartment}
+                onValueChange={(val) => {
+                  setSelectedDepartment(val);
+                  setForm({ ...form, class_id: "" });
+                }}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select department" />
+                </SelectTrigger>
+                <SelectContent>
+                  {departments?.map((d) => (
+                    <SelectItem key={d.id} value={d.id}>
+                      {d.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
               <Label>Class</Label>
               <Select
                 value={form.class_id}
                 onValueChange={(val) => setForm({ ...form, class_id: val })}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select class" />
+                  <SelectValue placeholder={selectedDepartment ? "Select class" : "Select department first"} />
                 </SelectTrigger>
                 <SelectContent>
                   {classes?.map((c) => (
