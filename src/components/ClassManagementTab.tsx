@@ -363,7 +363,19 @@ export const ClassManagementTab = () => {
                       >
                         <BookOpen className="h-4 w-4" />
                       </Button>
-                      <Button variant="outline" size="sm">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          setEditingClass({
+                            id: cls.id,
+                            name: cls.name,
+                            department_id: cls.department_id,
+                            academic_year_id: cls.academic_year_id,
+                          });
+                          setIsEditDialogOpen(true);
+                        }}
+                      >
                         <Pencil className="h-4 w-4" />
                       </Button>
                       <Button
