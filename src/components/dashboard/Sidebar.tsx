@@ -53,15 +53,24 @@ export const Sidebar = ({ activeTab, onTabChange, collapsed = false, onToggle }:
     ],
   };
 
+  const usersGroup: MenuGroup = {
+    id: "users",
+    icon: UsersRound,
+    label: "Users",
+    roles: ["admin"],
+    children: [
+      { id: "students", icon: GraduationCap, label: "Students", path: "/students", roles: ["admin"] },
+      { id: "teachers", icon: UserCog, label: "Teachers", path: "/teachers", roles: ["admin"] },
+      { id: "parents", icon: Users, label: "Parents", path: "/parents", roles: ["admin"] },
+    ],
+  };
+
   const adminGroup: MenuGroup = {
     id: "administration",
     icon: Settings,
     label: "Administration",
     roles: ["admin"],
     children: [
-      { id: "students", icon: GraduationCap, label: "Students", path: "/students", roles: ["admin"] },
-      { id: "teachers", icon: UserCog, label: "Teachers", path: "/teachers", roles: ["admin"] },
-      { id: "parents", icon: Users, label: "Parents", path: "/parents", roles: ["admin"] },
       { id: "schedule", icon: CalendarDays, label: "Schedule", path: "/schedule", roles: ["admin"] },
       { id: "calendar", icon: Calendar, label: "Calendar", path: "/academic-calendar", roles: ["admin"] },
       { id: "analytics", icon: BarChart3, label: "Analytics", path: "/analytics", roles: ["teacher", "admin"] },
@@ -74,12 +83,18 @@ export const Sidebar = ({ activeTab, onTabChange, collapsed = false, onToggle }:
     (id) => activeTab === id || academicsGroup.children.find((c) => c.id === id)?.path === location.pathname
   );
 
+  const usersChildIds = usersGroup.children.map((c) => c.id);
+  const isUsersActive = usersChildIds.some(
+    (id) => activeTab === id || usersGroup.children.find((c) => c.id === id)?.path === location.pathname
+  );
+
   const adminChildIds = adminGroup.children.map((c) => c.id);
   const isAdminActive = adminChildIds.some(
     (id) => activeTab === id || adminGroup.children.find((c) => c.id === id)?.path === location.pathname
   );
 
   const [academicsOpen, setAcademicsOpen] = useState(isAcademicsActive);
+  const [usersOpen, setUsersOpen] = useState(isUsersActive);
   const [adminOpen, setAdminOpen] = useState(isAdminActive);
 
   const canAccess = (roles: string[]) => {
