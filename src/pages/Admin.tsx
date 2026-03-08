@@ -1,15 +1,12 @@
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useUserManagement } from "@/hooks/useUserManagement";
-import { UserPlus, FileText, CalendarDays, Calendar, Palette } from "lucide-react";
-import { ClassScheduleManagementTab } from "@/components/ClassScheduleManagementTab";
+import { UserPlus, FileText, Palette } from "lucide-react";
 import { UserBiodataManagementTab } from "@/components/UserBiodataManagementTab";
 import { TeacherAssignmentDialog } from "@/components/TeacherAssignmentDialog";
 import { SponsorAssignmentDialog } from "@/components/SponsorAssignmentDialog";
 import { UserRoleManagement } from "@/components/UserRoleManagement";
 import AppShell from "@/components/AppShell";
-import { AcademicEventManagementTab } from "@/components/AcademicEventManagementTab";
-import { AcademicPeriodManagement } from "@/components/AcademicPeriodManagement";
 import { SettingsTab } from "@/components/SettingsTab";
 
 const Admin = () => {
@@ -51,11 +48,11 @@ const Admin = () => {
       <div className="py-4">
         <div className="mb-8">
           <h1 className="text-4xl font-bold text-foreground mb-2">Settings</h1>
-          <p className="text-muted-foreground">Manage users, schedules, calendar, and system settings</p>
+          <p className="text-muted-foreground">Manage users, biodata, and system settings</p>
         </div>
 
         <Tabs defaultValue="users" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5">
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="users">
               <UserPlus className="h-4 w-4 mr-2" />
               Users
@@ -63,14 +60,6 @@ const Admin = () => {
             <TabsTrigger value="biodata">
               <FileText className="h-4 w-4 mr-2" />
               Biodata
-            </TabsTrigger>
-            <TabsTrigger value="schedule">
-              <CalendarDays className="h-4 w-4 mr-2" />
-              Schedule
-            </TabsTrigger>
-            <TabsTrigger value="calendar">
-              <Calendar className="h-4 w-4 mr-2" />
-              Calendar
             </TabsTrigger>
             <TabsTrigger value="theme">
               <Palette className="h-4 w-4 mr-2" />
@@ -91,15 +80,6 @@ const Admin = () => {
 
           <TabsContent value="biodata">
             <UserBiodataManagementTab />
-          </TabsContent>
-
-          <TabsContent value="schedule">
-            <ClassScheduleManagementTab />
-          </TabsContent>
-
-          <TabsContent value="calendar" className="space-y-6">
-            <AcademicPeriodManagement />
-            <AcademicEventManagementTab />
           </TabsContent>
 
           <TabsContent value="theme">
