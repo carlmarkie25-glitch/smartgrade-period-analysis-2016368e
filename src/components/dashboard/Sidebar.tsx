@@ -74,7 +74,7 @@ export const Sidebar = ({ activeTab, onTabChange, collapsed = false, onToggle }:
       { id: "schedule", icon: CalendarDays, label: "Schedule", path: "/schedule", roles: ["admin"] },
       { id: "calendar", icon: Calendar, label: "Calendar", path: "/academic-calendar", roles: ["admin"] },
       { id: "analytics", icon: BarChart3, label: "Analytics", path: "/analytics", roles: ["teacher", "admin"] },
-      { id: "settings", icon: Settings, label: "Settings", path: "/admin", roles: ["admin"] },
+      
     ],
   };
 
@@ -238,11 +238,32 @@ export const Sidebar = ({ activeTab, onTabChange, collapsed = false, onToggle }:
         {renderGroup(adminGroup, adminOpen, setAdminOpen, isAdminActive)}
       </div>
 
+      {/* Settings */}
+      {canAccess(["admin"]) && (
+        <button
+          onClick={() => navigate("/admin")}
+          title="Settings"
+          className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-300 group relative ${collapsed ? "justify-center" : ""} ${
+            location.pathname === "/admin"
+              ? "bg-white/20 text-white shadow-lg"
+              : "text-[hsl(170,30%,70%)] hover:text-white hover:bg-white/10"
+          }`}
+        >
+          <Settings size={20} className="flex-shrink-0" />
+          {!collapsed && <span className="text-sm font-medium">Settings</span>}
+          {collapsed && (
+            <div className="absolute left-full ml-2 px-2 py-1 bg-[hsl(170,30%,20%)]/90 text-white text-[10px] rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
+              Settings
+            </div>
+          )}
+        </button>
+      )}
+
       {/* Sign Out */}
       <button
         onClick={signOut}
         title="Sign Out"
-        className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-300 text-[hsl(170,30%,70%)] hover:text-white hover:bg-white/10 group relative mt-2 ${collapsed ? "justify-center" : ""}`}
+        className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-300 text-[hsl(170,30%,70%)] hover:text-white hover:bg-white/10 group relative mt-1 ${collapsed ? "justify-center" : ""}`}
       >
         <LogOut size={20} className="flex-shrink-0" />
         {!collapsed && <span className="text-sm font-medium">Sign Out</span>}
