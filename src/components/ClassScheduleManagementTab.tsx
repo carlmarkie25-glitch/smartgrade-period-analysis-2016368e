@@ -225,13 +225,34 @@ export const ClassScheduleManagementTab = () => {
           </DialogHeader>
           <div className="space-y-4">
             <div>
+              <Label>Department</Label>
+              <Select
+                value={selectedDepartment}
+                onValueChange={(val) => {
+                  setSelectedDepartment(val);
+                  setForm({ ...form, class_id: "" });
+                }}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select department" />
+                </SelectTrigger>
+                <SelectContent>
+                  {departments?.map((d) => (
+                    <SelectItem key={d.id} value={d.id}>
+                      {d.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
               <Label>Class</Label>
               <Select
                 value={form.class_id}
                 onValueChange={(val) => setForm({ ...form, class_id: val })}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select class" />
+                  <SelectValue placeholder={selectedDepartment ? "Select class" : "Select department first"} />
                 </SelectTrigger>
                 <SelectContent>
                   {classes?.map((c) => (
