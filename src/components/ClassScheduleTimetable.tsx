@@ -129,7 +129,7 @@ export const ClassScheduleTimetable = () => {
     },
   });
 
-  const isLoading = deptLoading || schedLoading;
+  const isLoading = deptLoading || schedLoading || userDeptLoading;
 
   if (isLoading) {
     return (
