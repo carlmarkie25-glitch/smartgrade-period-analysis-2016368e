@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Users, FileText, GraduationCap, Receipt } from "lucide-react";
 import { StudentManagementTab } from "@/components/StudentManagementTab";
@@ -11,47 +10,34 @@ const StudentPanel = () => {
   return (
     <AppShell activeTab="students">
       <div className="py-4">
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold text-foreground mb-2">Student Management</h1>
-          <p className="text-muted-foreground">Manage student users, biodata, enrollment, and classes</p>
+        <div className="mb-6">
+          <h1 className="text-2xl font-bold text-gray-900 mb-1">Student Management</h1>
+          <p className="text-sm text-gray-500">Manage student users, biodata, enrollment, and classes</p>
         </div>
 
-        <Tabs defaultValue="users" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="users">
-              <Users className="h-4 w-4 mr-2" />
-              Users
-            </TabsTrigger>
-            <TabsTrigger value="biodata">
-              <FileText className="h-4 w-4 mr-2" />
-              Biodata
-            </TabsTrigger>
-            <TabsTrigger value="students">
-              <GraduationCap className="h-4 w-4 mr-2" />
-              Students
-            </TabsTrigger>
-            <TabsTrigger value="payments">
-              <Receipt className="h-4 w-4 mr-2" />
-              Payments
-            </TabsTrigger>
-          </TabsList>
+        <div className="bg-white/70 backdrop-blur-md rounded-2xl border border-[hsl(170,30%,85%)]/30 p-4 shadow-sm">
+          <Tabs defaultValue="users" className="space-y-4">
+            <TabsList className="grid w-full grid-cols-4 bg-[hsl(170,20%,96%)] rounded-xl p-1">
+              <TabsTrigger value="users" className="rounded-lg text-xs data-[state=active]:bg-white data-[state=active]:shadow-sm">
+                <Users className="h-3.5 w-3.5 mr-1.5" />Users
+              </TabsTrigger>
+              <TabsTrigger value="biodata" className="rounded-lg text-xs data-[state=active]:bg-white data-[state=active]:shadow-sm">
+                <FileText className="h-3.5 w-3.5 mr-1.5" />Biodata
+              </TabsTrigger>
+              <TabsTrigger value="students" className="rounded-lg text-xs data-[state=active]:bg-white data-[state=active]:shadow-sm">
+                <GraduationCap className="h-3.5 w-3.5 mr-1.5" />Students
+              </TabsTrigger>
+              <TabsTrigger value="payments" className="rounded-lg text-xs data-[state=active]:bg-white data-[state=active]:shadow-sm">
+                <Receipt className="h-3.5 w-3.5 mr-1.5" />Payments
+              </TabsTrigger>
+            </TabsList>
 
-          <TabsContent value="users">
-            <StudentUsersTab />
-          </TabsContent>
-
-          <TabsContent value="biodata">
-            <UserBiodataManagementTab />
-          </TabsContent>
-
-          <TabsContent value="students">
-            <StudentManagementTab />
-          </TabsContent>
-
-          <TabsContent value="payments">
-            <StudentPaymentReceipts />
-          </TabsContent>
-        </Tabs>
+            <TabsContent value="users"><StudentUsersTab /></TabsContent>
+            <TabsContent value="biodata"><UserBiodataManagementTab /></TabsContent>
+            <TabsContent value="students"><StudentManagementTab /></TabsContent>
+            <TabsContent value="payments"><StudentPaymentReceipts /></TabsContent>
+          </Tabs>
+        </div>
       </div>
     </AppShell>
   );
