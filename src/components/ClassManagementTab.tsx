@@ -16,9 +16,11 @@ import { Badge } from "@/components/ui/badge";
 
 export const ClassManagementTab = () => {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isSubjectsDialogOpen, setIsSubjectsDialogOpen] = useState(false);
   const [selectedClassId, setSelectedClassId] = useState<string>("");
   const [selectedSubjectId, setSelectedSubjectId] = useState<string>("");
+  const [editingClass, setEditingClass] = useState<{ id: string; name: string; department_id: string; academic_year_id: string } | null>(null);
   const [newClass, setNewClass] = useState({
     name: "",
     department_id: "",
