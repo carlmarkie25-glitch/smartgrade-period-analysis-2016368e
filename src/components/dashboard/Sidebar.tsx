@@ -1,4 +1,4 @@
-import { LayoutDashboard, Users, BookOpen, FileText, BarChart3, Settings, GraduationCap, CalendarDays, LogOut, UserCog, Calendar, Building, School, Layers, ChevronDown, PanelLeftClose, PanelLeft } from "lucide-react";
+import { LayoutDashboard, Users, BookOpen, FileText, BarChart3, Settings, GraduationCap, CalendarDays, LogOut, UserCog, Calendar, Building, School, Layers, ChevronDown, PanelLeftClose, PanelLeft, UsersRound } from "lucide-react";
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useUserRoles } from "@/hooks/useUserRoles";
