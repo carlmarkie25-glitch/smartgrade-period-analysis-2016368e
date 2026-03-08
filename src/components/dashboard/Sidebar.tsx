@@ -234,6 +234,7 @@ export const Sidebar = ({ activeTab, onTabChange, collapsed = false, onToggle }:
         {topItems.filter((item) => canAccess(item.roles)).map((item) => renderItem(item))}
 
         {renderGroup(academicsGroup, academicsOpen, setAcademicsOpen, isAcademicsActive)}
+        {renderGroup(usersGroup, usersOpen, setUsersOpen, isUsersActive)}
         {renderGroup(adminGroup, adminOpen, setAdminOpen, isAdminActive)}
       </div>
 
