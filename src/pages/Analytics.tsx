@@ -43,16 +43,16 @@ const Analytics = () => {
   const activePeriod = selectedPeriod || currentActivePeriod;
   const { isAdmin, isLoading: rolesLoading } = useUserRoles();
 
-  const { data: adminAnalytics, isLoading: adminAnalyticsLoading } = useAnalytics(selectedPeriod);
-  const { data: adminTopStudents = [], isLoading: adminTopLoading } = useTopStudents(selectedPeriod);
-  const { data: adminAtRisk = [], isLoading: adminAtRiskLoading } = useAtRiskStudents(selectedPeriod);
-  const { data: adminClassPerf = [], isLoading: adminClassPerfLoading } = useClassPerformance(selectedPeriod);
+  const { data: adminAnalytics, isLoading: adminAnalyticsLoading } = useAnalytics(activePeriod);
+  const { data: adminTopStudents = [], isLoading: adminTopLoading } = useTopStudents(activePeriod);
+  const { data: adminAtRisk = [], isLoading: adminAtRiskLoading } = useAtRiskStudents(activePeriod);
+  const { data: adminClassPerf = [], isLoading: adminClassPerfLoading } = useClassPerformance(activePeriod);
   const { data: adminTrend = [], isLoading: adminTrendLoading } = usePerformanceTrend();
 
-  const { data: teacherAnalytics, isLoading: teacherAnalyticsLoading } = useTeacherAnalytics(selectedPeriod);
-  const { data: teacherTopStudents = [], isLoading: teacherTopLoading } = useTeacherTopStudents(selectedPeriod);
-  const { data: teacherAtRisk = [], isLoading: teacherAtRiskLoading } = useTeacherAtRiskStudents(selectedPeriod);
-  const { data: teacherClassPerf = [], isLoading: teacherClassPerfLoading } = useTeacherClassPerformance(selectedPeriod);
+  const { data: teacherAnalytics, isLoading: teacherAnalyticsLoading } = useTeacherAnalytics(activePeriod);
+  const { data: teacherTopStudents = [], isLoading: teacherTopLoading } = useTeacherTopStudents(activePeriod);
+  const { data: teacherAtRisk = [], isLoading: teacherAtRiskLoading } = useTeacherAtRiskStudents(activePeriod);
+  const { data: teacherClassPerf = [], isLoading: teacherClassPerfLoading } = useTeacherClassPerformance(activePeriod);
   const { data: teacherTrend = [], isLoading: teacherTrendLoading } = useTeacherPerformanceTrend();
 
   const { data: demographics, isLoading: demographicsLoading } = useStudentDemographics();
