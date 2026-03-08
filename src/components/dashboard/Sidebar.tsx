@@ -72,7 +72,7 @@ export const Sidebar = ({ activeTab, onTabChange, collapsed = false, onToggle }:
     roles: ["admin"],
     children: [
       { id: "fees", icon: DollarSign, label: "Fee Management", path: "/fees", roles: ["admin"] },
-      { id: "payments", icon: Receipt, label: "Payments", path: "/payments", roles: ["admin"] },
+      { id: "payments", icon: Receipt, label: "Payments & Billing", path: "/payments", roles: ["admin"] },
       { id: "expenses", icon: TrendingUp, label: "Expenses", path: "/expenses", roles: ["admin"] },
       { id: "finance-reports", icon: PieChart, label: "Finance Reports", path: "/finance-reports", roles: ["admin"] },
     ],
