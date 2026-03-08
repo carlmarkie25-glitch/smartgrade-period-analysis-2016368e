@@ -345,6 +345,58 @@ export type Database = {
         }
         Relationships: []
       }
+      division_fee_rates: {
+        Row: {
+          academic_year_id: string | null
+          amount: number
+          created_at: string
+          department_id: string
+          fee_category_id: string
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          academic_year_id?: string | null
+          amount?: number
+          created_at?: string
+          department_id: string
+          fee_category_id: string
+          id?: string
+          updated_at?: string
+        }
+        Update: {
+          academic_year_id?: string | null
+          amount?: number
+          created_at?: string
+          department_id?: string
+          fee_category_id?: string
+          id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "division_fee_rates_academic_year_id_fkey"
+            columns: ["academic_year_id"]
+            isOneToOne: false
+            referencedRelation: "academic_years"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "division_fee_rates_department_id_fkey"
+            columns: ["department_id"]
+            isOneToOne: false
+            referencedRelation: "departments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "division_fee_rates_fee_category_id_fkey"
+            columns: ["fee_category_id"]
+            isOneToOne: false
+            referencedRelation: "fee_categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       expenses: {
         Row: {
           amount: number
@@ -438,6 +490,30 @@ export type Database = {
           },
         ]
       }
+      fee_categories: {
+        Row: {
+          created_at: string
+          display_order: number
+          id: string
+          is_registration: boolean
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          display_order?: number
+          id?: string
+          is_registration?: boolean
+          name: string
+        }
+        Update: {
+          created_at?: string
+          display_order?: number
+          id?: string
+          is_registration?: boolean
+          name?: string
+        }
+        Relationships: []
+      }
       fee_structures: {
         Row: {
           academic_year_id: string | null
@@ -475,6 +551,57 @@ export type Database = {
             columns: ["academic_year_id"]
             isOneToOne: false
             referencedRelation: "academic_years"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      installment_plans: {
+        Row: {
+          academic_year_id: string | null
+          amount: number
+          created_at: string
+          department_id: string
+          due_date: string | null
+          id: string
+          installment_number: number
+          label: string
+          period_label: string
+        }
+        Insert: {
+          academic_year_id?: string | null
+          amount?: number
+          created_at?: string
+          department_id: string
+          due_date?: string | null
+          id?: string
+          installment_number: number
+          label: string
+          period_label: string
+        }
+        Update: {
+          academic_year_id?: string | null
+          amount?: number
+          created_at?: string
+          department_id?: string
+          due_date?: string | null
+          id?: string
+          installment_number?: number
+          label?: string
+          period_label?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "installment_plans_academic_year_id_fkey"
+            columns: ["academic_year_id"]
+            isOneToOne: false
+            referencedRelation: "academic_years"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "installment_plans_department_id_fkey"
+            columns: ["department_id"]
+            isOneToOne: false
+            referencedRelation: "departments"
             referencedColumns: ["id"]
           },
         ]
