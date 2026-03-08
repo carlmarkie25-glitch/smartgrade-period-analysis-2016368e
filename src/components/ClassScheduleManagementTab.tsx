@@ -36,6 +36,7 @@ export const ClassScheduleManagementTab = () => {
   const { toast } = useToast();
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [selectedDepartment, setSelectedDepartment] = useState<string>("");
   const [form, setForm] = useState<Partial<ClassScheduleEntry>>({
     class_id: "",
     teacher_id: null,
