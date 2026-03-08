@@ -56,22 +56,55 @@ export const useAllStudentPayments = (academicYearId?: string) => {
   return useQuery({
     queryKey: ["all-student-payments", academicYearId],
     queryFn: async () => {
-      // Get bill IDs for the academic year first
+      // Get bills for the academic year with student info
       const { data: bills } = await supabase
         .from("student_bills")
-        .select("id")
+        .select("id, grand_total, amount_paid, balance, students(full_name, student_id, class_id, department_id, classes:class_id(name), departments:department_id(name))")
         .eq("academic_year_id", academicYearId!);
       if (!bills?.length) return [];
       const billIds = bills.map(b => b.id);
+      const billMap = Object.fromEntries(bills.map(b => [b.id, b]));
       const { data, error } = await supabase
         .from("student_payments")
         .select("*, students(full_name, student_id)")
         .in("bill_id", billIds)
         .order("payment_date", { ascending: false });
       if (error) throw error;
-      return data;
+      // Attach bill info to each payment
+      return (data || []).map(p => ({ ...p, bill: billMap[p.bill_id] }));
     },
     enabled: !!academicYearId,
+  });
+};
+
+// Hook for student to view their own payments
+export const useMyStudentPayments = () => {
+  return useQuery({
+    queryKey: ["my-student-payments"],
+    queryFn: async () => {
+      // Get the student record for current user
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return [];
+      const { data: profile } = await supabase.from("profiles").select("id").eq("user_id", user.id).single();
+      if (!profile) return [];
+      const { data: student } = await supabase.from("students").select("id, full_name, student_id, class_id, department_id, classes:class_id(name), departments:department_id(name)").eq("user_id", profile.id).single();
+      if (!student) return [];
+      // Get all bills for this student
+      const { data: bills } = await supabase.from("student_bills").select("*").eq("student_id", student.id);
+      if (!bills?.length) return [];
+      const billIds = bills.map(b => b.id);
+      const billMap = Object.fromEntries(bills.map(b => [b.id, b]));
+      const { data: payments } = await supabase
+        .from("student_payments")
+        .select("*")
+        .in("bill_id", billIds)
+        .order("payment_date", { ascending: false });
+      return (payments || []).map(p => ({
+        ...p,
+        student,
+        bill: billMap[p.bill_id],
+      }));
+    },
   });
 };
 
