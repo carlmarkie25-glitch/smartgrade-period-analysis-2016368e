@@ -159,18 +159,32 @@ export const ClassManagementTab = () => {
       const { error } = await supabase.from("classes").delete().eq("id", id);
       if (error) throw error;
 
-      toast({
-        title: "Success",
-        description: "Class deleted successfully",
-      });
-
+      toast({ title: "Success", description: "Class deleted successfully" });
       queryClient.invalidateQueries({ queryKey: ["classes"] });
     } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    }
+  };
+
+  const handleEditClass = async () => {
+    if (!editingClass) return;
+    try {
+      const { error } = await supabase
+        .from("classes")
+        .update({
+          name: editingClass.name,
+          department_id: editingClass.department_id,
+          academic_year_id: editingClass.academic_year_id,
+        })
+        .eq("id", editingClass.id);
+      if (error) throw error;
+
+      toast({ title: "Success", description: "Class updated successfully" });
+      queryClient.invalidateQueries({ queryKey: ["classes"] });
+      setIsEditDialogOpen(false);
+      setEditingClass(null);
+    } catch (error: any) {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
     }
   };
 
