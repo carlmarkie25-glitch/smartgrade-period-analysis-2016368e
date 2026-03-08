@@ -43,8 +43,6 @@ const AppSidebar = () => {
 
   const mainItems = [
     { path: "/dashboard", icon: LayoutDashboard, label: "Dashboard", roles: ["all"] },
-    { path: "/schedule", icon: CalendarDays, label: "Schedule", roles: ["all"] },
-    { path: "/academic-calendar", icon: Calendar, label: "Calendar", roles: ["all"] },
   ];
 
   const academicsItems = [
@@ -53,9 +51,14 @@ const AppSidebar = () => {
   ];
 
   const adminItems = [
-    { path: "/analytics", icon: BarChart3, label: "Analytics", roles: ["teacher", "admin"] },
-    { path: "/admin", icon: Settings, label: "Admin Panel", roles: ["admin"] },
+    { path: "/schedule", icon: CalendarDays, label: "Schedule" },
+    { path: "/academic-calendar", icon: Calendar, label: "Calendar" },
+    { path: "/analytics", icon: BarChart3, label: "Analytics" },
+    { path: "/admin", icon: Settings, label: "Settings" },
   ];
+
+  const isAdminActive = isActive("/schedule") || isActive("/academic-calendar") || isActive("/analytics") || isActive("/admin");
+  const [adminOpen, setAdminOpen] = useState(isAdminActive);
 
   const renderMenuItem = (item: { path: string; icon: any; label: string }) => {
     const Icon = item.icon;
