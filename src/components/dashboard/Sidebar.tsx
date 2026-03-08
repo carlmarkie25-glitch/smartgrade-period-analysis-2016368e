@@ -165,10 +165,40 @@ export const Sidebar = ({ activeTab, onTabChange }: SidebarProps) => {
           </div>
         )}
 
-        {/* Divider */}
-        <div className="w-8 h-px bg-white/10 my-1" />
-
-        {bottomItems.filter((item) => canAccess(item.roles)).map((item) => renderItem(item))}
+        {/* Administration Group */}
+        {canAccess(adminGroup.roles) && (
+          <div className="flex flex-col items-center">
+            <button
+              onClick={() => setAdminOpen(!adminOpen)}
+              title="Administration"
+              className={`relative p-3 rounded-xl transition-all duration-300 group ${
+                isAdminActive && !adminOpen
+                  ? "bg-white/20 text-white shadow-lg"
+                  : isAdminActive
+                  ? "text-white"
+                  : "text-[hsl(170,30%,70%)] hover:text-white hover:bg-white/10"
+              }`}
+            >
+              <Settings size={20} />
+              <ChevronDown
+                size={10}
+                className={`absolute bottom-1 left-1/2 -translate-x-1/2 transition-transform duration-200 ${
+                  adminOpen ? "rotate-180" : ""
+                }`}
+              />
+              <div className="absolute left-full ml-2 px-2 py-1 bg-[hsl(170,30%,20%)]/90 text-white text-[10px] rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
+                Administration
+              </div>
+            </button>
+            {adminOpen && (
+              <div className="flex flex-col items-center gap-1 mt-1 py-1 px-1 rounded-xl bg-white/5">
+                {adminGroup.children
+                  .filter((item) => canAccess(item.roles))
+                  .map((item) => renderItem(item, 16))}
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Sign Out */}
