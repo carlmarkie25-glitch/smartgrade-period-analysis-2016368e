@@ -1,6 +1,6 @@
+import { useState, useEffect } from "react";
 import AppShell from "@/components/AppShell";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useStudentBills, useAllStudentPayments } from "@/hooks/useStudentBilling";
 import { useExpenses } from "@/hooks/useFinance";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -10,28 +10,38 @@ import { DollarSign, TrendingUp, TrendingDown, AlertCircle } from "lucide-react"
 const COLORS = ["hsl(var(--primary))", "hsl(var(--secondary))", "hsl(var(--accent))", "hsl(var(--destructive))", "#f59e0b", "#8b5cf6", "#06b6d4", "#ec4899"];
 
 const FinanceReports = () => {
-  // Get current academic year with fallback
-  const { data: currentYear } = useQuery({
-    queryKey: ["current-academic-year-fallback"],
+  const { data: years } = useQuery({
+    queryKey: ["academic-years"],
     queryFn: async () => {
-      const { data: current } = await supabase
-        .from("academic_years")
-        .select("*")
-        .eq("is_current", true)
-        .limit(1)
-        .maybeSingle();
-      if (current) return current;
-      const { data: fallback } = await supabase
-        .from("academic_years")
-        .select("*")
-        .order("start_date", { ascending: false })
-        .limit(1)
-        .maybeSingle();
-      return fallback;
+      const { data } = await supabase.from("academic_years").select("*").order("start_date", { ascending: false });
+      return data || [];
     },
   });
 
-  const { data: bills } = useStudentBills(currentYear?.id);
+  const [selectedYear, setSelectedYear] = useState("");
+  useEffect(() => {
+    if (!selectedYear && years?.length) {
+      const current = years.find(y => y.is_current);
+      setSelectedYear(current ? current.id : years[0].id);
+    }
+  }, [years, selectedYear]);
+
+  const selectedYearName = years?.find(y => y.id === selectedYear)?.year_name || "";
+
+  const { data: bills } = useQuery({
+    queryKey: ["finance-report-bills", selectedYear],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("student_bills")
+        .select("*, students(full_name, student_id, department_id, class_id, classes:class_id(name), departments:department_id(name))")
+        .eq("academic_year_id", selectedYear)
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!selectedYear,
+  });
+
   const { data: expenses } = useExpenses();
 
   const totalBilled = bills?.reduce((s, b) => s + Number(b.grand_total), 0) || 0;
@@ -67,11 +77,22 @@ const FinanceReports = () => {
   return (
     <AppShell>
       <div className="p-6 space-y-6">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Financial Reports</h1>
-          <p className="text-muted-foreground">
-            Overview of school finances {currentYear ? `— ${currentYear.year_name}` : ""}
-          </p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-foreground">Financial Reports</h1>
+            <p className="text-muted-foreground">Overview of school finances</p>
+          </div>
+          {years && years.length > 0 && (
+            <select
+              className="border rounded-md px-3 py-2 text-sm bg-background text-foreground"
+              value={selectedYear}
+              onChange={e => setSelectedYear(e.target.value)}
+            >
+              {years.map(y => (
+                <option key={y.id} value={y.id}>{y.year_name}</option>
+              ))}
+            </select>
+          )}
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -90,7 +111,6 @@ const FinanceReports = () => {
           ))}
         </div>
 
-        {/* Net Income Card */}
         <Card className={netIncome >= 0 ? "border-green-500/30 bg-green-500/5" : "border-destructive/30 bg-destructive/5"}>
           <CardContent className="p-4 flex items-center justify-between">
             <div>
