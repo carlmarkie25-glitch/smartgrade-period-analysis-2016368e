@@ -67,6 +67,10 @@ const Schedule = () => {
                 <CalendarDays className="h-4 w-4 mr-2" />
                 Manage Timetable
               </TabsTrigger>
+              <TabsTrigger value="timetable">
+                <LayoutGrid className="h-4 w-4 mr-2" />
+                Timetable View
+              </TabsTrigger>
               <TabsTrigger value="preview">
                 <Eye className="h-4 w-4 mr-2" />
                 Today's Preview
@@ -75,12 +79,17 @@ const Schedule = () => {
             <TabsContent value="manage">
               <ClassScheduleManagementTab />
             </TabsContent>
+            <TabsContent value="timetable">
+              <ClassScheduleTimetable />
+            </TabsContent>
             <TabsContent value="preview">
               {schedulePreview}
             </TabsContent>
           </Tabs>
         ) : (
-          schedulePreview
+          <div className="space-y-6">
+            <ClassScheduleTimetable />
+          </div>
         )}
       </div>
     </AppShell>
