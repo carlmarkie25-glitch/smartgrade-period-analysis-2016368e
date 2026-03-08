@@ -130,7 +130,8 @@ export const useAnalytics = (period: string) => {
       const passRate = gradedStudents ? Math.round((passingStudents / gradedStudents) * 100) : 0;
       const failRate = gradedStudents ? Math.round((failingStudents / gradedStudents) * 100) : 0;
 
-      return { totalStudents, passingStudents, failingStudents, passRate, failRate };
+      const allGraded = totalStudents > 0 && gradedStudents === totalStudents;
+      return { totalStudents, passingStudents, failingStudents, passRate, failRate, allGraded, gradedStudents };
     },
   });
 };
