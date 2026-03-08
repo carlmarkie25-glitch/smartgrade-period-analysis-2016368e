@@ -1,25 +1,41 @@
 import AppShell from "@/components/AppShell";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useFeeAssignments, usePayments, useExpenses } from "@/hooks/useFinance";
+import { useStudentBills, useAllStudentPayments } from "@/hooks/useStudentBilling";
+import { useExpenses } from "@/hooks/useFinance";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from "recharts";
 import { DollarSign, TrendingUp, TrendingDown, AlertCircle } from "lucide-react";
 
 const COLORS = ["hsl(var(--primary))", "hsl(var(--secondary))", "hsl(var(--accent))", "hsl(var(--destructive))", "#f59e0b", "#8b5cf6", "#06b6d4", "#ec4899"];
 
 const FinanceReports = () => {
-  const { data: assignments } = useFeeAssignments();
-  const { data: payments } = usePayments();
+  // Get current academic year
+  const { data: currentYear } = useQuery({
+    queryKey: ["current-academic-year"],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("academic_years")
+        .select("*")
+        .eq("is_current", true)
+        .limit(1)
+        .maybeSingle();
+      return data;
+    },
+  });
+
+  const { data: bills } = useStudentBills(currentYear?.id);
   const { data: expenses } = useExpenses();
 
-  const totalRevenue = assignments?.reduce((s, a) => s + Number(a.amount_paid), 0) || 0;
-  const totalDue = assignments?.reduce((s, a) => s + Number(a.amount_due), 0) || 0;
-  const totalOutstanding = totalDue - totalRevenue;
+  const totalBilled = bills?.reduce((s, b) => s + Number(b.grand_total), 0) || 0;
+  const totalRevenue = bills?.reduce((s, b) => s + Number(b.amount_paid), 0) || 0;
+  const totalOutstanding = bills?.reduce((s, b) => s + Number(b.balance), 0) || 0;
   const totalExpenses = expenses?.reduce((s, e) => s + Number(e.amount), 0) || 0;
   const netIncome = totalRevenue - totalExpenses;
 
-  const paidCount = assignments?.filter(a => a.status === "paid").length || 0;
-  const partialCount = assignments?.filter(a => a.status === "partial").length || 0;
-  const pendingCount = assignments?.filter(a => a.status === "pending").length || 0;
+  const paidCount = bills?.filter(b => b.status === "paid").length || 0;
+  const partialCount = bills?.filter(b => b.status === "partial").length || 0;
+  const pendingCount = bills?.filter(b => b.status === "pending").length || 0;
 
   const statusData = [
     { name: "Paid", value: paidCount },
@@ -35,10 +51,10 @@ const FinanceReports = () => {
   const expenseCategoryData = Object.entries(expenseByCategory).map(([name, value]) => ({ name, value }));
 
   const stats = [
-    { label: "Total Revenue", value: totalRevenue, icon: TrendingUp, color: "text-green-600" },
+    { label: "Total Billed", value: totalBilled, icon: DollarSign, color: "text-primary" },
+    { label: "Total Collected", value: totalRevenue, icon: TrendingUp, color: "text-green-600" },
     { label: "Outstanding", value: totalOutstanding, icon: AlertCircle, color: "text-amber-600" },
     { label: "Total Expenses", value: totalExpenses, icon: TrendingDown, color: "text-red-600" },
-    { label: "Net Income", value: netIncome, icon: DollarSign, color: netIncome >= 0 ? "text-green-600" : "text-red-600" },
   ];
 
   return (
@@ -46,7 +62,9 @@ const FinanceReports = () => {
       <div className="p-6 space-y-6">
         <div>
           <h1 className="text-2xl font-bold text-foreground">Financial Reports</h1>
-          <p className="text-muted-foreground">Overview of school finances</p>
+          <p className="text-muted-foreground">
+            Overview of school finances {currentYear ? `— ${currentYear.year_name}` : ""}
+          </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -65,9 +83,22 @@ const FinanceReports = () => {
           ))}
         </div>
 
+        {/* Net Income Card */}
+        <Card className={netIncome >= 0 ? "border-green-500/30 bg-green-500/5" : "border-destructive/30 bg-destructive/5"}>
+          <CardContent className="p-4 flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-muted-foreground">Net Income (Collected − Expenses)</p>
+              <p className={`text-2xl font-bold ${netIncome >= 0 ? "text-green-600" : "text-destructive"}`}>
+                {netIncome.toLocaleString()}
+              </p>
+            </div>
+            <DollarSign className={`h-8 w-8 ${netIncome >= 0 ? "text-green-600" : "text-destructive"}`} />
+          </CardContent>
+        </Card>
+
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <Card>
-            <CardHeader><CardTitle className="text-base">Fee Payment Status</CardTitle></CardHeader>
+            <CardHeader><CardTitle className="text-base">Student Bill Status</CardTitle></CardHeader>
             <CardContent>
               {statusData.length === 0 ? (
                 <p className="text-muted-foreground text-center py-8">No data yet</p>
