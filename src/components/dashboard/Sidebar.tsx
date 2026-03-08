@@ -1,4 +1,4 @@
-import { LayoutDashboard, Users, BookOpen, FileText, BarChart3, Settings, GraduationCap, CalendarDays, LogOut, UserCog, Calendar, Building, School, Layers, ChevronDown } from "lucide-react";
+import { LayoutDashboard, Users, BookOpen, FileText, BarChart3, Settings, GraduationCap, CalendarDays, LogOut, UserCog, Calendar, Building, School, Layers, ChevronDown, PanelLeftClose, PanelLeft } from "lucide-react";
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useUserRoles } from "@/hooks/useUserRoles";
@@ -8,6 +8,8 @@ import logo from "@/assets/logo.png";
 interface SidebarProps {
   activeTab?: string;
   onTabChange?: (tab: string) => void;
+  collapsed?: boolean;
+  onToggle?: () => void;
 }
 
 type MenuItem = {
@@ -26,7 +28,7 @@ type MenuGroup = {
   children: MenuItem[];
 };
 
-export const Sidebar = ({ activeTab, onTabChange }: SidebarProps) => {
+export const Sidebar = ({ activeTab, onTabChange, collapsed = false, onToggle }: SidebarProps) => {
   const navigate = useNavigate();
   const location = useLocation();
   const { isAdmin, isTeacher, isLoading: rolesLoading } = useUserRoles();
@@ -88,7 +90,7 @@ export const Sidebar = ({ activeTab, onTabChange }: SidebarProps) => {
     return false;
   };
 
-  const isActive = (item: MenuItem) => {
+  const isActiveItem = (item: MenuItem) => {
     return location.pathname === item.path;
   };
 
@@ -97,120 +99,142 @@ export const Sidebar = ({ activeTab, onTabChange }: SidebarProps) => {
     navigate(item.path);
   };
 
-  const renderItem = (item: MenuItem, size: number = 20) => {
+  const renderItem = (item: MenuItem) => {
     const Icon = item.icon;
-    const active = isActive(item);
+    const active = isActiveItem(item);
     return (
       <button
         key={item.id}
         onClick={() => handleClick(item)}
         title={item.label}
-        className={`relative p-3 rounded-xl transition-all duration-300 group ${
+        className={`flex items-center gap-3 w-full px-3 py-2.5 rounded-xl transition-all duration-300 group ${
           active
             ? "bg-white/20 text-white shadow-lg"
             : "text-[hsl(170,30%,70%)] hover:text-white hover:bg-white/10"
         }`}
       >
-        <Icon size={size} />
-        <div className="absolute left-full ml-2 px-2 py-1 bg-[hsl(170,30%,20%)]/90 text-white text-[10px] rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
-          {item.label}
-        </div>
+        <Icon size={20} className="flex-shrink-0" />
+        {!collapsed && <span className="text-sm font-medium truncate">{item.label}</span>}
+        {collapsed && (
+          <div className="absolute left-full ml-2 px-2 py-1 bg-[hsl(170,30%,20%)]/90 text-white text-[10px] rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
+            {item.label}
+          </div>
+        )}
       </button>
     );
   };
 
+  const renderGroupItem = (item: MenuItem) => {
+    const Icon = item.icon;
+    const active = isActiveItem(item);
+    return (
+      <button
+        key={item.id}
+        onClick={() => handleClick(item)}
+        title={item.label}
+        className={`flex items-center gap-3 w-full px-3 py-2 rounded-lg transition-all duration-300 ${
+          active
+            ? "bg-white/15 text-white"
+            : "text-[hsl(170,30%,70%)] hover:text-white hover:bg-white/10"
+        }`}
+      >
+        <Icon size={16} className="flex-shrink-0" />
+        {!collapsed && <span className="text-xs font-medium truncate">{item.label}</span>}
+      </button>
+    );
+  };
+
+  const renderGroup = (group: MenuGroup, isOpen: boolean, setOpen: (v: boolean) => void, isGroupActive: boolean) => {
+    if (!canAccess(group.roles)) return null;
+    const GroupIcon = group.icon;
+    return (
+      <div className="w-full" key={group.id}>
+        <button
+          onClick={() => setOpen(!isOpen)}
+          title={group.label}
+          className={`flex items-center gap-3 w-full px-3 py-2.5 rounded-xl transition-all duration-300 group relative ${
+            isGroupActive && !isOpen
+              ? "bg-white/20 text-white shadow-lg"
+              : isGroupActive
+              ? "text-white"
+              : "text-[hsl(170,30%,70%)] hover:text-white hover:bg-white/10"
+          }`}
+        >
+          <GroupIcon size={20} className="flex-shrink-0" />
+          {!collapsed && (
+            <>
+              <span className="text-sm font-medium truncate flex-1 text-left">{group.label}</span>
+              <ChevronDown
+                size={14}
+                className={`flex-shrink-0 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
+              />
+            </>
+          )}
+          {collapsed && (
+            <>
+              <ChevronDown
+                size={10}
+                className={`absolute bottom-1 left-1/2 -translate-x-1/2 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
+              />
+              <div className="absolute left-full ml-2 px-2 py-1 bg-[hsl(170,30%,20%)]/90 text-white text-[10px] rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
+                {group.label}
+              </div>
+            </>
+          )}
+        </button>
+        {isOpen && (
+          <div className={`flex flex-col gap-0.5 mt-1 py-1 rounded-xl bg-white/5 ${collapsed ? "px-1" : "px-2 ml-2"}`}>
+            {group.children
+              .filter((item) => canAccess(item.roles))
+              .map((item) => renderGroupItem(item))}
+          </div>
+        )}
+      </div>
+    );
+  };
+
   return (
-    <aside className="fixed left-0 top-0 h-screen w-20 bg-gradient-to-b from-[hsl(170,35%,25%)] via-[hsl(170,30%,22%)] to-[hsl(170,35%,20%)] rounded-r-3xl flex flex-col items-center py-5 shadow-2xl backdrop-blur-md z-50">
-      {/* Logo */}
-      <div className="mb-6">
-        <img src={logo} alt="Logo" className="h-10 w-10 rounded-lg object-contain" />
+    <aside
+      className={`fixed left-0 top-0 h-screen bg-gradient-to-b from-[hsl(170,35%,25%)] via-[hsl(170,30%,22%)] to-[hsl(170,35%,20%)] rounded-r-3xl flex flex-col py-5 shadow-2xl backdrop-blur-md z-50 transition-all duration-300 ${
+        collapsed ? "w-20 items-center px-2" : "w-56 px-3"
+      }`}
+    >
+      {/* Header: Logo + Toggle */}
+      <div className={`flex items-center mb-6 ${collapsed ? "justify-center" : "justify-between px-1"}`}>
+        <div className="flex items-center gap-3">
+          <img src={logo} alt="Logo" className="h-10 w-10 rounded-lg object-contain flex-shrink-0" />
+          {!collapsed && <span className="text-white font-bold text-lg truncate">SmartGrade</span>}
+        </div>
+        <button
+          onClick={onToggle}
+          title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+          className="p-1.5 rounded-lg text-[hsl(170,30%,70%)] hover:text-white hover:bg-white/10 transition-all duration-200"
+        >
+          {collapsed ? <PanelLeft size={18} /> : <PanelLeftClose size={18} />}
+        </button>
       </div>
 
       {/* Nav Items */}
-      <div className="flex-1 flex flex-col items-center gap-2 overflow-y-auto scrollbar-none">
+      <div className="flex-1 flex flex-col gap-1.5 overflow-hidden">
         {topItems.filter((item) => canAccess(item.roles)).map((item) => renderItem(item))}
 
-        {/* Academics Group */}
-        {canAccess(academicsGroup.roles) && (
-          <div className="flex flex-col items-center">
-            <button
-              onClick={() => setAcademicsOpen(!academicsOpen)}
-              title="Academics"
-              className={`relative p-3 rounded-xl transition-all duration-300 group ${
-                isAcademicsActive && !academicsOpen
-                  ? "bg-white/20 text-white shadow-lg"
-                  : isAcademicsActive
-                  ? "text-white"
-                  : "text-[hsl(170,30%,70%)] hover:text-white hover:bg-white/10"
-              }`}
-            >
-              <BookOpen size={20} />
-              <ChevronDown
-                size={10}
-                className={`absolute bottom-1 left-1/2 -translate-x-1/2 transition-transform duration-200 ${
-                  academicsOpen ? "rotate-180" : ""
-                }`}
-              />
-              <div className="absolute left-full ml-2 px-2 py-1 bg-[hsl(170,30%,20%)]/90 text-white text-[10px] rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
-                Academics
-              </div>
-            </button>
-            {academicsOpen && (
-              <div className="flex flex-col items-center gap-1 mt-1 py-1 px-1 rounded-xl bg-white/5">
-                {academicsGroup.children
-                  .filter((item) => canAccess(item.roles))
-                  .map((item) => renderItem(item, 16))}
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Administration Group */}
-        {canAccess(adminGroup.roles) && (
-          <div className="flex flex-col items-center">
-            <button
-              onClick={() => setAdminOpen(!adminOpen)}
-              title="Administration"
-              className={`relative p-3 rounded-xl transition-all duration-300 group ${
-                isAdminActive && !adminOpen
-                  ? "bg-white/20 text-white shadow-lg"
-                  : isAdminActive
-                  ? "text-white"
-                  : "text-[hsl(170,30%,70%)] hover:text-white hover:bg-white/10"
-              }`}
-            >
-              <Settings size={20} />
-              <ChevronDown
-                size={10}
-                className={`absolute bottom-1 left-1/2 -translate-x-1/2 transition-transform duration-200 ${
-                  adminOpen ? "rotate-180" : ""
-                }`}
-              />
-              <div className="absolute left-full ml-2 px-2 py-1 bg-[hsl(170,30%,20%)]/90 text-white text-[10px] rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
-                Administration
-              </div>
-            </button>
-            {adminOpen && (
-              <div className="flex flex-col items-center gap-1 mt-1 py-1 px-1 rounded-xl bg-white/5">
-                {adminGroup.children
-                  .filter((item) => canAccess(item.roles))
-                  .map((item) => renderItem(item, 16))}
-              </div>
-            )}
-          </div>
-        )}
+        {renderGroup(academicsGroup, academicsOpen, setAcademicsOpen, isAcademicsActive)}
+        {renderGroup(adminGroup, adminOpen, setAdminOpen, isAdminActive)}
       </div>
 
       {/* Sign Out */}
       <button
         onClick={signOut}
         title="Sign Out"
-        className="p-3 rounded-xl transition-all duration-300 text-[hsl(170,30%,70%)] hover:text-white hover:bg-white/10 group relative"
+        className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-300 text-[hsl(170,30%,70%)] hover:text-white hover:bg-white/10 group relative mt-2 ${collapsed ? "justify-center" : ""}`}
       >
-        <LogOut size={20} />
-        <div className="absolute left-full ml-2 px-2 py-1 bg-[hsl(170,30%,20%)]/90 text-white text-[10px] rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
-          Sign Out
-        </div>
+        <LogOut size={20} className="flex-shrink-0" />
+        {!collapsed && <span className="text-sm font-medium">Sign Out</span>}
+        {collapsed && (
+          <div className="absolute left-full ml-2 px-2 py-1 bg-[hsl(170,30%,20%)]/90 text-white text-[10px] rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
+            Sign Out
+          </div>
+        )}
       </button>
     </aside>
   );
