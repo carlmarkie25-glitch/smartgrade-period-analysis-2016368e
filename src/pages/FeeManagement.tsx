@@ -55,6 +55,12 @@ const FeeManagement = () => {
   // Local editable state for the fee matrix
   const [rateEdits, setRateEdits] = useState<Record<string, number>>({});
   const [installEdits, setInstallEdits] = useState<Record<string, { label: string; period_label: string; amount: number }>>({});
+  const [installmentRows, setInstallmentRows] = useState<{ num: number; label: string; period_label: string }[]>([
+    { num: 1, label: "1st Installment", period_label: "October - December" },
+    { num: 2, label: "2nd Installment", period_label: "January - February" },
+    { num: 3, label: "3rd Installment", period_label: "March - May" },
+  ]);
+  const [regPeriod, setRegPeriod] = useState("July - September");
 
   // Build rate lookup: `${categoryId}_${deptId}` -> amount
   const rateLookup = useMemo(() => {
