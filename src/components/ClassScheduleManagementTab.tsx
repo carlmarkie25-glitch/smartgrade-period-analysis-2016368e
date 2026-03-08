@@ -139,6 +139,7 @@ export const ClassScheduleManagementTab = () => {
 
   const openNew = () => {
     setForm({ class_id: "", teacher_id: null, day_of_week: 1, start_time: "", end_time: "", subject_id: null });
+    setSelectedDepartment("");
     setIsDialogOpen(true);
   };
 
