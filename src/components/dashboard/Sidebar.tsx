@@ -100,6 +100,11 @@ export const Sidebar = ({ activeTab, onTabChange, collapsed = false, onToggle }:
     (id) => activeTab === id || usersGroup.children.find((c) => c.id === id)?.path === location.pathname
   );
 
+  const financeChildIds = financeGroup.children.map((c) => c.id);
+  const isFinanceActive = financeChildIds.some(
+    (id) => activeTab === id || financeGroup.children.find((c) => c.id === id)?.path === location.pathname
+  );
+
   const adminChildIds = adminGroup.children.map((c) => c.id);
   const isAdminActive = adminChildIds.some(
     (id) => activeTab === id || adminGroup.children.find((c) => c.id === id)?.path === location.pathname
@@ -107,6 +112,7 @@ export const Sidebar = ({ activeTab, onTabChange, collapsed = false, onToggle }:
 
   const [academicsOpen, setAcademicsOpen] = useState(isAcademicsActive);
   const [usersOpen, setUsersOpen] = useState(isUsersActive);
+  const [financeOpen, setFinanceOpen] = useState(isFinanceActive);
   const [adminOpen, setAdminOpen] = useState(isAdminActive);
 
   const canAccess = (roles: string[]) => {
@@ -247,6 +253,7 @@ export const Sidebar = ({ activeTab, onTabChange, collapsed = false, onToggle }:
 
         {renderGroup(academicsGroup, academicsOpen, setAcademicsOpen, isAcademicsActive)}
         {renderGroup(usersGroup, usersOpen, setUsersOpen, isUsersActive)}
+        {renderGroup(financeGroup, financeOpen, setFinanceOpen, isFinanceActive)}
         {renderGroup(adminGroup, adminOpen, setAdminOpen, isAdminActive)}
       </div>
 

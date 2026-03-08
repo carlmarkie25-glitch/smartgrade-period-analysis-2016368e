@@ -25,6 +25,10 @@ import SubjectsPage from "./pages/SubjectsPage";
 import DepartmentsPage from "./pages/DepartmentsPage";
 import AcademicYearsPage from "./pages/AcademicYearsPage";
 import NotFound from "./pages/NotFound";
+import FeeManagement from "./pages/FeeManagement";
+import Payments from "./pages/Payments";
+import Expenses from "./pages/Expenses";
+import FinanceReports from "./pages/FinanceReports";
 
 const queryClient = new QueryClient();
 
@@ -53,6 +57,10 @@ const App = () => (
             <Route path="/teachers" element={<AdminRoute><TeacherPanel /></AdminRoute>} />
             <Route path="/parents" element={<AdminRoute><ParentPanel /></AdminRoute>} />
             <Route path="/admin" element={<AdminRoute><Admin /></AdminRoute>} />
+            <Route path="/fees" element={<AdminRoute><FeeManagement /></AdminRoute>} />
+            <Route path="/payments" element={<AdminRoute><Payments /></AdminRoute>} />
+            <Route path="/expenses" element={<AdminRoute><Expenses /></AdminRoute>} />
+            <Route path="/finance-reports" element={<AdminRoute><FinanceReports /></AdminRoute>} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
             </Routes>
