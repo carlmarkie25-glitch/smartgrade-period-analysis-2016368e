@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Users, FileText, GraduationCap } from "lucide-react";
+import { Users, FileText, GraduationCap, Receipt } from "lucide-react";
 import { StudentManagementTab } from "@/components/StudentManagementTab";
 import { UserBiodataManagementTab } from "@/components/UserBiodataManagementTab";
 import { StudentUsersTab } from "@/components/StudentUsersTab";
+import StudentPaymentReceipts from "@/components/StudentPaymentReceipts";
 import AppShell from "@/components/AppShell";
 
 const StudentPanel = () => {
@@ -16,7 +17,7 @@ const StudentPanel = () => {
         </div>
 
         <Tabs defaultValue="users" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="users">
               <Users className="h-4 w-4 mr-2" />
               Users
@@ -28,6 +29,10 @@ const StudentPanel = () => {
             <TabsTrigger value="students">
               <GraduationCap className="h-4 w-4 mr-2" />
               Students
+            </TabsTrigger>
+            <TabsTrigger value="payments">
+              <Receipt className="h-4 w-4 mr-2" />
+              Payments
             </TabsTrigger>
           </TabsList>
 
@@ -41,6 +46,10 @@ const StudentPanel = () => {
 
           <TabsContent value="students">
             <StudentManagementTab />
+          </TabsContent>
+
+          <TabsContent value="payments">
+            <StudentPaymentReceipts />
           </TabsContent>
         </Tabs>
       </div>
