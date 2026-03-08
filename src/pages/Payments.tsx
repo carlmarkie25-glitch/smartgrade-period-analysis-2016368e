@@ -231,8 +231,8 @@ const Payments = () => {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {!allPayments?.length ? (
-                      <TableRow><TableCell colSpan={6} className="text-center py-8 text-muted-foreground">No payments recorded yet</TableCell></TableRow>
+                     {!allPayments?.length ? (
+                      <TableRow><TableCell colSpan={7} className="text-center py-8 text-muted-foreground">No payments recorded yet</TableCell></TableRow>
                     ) : allPayments.map(p => (
                       <TableRow key={p.id}>
                         <TableCell>{p.payment_date}</TableCell>
@@ -241,6 +241,20 @@ const Payments = () => {
                         <TableCell className="text-right font-bold text-green-600">{p.amount.toLocaleString()}LD</TableCell>
                         <TableCell><Badge variant="outline">{p.payment_method}</Badge></TableCell>
                         <TableCell className="text-muted-foreground">{p.notes || "—"}</TableCell>
+                        <TableCell className="text-right">
+                          <Button variant="ghost" size="icon" title="View Receipt" onClick={() => {
+                            setReceiptData({
+                              receipt_number: p.receipt_number,
+                              payment_date: p.payment_date,
+                              amount: p.amount,
+                              payment_method: p.payment_method,
+                              studentName: (p as any).students?.full_name,
+                              studentId: (p as any).students?.student_id,
+                            });
+                          }}>
+                            <Receipt className="h-4 w-4" />
+                          </Button>
+                        </TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
