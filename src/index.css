@@ -171,3 +171,36 @@ All colors MUST be HSL.
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
 }
+
+/* Neumorphic utility classes */
+.neu-card {
+  background: hsl(var(--neu-bg));
+  box-shadow: var(--neu-shadow);
+  border-radius: 22px;
+  border: none;
+}
+
+.neu-card-sm {
+  background: hsl(var(--neu-bg));
+  box-shadow: var(--neu-shadow-sm);
+  border-radius: 16px;
+  border: none;
+}
+
+.neu-inset {
+  background: hsl(var(--neu-bg));
+  box-shadow: var(--neu-inset);
+  border-radius: 16px;
+}
+
+.neu-inset-sm {
+  background: hsl(var(--neu-bg));
+  box-shadow: var(--neu-inset-sm);
+  border-radius: 12px;
+}
+
+.neu-pill {
+  background: hsl(var(--neu-bg));
+  box-shadow: var(--neu-inset-sm);
+  border-radius: 9999px;
+}
