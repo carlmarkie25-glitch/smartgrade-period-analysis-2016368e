@@ -1,9 +1,4 @@
-import {
-  LayoutDashboard, Users, BookOpen, FileText, BarChart3, Settings,
-  GraduationCap, CalendarDays, LogOut, UserCog, Calendar, Building,
-  School, Layers, ChevronDown, PanelLeftClose, PanelLeft,
-  UsersRound, Wallet, DollarSign, Receipt, TrendingUp, PieChart,
-} from "lucide-react";
+import { LayoutDashboard, Users, BookOpen, FileText, BarChart3, Settings, GraduationCap, CalendarDays, LogOut, UserCog, Calendar, Building, School, Layers, ChevronDown, PanelLeftClose, PanelLeft, UsersRound, Wallet, DollarSign, Receipt, TrendingUp, PieChart } from "lucide-react";
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useUserRoles } from "@/hooks/useUserRoles";
@@ -17,8 +12,21 @@ interface SidebarProps {
   onToggle?: () => void;
 }
 
-type MenuItem = { id: string; icon: any; label: string; path: string; roles: string[] };
-type MenuGroup = { id: string; icon: any; label: string; roles: string[]; children: MenuItem[] };
+type MenuItem = {
+  id: string;
+  icon: any;
+  label: string;
+  path: string;
+  roles: string[];
+};
+
+type MenuGroup = {
+  id: string;
+  icon: any;
+  label: string;
+  roles: string[];
+  children: MenuItem[];
+};
 
 export const Sidebar = ({ activeTab, onTabChange, collapsed = false, onToggle }: SidebarProps) => {
   const navigate = useNavigate();
@@ -31,7 +39,10 @@ export const Sidebar = ({ activeTab, onTabChange, collapsed = false, onToggle }:
   ];
 
   const academicsGroup: MenuGroup = {
-    id: "academics", icon: BookOpen, label: "Academics", roles: ["teacher", "admin"],
+    id: "academics",
+    icon: BookOpen,
+    label: "Academics",
+    roles: ["teacher", "admin"],
     children: [
       { id: "gradebook", icon: BookOpen, label: "Gradebook", path: "/gradebook", roles: ["teacher", "admin"] },
       { id: "reports", icon: FileText, label: "Reports", path: "/reports", roles: ["teacher", "admin"] },
@@ -43,7 +54,10 @@ export const Sidebar = ({ activeTab, onTabChange, collapsed = false, onToggle }:
   };
 
   const usersGroup: MenuGroup = {
-    id: "users", icon: UsersRound, label: "Users", roles: ["admin"],
+    id: "users",
+    icon: UsersRound,
+    label: "Users",
+    roles: ["admin"],
     children: [
       { id: "students", icon: GraduationCap, label: "Students", path: "/students", roles: ["admin"] },
       { id: "teachers", icon: UserCog, label: "Teachers", path: "/teachers", roles: ["admin"] },
@@ -52,7 +66,10 @@ export const Sidebar = ({ activeTab, onTabChange, collapsed = false, onToggle }:
   };
 
   const financeGroup: MenuGroup = {
-    id: "finance", icon: Wallet, label: "Finance", roles: ["admin"],
+    id: "finance",
+    icon: Wallet,
+    label: "Finance",
+    roles: ["admin"],
     children: [
       { id: "fees", icon: DollarSign, label: "Fee Management", path: "/fees", roles: ["admin"] },
       { id: "payments", icon: Receipt, label: "Payments & Billing", path: "/payments", roles: ["admin"] },
@@ -62,7 +79,10 @@ export const Sidebar = ({ activeTab, onTabChange, collapsed = false, onToggle }:
   };
 
   const adminGroup: MenuGroup = {
-    id: "administration", icon: Settings, label: "Administration", roles: ["admin"],
+    id: "administration",
+    icon: Settings,
+    label: "Administration",
+    roles: ["admin"],
     children: [
       { id: "schedule", icon: CalendarDays, label: "Schedule", path: "/schedule", roles: ["admin"] },
       { id: "calendar", icon: Calendar, label: "Calendar", path: "/academic-calendar", roles: ["admin"] },
@@ -70,13 +90,30 @@ export const Sidebar = ({ activeTab, onTabChange, collapsed = false, onToggle }:
     ],
   };
 
-  const isGroupActive = (group: MenuGroup) =>
-    group.children.some((c) => c.path === location.pathname);
+  const academicsChildIds = academicsGroup.children.map((c) => c.id);
+  const isAcademicsActive = academicsChildIds.some(
+    (id) => activeTab === id || academicsGroup.children.find((c) => c.id === id)?.path === location.pathname
+  );
 
-  const [academicsOpen, setAcademicsOpen] = useState(isGroupActive(academicsGroup));
-  const [usersOpen, setUsersOpen] = useState(isGroupActive(usersGroup));
-  const [financeOpen, setFinanceOpen] = useState(isGroupActive(financeGroup));
-  const [adminOpen, setAdminOpen] = useState(isGroupActive(adminGroup));
+  const usersChildIds = usersGroup.children.map((c) => c.id);
+  const isUsersActive = usersChildIds.some(
+    (id) => activeTab === id || usersGroup.children.find((c) => c.id === id)?.path === location.pathname
+  );
+
+  const financeChildIds = financeGroup.children.map((c) => c.id);
+  const isFinanceActive = financeChildIds.some(
+    (id) => activeTab === id || financeGroup.children.find((c) => c.id === id)?.path === location.pathname
+  );
+
+  const adminChildIds = adminGroup.children.map((c) => c.id);
+  const isAdminActive = adminChildIds.some(
+    (id) => activeTab === id || adminGroup.children.find((c) => c.id === id)?.path === location.pathname
+  );
+
+  const [academicsOpen, setAcademicsOpen] = useState(isAcademicsActive);
+  const [usersOpen, setUsersOpen] = useState(isUsersActive);
+  const [financeOpen, setFinanceOpen] = useState(isFinanceActive);
+  const [adminOpen, setAdminOpen] = useState(isAdminActive);
 
   const canAccess = (roles: string[]) => {
     if (rolesLoading) return roles.includes("all");
@@ -86,95 +123,103 @@ export const Sidebar = ({ activeTab, onTabChange, collapsed = false, onToggle }:
     return false;
   };
 
+  const isActiveItem = (item: MenuItem) => {
+    return location.pathname === item.path;
+  };
+
   const handleClick = (item: MenuItem) => {
     onTabChange?.(item.id);
     navigate(item.path);
   };
 
-  /* ── Shared styles ── */
-  const itemBase =
-    "flex items-center gap-3 w-full px-3 py-2.5 rounded-xl transition-all duration-200 relative group";
-  const itemActive = "bg-white/15 text-white";
-  const itemInactive = "text-white/60 hover:text-white hover:bg-white/10";
-  const subItemBase = "flex items-center gap-2.5 w-full px-3 py-2 rounded-xl transition-all duration-200";
-  const subItemActive = "bg-white/12 text-white";
-  const subItemInactive = "text-white/55 hover:text-white hover:bg-white/8";
-
-  const Tooltip = ({ label }: { label: string }) =>
-    collapsed ? (
-      <div className="absolute left-full ml-3 px-2.5 py-1.5 bg-[hsl(220,70%,8%)] text-white text-[10px] font-medium rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50 shadow-lg border border-white/10">
-        {label}
-      </div>
-    ) : null;
-
   const renderItem = (item: MenuItem) => {
     const Icon = item.icon;
-    const active = location.pathname === item.path;
+    const active = isActiveItem(item);
     return (
       <button
         key={item.id}
         onClick={() => handleClick(item)}
-        className={`${itemBase} ${active ? itemActive : itemInactive}`}
+        title={item.label}
+        className={`flex items-center gap-3 w-full px-3 py-2.5 rounded-xl transition-all duration-300 group ${
+          active
+            ? "bg-white/20 text-white shadow-lg"
+            : "text-[hsl(170,30%,70%)] hover:text-white hover:bg-white/10"
+        }`}
       >
-        <Icon size={18} className="flex-shrink-0" />
-        {!collapsed && <span className="text-sm font-medium">{item.label}</span>}
-        <Tooltip label={item.label} />
+        <Icon size={20} className="flex-shrink-0" />
+        {!collapsed && <span className="text-sm font-medium truncate">{item.label}</span>}
+        {collapsed && (
+          <div className="absolute left-full ml-2 px-2 py-1 bg-[hsl(170,30%,20%)]/90 text-white text-[10px] rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
+            {item.label}
+          </div>
+        )}
       </button>
     );
   };
 
-  const renderGroup = (
-    group: MenuGroup,
-    isOpen: boolean,
-    setOpen: (v: boolean) => void
-  ) => {
+  const renderGroupItem = (item: MenuItem) => {
+    const Icon = item.icon;
+    const active = isActiveItem(item);
+    return (
+      <button
+        key={item.id}
+        onClick={() => handleClick(item)}
+        title={item.label}
+        className={`flex items-center gap-3 w-full px-3 py-2 rounded-lg transition-all duration-300 ${
+          active
+            ? "bg-white/15 text-white"
+            : "text-[hsl(170,30%,70%)] hover:text-white hover:bg-white/10"
+        }`}
+      >
+        <Icon size={16} className="flex-shrink-0" />
+        {!collapsed && <span className="text-xs font-medium truncate">{item.label}</span>}
+      </button>
+    );
+  };
+
+  const renderGroup = (group: MenuGroup, isOpen: boolean, setOpen: (v: boolean) => void, isGroupActive: boolean) => {
     if (!canAccess(group.roles)) return null;
     const GroupIcon = group.icon;
-    const groupActive = isGroupActive(group);
     return (
-      <div key={group.id}>
+      <div className="w-full" key={group.id}>
         <button
           onClick={() => setOpen(!isOpen)}
-          className={`${itemBase} ${groupActive && !isOpen ? itemActive : groupActive ? "text-white" : itemInactive}`}
+          title={group.label}
+          className={`flex items-center gap-3 w-full px-3 py-2.5 rounded-xl transition-all duration-300 group relative ${
+            isGroupActive && !isOpen
+              ? "bg-white/20 text-white shadow-lg"
+              : isGroupActive
+              ? "text-white"
+              : "text-[hsl(170,30%,70%)] hover:text-white hover:bg-white/10"
+          }`}
         >
-          <GroupIcon size={18} className="flex-shrink-0" />
+          <GroupIcon size={20} className="flex-shrink-0" />
           {!collapsed && (
             <>
-              <span className="text-sm font-medium flex-1 text-left">{group.label}</span>
+              <span className="text-sm font-medium truncate flex-1 text-left">{group.label}</span>
               <ChevronDown
-                size={13}
+                size={14}
                 className={`flex-shrink-0 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
               />
             </>
           )}
           {collapsed && (
-            <ChevronDown
-              size={8}
-              className={`absolute bottom-1 left-1/2 -translate-x-1/2 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
-            />
+            <>
+              <ChevronDown
+                size={10}
+                className={`absolute bottom-1 left-1/2 -translate-x-1/2 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
+              />
+              <div className="absolute left-full ml-2 px-2 py-1 bg-[hsl(170,30%,20%)]/90 text-white text-[10px] rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
+                {group.label}
+              </div>
+            </>
           )}
-          <Tooltip label={group.label} />
         </button>
-
         {isOpen && (
-          <div className={`flex flex-col gap-0.5 mt-0.5 py-1 rounded-xl bg-white/5 ${collapsed ? "px-1" : "ml-2 px-1.5"}`}>
+          <div className={`flex flex-col gap-0.5 mt-1 py-1 rounded-xl bg-white/5 ${collapsed ? "px-1" : "px-2 ml-2"}`}>
             {group.children
-              .filter((c) => canAccess(c.roles))
-              .map((item) => {
-                const Icon = item.icon;
-                const active = location.pathname === item.path;
-                return (
-                  <button
-                    key={item.id}
-                    onClick={() => handleClick(item)}
-                    className={`${subItemBase} ${active ? subItemActive : subItemInactive} relative group`}
-                  >
-                    <Icon size={14} className="flex-shrink-0" />
-                    {!collapsed && <span className="text-xs font-medium">{item.label}</span>}
-                    <Tooltip label={item.label} />
-                  </button>
-                );
-              })}
+              .filter((item) => canAccess(item.roles))
+              .map((item) => renderGroupItem(item))}
           </div>
         )}
       </div>
@@ -183,63 +228,69 @@ export const Sidebar = ({ activeTab, onTabChange, collapsed = false, onToggle }:
 
   return (
     <aside
-      className={`fixed left-0 top-0 h-screen flex flex-col py-5 z-50 transition-all duration-300 ${
-        collapsed ? "w-[70px] px-2 items-center" : "w-[224px] px-3"
+      className={`fixed left-0 top-0 h-screen bg-gradient-to-b from-[hsl(170,35%,25%)] via-[hsl(170,30%,22%)] to-[hsl(170,35%,20%)] rounded-r-3xl flex flex-col py-5 shadow-2xl backdrop-blur-md z-50 transition-all duration-300 ${
+        collapsed ? "w-20 items-center px-2" : "w-56 px-3"
       }`}
-      style={{
-        background: "linear-gradient(180deg, hsl(220,70%,12%) 0%, hsl(220,68%,15%) 40%, hsl(220,65%,20%) 100%)",
-        borderRight: "1px solid hsl(220,70%,22%)",
-      }}
     >
-      {/* Header */}
+      {/* Header: Logo + Toggle */}
       <div className={`flex items-center mb-6 ${collapsed ? "justify-center" : "justify-between px-1"}`}>
-        <div className="flex items-center gap-2.5">
-          <img src={logo} alt="Logo" className="h-9 w-9 rounded-xl object-contain flex-shrink-0" />
-          {!collapsed && (
-            <span className="text-white font-bold text-base tracking-tight">SmartGrade</span>
-          )}
+        <div className="flex items-center gap-3">
+          <img src={logo} alt="Logo" className="h-10 w-10 rounded-lg object-contain flex-shrink-0" />
+          {!collapsed && <span className="text-white font-bold text-lg truncate">SmartGrade</span>}
         </div>
         <button
           onClick={onToggle}
-          className="p-1.5 rounded-lg text-white/50 hover:text-white hover:bg-white/10 transition-all duration-200"
-          title={collapsed ? "Expand" : "Collapse"}
+          title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+          className="p-1.5 rounded-lg text-[hsl(170,30%,70%)] hover:text-white hover:bg-white/10 transition-all duration-200"
         >
-          {collapsed ? <PanelLeft size={16} /> : <PanelLeftClose size={16} />}
+          {collapsed ? <PanelLeft size={18} /> : <PanelLeftClose size={18} />}
         </button>
       </div>
 
-      {/* Nav */}
-      <div className="flex-1 flex flex-col gap-0.5 overflow-y-auto scrollbar-hide">
-        {topItems.filter((i) => canAccess(i.roles)).map(renderItem)}
+      {/* Nav Items */}
+      <div className="flex-1 flex flex-col gap-1.5 overflow-hidden">
+        {topItems.filter((item) => canAccess(item.roles)).map((item) => renderItem(item))}
 
-        <div className="my-1 h-px bg-white/10 mx-1" />
-
-        {renderGroup(academicsGroup, academicsOpen, setAcademicsOpen)}
-        {renderGroup(usersGroup, usersOpen, setUsersOpen)}
-        {renderGroup(financeGroup, financeOpen, setFinanceOpen)}
-        {renderGroup(adminGroup, adminOpen, setAdminOpen)}
+        {renderGroup(academicsGroup, academicsOpen, setAcademicsOpen, isAcademicsActive)}
+        {renderGroup(usersGroup, usersOpen, setUsersOpen, isUsersActive)}
+        {renderGroup(financeGroup, financeOpen, setFinanceOpen, isFinanceActive)}
+        {renderGroup(adminGroup, adminOpen, setAdminOpen, isAdminActive)}
       </div>
 
       {/* Settings */}
       {canAccess(["admin"]) && (
         <button
           onClick={() => navigate("/admin")}
-          className={`${itemBase} mt-1 ${location.pathname === "/admin" ? itemActive : itemInactive}`}
+          title="Settings"
+          className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-300 group relative ${collapsed ? "justify-center" : ""} ${
+            location.pathname === "/admin"
+              ? "bg-white/20 text-white shadow-lg"
+              : "text-[hsl(170,30%,70%)] hover:text-white hover:bg-white/10"
+          }`}
         >
-          <Settings size={18} className="flex-shrink-0" />
+          <Settings size={20} className="flex-shrink-0" />
           {!collapsed && <span className="text-sm font-medium">Settings</span>}
-          <Tooltip label="Settings" />
+          {collapsed && (
+            <div className="absolute left-full ml-2 px-2 py-1 bg-[hsl(170,30%,20%)]/90 text-white text-[10px] rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
+              Settings
+            </div>
+          )}
         </button>
       )}
 
       {/* Sign Out */}
       <button
         onClick={signOut}
-        className={`${itemBase} mt-1 text-white/50 hover:text-white hover:bg-white/10`}
+        title="Sign Out"
+        className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-300 text-[hsl(170,30%,70%)] hover:text-white hover:bg-white/10 group relative mt-1 ${collapsed ? "justify-center" : ""}`}
       >
-        <LogOut size={18} className="flex-shrink-0" />
+        <LogOut size={20} className="flex-shrink-0" />
         {!collapsed && <span className="text-sm font-medium">Sign Out</span>}
-        <Tooltip label="Sign Out" />
+        {collapsed && (
+          <div className="absolute left-full ml-2 px-2 py-1 bg-[hsl(170,30%,20%)]/90 text-white text-[10px] rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
+            Sign Out
+          </div>
+        )}
       </button>
     </aside>
   );

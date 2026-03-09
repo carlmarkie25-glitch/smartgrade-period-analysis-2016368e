@@ -22,60 +22,72 @@ export const DashboardLayout = () => {
 
   return (
     <AppShell activeTab="dashboard">
-      <div className="flex flex-col gap-5">
-
-        {/* ── Overview Card ── */}
-        <div
-          className="rounded-[22px] p-6 md:p-7 bg-card border border-border/60"
-          style={{ boxShadow: "var(--shadow-sm)" }}
+      <div className="flex flex-col gap-6">
+        
+        {/* Main Neumorphic Container */}
+        <div 
+          className="rounded-[28px] p-6 md:p-8"
+          style={{
+            background: 'hsl(220, 20%, 96%)',
+            boxShadow: '12px 12px 24px hsl(220, 20%, 86%), -12px -12px 24px hsl(0, 0%, 100%)'
+          }}
         >
-          <div className="grid grid-cols-1 lg:grid-cols-[1fr_240px] gap-6 items-stretch">
-
-            {/* LEFT: Stats */}
-            <div className="flex flex-col gap-4">
-              <div className="flex items-center justify-between">
-                <h3 className="text-sm font-semibold text-foreground">Overview</h3>
-                <span className="text-[10px] font-semibold text-muted-foreground px-3 py-1 bg-muted rounded-full border border-border/50 uppercase tracking-widest">
-                  This Term
-                </span>
+          <div className="grid grid-cols-1 lg:grid-cols-[1fr_260px] gap-8 items-center">
+            
+            {/* LEFT SIDE: Stats Row */}
+            <div className="flex flex-col gap-5">
+              <div className="flex items-center justify-between px-2">
+                <h3 className="text-lg font-black text-gray-700 tracking-tight">Overview</h3>
+                <div 
+                  className="px-4 py-1.5 rounded-full flex items-center"
+                  style={{
+                    background: 'hsl(220, 20%, 96%)',
+                    boxShadow: 'inset 3px 3px 6px hsl(220, 20%, 88%), inset -3px -3px 6px hsl(0, 0%, 100%)'
+                  }}
+                >
+                  <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">This Term</span>
+                </div>
               </div>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                <StatCard
-                  title="Students"
-                  value={stats?.totalStudents ?? "—"}
-                  icon={Users}
-                  iconColor="text-blue-500"
+              
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-5">
+                <StatCard 
+                  title="Students" 
+                  value={stats?.totalStudents ?? "—"} 
+                  icon={Users} 
+                  iconColor="text-blue-400" 
                 />
-                <StatCard
-                  title="Classes"
-                  value={stats?.totalClasses ?? "—"}
-                  icon={GraduationCap}
-                  iconColor="text-violet-500"
+                <StatCard 
+                  title="Classes" 
+                  value={stats?.totalClasses ?? "—"} 
+                  icon={GraduationCap} 
+                  iconColor="text-purple-400" 
                 />
-                <StatCard
-                  title="Year"
-                  value={stats?.currentYear ?? "—"}
-                  icon={Clock}
-                  iconColor="text-amber-500"
+                <StatCard 
+                  title="Year" 
+                  value={stats?.currentYear ?? "—"} 
+                  icon={Clock} 
+                  iconColor="text-amber-400" 
                 />
-                <StatCard
-                  title="Enrollment"
-                  value={stats?.totalStudents ? "+12%" : "—"}
-                  icon={TrendingUp}
-                  iconColor="text-emerald-500"
+                <StatCard 
+                  title="Enrollment" 
+                  value={stats?.totalStudents ? "+12%" : "—"} 
+                  icon={TrendingUp} 
+                  iconColor="text-emerald-400" 
                 />
               </div>
             </div>
 
-            {/* RIGHT: Profile */}
-            <div className="mt-0">
+            {/* RIGHT SIDE: Profile Summary */}
+            <div className="h-full mt-4 lg:mt-0">
               <ProfileSummary />
             </div>
+
           </div>
         </div>
 
-        {/* ── Lower Grid ── */}
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr_260px] gap-5 auto-rows-max">
+        {/* Existing Lower Sections Container */}
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_260px] gap-4 auto-rows-max">
+          {/* Row 2: Analytics */}
           <AnalyticsChart
             data={analyticsData}
             title="Enrollment Rate"
@@ -84,10 +96,12 @@ export const DashboardLayout = () => {
             totalStudents={stats?.totalStudents ?? 0}
           />
 
+          {/* Rows 2-3 Right: Activity List */}
           <div className="lg:row-span-2">
             <ActivityList />
           </div>
 
+          {/* Row 3: Schedule */}
           <Schedule />
         </div>
       </div>
