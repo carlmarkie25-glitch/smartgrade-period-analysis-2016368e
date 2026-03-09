@@ -74,14 +74,14 @@ const FinanceReports = () => {
   return (
     <AppShell>
       <div className="py-4 space-y-4">
-        <div className="flex items-center justify-between">
+        <div className="neu-card p-6 flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold text-gray-900 mb-1">Financial Reports</h1>
             <p className="text-sm text-gray-500">Overview of school finances</p>
           </div>
           {years && years.length > 0 && (
             <select
-              className="border border-[hsl(170,30%,85%)] rounded-lg px-3 py-1.5 text-xs bg-white/70 text-gray-900"
+              className="neu-pill px-3 py-1.5 text-xs text-gray-900 outline-none"
               value={selectedYear}
               onChange={e => setSelectedYear(e.target.value)}
             >
