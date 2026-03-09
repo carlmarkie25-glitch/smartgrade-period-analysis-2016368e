@@ -141,8 +141,8 @@ export const ProfileSummary = () => {
         <div className="h-8 w-px bg-border/60" />
 
         <div className="flex flex-col items-center flex-1 gap-1">
-          <div className="w-8 h-8 rounded-xl flex items-center justify-center bg-purple-500/10">
-            <User className="size-3.5 text-purple-500" />
+          <div className="w-8 h-8 rounded-xl flex items-center justify-center bg-chart-4/10">
+            <User className="size-3.5 text-muted-foreground" />
           </div>
           <span className="text-sm font-bold text-foreground">{femaleCount}</span>
           <span className="text-[9px] text-muted-foreground font-medium uppercase tracking-widest">Female</span>
