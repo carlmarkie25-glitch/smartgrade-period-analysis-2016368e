@@ -80,6 +80,13 @@ All colors MUST be HSL.
     /* Transitions */
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     --transition-bounce: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+
+    /* Neumorphic teal palette */
+    --neu-bg: 170 25% 96%;
+    --neu-shadow: 6px 6px 12px hsl(170 25% 88%), -6px -6px 12px hsl(0 0% 100%);
+    --neu-shadow-sm: 4px 4px 8px hsl(170 25% 88%), -4px -4px 8px hsl(0 0% 100%);
+    --neu-inset: inset 3px 3px 6px hsl(170 25% 88%), inset -3px -3px 6px hsl(0 0% 100%);
+    --neu-inset-sm: inset 2px 2px 4px hsl(170 25% 88%), inset -2px -2px 4px hsl(0 0% 100%);
   }
 
   .dark {
