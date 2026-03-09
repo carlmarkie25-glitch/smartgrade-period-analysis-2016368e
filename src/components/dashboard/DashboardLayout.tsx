@@ -88,21 +88,13 @@ export const DashboardLayout = () => {
         {/* Existing Lower Sections Container */}
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_260px] gap-4 auto-rows-max">
           {/* Row 2: Analytics */}
-          <div className="bg-white/70 backdrop-blur-md rounded-2xl border border-[hsl(170,30%,85%)]/30 p-4 shadow-sm">
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="text-sm font-semibold text-gray-900">Enrollment Rate</h3>
-              <span className="text-[10px] font-medium text-[hsl(170,50%,35%)]/70 px-2 py-0.5 bg-[hsl(170,40%,95%)] rounded-md">Weekly</span>
-            </div>
-            <div className="flex flex-col lg:flex-row items-start lg:items-end gap-3">
-              <div className="flex-shrink-0">
-                <p className="text-3xl font-bold text-gray-900">{stats?.totalStudents ?? 0}</p>
-                <p className="text-xs text-gray-500 mt-0.5">Total Enrolled<br/>Students</p>
-              </div>
-              <div className="flex-1 w-full min-w-0">
-                <AnalyticsChart data={analyticsData} height={120} />
-              </div>
-            </div>
-          </div>
+          <AnalyticsChart
+            data={analyticsData}
+            title="Enrollment Rate"
+            height={140}
+            standalone
+            totalStudents={stats?.totalStudents ?? 0}
+          />
 
           {/* Rows 2-3 Right: Activity List */}
           <div className="lg:row-span-2">
