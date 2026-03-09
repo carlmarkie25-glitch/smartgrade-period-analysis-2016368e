@@ -35,8 +35,8 @@ export const Schedule = ({
     <div
       className="rounded-[26px] p-6 md:p-7"
       style={{
-        background: "hsl(220, 20%, 96%)",
-        boxShadow: "10px 10px 20px hsl(220, 20%, 87%), -10px -10px 20px hsl(0, 0%, 100%)",
+        background: "hsl(170, 25%, 96%)",
+        boxShadow: "10px 10px 20px hsl(170, 25%, 87%), -10px -10px 20px hsl(0, 0%, 100%)",
       }}
     >
       {/* Header */}
@@ -45,8 +45,8 @@ export const Schedule = ({
         <div
           className="px-4 py-1.5 rounded-full flex items-center"
           style={{
-            background: "hsl(220, 20%, 96%)",
-            boxShadow: "inset 3px 3px 6px hsl(220, 20%, 88%), inset -3px -3px 6px hsl(0, 0%, 100%)",
+            background: "hsl(170, 25%, 96%)",
+            boxShadow: "inset 3px 3px 6px hsl(170, 25%, 88%), inset -3px -3px 6px hsl(0, 0%, 100%)",
           }}
         >
           <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Weekly</span>
@@ -63,14 +63,14 @@ export const Schedule = ({
             style={
               activeDay === index
                 ? {
-                    background: "linear-gradient(135deg, hsl(170,55%,48%), hsl(160,50%,42%))",
-                    boxShadow: "4px 4px 8px hsl(220, 20%, 87%), -2px -2px 6px hsl(0, 0%, 100%)",
+                    background: "linear-gradient(135deg, hsl(170, 55%, 45%), hsl(160, 50%, 40%))",
+                    boxShadow: "4px 4px 8px hsl(170, 25%, 87%), -2px -2px 6px hsl(0, 0%, 100%)",
                     color: "white",
                   }
                 : {
-                    background: "hsl(220, 20%, 96%)",
-                    boxShadow: "4px 4px 8px hsl(220, 20%, 88%), -4px -4px 8px hsl(0, 0%, 100%)",
-                    color: "hsl(220, 10%, 55%)",
+                    background: "hsl(170, 25%, 96%)",
+                    boxShadow: "4px 4px 8px hsl(170, 25%, 88%), -4px -4px 8px hsl(0, 0%, 100%)",
+                    color: "hsl(170, 10%, 55%)",
                   }
             }
           >
@@ -84,8 +84,8 @@ export const Schedule = ({
       <div
         className="rounded-[18px] p-4 max-h-48 overflow-y-auto"
         style={{
-          background: "hsl(220, 20%, 96%)",
-          boxShadow: "inset 4px 4px 10px hsl(220, 20%, 88%), inset -4px -4px 10px hsl(0, 0%, 100%)",
+          background: "hsl(170, 25%, 96%)",
+          boxShadow: "inset 4px 4px 10px hsl(170, 25%, 88%), inset -4px -4px 10px hsl(0, 0%, 100%)",
         }}
       >
         <div className="space-y-1">
@@ -95,20 +95,20 @@ export const Schedule = ({
               className="flex items-center gap-3 py-2 px-2 rounded-xl transition-all duration-200 cursor-pointer group"
               style={{ background: "transparent" }}
               onMouseEnter={(e) => {
-                (e.currentTarget as HTMLDivElement).style.background = "hsl(220, 20%, 94%)";
+                (e.currentTarget as HTMLDivElement).style.background = "hsl(170, 20%, 93%)";
               }}
               onMouseLeave={(e) => {
                 (e.currentTarget as HTMLDivElement).style.background = "transparent";
               }}
             >
               <div className="flex items-center gap-1.5 flex-shrink-0 w-12">
-                <Clock className="h-2.5 w-2.5 text-gray-400" />
+                <Clock className="h-2.5 w-2.5 text-[hsl(170,30%,55%)]" />
                 <p className="text-[10px] font-bold text-gray-400 tabular-nums">{slot.time}</p>
               </div>
               <div
                 className="w-0.5 h-5 rounded-full flex-shrink-0"
                 style={{
-                  background: "linear-gradient(to bottom, hsl(170,55%,48%), hsl(160,50%,58%))",
+                  background: "linear-gradient(to bottom, hsl(170, 55%, 45%), hsl(160, 50%, 56%))",
                 }}
               />
               <p className="text-xs font-semibold text-gray-600 group-hover:text-gray-800 transition-colors">

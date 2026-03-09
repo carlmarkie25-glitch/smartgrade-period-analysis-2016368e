@@ -80,15 +80,17 @@ const Analytics = () => {
     ? ((atRiskStudents.length / analyticsData.totalStudents) * 100).toFixed(1)
     : "0";
 
+  const nBg = "hsl(170, 25%, 96%)";
+  const nShadow = "6px 6px 12px hsl(170, 25%, 88%), -6px -6px 12px hsl(0, 0%, 100%)";
+  const nInset = "inset 3px 3px 6px hsl(170, 25%, 88%), inset -3px -3px 6px hsl(0, 0%, 100%)";
+
   // Total Students card is always visible
   const totalStudentsCard = {
     title: "Total Students",
     value: analyticsData?.totalStudents ?? 0,
     subtitle: "enrolled this period",
     icon: Users,
-    bgColor: "bg-[hsl(210,60%,96%)]",
-    iconBg: "bg-[hsl(210,60%,90%)]",
-    iconColor: "text-[hsl(210,60%,45%)]",
+    iconColor: "text-[hsl(170,55%,45%)]",
   };
 
   // Grade-dependent stat cards
@@ -98,17 +100,13 @@ const Analytics = () => {
       value: `${analyticsData?.passRate ?? 0}%`,
       subtitle: `${analyticsData?.passingStudents ?? 0} students passing`,
       icon: TrendingUp,
-      bgColor: "bg-[hsl(145,45%,95%)]",
-      iconBg: "bg-[hsl(145,45%,88%)]",
-      iconColor: "text-[hsl(145,50%,35%)]",
+      iconColor: "text-[hsl(145,50%,40%)]",
     },
     {
       title: "Fail Rate",
       value: `${analyticsData?.failRate ?? 0}%`,
       subtitle: `${analyticsData?.failingStudents ?? 0} students failing`,
       icon: AlertTriangle,
-      bgColor: "bg-[hsl(0,60%,96%)]",
-      iconBg: "bg-[hsl(0,60%,90%)]",
       iconColor: "text-[hsl(0,50%,45%)]",
     },
     {
@@ -116,23 +114,28 @@ const Analytics = () => {
       value: atRiskStudents.length,
       subtitle: `${atRiskPercent}% of total`,
       icon: Target,
-      bgColor: "bg-[hsl(35,60%,96%)]",
-      iconBg: "bg-[hsl(35,60%,90%)]",
-      iconColor: "text-[hsl(35,60%,40%)]",
+      iconColor: "text-[hsl(35,60%,45%)]",
     },
   ];
 
   const renderStatCard = (stat: typeof totalStudentsCard) => {
     const Icon = stat.icon;
     return (
-      <div key={stat.title} className={`p-3 rounded-xl ${stat.bgColor} transition-colors`}>
+      <div
+        key={stat.title}
+        className="p-3 rounded-[16px] transition-colors"
+        style={{ background: nBg, boxShadow: nShadow }}
+      >
         <div className="flex items-center justify-between mb-1.5">
           <span className="text-[10px] font-medium text-gray-500">{stat.title}</span>
-          <div className={`w-7 h-7 rounded-lg ${stat.iconBg} flex items-center justify-center`}>
+          <div
+            className="w-7 h-7 rounded-lg flex items-center justify-center"
+            style={{ background: nBg, boxShadow: nInset }}
+          >
             <Icon className={`h-3.5 w-3.5 ${stat.iconColor}`} />
           </div>
         </div>
-        <div className="text-xl font-bold text-gray-900">{stat.value}</div>
+        <div className="text-xl font-bold text-gray-800">{stat.value}</div>
         <p className="text-[10px] text-gray-400 mt-0.5">{stat.subtitle}</p>
       </div>
     );
@@ -140,16 +143,19 @@ const Analytics = () => {
 
   return (
     <AppShell activeTab="analytics">
-      <div className="py-4 space-y-4">
+      <div className="py-4 space-y-5">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900 mb-1">{pageTitle}</h1>
+            <h1 className="text-2xl font-bold text-gray-800 mb-1">{pageTitle}</h1>
             <p className="text-sm text-gray-500">{pageDescription}</p>
           </div>
           <div className="flex items-center gap-2">
             <Select defaultValue="2024-2025">
-              <SelectTrigger className="w-[130px] h-8 text-xs bg-white/70 border-[hsl(170,30%,85%)]/30">
+              <SelectTrigger
+                className="w-[130px] h-8 text-xs border-none"
+                style={{ background: nBg, boxShadow: nInset }}
+              >
                 <SelectValue placeholder="Year" />
               </SelectTrigger>
               <SelectContent>
@@ -158,7 +164,10 @@ const Analytics = () => {
               </SelectContent>
             </Select>
             <Select value={activePeriod} onValueChange={setSelectedPeriod}>
-              <SelectTrigger className="w-[120px] h-8 text-xs bg-white/70 border-[hsl(170,30%,85%)]/30">
+              <SelectTrigger
+                className="w-[120px] h-8 text-xs border-none"
+                style={{ background: nBg, boxShadow: nInset }}
+              >
                 <SelectValue placeholder="Period" />
               </SelectTrigger>
               <SelectContent>
@@ -173,24 +182,39 @@ const Analytics = () => {
           </div>
         </div>
 
-        {/* Total Students Card - always visible */}
-        <div className="bg-white/70 backdrop-blur-md rounded-2xl border border-[hsl(170,30%,85%)]/30 p-4 shadow-sm">
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="text-sm font-semibold text-gray-900">Student Overview</h3>
-            <span className="text-[10px] font-medium text-[hsl(170,50%,35%)]/70 px-2 py-0.5 bg-[hsl(170,40%,95%)] rounded-md">This Period</span>
+        {/* Student Overview Card */}
+        <div
+          className="rounded-[24px] p-5"
+          style={{ background: nBg, boxShadow: "10px 10px 20px hsl(170, 25%, 87%), -10px -10px 20px hsl(0, 0%, 100%)" }}
+        >
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-sm font-bold text-gray-700">Student Overview</h3>
+            <span
+              className="text-[10px] font-bold text-gray-500 uppercase tracking-widest px-3 py-1 rounded-full"
+              style={{ background: nBg, boxShadow: nInset }}
+            >
+              This Period
+            </span>
           </div>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-           {renderStatCard(totalStudentsCard)}
+            {renderStatCard(totalStudentsCard)}
             {allGraded ? (
               gradeStatCards.map(renderStatCard)
             ) : (
               gradeStatCards.map((stat) => {
                 const Icon = stat.icon;
                 return (
-                  <div key={stat.title} className={`p-3 rounded-xl ${stat.bgColor} transition-colors relative`}>
+                  <div
+                    key={stat.title}
+                    className="p-3 rounded-[16px] relative"
+                    style={{ background: nBg, boxShadow: nShadow }}
+                  >
                     <div className="flex items-center justify-between mb-1.5">
                       <span className="text-[10px] font-medium text-gray-500">{stat.title}</span>
-                      <div className={`w-7 h-7 rounded-lg ${stat.iconBg} flex items-center justify-center`}>
+                      <div
+                        className="w-7 h-7 rounded-lg flex items-center justify-center"
+                        style={{ background: nBg, boxShadow: nInset }}
+                      >
                         <Icon className={`h-3.5 w-3.5 ${stat.iconColor}`} />
                       </div>
                     </div>
@@ -214,40 +238,52 @@ const Analytics = () => {
           <DemographicsChart title="County Distribution" data={demographics?.county ?? []} isLoading={demographicsLoading} icon={<MapPin className="h-4 w-4 text-[hsl(145,50%,40%)]" />} />
         </div>
 
-        {/* Grading progress banner - shown when incomplete */}
+        {/* Grading progress banner */}
         {!allGraded && totalCount > 0 && (
-          <div className="p-3 rounded-xl bg-[hsl(35,60%,96%)] border border-[hsl(35,40%,88%)] flex items-center gap-3">
+          <div
+            className="p-3 rounded-[16px] flex items-center gap-3"
+            style={{ background: nBg, boxShadow: nShadow }}
+          >
             <ClipboardList className="h-5 w-5 text-[hsl(35,60%,45%)] flex-shrink-0" />
             <div className="flex-1 min-w-0">
               <p className="text-[10px] font-semibold text-[hsl(35,50%,30%)]">Grading In Progress</p>
               <p className="text-[10px] text-[hsl(35,40%,40%)]">{gradedCount}/{totalCount} students have complete grades</p>
-              <div className="w-full bg-[hsl(35,40%,88%)] rounded-full h-1.5 mt-1">
-                <div className="bg-[hsl(35,60%,50%)] h-1.5 rounded-full transition-all" style={{ width: totalCount > 0 ? `${(gradedCount / totalCount) * 100}%` : '0%' }} />
+              <div className="w-full bg-[hsl(170,20%,90%)] rounded-full h-1.5 mt-1">
+                <div className="bg-[hsl(170,55%,45%)] h-1.5 rounded-full transition-all" style={{ width: totalCount > 0 ? `${(gradedCount / totalCount) * 100}%` : "0%" }} />
               </div>
             </div>
           </div>
         )}
 
-        {/* Charts - always visible */}
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr_340px] gap-4">
+        {/* Charts */}
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_340px] gap-5">
           <SubjectTrendsChart data={allGraded ? trendData : []} isLoading={allGraded && trendLoading} />
           <PassFailChart passRate={allGraded ? (analyticsData?.passRate || 0) : 0} failRate={allGraded ? (analyticsData?.failRate || 0) : 0} awaitingGrades={!allGraded} />
         </div>
 
         <ClassPerformanceChart data={allGraded ? classPerformance : []} isLoading={allGraded && classPerformanceLoading} />
 
-        {/* Top Students and At Risk - always visible */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          <div className="bg-white/70 backdrop-blur-md rounded-2xl border border-[hsl(170,30%,85%)]/30 p-4 shadow-sm">
-            <div className="flex items-center justify-between mb-3">
+        {/* Top Students and At Risk */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+          {/* Top Students */}
+          <div
+            className="rounded-[22px] p-5"
+            style={{ background: nBg, boxShadow: "8px 8px 16px hsl(170, 25%, 88%), -8px -8px 16px hsl(0, 0%, 100%)" }}
+          >
+            <div className="flex items-center justify-between mb-4">
               <div>
-                <h3 className="text-sm font-semibold text-gray-900 flex items-center gap-2">
-                  <Award className="h-4 w-4 text-[hsl(170,50%,35%)]" />
+                <h3 className="text-sm font-bold text-gray-700 flex items-center gap-2">
+                  <Award className="h-4 w-4 text-[hsl(170,50%,40%)]" />
                   {topLabel}
                 </h3>
                 <p className="text-[10px] text-gray-400 mt-0.5">Exceptional students with 90%+ average</p>
               </div>
-              <span className="text-[10px] font-medium text-[hsl(170,50%,35%)]/70 px-2 py-0.5 bg-[hsl(170,40%,95%)] rounded-md">90%+</span>
+              <span
+                className="text-[10px] font-bold text-gray-500 uppercase tracking-widest px-3 py-1 rounded-full"
+                style={{ background: nBg, boxShadow: nInset }}
+              >
+                90%+
+              </span>
             </div>
             {!allGraded ? (
               <div className="text-center py-8 text-gray-400">
@@ -258,7 +294,7 @@ const Analytics = () => {
             ) : topStudentsLoading ? (
               <div className="space-y-2.5">
                 {Array(5).fill(0).map((_, i) => (
-                  <div key={i} className="flex items-center gap-2.5 p-2.5 rounded-xl bg-gray-50">
+                  <div key={i} className="flex items-center gap-2.5 p-2.5 rounded-[14px]" style={{ background: nBg, boxShadow: nShadow }}>
                     <Skeleton className="h-6 w-6 rounded-full" />
                     <Skeleton className="h-7 w-7 rounded-full" />
                     <div className="flex-1"><Skeleton className="h-3 w-24 mb-1" /><Skeleton className="h-2.5 w-16" /></div>
@@ -274,37 +310,55 @@ const Analytics = () => {
             ) : (
               <div className="space-y-2">
                 {topStudents.map((student, index) => (
-                  <div key={index} className="flex items-center justify-between p-2.5 rounded-xl border border-[hsl(170,30%,90%)] bg-[hsl(170,20%,98%)] hover:bg-[hsl(170,25%,95%)] transition-colors">
+                  <div
+                    key={index}
+                    className="flex items-center justify-between p-2.5 rounded-[14px] transition-all duration-200"
+                    style={{ background: nBg, boxShadow: nShadow }}
+                    onMouseEnter={(e) => { e.currentTarget.style.boxShadow = nInset; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.boxShadow = nShadow; }}
+                  >
                     <div className="flex items-center gap-2.5">
-                      <div className="flex items-center justify-center w-6 h-6 rounded-full bg-[hsl(170,40%,93%)] text-[hsl(170,50%,30%)] font-bold text-[10px]">
+                      <div
+                        className="flex items-center justify-center w-6 h-6 rounded-full text-[hsl(170,50%,35%)] font-bold text-[10px]"
+                        style={{ background: nBg, boxShadow: nInset }}
+                      >
                         {index + 1}
                       </div>
                       <Avatar className="h-7 w-7">
                         <AvatarImage src="" />
-                        <AvatarFallback className="text-[9px] bg-[hsl(170,30%,90%)] text-[hsl(170,50%,30%)]">{student.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                        <AvatarFallback className="text-[9px] bg-[hsl(170,30%,90%)] text-[hsl(170,50%,30%)]">{student.name.split(" ").map(n => n[0]).join("")}</AvatarFallback>
                       </Avatar>
                       <div>
-                        <p className="font-medium text-gray-900 text-xs leading-tight">{student.name}</p>
+                        <p className="font-medium text-gray-700 text-xs leading-tight">{student.name}</p>
                         <p className="text-[10px] text-gray-400">{student.class}</p>
                       </div>
                     </div>
-                    <span className="text-sm font-bold text-[hsl(170,50%,35%)]">{student.average}%</span>
+                    <span className="text-sm font-bold text-[hsl(170,50%,40%)]">{student.average}%</span>
                   </div>
                 ))}
               </div>
             )}
           </div>
 
-          <div className="bg-white/70 backdrop-blur-md rounded-2xl border border-[hsl(170,30%,85%)]/30 p-4 shadow-sm">
-            <div className="flex items-center justify-between mb-3">
+          {/* At Risk Students */}
+          <div
+            className="rounded-[22px] p-5"
+            style={{ background: nBg, boxShadow: "8px 8px 16px hsl(170, 25%, 88%), -8px -8px 16px hsl(0, 0%, 100%)" }}
+          >
+            <div className="flex items-center justify-between mb-4">
               <div>
-                <h3 className="text-sm font-semibold text-gray-900 flex items-center gap-2">
+                <h3 className="text-sm font-bold text-gray-700 flex items-center gap-2">
                   <AlertTriangle className="h-4 w-4 text-[hsl(0,60%,50%)]" />
                   Students Needing Attention
                 </h3>
                 <p className="text-[10px] text-gray-400 mt-0.5">Students with 75% average and below</p>
               </div>
-              <span className="text-[10px] font-medium text-[hsl(0,50%,50%)]/70 px-2 py-0.5 bg-[hsl(0,50%,96%)] rounded-md">≤75%</span>
+              <span
+                className="text-[10px] font-bold text-gray-500 uppercase tracking-widest px-3 py-1 rounded-full"
+                style={{ background: nBg, boxShadow: nInset }}
+              >
+                ≤75%
+              </span>
             </div>
             {!allGraded ? (
               <div className="text-center py-8 text-gray-400">
@@ -315,7 +369,7 @@ const Analytics = () => {
             ) : atRiskLoading ? (
               <div className="space-y-2.5">
                 {Array(3).fill(0).map((_, i) => (
-                  <div key={i} className="flex items-center gap-2.5 p-2.5 rounded-xl bg-gray-50">
+                  <div key={i} className="flex items-center gap-2.5 p-2.5 rounded-[14px]" style={{ background: nBg, boxShadow: nShadow }}>
                     <Skeleton className="h-7 w-7 rounded-full" />
                     <div className="flex-1"><Skeleton className="h-3 w-24 mb-1" /><Skeleton className="h-2.5 w-16" /></div>
                     <Skeleton className="h-5 w-10" />
@@ -332,21 +386,24 @@ const Analytics = () => {
                 {atRiskStudents.map((student, index) => {
                   const isAtRisk = student.average <= 72 && student.average > 60;
                   const isFailed = student.average <= 60;
-                  const borderColor = isFailed ? "border-[hsl(0,40%,90%)]" : isAtRisk ? "border-[hsl(25,50%,90%)]" : "border-[hsl(35,40%,90%)]";
-                  const bgColor = isFailed ? "bg-[hsl(0,30%,98%)]" : isAtRisk ? "bg-[hsl(25,30%,98%)]" : "bg-[hsl(35,30%,98%)]";
-                  const hoverColor = isFailed ? "hover:bg-[hsl(0,30%,95%)]" : isAtRisk ? "hover:bg-[hsl(25,30%,95%)]" : "hover:bg-[hsl(35,30%,95%)]";
                   const textColor = isFailed ? "text-[hsl(0,60%,50%)]" : isAtRisk ? "text-[hsl(25,70%,40%)]" : "text-[hsl(35,60%,40%)]";
                   const label = isFailed ? "Failed" : isAtRisk ? "At Risk" : "Attention";
 
                   return (
-                    <div key={index} className={`flex items-center justify-between p-2.5 rounded-xl border ${borderColor} ${bgColor} ${hoverColor} transition-colors`}>
+                    <div
+                      key={index}
+                      className="flex items-center justify-between p-2.5 rounded-[14px] transition-all duration-200"
+                      style={{ background: nBg, boxShadow: nShadow }}
+                      onMouseEnter={(e) => { e.currentTarget.style.boxShadow = nInset; }}
+                      onMouseLeave={(e) => { e.currentTarget.style.boxShadow = nShadow; }}
+                    >
                       <div className="flex items-center gap-2.5">
                         <Avatar className="h-7 w-7">
                           <AvatarImage src="" />
-                          <AvatarFallback className="text-[9px] bg-[hsl(0,30%,92%)] text-[hsl(0,50%,45%)]">{student.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                          <AvatarFallback className="text-[9px] bg-[hsl(170,25%,90%)] text-gray-600">{student.name.split(" ").map(n => n[0]).join("")}</AvatarFallback>
                         </Avatar>
                         <div>
-                          <p className="font-medium text-gray-900 text-xs leading-tight">{student.name}</p>
+                          <p className="font-medium text-gray-700 text-xs leading-tight">{student.name}</p>
                           <p className="text-[10px] text-gray-400">{student.class}</p>
                         </div>
                       </div>
@@ -367,3 +424,4 @@ const Analytics = () => {
 };
 
 export default Analytics;
+

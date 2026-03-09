@@ -23,61 +23,41 @@ export const DashboardLayout = () => {
   return (
     <AppShell activeTab="dashboard">
       <div className="flex flex-col gap-6">
-        
-        {/* Main Neumorphic Container */}
-        <div 
+
+        {/* Main Neumorphic Container — teal palette */}
+        <div
           className="rounded-[28px] p-6 md:p-8"
           style={{
-            background: 'hsl(220, 20%, 96%)',
-            boxShadow: '12px 12px 24px hsl(220, 20%, 86%), -12px -12px 24px hsl(0, 0%, 100%)'
+            background: "hsl(170, 25%, 96%)",
+            boxShadow: "12px 12px 24px hsl(170, 25%, 87%), -12px -12px 24px hsl(0, 0%, 100%)",
           }}
         >
           <div className="grid grid-cols-1 lg:grid-cols-[1fr_260px] gap-8 items-center">
-            
-            {/* LEFT SIDE: Stats Row */}
+
+            {/* LEFT: Stats Row */}
             <div className="flex flex-col gap-5">
               <div className="flex items-center justify-between px-2">
                 <h3 className="text-lg font-black text-gray-700 tracking-tight">Overview</h3>
-                <div 
+                <div
                   className="px-4 py-1.5 rounded-full flex items-center"
                   style={{
-                    background: 'hsl(220, 20%, 96%)',
-                    boxShadow: 'inset 3px 3px 6px hsl(220, 20%, 88%), inset -3px -3px 6px hsl(0, 0%, 100%)'
+                    background: "hsl(170, 25%, 96%)",
+                    boxShadow: "inset 3px 3px 6px hsl(170, 25%, 88%), inset -3px -3px 6px hsl(0, 0%, 100%)",
                   }}
                 >
                   <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">This Term</span>
                 </div>
               </div>
-              
+
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-5">
-                <StatCard 
-                  title="Students" 
-                  value={stats?.totalStudents ?? "—"} 
-                  icon={Users} 
-                  iconColor="text-blue-400" 
-                />
-                <StatCard 
-                  title="Classes" 
-                  value={stats?.totalClasses ?? "—"} 
-                  icon={GraduationCap} 
-                  iconColor="text-purple-400" 
-                />
-                <StatCard 
-                  title="Year" 
-                  value={stats?.currentYear ?? "—"} 
-                  icon={Clock} 
-                  iconColor="text-amber-400" 
-                />
-                <StatCard 
-                  title="Enrollment" 
-                  value={stats?.totalStudents ? "+12%" : "—"} 
-                  icon={TrendingUp} 
-                  iconColor="text-emerald-400" 
-                />
+                <StatCard title="Students" value={stats?.totalStudents ?? "—"} icon={Users} iconColor="text-[hsl(170,55%,45%)]" />
+                <StatCard title="Classes" value={stats?.totalClasses ?? "—"} icon={GraduationCap} iconColor="text-[hsl(185,55%,45%)]" />
+                <StatCard title="Year" value={stats?.currentYear ?? "—"} icon={Clock} iconColor="text-amber-400" />
+                <StatCard title="Enrollment" value={stats?.totalStudents ? "+12%" : "—"} icon={TrendingUp} iconColor="text-emerald-400" />
               </div>
             </div>
 
-            {/* RIGHT SIDE: Profile Summary */}
+            {/* RIGHT: Profile Summary */}
             <div className="h-full mt-4 lg:mt-0">
               <ProfileSummary />
             </div>
@@ -85,9 +65,9 @@ export const DashboardLayout = () => {
           </div>
         </div>
 
-        {/* Existing Lower Sections Container */}
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr_260px] gap-4 auto-rows-max">
-          {/* Row 2: Analytics */}
+        {/* Lower Sections */}
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_260px] gap-6 auto-rows-max">
+          {/* Analytics Chart */}
           <AnalyticsChart
             data={analyticsData}
             title="Enrollment Rate"
@@ -96,14 +76,15 @@ export const DashboardLayout = () => {
             totalStudents={stats?.totalStudents ?? 0}
           />
 
-          {/* Rows 2-3 Right: Activity List */}
+          {/* Activity List — spans 2 rows */}
           <div className="lg:row-span-2">
             <ActivityList />
           </div>
 
-          {/* Row 3: Schedule */}
+          {/* Schedule */}
           <Schedule />
         </div>
+
       </div>
     </AppShell>
   );
