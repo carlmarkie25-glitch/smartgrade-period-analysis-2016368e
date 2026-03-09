@@ -5,9 +5,9 @@ const ClassesPage = () => {
   return (
     <AppShell activeTab="classes">
       <div className="py-4">
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold text-foreground mb-2">Class Management</h1>
-          <p className="text-muted-foreground">Create and manage classes, assign teachers and departments</p>
+        <div className="neu-card p-6 mb-6">
+          <h1 className="text-3xl font-bold text-foreground mb-1">Class Management</h1>
+          <p className="text-muted-foreground text-sm">Create and manage classes, assign teachers and departments</p>
         </div>
         <ClassManagementTab />
       </div>

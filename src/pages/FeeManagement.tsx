@@ -181,11 +181,11 @@ const FeeManagement = () => {
 
   return (
     <AppShell>
-      <div className="p-6 space-y-6">
-        <div className="flex items-center justify-between flex-wrap gap-4">
+      <div className="py-4 space-y-6">
+        <div className="neu-card p-6 flex items-center justify-between flex-wrap gap-4">
           <div>
             <h1 className="text-2xl font-bold text-foreground">Fee Management</h1>
-            <p className="text-muted-foreground">Set fee standards by division and manage installment plans</p>
+            <p className="text-muted-foreground text-sm">Set fee standards by division and manage installment plans</p>
           </div>
           <div className="flex items-center gap-3">
             <Button onClick={() => generateBills.mutate()} disabled={generateBills.isPending} variant="default">

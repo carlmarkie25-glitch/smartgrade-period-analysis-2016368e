@@ -232,9 +232,9 @@ const AcademicCalendar = () => {
   return (
     <AppShell activeTab="schedule">
       <div className="py-4">
-        <div className="mb-6">
+        <div className="neu-card p-6 mb-6">
           <h1 className="text-3xl font-bold text-foreground">Academic Calendar</h1>
-          <p className="text-muted-foreground">
+          <p className="text-muted-foreground mt-1">
             {isAdmin ? "Manage periods, events, and view the calendar" : "Term-based overview of the academic year"}
           </p>
         </div>

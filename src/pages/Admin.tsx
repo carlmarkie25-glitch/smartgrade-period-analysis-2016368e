@@ -51,9 +51,10 @@ const Admin = () => {
           <p className="text-muted-foreground">Manage users, biodata, and system settings</p>
         </div>
 
-        <Tabs defaultValue="users" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="users">
+        <div className="neu-card p-6">
+          <Tabs defaultValue="users" className="space-y-6">
+            <TabsList className="grid w-full grid-cols-3">
+              <TabsTrigger value="users">
               <UserPlus className="h-4 w-4 mr-2" />
               Users
             </TabsTrigger>
@@ -86,6 +87,7 @@ const Admin = () => {
             <SettingsTab />
           </TabsContent>
         </Tabs>
+        </div>
       </div>
 
       <TeacherAssignmentDialog

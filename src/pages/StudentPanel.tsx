@@ -15,7 +15,7 @@ const StudentPanel = () => {
           <p className="text-sm text-gray-500">Manage student users, biodata, enrollment, and classes</p>
         </div>
 
-        <div className="bg-white/70 backdrop-blur-md rounded-2xl border border-[hsl(170,30%,85%)]/30 p-4 shadow-sm">
+        <div className="neu-card p-4">
           <Tabs defaultValue="users" className="space-y-4">
             <TabsList className="grid w-full grid-cols-4 bg-[hsl(170,20%,96%)] rounded-xl p-1">
               <TabsTrigger value="users" className="rounded-lg text-xs data-[state=active]:bg-white data-[state=active]:shadow-sm">

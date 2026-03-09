@@ -54,9 +54,9 @@ const Reports = () => {
   return (
     <AppShell activeTab="reports">
       <div className="py-4">
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold text-foreground mb-2">Reports</h1>
-          <p className="text-muted-foreground">Generate and view student report cards</p>
+        <div className="neu-card p-6 mb-6">
+          <h1 className="text-3xl font-bold text-foreground mb-1">Reports</h1>
+          <p className="text-muted-foreground text-sm">Generate and view student report cards</p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">

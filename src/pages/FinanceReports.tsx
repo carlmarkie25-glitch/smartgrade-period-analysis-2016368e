@@ -74,14 +74,14 @@ const FinanceReports = () => {
   return (
     <AppShell>
       <div className="py-4 space-y-4">
-        <div className="flex items-center justify-between">
+        <div className="neu-card p-6 flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold text-gray-900 mb-1">Financial Reports</h1>
             <p className="text-sm text-gray-500">Overview of school finances</p>
           </div>
           {years && years.length > 0 && (
             <select
-              className="border border-[hsl(170,30%,85%)] rounded-lg px-3 py-1.5 text-xs bg-white/70 text-gray-900"
+              className="neu-pill px-3 py-1.5 text-xs text-gray-900 outline-none"
               value={selectedYear}
               onChange={e => setSelectedYear(e.target.value)}
             >
@@ -93,7 +93,7 @@ const FinanceReports = () => {
         </div>
 
         {/* Stats */}
-        <div className="bg-white/70 backdrop-blur-md rounded-2xl border border-[hsl(170,30%,85%)]/30 p-4 shadow-sm">
+        <div className="neu-card p-4">
           <div className="flex items-center justify-between mb-3">
             <h3 className="text-sm font-semibold text-gray-900">Financial Overview</h3>
             <span className="text-[10px] font-medium text-[hsl(170,50%,35%)]/70 px-2 py-0.5 bg-[hsl(170,40%,95%)] rounded-md">Summary</span>
@@ -117,7 +117,7 @@ const FinanceReports = () => {
         </div>
 
         {/* Net Income */}
-        <div className={`bg-white/70 backdrop-blur-md rounded-2xl border p-4 shadow-sm ${netIncome >= 0 ? "border-[hsl(170,40%,80%)]/50" : "border-[hsl(0,40%,85%)]/50"}`}>
+        <div className={`neu-card p-4 ${netIncome >= 0 ? "" : ""}`}>
           <div className="flex items-center justify-between">
             <div>
               <p className="text-[10px] font-medium text-gray-500">Net Income (Collected − Expenses)</p>
@@ -133,7 +133,7 @@ const FinanceReports = () => {
 
         {/* Charts */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          <div className="bg-white/70 backdrop-blur-md rounded-2xl border border-[hsl(170,30%,85%)]/30 p-4 shadow-sm">
+          <div className="neu-card p-4">
             <div className="flex items-center justify-between mb-3">
               <h3 className="text-sm font-semibold text-gray-900">Student Bill Status</h3>
               <span className="text-[10px] font-medium text-[hsl(170,50%,35%)]/70 px-2 py-0.5 bg-[hsl(170,40%,95%)] rounded-md">Distribution</span>
@@ -153,7 +153,7 @@ const FinanceReports = () => {
             )}
           </div>
 
-          <div className="bg-white/70 backdrop-blur-md rounded-2xl border border-[hsl(170,30%,85%)]/30 p-4 shadow-sm">
+          <div className="neu-card p-4">
             <div className="flex items-center justify-between mb-3">
               <h3 className="text-sm font-semibold text-gray-900">Expenses by Category</h3>
               <span className="text-[10px] font-medium text-[hsl(170,50%,35%)]/70 px-2 py-0.5 bg-[hsl(170,40%,95%)] rounded-md">Breakdown</span>
