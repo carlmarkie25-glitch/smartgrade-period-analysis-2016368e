@@ -121,14 +121,21 @@ const Analytics = () => {
   const renderStatCard = (stat: typeof totalStudentsCard) => {
     const Icon = stat.icon;
     return (
-      <div key={stat.title} className={`p-3 rounded-xl ${stat.bgColor} transition-colors`}>
+      <div
+        key={stat.title}
+        className="p-3 rounded-[16px] transition-colors"
+        style={{ background: nBg, boxShadow: nShadow }}
+      >
         <div className="flex items-center justify-between mb-1.5">
           <span className="text-[10px] font-medium text-gray-500">{stat.title}</span>
-          <div className={`w-7 h-7 rounded-lg ${stat.iconBg} flex items-center justify-center`}>
+          <div
+            className="w-7 h-7 rounded-lg flex items-center justify-center"
+            style={{ background: nBg, boxShadow: nInset }}
+          >
             <Icon className={`h-3.5 w-3.5 ${stat.iconColor}`} />
           </div>
         </div>
-        <div className="text-xl font-bold text-gray-900">{stat.value}</div>
+        <div className="text-xl font-bold text-gray-800">{stat.value}</div>
         <p className="text-[10px] text-gray-400 mt-0.5">{stat.subtitle}</p>
       </div>
     );
@@ -136,16 +143,19 @@ const Analytics = () => {
 
   return (
     <AppShell activeTab="analytics">
-      <div className="py-4 space-y-4">
+      <div className="py-4 space-y-5">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900 mb-1">{pageTitle}</h1>
+            <h1 className="text-2xl font-bold text-gray-800 mb-1">{pageTitle}</h1>
             <p className="text-sm text-gray-500">{pageDescription}</p>
           </div>
           <div className="flex items-center gap-2">
             <Select defaultValue="2024-2025">
-              <SelectTrigger className="w-[130px] h-8 text-xs bg-white/70 border-[hsl(170,30%,85%)]/30">
+              <SelectTrigger
+                className="w-[130px] h-8 text-xs border-none"
+                style={{ background: nBg, boxShadow: nInset }}
+              >
                 <SelectValue placeholder="Year" />
               </SelectTrigger>
               <SelectContent>
@@ -154,7 +164,10 @@ const Analytics = () => {
               </SelectContent>
             </Select>
             <Select value={activePeriod} onValueChange={setSelectedPeriod}>
-              <SelectTrigger className="w-[120px] h-8 text-xs bg-white/70 border-[hsl(170,30%,85%)]/30">
+              <SelectTrigger
+                className="w-[120px] h-8 text-xs border-none"
+                style={{ background: nBg, boxShadow: nInset }}
+              >
                 <SelectValue placeholder="Period" />
               </SelectTrigger>
               <SelectContent>
@@ -169,24 +182,39 @@ const Analytics = () => {
           </div>
         </div>
 
-        {/* Total Students Card - always visible */}
-        <div className="bg-white/70 backdrop-blur-md rounded-2xl border border-[hsl(170,30%,85%)]/30 p-4 shadow-sm">
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="text-sm font-semibold text-gray-900">Student Overview</h3>
-            <span className="text-[10px] font-medium text-[hsl(170,50%,35%)]/70 px-2 py-0.5 bg-[hsl(170,40%,95%)] rounded-md">This Period</span>
+        {/* Student Overview Card */}
+        <div
+          className="rounded-[24px] p-5"
+          style={{ background: nBg, boxShadow: "10px 10px 20px hsl(170, 25%, 87%), -10px -10px 20px hsl(0, 0%, 100%)" }}
+        >
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-sm font-bold text-gray-700">Student Overview</h3>
+            <span
+              className="text-[10px] font-bold text-gray-500 uppercase tracking-widest px-3 py-1 rounded-full"
+              style={{ background: nBg, boxShadow: nInset }}
+            >
+              This Period
+            </span>
           </div>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-           {renderStatCard(totalStudentsCard)}
+            {renderStatCard(totalStudentsCard)}
             {allGraded ? (
               gradeStatCards.map(renderStatCard)
             ) : (
               gradeStatCards.map((stat) => {
                 const Icon = stat.icon;
                 return (
-                  <div key={stat.title} className={`p-3 rounded-xl ${stat.bgColor} transition-colors relative`}>
+                  <div
+                    key={stat.title}
+                    className="p-3 rounded-[16px] relative"
+                    style={{ background: nBg, boxShadow: nShadow }}
+                  >
                     <div className="flex items-center justify-between mb-1.5">
                       <span className="text-[10px] font-medium text-gray-500">{stat.title}</span>
-                      <div className={`w-7 h-7 rounded-lg ${stat.iconBg} flex items-center justify-center`}>
+                      <div
+                        className="w-7 h-7 rounded-lg flex items-center justify-center"
+                        style={{ background: nBg, boxShadow: nInset }}
+                      >
                         <Icon className={`h-3.5 w-3.5 ${stat.iconColor}`} />
                       </div>
                     </div>
