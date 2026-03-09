@@ -33,85 +33,50 @@ export const Schedule = ({
 
   return (
     <div
-      className="rounded-[26px] p-6 md:p-7"
-      style={{
-        background: "hsl(220, 20%, 96%)",
-        boxShadow: "10px 10px 20px hsl(220, 20%, 87%), -10px -10px 20px hsl(0, 0%, 100%)",
-      }}
+      className="rounded-[22px] p-6 bg-card border border-border/60"
+      style={{ boxShadow: "var(--shadow-sm)" }}
     >
       {/* Header */}
       <div className="flex items-center justify-between mb-5">
-        <h3 className="text-sm font-bold text-gray-700 tracking-tight">My Schedule</h3>
-        <div
-          className="px-4 py-1.5 rounded-full flex items-center"
-          style={{
-            background: "hsl(220, 20%, 96%)",
-            boxShadow: "inset 3px 3px 6px hsl(220, 20%, 88%), inset -3px -3px 6px hsl(0, 0%, 100%)",
-          }}
-        >
-          <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Weekly</span>
+        <h3 className="text-sm font-semibold text-foreground">My Schedule</h3>
+        <div className="px-3.5 py-1.5 rounded-full bg-muted border border-border/50">
+          <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest">Weekly</span>
         </div>
       </div>
 
       {/* Day Selector */}
-      <div className="flex justify-between gap-2 mb-5">
+      <div className="flex justify-between gap-1.5 mb-5">
         {days.map((day, index) => (
           <button
             key={index}
             onClick={() => setActiveDay(index)}
-            className="flex flex-col items-center px-2 py-2.5 rounded-[14px] transition-all duration-300 flex-1"
-            style={
+            className={`flex flex-col items-center px-2 py-2.5 rounded-[14px] transition-all duration-200 flex-1 ${
               activeDay === index
-                ? {
-                    background: "linear-gradient(135deg, hsl(170,55%,48%), hsl(160,50%,42%))",
-                    boxShadow: "4px 4px 8px hsl(220, 20%, 87%), -2px -2px 6px hsl(0, 0%, 100%)",
-                    color: "white",
-                  }
-                : {
-                    background: "hsl(220, 20%, 96%)",
-                    boxShadow: "4px 4px 8px hsl(220, 20%, 88%), -4px -4px 8px hsl(0, 0%, 100%)",
-                    color: "hsl(220, 10%, 55%)",
-                  }
-            }
+                ? "bg-primary text-primary-foreground shadow-sm"
+                : "bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground border border-border/40"
+            }`}
           >
-            <span className="text-sm font-black leading-none mb-0.5">{day.short}</span>
-            <span className="text-[8px] font-bold uppercase tracking-wider opacity-75">{day.long}</span>
+            <span className="text-sm font-bold leading-none mb-0.5">{day.short}</span>
+            <span className="text-[8px] font-semibold uppercase tracking-wider opacity-80">{day.long}</span>
           </button>
         ))}
       </div>
 
-      {/* Timeline Inner Container */}
-      <div
-        className="rounded-[18px] p-4 max-h-48 overflow-y-auto"
-        style={{
-          background: "hsl(220, 20%, 96%)",
-          boxShadow: "inset 4px 4px 10px hsl(220, 20%, 88%), inset -4px -4px 10px hsl(0, 0%, 100%)",
-        }}
-      >
+      {/* Timeline Container */}
+      <div className="rounded-[16px] p-3 max-h-48 overflow-y-auto scrollbar-hide bg-muted/40 border border-border/40">
         <div className="space-y-1">
           {timeSlots.map((slot, index) => (
             <div
               key={index}
-              className="flex items-center gap-3 py-2 px-2 rounded-xl transition-all duration-200 cursor-pointer group"
-              style={{ background: "transparent" }}
-              onMouseEnter={(e) => {
-                (e.currentTarget as HTMLDivElement).style.background = "hsl(220, 20%, 94%)";
-              }}
-              onMouseLeave={(e) => {
-                (e.currentTarget as HTMLDivElement).style.background = "transparent";
-              }}
+              className="flex items-center gap-3 py-2.5 px-3 rounded-xl transition-all duration-150 cursor-pointer hover:bg-card group border border-transparent hover:border-border/50"
+              style={{ boxShadow: "none" }}
             >
               <div className="flex items-center gap-1.5 flex-shrink-0 w-12">
-                <Clock className="h-2.5 w-2.5 text-gray-400" />
-                <p className="text-[10px] font-bold text-gray-400 tabular-nums">{slot.time}</p>
+                <Clock className="h-2.5 w-2.5 text-muted-foreground" />
+                <p className="text-[10px] font-semibold text-muted-foreground tabular-nums">{slot.time}</p>
               </div>
-              <div
-                className="w-0.5 h-5 rounded-full flex-shrink-0"
-                style={{
-                  background: "linear-gradient(to bottom, hsl(170,55%,48%), hsl(160,50%,58%))",
-                }}
-              />
-              <p className="text-xs font-semibold text-gray-600 group-hover:text-gray-800 transition-colors">
+              <div className="w-0.5 h-5 rounded-full flex-shrink-0 bg-primary/40" />
+              <p className="text-xs font-medium text-foreground/80 group-hover:text-foreground transition-colors">
                 {slot.class}
               </p>
             </div>
