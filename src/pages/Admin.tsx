@@ -86,6 +86,7 @@ const Admin = () => {
             <SettingsTab />
           </TabsContent>
         </Tabs>
+        </div>
       </div>
 
       <TeacherAssignmentDialog

@@ -126,10 +126,10 @@ const Gradebook = () => {
   return (
     <AppShell activeTab="gradebook">
       <div className="py-4">
-        <div className="mb-8 flex items-center justify-between">
+        <div className="neu-card p-6 mb-6 flex items-center justify-between">
           <div>
-            <h1 className="text-4xl font-bold text-foreground mb-2">Gradebook</h1>
-            <p className="text-muted-foreground">Enter and manage student grades</p>
+            <h1 className="text-3xl font-bold text-foreground mb-1">Gradebook</h1>
+            <p className="text-muted-foreground text-sm">Enter and manage student grades</p>
           </div>
           <Button 
             variant={isLocked ? "outline" : "default"} 

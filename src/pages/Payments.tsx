@@ -95,12 +95,12 @@ const Payments = () => {
 
   return (
     <AppShell>
-      <div className="p-6 space-y-6">
+      <div className="py-4 space-y-6">
         {/* Header */}
-        <div className="flex items-center justify-between flex-wrap gap-4">
+        <div className="neu-card p-6 flex items-center justify-between flex-wrap gap-4">
           <div>
             <h1 className="text-2xl font-bold text-foreground">Payments & Billing</h1>
-            <p className="text-muted-foreground">Track student bills and record payments</p>
+            <p className="text-muted-foreground text-sm">Track student bills and record payments</p>
           </div>
           <Select value={selectedYear} onValueChange={setSelectedYear}>
             <SelectTrigger className="w-[200px]"><SelectValue placeholder="Academic Year" /></SelectTrigger>

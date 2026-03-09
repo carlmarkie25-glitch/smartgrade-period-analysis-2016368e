@@ -74,9 +74,9 @@ const AcademicYearsPage = () => {
   return (
     <AppShell activeTab="years">
       <div className="py-4">
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold text-foreground mb-2">Academic Years</h1>
-          <p className="text-muted-foreground">Manage academic years and set the current active year</p>
+        <div className="neu-card p-6 mb-6">
+          <h1 className="text-3xl font-bold text-foreground mb-1">Academic Years</h1>
+          <p className="text-muted-foreground text-sm">Manage academic years and set the current active year</p>
         </div>
 
         <div className="space-y-6">
