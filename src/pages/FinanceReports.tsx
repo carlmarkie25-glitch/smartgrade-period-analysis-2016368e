@@ -117,7 +117,7 @@ const FinanceReports = () => {
         </div>
 
         {/* Net Income */}
-        <div className={`bg-white/70 backdrop-blur-md rounded-2xl border p-4 shadow-sm ${netIncome >= 0 ? "border-[hsl(170,40%,80%)]/50" : "border-[hsl(0,40%,85%)]/50"}`}>
+        <div className={`neu-card p-4 ${netIncome >= 0 ? "" : ""}`}>
           <div className="flex items-center justify-between">
             <div>
               <p className="text-[10px] font-medium text-gray-500">Net Income (Collected − Expenses)</p>
