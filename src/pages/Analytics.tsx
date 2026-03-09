@@ -80,15 +80,17 @@ const Analytics = () => {
     ? ((atRiskStudents.length / analyticsData.totalStudents) * 100).toFixed(1)
     : "0";
 
+  const nBg = "hsl(170, 25%, 96%)";
+  const nShadow = "6px 6px 12px hsl(170, 25%, 88%), -6px -6px 12px hsl(0, 0%, 100%)";
+  const nInset = "inset 3px 3px 6px hsl(170, 25%, 88%), inset -3px -3px 6px hsl(0, 0%, 100%)";
+
   // Total Students card is always visible
   const totalStudentsCard = {
     title: "Total Students",
     value: analyticsData?.totalStudents ?? 0,
     subtitle: "enrolled this period",
     icon: Users,
-    bgColor: "bg-[hsl(210,60%,96%)]",
-    iconBg: "bg-[hsl(210,60%,90%)]",
-    iconColor: "text-[hsl(210,60%,45%)]",
+    iconColor: "text-[hsl(170,55%,45%)]",
   };
 
   // Grade-dependent stat cards
@@ -98,17 +100,13 @@ const Analytics = () => {
       value: `${analyticsData?.passRate ?? 0}%`,
       subtitle: `${analyticsData?.passingStudents ?? 0} students passing`,
       icon: TrendingUp,
-      bgColor: "bg-[hsl(145,45%,95%)]",
-      iconBg: "bg-[hsl(145,45%,88%)]",
-      iconColor: "text-[hsl(145,50%,35%)]",
+      iconColor: "text-[hsl(145,50%,40%)]",
     },
     {
       title: "Fail Rate",
       value: `${analyticsData?.failRate ?? 0}%`,
       subtitle: `${analyticsData?.failingStudents ?? 0} students failing`,
       icon: AlertTriangle,
-      bgColor: "bg-[hsl(0,60%,96%)]",
-      iconBg: "bg-[hsl(0,60%,90%)]",
       iconColor: "text-[hsl(0,50%,45%)]",
     },
     {
@@ -116,9 +114,7 @@ const Analytics = () => {
       value: atRiskStudents.length,
       subtitle: `${atRiskPercent}% of total`,
       icon: Target,
-      bgColor: "bg-[hsl(35,60%,96%)]",
-      iconBg: "bg-[hsl(35,60%,90%)]",
-      iconColor: "text-[hsl(35,60%,40%)]",
+      iconColor: "text-[hsl(35,60%,45%)]",
     },
   ];
 
