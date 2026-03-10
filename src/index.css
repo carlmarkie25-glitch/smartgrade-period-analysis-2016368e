@@ -17,65 +17,65 @@ All colors MUST be HSL.
     --popover: 0 0% 100%;
     --popover-foreground: 220 25% 10%;
 
-    --primary: 220 70% 18%;
+    --primary: 170 35% 30%;
     --primary-foreground: 0 0% 100%;
-    --primary-glow: 220 70% 35%;
+    --primary-glow: 170 35% 42%;
 
-    --secondary: 45 93% 47%;
-    --secondary-foreground: 220 25% 10%;
-    --secondary-glow: 45 93% 55%;
+    --secondary: 170 25% 40%;
+    --secondary-foreground: 0 0% 100%;
+    --secondary-glow: 170 25% 50%;
 
-    --success: 142 76% 36%;
+    --success: 170 40% 36%;
     --success-foreground: 0 0% 100%;
     
-    --warning: 45 93% 47%;
-    --warning-foreground: 220 25% 10%;
+    --warning: 38 92% 50%;
+    --warning-foreground: 0 0% 100%;
 
     --muted: 220 14% 96%;
     --muted-foreground: 220 9% 46%;
 
-    --accent: 45 93% 95%;
-    --accent-foreground: 220 70% 18%;
+    --accent: 170 25% 94%;
+    --accent-foreground: 170 35% 25%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
     --border: 220 13% 91%;
     --input: 220 13% 91%;
-    --ring: 45 93% 47%;
+    --ring: 170 35% 30%;
 
     --radius: 0.75rem;
 
     /* Chart colors */
-    --chart-1: 45 93% 47%;
-    --chart-2: 220 70% 35%;
-    --chart-3: 142 76% 45%;
-    --chart-4: 280 60% 50%;
-    --chart-5: 200 80% 50%;
+    --chart-1: 170 35% 35%;
+    --chart-2: 170 25% 50%;
+    --chart-3: 160 40% 45%;
+    --chart-4: 190 50% 45%;
+    --chart-5: 150 45% 40%;
 
-    /* Sidebar - Dark navy theme with gold accent */
-    --sidebar-background: 220 70% 12%;
+    /* Sidebar - Teal theme */
+    --sidebar-background: 170 35% 18%;
     --sidebar-foreground: 0 0% 95%;
-    --sidebar-primary: 45 93% 47%;
-    --sidebar-primary-foreground: 220 25% 10%;
-    --sidebar-accent: 220 70% 18%;
+    --sidebar-primary: 170 40% 40%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 170 35% 25%;
     --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-border: 220 70% 18%;
-    --sidebar-ring: 45 93% 47%;
+    --sidebar-border: 170 35% 25%;
+    --sidebar-ring: 170 35% 40%;
 
     /* Gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(220 70% 12%), hsl(220 70% 22%));
-    --gradient-secondary: linear-gradient(135deg, hsl(45 93% 47%), hsl(45 93% 55%));
-    --gradient-hero: linear-gradient(135deg, hsl(220 70% 12%) 0%, hsl(220 70% 22%) 50%, hsl(45 93% 47%) 100%);
-    --gradient-subtle: linear-gradient(180deg, hsl(220 20% 97%), hsl(220 20% 94%));
+    --gradient-primary: linear-gradient(135deg, hsl(170 35% 20%), hsl(170 35% 30%));
+    --gradient-secondary: linear-gradient(135deg, hsl(170 25% 35%), hsl(170 25% 45%));
+    --gradient-hero: linear-gradient(135deg, hsl(170 35% 18%) 0%, hsl(170 35% 28%) 50%, hsl(170 40% 40%) 100%);
+    --gradient-subtle: linear-gradient(180deg, hsl(170 25% 96%), hsl(170 20% 93%));
 
     /* Shadows */
-    --shadow-sm: 0 2px 4px -1px hsl(220 25% 10% / 0.06);
-    --shadow-md: 0 4px 6px -1px hsl(220 25% 10% / 0.1), 0 2px 4px -1px hsl(220 25% 10% / 0.06);
-    --shadow-lg: 0 10px 15px -3px hsl(220 25% 10% / 0.1), 0 4px 6px -2px hsl(220 25% 10% / 0.05);
-    --shadow-xl: 0 20px 25px -5px hsl(220 25% 10% / 0.1), 0 10px 10px -5px hsl(220 25% 10% / 0.04);
-    --shadow-glow: 0 0 40px hsl(45 93% 47% / 0.3);
-    --shadow-success: 0 10px 30px -10px hsl(142 76% 36% / 0.4);
+    --shadow-sm: 0 2px 4px -1px hsl(170 25% 10% / 0.06);
+    --shadow-md: 0 4px 6px -1px hsl(170 25% 10% / 0.1), 0 2px 4px -1px hsl(170 25% 10% / 0.06);
+    --shadow-lg: 0 10px 15px -3px hsl(170 25% 10% / 0.1), 0 4px 6px -2px hsl(170 25% 10% / 0.05);
+    --shadow-xl: 0 20px 25px -5px hsl(170 25% 10% / 0.1), 0 10px 10px -5px hsl(170 25% 10% / 0.04);
+    --shadow-glow: 0 0 40px hsl(170 35% 30% / 0.3);
+    --shadow-success: 0 10px 30px -10px hsl(170 40% 36% / 0.4);
 
     /* Transitions */
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -99,57 +99,57 @@ All colors MUST be HSL.
     --popover: 220 25% 10%;
     --popover-foreground: 0 0% 95%;
 
-    --primary: 220 70% 35%;
+    --primary: 170 35% 40%;
     --primary-foreground: 0 0% 100%;
-    --primary-glow: 220 70% 50%;
+    --primary-glow: 170 35% 55%;
 
-    --secondary: 45 93% 50%;
-    --secondary-foreground: 220 25% 10%;
-    --secondary-glow: 45 93% 60%;
+    --secondary: 170 25% 50%;
+    --secondary-foreground: 0 0% 100%;
+    --secondary-glow: 170 25% 60%;
 
-    --success: 142 76% 50%;
-    --success-foreground: 220 25% 10%;
+    --success: 170 40% 50%;
+    --success-foreground: 0 0% 100%;
     
-    --warning: 45 93% 55%;
-    --warning-foreground: 220 25% 10%;
+    --warning: 38 92% 55%;
+    --warning-foreground: 0 0% 100%;
 
     --muted: 220 20% 15%;
     --muted-foreground: 220 9% 65%;
 
-    --accent: 220 20% 18%;
-    --accent-foreground: 45 93% 50%;
+    --accent: 170 20% 18%;
+    --accent-foreground: 170 35% 50%;
 
     --destructive: 0 84% 65%;
     --destructive-foreground: 0 0% 100%;
 
     --border: 220 20% 18%;
     --input: 220 20% 18%;
-    --ring: 45 93% 50%;
+    --ring: 170 35% 40%;
 
     /* Chart colors */
-    --chart-1: 45 93% 50%;
-    --chart-2: 220 70% 50%;
-    --chart-3: 142 76% 55%;
-    --chart-4: 280 60% 55%;
-    --chart-5: 200 80% 55%;
+    --chart-1: 170 35% 45%;
+    --chart-2: 170 25% 55%;
+    --chart-3: 160 40% 50%;
+    --chart-4: 190 50% 50%;
+    --chart-5: 150 45% 45%;
 
-    /* Sidebar - Dark navy theme (same in dark mode) */
-    --sidebar-background: 220 70% 10%;
+    /* Sidebar - Teal theme (dark mode) */
+    --sidebar-background: 170 35% 12%;
     --sidebar-foreground: 0 0% 95%;
-    --sidebar-primary: 45 93% 50%;
-    --sidebar-primary-foreground: 220 25% 10%;
-    --sidebar-accent: 220 70% 15%;
+    --sidebar-primary: 170 40% 45%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 170 35% 20%;
     --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-border: 220 70% 15%;
-    --sidebar-ring: 45 93% 50%;
+    --sidebar-border: 170 35% 20%;
+    --sidebar-ring: 170 35% 45%;
 
-    --gradient-primary: linear-gradient(135deg, hsl(220 70% 15%), hsl(220 70% 25%));
-    --gradient-secondary: linear-gradient(135deg, hsl(45 93% 45%), hsl(45 93% 55%));
-    --gradient-hero: linear-gradient(135deg, hsl(220 70% 15%) 0%, hsl(220 70% 25%) 50%, hsl(45 93% 45%) 100%);
-    --gradient-subtle: linear-gradient(180deg, hsl(220 25% 6%), hsl(220 25% 10%));
+    --gradient-primary: linear-gradient(135deg, hsl(170 35% 15%), hsl(170 35% 25%));
+    --gradient-secondary: linear-gradient(135deg, hsl(170 25% 40%), hsl(170 25% 50%));
+    --gradient-hero: linear-gradient(135deg, hsl(170 35% 15%) 0%, hsl(170 35% 25%) 50%, hsl(170 40% 40%) 100%);
+    --gradient-subtle: linear-gradient(180deg, hsl(170 25% 6%), hsl(170 25% 10%));
 
-    --shadow-glow: 0 0 40px hsl(45 93% 50% / 0.4);
-    --shadow-success: 0 10px 30px -10px hsl(142 76% 50% / 0.5);
+    --shadow-glow: 0 0 40px hsl(170 35% 40% / 0.4);
+    --shadow-success: 0 10px 30px -10px hsl(170 40% 50% / 0.5);
   }
 }
 
