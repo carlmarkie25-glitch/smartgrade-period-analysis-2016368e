@@ -54,7 +54,7 @@ const Admin = () => {
 
         <div className="neu-card p-6">
           <Tabs defaultValue="users" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-3">
+            <TabsList className="grid w-full grid-cols-4">
               <TabsTrigger value="users">
               <UserPlus className="h-4 w-4 mr-2" />
               Users
@@ -62,6 +62,10 @@ const Admin = () => {
             <TabsTrigger value="biodata">
               <FileText className="h-4 w-4 mr-2" />
               Biodata
+            </TabsTrigger>
+            <TabsTrigger value="notifications">
+              <Bell className="h-4 w-4 mr-2" />
+              Notifications
             </TabsTrigger>
             <TabsTrigger value="theme">
               <Palette className="h-4 w-4 mr-2" />
@@ -82,6 +86,18 @@ const Admin = () => {
 
           <TabsContent value="biodata">
             <UserBiodataManagementTab />
+          </TabsContent>
+
+          <TabsContent value="notifications">
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-lg font-semibold text-foreground">Send Notifications</h3>
+                  <p className="text-sm text-muted-foreground">Send announcements to teachers, students, parents, or everyone</p>
+                </div>
+                <SendNotificationDialog />
+              </div>
+            </div>
           </TabsContent>
 
           <TabsContent value="theme">
