@@ -1,5 +1,7 @@
-import { Search, Bell, Mail, ChevronDown } from "lucide-react";
+import { Search, Bell, ChevronDown } from "lucide-react";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useNotifications } from "@/hooks/useNotifications";
 
 interface TopbarProps {
   userName?: string;
@@ -15,6 +17,8 @@ export const Topbar = ({
   sidebarCollapsed = false,
 }: TopbarProps) => {
   const [searchFocus, setSearchFocus] = useState(false);
+  const navigate = useNavigate();
+  const { unreadCount } = useNotifications();
 
   return (
     <nav className={`fixed top-0 right-0 h-16 z-40 bg-white/60 backdrop-blur-md border-b border-[hsl(170,25%,90%)]/40 flex items-center justify-between px-5 shadow-sm transition-all duration-300 ${sidebarCollapsed ? "left-20" : "left-56"}`}>
@@ -32,12 +36,14 @@ export const Topbar = ({
 
       {/* Right Section */}
       <div className="flex items-center gap-4">
-        <button className="relative p-2 rounded-full hover:bg-[hsl(170,20%,95%)] transition-colors">
-          <Mail className="text-gray-500 size-4" />
-        </button>
-        <button className="relative p-2 rounded-full hover:bg-[hsl(170,20%,95%)] transition-colors">
+        <button
+          onClick={() => navigate("/notifications")}
+          className="relative p-2 rounded-full hover:bg-[hsl(170,20%,95%)] transition-colors"
+        >
           <Bell className="text-gray-500 size-4" />
-          <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-orange-400 rounded-full" />
+          {unreadCount > 0 && (
+            <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-[hsl(170,55%,45%)] rounded-full border-2 border-white animate-pulse" />
+          )}
         </button>
 
         <div className="w-px h-5 bg-gray-200" />

@@ -29,6 +29,7 @@ import FeeManagement from "./pages/FeeManagement";
 import Payments from "./pages/Payments";
 import Expenses from "./pages/Expenses";
 import FinanceReports from "./pages/FinanceReports";
+import Notifications from "./pages/Notifications";
 
 const queryClient = new QueryClient();
 
