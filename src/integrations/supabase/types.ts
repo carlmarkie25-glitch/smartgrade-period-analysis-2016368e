@@ -606,6 +606,42 @@ export type Database = {
           },
         ]
       }
+      notifications: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          is_read: boolean
+          message: string
+          recipient_user_id: string | null
+          target_role: string | null
+          title: string
+          type: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_read?: boolean
+          message: string
+          recipient_user_id?: string | null
+          target_role?: string | null
+          title: string
+          type?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_read?: boolean
+          message?: string
+          recipient_user_id?: string | null
+          target_role?: string | null
+          title?: string
+          type?: string
+        }
+        Relationships: []
+      }
       parent_student_assignments: {
         Row: {
           created_at: string
