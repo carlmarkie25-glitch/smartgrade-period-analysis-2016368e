@@ -60,7 +60,7 @@ const PeriodWeeklyGrid = ({ period, events }: Props) => {
       {/* Period header */}
       <div
         className="text-center py-2 px-4 font-bold text-white text-sm rounded-t-xl"
-        style={{ background: "hsl(170, 35%, 30%)" }}
+        style={{ background: "hsl(220, 60%, 25%)" }}
       >
         {headerText}
       </div>
@@ -74,7 +74,7 @@ const PeriodWeeklyGrid = ({ period, events }: Props) => {
                 key={day}
                 className="border border-border/50 px-2 py-2 text-xs font-bold text-foreground"
                 style={{
-                  background: "hsl(170, 25%, 92%)",
+                  background: "hsl(210, 70%, 92%)",
                   width: "20%",
                 }}
               >
@@ -101,8 +101,8 @@ const PeriodWeeklyGrid = ({ period, events }: Props) => {
                     style={{
                       background: inPeriod
                         ? dayEvents.some((e) => e.event_type === "holiday")
-                          ? "hsl(170, 30%, 90%)"
-                          : "hsl(170, 25%, 96%)"
+                          ? "hsl(210, 60%, 90%)"
+                          : "hsl(210, 70%, 96%)"
                         : "hsl(170, 15%, 97%)",
                       minHeight: 48,
                     }}

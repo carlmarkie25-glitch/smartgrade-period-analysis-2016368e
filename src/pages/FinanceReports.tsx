@@ -6,7 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from "recharts";
 import { DollarSign, TrendingUp, TrendingDown, AlertCircle } from "lucide-react";
 
-const COLORS = ["hsl(170,50%,40%)", "hsl(35,60%,50%)", "hsl(0,60%,55%)", "hsl(210,60%,50%)", "#f59e0b", "#8b5cf6", "#06b6d4", "#ec4899"];
+const COLORS = ["hsl(220,60%,35%)", "hsl(35,60%,50%)", "hsl(0,60%,55%)", "hsl(210,60%,50%)", "#f59e0b", "#8b5cf6", "#06b6d4", "#ec4899"];
 
 const FinanceReports = () => {
   const { data: years } = useQuery({
@@ -66,7 +66,7 @@ const FinanceReports = () => {
 
   const stats = [
     { label: "Total Billed", value: totalBilled, icon: DollarSign, bgColor: "bg-[hsl(210,60%,96%)]", iconBg: "bg-[hsl(210,60%,90%)]", iconColor: "text-[hsl(210,60%,45%)]" },
-    { label: "Total Collected", value: totalRevenue, icon: TrendingUp, bgColor: "bg-[hsl(170,45%,95%)]", iconBg: "bg-[hsl(170,45%,88%)]", iconColor: "text-[hsl(170,50%,35%)]" },
+    { label: "Total Collected", value: totalRevenue, icon: TrendingUp, bgColor: "bg-[hsl(210,60%,95%)]", iconBg: "bg-[hsl(210,60%,88%)]", iconColor: "text-[hsl(220,60%,30%)]" },
     { label: "Outstanding", value: totalOutstanding, icon: AlertCircle, bgColor: "bg-[hsl(35,60%,96%)]", iconBg: "bg-[hsl(35,60%,90%)]", iconColor: "text-[hsl(35,60%,40%)]" },
     { label: "Total Expenses", value: totalExpenses, icon: TrendingDown, bgColor: "bg-[hsl(0,60%,96%)]", iconBg: "bg-[hsl(0,60%,90%)]", iconColor: "text-[hsl(0,50%,45%)]" },
   ];
@@ -96,7 +96,7 @@ const FinanceReports = () => {
         <div className="neu-card p-4">
           <div className="flex items-center justify-between mb-3">
             <h3 className="text-sm font-semibold text-gray-900">Financial Overview</h3>
-            <span className="text-[10px] font-medium text-[hsl(170,50%,35%)]/70 px-2 py-0.5 bg-[hsl(170,40%,95%)] rounded-md">Summary</span>
+            <span className="text-[10px] font-medium text-[hsl(220,60%,30%)]/70 px-2 py-0.5 bg-[hsl(210,60%,95%)] rounded-md">Summary</span>
           </div>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
             {stats.map(s => {
@@ -121,12 +121,12 @@ const FinanceReports = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-[10px] font-medium text-gray-500">Net Income (Collected − Expenses)</p>
-              <p className={`text-2xl font-bold mt-1 ${netIncome >= 0 ? "text-[hsl(170,50%,35%)]" : "text-[hsl(0,60%,50%)]"}`}>
+              <p className={`text-2xl font-bold mt-1 ${netIncome >= 0 ? "text-[hsl(220,60%,30%)]" : "text-[hsl(0,60%,50%)]"}`}>
                 {netIncome.toLocaleString()}
               </p>
             </div>
-            <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${netIncome >= 0 ? "bg-[hsl(170,45%,92%)]" : "bg-[hsl(0,50%,94%)]"}`}>
-              <DollarSign className={`h-5 w-5 ${netIncome >= 0 ? "text-[hsl(170,50%,35%)]" : "text-[hsl(0,60%,50%)]"}`} />
+            <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${netIncome >= 0 ? "bg-[hsl(210,60%,92%)]" : "bg-[hsl(0,50%,94%)]"}` }>
+              <DollarSign className={`h-5 w-5 ${netIncome >= 0 ? "text-[hsl(220,60%,30%)]" : "text-[hsl(0,60%,50%)]"}`} />
             </div>
           </div>
         </div>
@@ -136,7 +136,7 @@ const FinanceReports = () => {
           <div className="neu-card p-4">
             <div className="flex items-center justify-between mb-3">
               <h3 className="text-sm font-semibold text-gray-900">Student Bill Status</h3>
-              <span className="text-[10px] font-medium text-[hsl(170,50%,35%)]/70 px-2 py-0.5 bg-[hsl(170,40%,95%)] rounded-md">Distribution</span>
+              <span className="text-[10px] font-medium text-[hsl(220,60%,30%)]/70 px-2 py-0.5 bg-[hsl(210,60%,95%)] rounded-md">Distribution</span>
             </div>
             {statusData.length === 0 ? (
               <p className="text-gray-400 text-center py-8 text-xs">No data yet</p>
@@ -156,18 +156,18 @@ const FinanceReports = () => {
           <div className="neu-card p-4">
             <div className="flex items-center justify-between mb-3">
               <h3 className="text-sm font-semibold text-gray-900">Expenses by Category</h3>
-              <span className="text-[10px] font-medium text-[hsl(170,50%,35%)]/70 px-2 py-0.5 bg-[hsl(170,40%,95%)] rounded-md">Breakdown</span>
+              <span className="text-[10px] font-medium text-[hsl(220,60%,30%)]/70 px-2 py-0.5 bg-[hsl(210,60%,95%)] rounded-md">Breakdown</span>
             </div>
             {expenseCategoryData.length === 0 ? (
               <p className="text-gray-400 text-center py-8 text-xs">No data yet</p>
             ) : (
               <ResponsiveContainer width="100%" height={220}>
                 <BarChart data={expenseCategoryData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(170,20%,90%)" />
+                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(210,70%,90%)" />
                   <XAxis dataKey="name" fontSize={11} tick={{ fill: "#9ca3af" }} />
                   <YAxis tick={{ fill: "#9ca3af", fontSize: 11 }} />
-                  <Tooltip contentStyle={{ backgroundColor: "rgba(255,255,255,0.9)", borderColor: "hsl(170,30%,85%)", borderRadius: "12px", fontSize: "11px" }} />
-                  <Bar dataKey="value" fill="hsl(170,50%,40%)" radius={[4, 4, 0, 0]} />
+                  <Tooltip contentStyle={{ backgroundColor: "rgba(255,255,255,0.9)", borderColor: "hsl(210,60%,85%)", borderRadius: "12px", fontSize: "11px" }} />
+                  <Bar dataKey="value" fill="hsl(220,60%,35%)" radius={[4, 4, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             )}

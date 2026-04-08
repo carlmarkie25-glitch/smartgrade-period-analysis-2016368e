@@ -80,9 +80,9 @@ const Analytics = () => {
     ? ((atRiskStudents.length / analyticsData.totalStudents) * 100).toFixed(1)
     : "0";
 
-  const nBg = "hsl(170, 25%, 96%)";
-  const nShadow = "6px 6px 12px hsl(170, 25%, 88%), -6px -6px 12px hsl(0, 0%, 100%)";
-  const nInset = "inset 3px 3px 6px hsl(170, 25%, 88%), inset -3px -3px 6px hsl(0, 0%, 100%)";
+  const nBg = "hsl(210, 80%, 96%)";
+  const nShadow = "6px 6px 12px hsl(210, 80%, 88%), -6px -6px 12px hsl(0, 0%, 100%)";
+  const nInset = "inset 3px 3px 6px hsl(210, 80%, 88%), inset -3px -3px 6px hsl(0, 0%, 100%)";
 
   // Total Students card is always visible
   const totalStudentsCard = {
@@ -90,7 +90,7 @@ const Analytics = () => {
     value: analyticsData?.totalStudents ?? 0,
     subtitle: "enrolled this period",
     icon: Users,
-    iconColor: "text-[hsl(170,55%,45%)]",
+    iconColor: "text-[hsl(220,60%,35%)]",
   };
 
   // Grade-dependent stat cards
@@ -185,7 +185,7 @@ const Analytics = () => {
         {/* Student Overview Card */}
         <div
           className="rounded-[24px] p-5"
-          style={{ background: nBg, boxShadow: "10px 10px 20px hsl(170, 25%, 87%), -10px -10px 20px hsl(0, 0%, 100%)" }}
+          style={{ background: nBg, boxShadow: "10px 10px 20px hsl(210, 80%, 87%), -10px -10px 20px hsl(0, 0%, 100%)" }}
         >
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-sm font-bold text-gray-700">Student Overview</h3>
@@ -248,8 +248,8 @@ const Analytics = () => {
             <div className="flex-1 min-w-0">
               <p className="text-[10px] font-semibold text-[hsl(35,50%,30%)]">Grading In Progress</p>
               <p className="text-[10px] text-[hsl(35,40%,40%)]">{gradedCount}/{totalCount} students have complete grades</p>
-              <div className="w-full bg-[hsl(170,20%,90%)] rounded-full h-1.5 mt-1">
-                <div className="bg-[hsl(170,55%,45%)] h-1.5 rounded-full transition-all" style={{ width: totalCount > 0 ? `${(gradedCount / totalCount) * 100}%` : "0%" }} />
+              <div className="w-full bg-[hsl(210,70%,90%)] rounded-full h-1.5 mt-1">
+                <div className="bg-[hsl(220,60%,35%)] h-1.5 rounded-full transition-all" style={{ width: totalCount > 0 ? `${(gradedCount / totalCount) * 100}%` : "0%" }} />
               </div>
             </div>
           </div>
@@ -273,7 +273,7 @@ const Analytics = () => {
             <div className="flex items-center justify-between mb-4">
               <div>
                 <h3 className="text-sm font-bold text-gray-700 flex items-center gap-2">
-                  <Award className="h-4 w-4 text-[hsl(170,50%,40%)]" />
+                  <Award className="h-4 w-4 text-[hsl(220,60%,35%)]" />
                   {topLabel}
                 </h3>
                 <p className="text-[10px] text-gray-400 mt-0.5">Exceptional students with 90%+ average</p>
@@ -319,21 +319,21 @@ const Analytics = () => {
                   >
                     <div className="flex items-center gap-2.5">
                       <div
-                        className="flex items-center justify-center w-6 h-6 rounded-full text-[hsl(170,50%,35%)] font-bold text-[10px]"
+                        className="flex items-center justify-center w-6 h-6 rounded-full text-[hsl(220,60%,30%)] font-bold text-[10px]"
                         style={{ background: nBg, boxShadow: nInset }}
                       >
                         {index + 1}
                       </div>
                       <Avatar className="h-7 w-7">
                         <AvatarImage src="" />
-                        <AvatarFallback className="text-[9px] bg-[hsl(170,30%,90%)] text-[hsl(170,50%,30%)]">{student.name.split(" ").map(n => n[0]).join("")}</AvatarFallback>
+                        <AvatarFallback className="text-[9px] bg-[hsl(210,60%,90%)] text-[hsl(220,60%,25%)]">{student.name.split(" ").map(n => n[0]).join("")}</AvatarFallback>
                       </Avatar>
                       <div>
                         <p className="font-medium text-gray-700 text-xs leading-tight">{student.name}</p>
                         <p className="text-[10px] text-gray-400">{student.class}</p>
                       </div>
                     </div>
-                    <span className="text-sm font-bold text-[hsl(170,50%,40%)]">{student.average}%</span>
+                    <span className="text-sm font-bold text-[hsl(220,60%,35%)]">{student.average}%</span>
                   </div>
                 ))}
               </div>
@@ -400,7 +400,7 @@ const Analytics = () => {
                       <div className="flex items-center gap-2.5">
                         <Avatar className="h-7 w-7">
                           <AvatarImage src="" />
-                          <AvatarFallback className="text-[9px] bg-[hsl(170,25%,90%)] text-gray-600">{student.name.split(" ").map(n => n[0]).join("")}</AvatarFallback>
+                          <AvatarFallback className="text-[9px] bg-[hsl(210,60%,90%)] text-gray-600">{student.name.split(" ").map(n => n[0]).join("")}</AvatarFallback>
                         </Avatar>
                         <div>
                           <p className="font-medium text-gray-700 text-xs leading-tight">{student.name}</p>

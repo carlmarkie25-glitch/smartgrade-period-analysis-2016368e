@@ -128,10 +128,10 @@ const Payments = () => {
           <Card>
             <CardContent className="pt-6">
               <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-green-500/10"><DollarSign className="h-5 w-5 text-green-600" /></div>
+                <div className="p-2 rounded-lg bg-blue-500/10"><DollarSign className="h-5 w-5 text-blue-600" /></div>
                 <div>
                   <p className="text-sm text-muted-foreground">Total Collected</p>
-                  <p className="text-2xl font-bold text-green-600">{totalCollected.toLocaleString()}LD</p>
+                  <p className="text-2xl font-bold text-blue-600">{totalCollected.toLocaleString()}LD</p>
                 </div>
               </div>
             </CardContent>
@@ -191,7 +191,7 @@ const Payments = () => {
                           <TableCell className="font-medium">{s?.full_name}</TableCell>
                           <TableCell>{s?.classes?.name || "—"}</TableCell>
                           <TableCell className="text-right font-medium">{bill.grand_total.toLocaleString()}LD</TableCell>
-                          <TableCell className="text-right text-green-600">{bill.amount_paid.toLocaleString()}LD</TableCell>
+                          <TableCell className="text-right text-blue-600">{bill.amount_paid.toLocaleString()}LD</TableCell>
                           <TableCell className="text-right text-destructive font-bold">{bill.balance.toLocaleString()}LD</TableCell>
                           <TableCell><Badge variant={statusColor(bill.status)}>{bill.status}</Badge></TableCell>
                           <TableCell className="text-right">
@@ -201,7 +201,7 @@ const Payments = () => {
                               </Button>
                               {bill.status !== "paid" && (
                                 <Button variant="ghost" size="icon" title="Record Payment" onClick={() => { setSelectedBill(bill); setPayOpen(true); }}>
-                                  <Plus className="h-4 w-4 text-green-600" />
+                                  <Plus className="h-4 w-4 text-blue-600" />
                                 </Button>
                               )}
                             </div>
@@ -239,7 +239,7 @@ const Payments = () => {
                         <TableCell>{p.payment_date}</TableCell>
                         <TableCell className="font-mono text-sm">{p.receipt_number}</TableCell>
                         <TableCell className="font-medium">{(p as any).students?.full_name}</TableCell>
-                        <TableCell className="text-right font-bold text-green-600">{p.amount.toLocaleString()}LD</TableCell>
+                        <TableCell className="text-right font-bold text-blue-600">{p.amount.toLocaleString()}LD</TableCell>
                         <TableCell><Badge variant="outline">{p.payment_method}</Badge></TableCell>
                         <TableCell className="text-muted-foreground">{p.notes || "—"}</TableCell>
                         <TableCell className="text-right">
@@ -371,7 +371,7 @@ const BillDetailDialog = ({ bill, onClose }: { bill: any; onClose: () => void })
 
           <div className="bg-destructive/10 rounded-lg p-3 space-y-1">
             <div className="flex justify-between font-bold"><span>Grand Total</span><span>{bill.grand_total.toLocaleString()}LD</span></div>
-            <div className="flex justify-between text-green-600"><span>Total Paid</span><span>{bill.amount_paid.toLocaleString()}LD</span></div>
+            <div className="flex justify-between text-blue-600"><span>Total Paid</span><span>{bill.amount_paid.toLocaleString()}LD</span></div>
             <div className="flex justify-between font-bold text-destructive"><span>Balance</span><span>{bill.balance.toLocaleString()}LD</span></div>
           </div>
 
@@ -383,7 +383,7 @@ const BillDetailDialog = ({ bill, onClose }: { bill: any; onClose: () => void })
                 {payments.map(p => (
                   <div key={p.id} className="flex justify-between text-sm">
                     <span>{p.payment_date} — {p.receipt_number}</span>
-                    <span className="text-green-600 font-medium">{p.amount.toLocaleString()}LD</span>
+                    <span className="text-blue-600 font-medium">{p.amount.toLocaleString()}LD</span>
                   </div>
                 ))}
               </div>
@@ -460,7 +460,7 @@ const ReceiptDialog = ({ data, onClose }: { data: any; onClose: () => void }) =>
               <span>Previously Paid:</span><span>{data.previousPaid?.toLocaleString()}LD</span>
             </div>
             <div className="row" style={{ display: "flex", justifyContent: "space-between", padding: "4px 0", fontWeight: "bold", fontSize: 16 }}>
-              <span>Amount Paid:</span><span style={{ color: "green" }}>{data.amount?.toLocaleString()}LD</span>
+              <span>Amount Paid:</span><span style={{ color: "hsl(220, 60%, 30%)" }}>{data.amount?.toLocaleString()}LD</span>
             </div>
             <div className="row" style={{ display: "flex", justifyContent: "space-between", padding: "4px 0" }}>
               <span>Method:</span><span>{data.payment_method}</span>

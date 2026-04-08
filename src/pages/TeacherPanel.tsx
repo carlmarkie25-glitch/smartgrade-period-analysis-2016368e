@@ -16,14 +16,14 @@ const UserCard = ({
   onOpenSponsorAssignment: (user: any) => void;
   isTeacher: boolean;
 }) => (
-  <div className="flex items-center justify-between p-3 rounded-xl border border-[hsl(170,30%,90%)] bg-[hsl(170,20%,98%)] hover:bg-[hsl(170,25%,95%)] transition-colors">
+  <div className="flex items-center justify-between p-3 rounded-xl border border-[hsl(210,60%,85%)] bg-[hsl(210,80%,97%)] hover:bg-[hsl(210,70%,95%)] transition-colors">
     <div>
       <p className="text-sm font-medium text-gray-900">{user.full_name}</p>
       <p className="text-[10px] text-gray-400">{user.email}</p>
       <div className="flex gap-1.5 mt-1.5 flex-wrap">
         {user.user_roles && user.user_roles.length > 0 ? (
           user.user_roles.map((ur: any) => (
-            <span key={ur.role} className="text-[9px] bg-[hsl(170,40%,93%)] text-[hsl(170,50%,30%)] px-2 py-0.5 rounded-md flex items-center gap-1">
+            <span key={ur.role} className="text-[9px] bg-[hsl(210,60%,93%)] text-[hsl(220,60%,25%)] px-2 py-0.5 rounded-md flex items-center gap-1">
               {ur.role}
               <button onClick={() => removeRole.mutate({ userId: user.user_id, role: ur.role })} className="hover:bg-[hsl(0,50%,90%)] rounded-full p-0.5">
                 <X className="h-2.5 w-2.5" />
@@ -37,12 +37,12 @@ const UserCard = ({
     </div>
     <div className="flex gap-1.5">
       {isTeacher && (
-        <Button variant="outline" size="sm" className="h-7 text-[10px] border-[hsl(170,30%,85%)] hover:bg-[hsl(170,25%,95%)]" onClick={() => onOpenTeacherAssignment(user)}>
+        <Button variant="outline" size="sm" className="h-7 text-[10px] border-[hsl(210,60%,85%)] hover:bg-[hsl(210,70%,95%)]" onClick={() => onOpenTeacherAssignment(user)}>
           <Settings2 className="h-3 w-3 mr-1" />Classes
         </Button>
       )}
       {isTeacher && (
-        <Button variant="outline" size="sm" className="h-7 text-[10px] border-[hsl(170,30%,85%)] hover:bg-[hsl(170,25%,95%)]" onClick={() => onOpenSponsorAssignment(user)}>
+        <Button variant="outline" size="sm" className="h-7 text-[10px] border-[hsl(210,60%,85%)] hover:bg-[hsl(210,70%,95%)]" onClick={() => onOpenSponsorAssignment(user)}>
           <Shield className="h-3 w-3 mr-1" />Sponsor
         </Button>
       )}
@@ -70,9 +70,9 @@ const RoleGroup = ({
   const [open, setOpen] = useState(defaultOpen);
   return (
     <Collapsible open={open} onOpenChange={setOpen}>
-      <CollapsibleTrigger className="flex items-center justify-between w-full p-3 rounded-xl bg-[hsl(170,20%,96%)] hover:bg-[hsl(170,25%,93%)] transition-colors">
+      <CollapsibleTrigger className="flex items-center justify-between w-full p-3 rounded-xl bg-[hsl(210,80%,96%)] hover:bg-[hsl(210,70%,93%)] transition-colors">
         <div className="flex items-center gap-2 text-sm font-semibold text-gray-900">
-          <Icon className="h-4 w-4 text-[hsl(170,50%,35%)]" />
+          <Icon className="h-4 w-4 text-[hsl(220,60%,30%)]" />
           {title}
           <span className="text-[10px] font-normal text-gray-400">({users.length})</span>
         </div>
@@ -112,7 +112,7 @@ const TeacherPanel = () => {
         <div className="neu-card p-4">
           <div className="flex items-center justify-between mb-3">
             <h3 className="text-sm font-semibold text-gray-900">User & Role Management</h3>
-            <span className="text-[10px] font-medium text-[hsl(170,50%,35%)]/70 px-2 py-0.5 bg-[hsl(170,40%,95%)] rounded-md">{users?.length || 0} Users</span>
+            <span className="text-[10px] font-medium text-[hsl(220,60%,30%)]/70 px-2 py-0.5 bg-[hsl(210,60%,95%)] rounded-md">{users?.length || 0} Users</span>
           </div>
           {usersLoading ? (
             <p className="text-xs text-gray-400 py-6 text-center">Loading users...</p>

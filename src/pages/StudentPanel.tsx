@@ -17,7 +17,7 @@ const StudentPanel = () => {
 
         <div className="neu-card p-4">
           <Tabs defaultValue="users" className="space-y-4">
-            <TabsList className="grid w-full grid-cols-4 bg-[hsl(170,20%,96%)] rounded-xl p-1">
+            <TabsList className="grid w-full grid-cols-4 bg-[hsl(210,80%,96%)] rounded-xl p-1">
               <TabsTrigger value="users" className="rounded-lg text-xs data-[state=active]:bg-white data-[state=active]:shadow-sm">
                 <Users className="h-3.5 w-3.5 mr-1.5" />Users
               </TabsTrigger>

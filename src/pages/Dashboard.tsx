@@ -78,7 +78,7 @@ const TeacherDashboard = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
           {isLoading ? (
             Array(4).fill(0).map((_, i) => (
-              <div key={i} className="bg-white/70 backdrop-blur-md rounded-2xl border border-[hsl(170,30%,85%)]/30 p-4 shadow-sm">
+              <div key={i} className="bg-white/70 backdrop-blur-md rounded-2xl border border-[hsl(210,60%,85%)]/30 p-4 shadow-sm">
                 <Skeleton className="h-4 w-24 mb-3" />
                 <Skeleton className="h-8 w-16 mb-2" />
                 <Skeleton className="h-3 w-20" />
@@ -91,7 +91,7 @@ const TeacherDashboard = () => {
                 <div key={stat.label} className="bg-white/70 backdrop-blur-md rounded-2xl border border-[hsl(170,30%,85%)]/30 p-4 shadow-sm">
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-xs font-medium text-gray-500">{stat.label}</span>
-                    <div className="w-8 h-8 rounded-lg bg-[hsl(170,40%,93%)] flex items-center justify-center">
+                    <div className="w-8 h-8 rounded-lg bg-[hsl(210,60%,93%)] flex items-center justify-center">
                       <Icon className="h-4 w-4 text-[hsl(170,50%,35%)]" />
                     </div>
                   </div>
@@ -116,7 +116,7 @@ const TeacherDashboard = () => {
                 {classes.map((cls) => (
                   <div
                     key={cls.id}
-                    className="p-3 rounded-xl border border-[hsl(170,30%,90%)] bg-[hsl(170,20%,98%)] hover:bg-[hsl(170,25%,95%)] transition-colors cursor-pointer"
+                    className="p-3 rounded-xl border border-[hsl(210,60%,90%)] bg-[hsl(210,80%,97%)] hover:bg-[hsl(210,70%,95%)] transition-colors cursor-pointer"
                     onClick={() => navigate("/gradebook")}
                   >
                     <div className="flex items-center justify-between">
@@ -124,7 +124,7 @@ const TeacherDashboard = () => {
                         <p className="text-sm font-medium text-gray-900">{cls.name}</p>
                         <p className="text-[10px] text-gray-400">{cls.departments?.name}</p>
                       </div>
-                      <Badge className="text-[9px] bg-[hsl(170,40%,93%)] text-[hsl(170,50%,30%)] border-0">{cls.academic_years?.year_name}</Badge>
+                      <Badge className="text-[9px] bg-[hsl(210,60%,93%)] text-[hsl(220,60%,25%)] border-0">{cls.academic_years?.year_name}</Badge>
                     </div>
                   </div>
                 ))}
@@ -147,9 +147,9 @@ const TeacherDashboard = () => {
             ) : recentGrades && recentGrades.length > 0 ? (
               <div className="space-y-2">
                 {recentGrades.map((grade) => (
-                  <div key={grade.id} className="flex items-start gap-2.5 pb-2.5 border-b border-[hsl(170,20%,92%)] last:border-0">
-                    <div className="h-7 w-7 rounded-full bg-[hsl(170,40%,93%)] flex items-center justify-center">
-                      <CheckCircle className="h-3.5 w-3.5 text-[hsl(170,50%,35%)]" />
+                  <div key={grade.id} className="flex items-start gap-2.5 pb-2.5 border-b border-[hsl(210,70%,92%)] last:border-0">
+                    <div className="h-7 w-7 rounded-full bg-[hsl(210,60%,93%)] flex items-center justify-center">
+                      <CheckCircle className="h-3.5 w-3.5 text-[hsl(220,60%,30%)]" />
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-xs font-medium text-gray-900 truncate">{grade.students?.full_name}</p>
@@ -161,7 +161,7 @@ const TeacherDashboard = () => {
                         {formatDistanceToNow(new Date(grade.updated_at), { addSuffix: true })}
                       </p>
                     </div>
-                    <span className="text-[10px] font-medium text-gray-500 bg-[hsl(170,20%,96%)] px-1.5 py-0.5 rounded">
+                    <span className="text-[10px] font-medium text-gray-500 bg-[hsl(210,80%,96%)] px-1.5 py-0.5 rounded">
                       {grade.score !== null ? `${grade.score}/${grade.max_score}` : "--"}
                     </span>
                   </div>
@@ -181,7 +181,7 @@ const TeacherDashboard = () => {
             <div className="space-y-2">
               {[
                 { label: "Enter Grades", description: "Add or edit student grades", icon: BookOpen, path: "/gradebook", color: "hsl(210,60%,50%)" },
-                { label: "View Reports", description: "Generate student report cards", icon: FileText, path: "/reports", color: "hsl(170,50%,40%)" },
+                  { label: "View Reports", description: "Generate student report cards", icon: FileText, path: "/reports", color: "hsl(220,60%,35%)" },
                 { label: "View Schedule", description: "See today's classes", icon: CalendarDays, path: "/schedule", color: "hsl(35,60%,50%)" },
               ].map((action) => {
                 const Icon = action.icon;
@@ -189,7 +189,7 @@ const TeacherDashboard = () => {
                   <button
                     key={action.label}
                     onClick={() => navigate(action.path)}
-                    className="p-3 rounded-xl border border-[hsl(170,30%,90%)] bg-[hsl(170,20%,98%)] hover:bg-[hsl(170,25%,95%)] transition-colors text-left flex items-center gap-3 w-full"
+                    className="p-3 rounded-xl border border-[hsl(210,60%,90%)] bg-[hsl(210,80%,97%)] hover:bg-[hsl(210,70%,95%)] transition-colors text-left flex items-center gap-3 w-full"
                   >
                     <div className="h-8 w-8 rounded-lg flex items-center justify-center" style={{ backgroundColor: `${action.color}15` }}>
                       <Icon className="h-4 w-4" style={{ color: action.color }} />
@@ -216,7 +216,7 @@ const NoRoleDashboard = () => {
     <AppShell activeTab="dashboard">
       <div className="py-4">
         <div className="max-w-lg mx-auto text-center">
-          <div className="bg-white/70 backdrop-blur-md rounded-2xl border border-[hsl(170,30%,85%)]/30 p-8 shadow-sm">
+          <div className="bg-white/70 backdrop-blur-md rounded-2xl border border-[hsl(210,60%,85%)]/30 p-8 shadow-sm">
             <div className="mx-auto h-14 w-14 rounded-full bg-[hsl(35,60%,93%)] flex items-center justify-center mb-4">
               <AlertCircle className="h-7 w-7 text-[hsl(35,60%,45%)]" />
             </div>
@@ -224,7 +224,7 @@ const NoRoleDashboard = () => {
             <p className="text-sm text-gray-500 mb-4">
               Your account has been created, but an administrator has not yet assigned you a role.
             </p>
-            <div className="p-3 bg-[hsl(170,20%,96%)] rounded-xl text-xs text-gray-500 mb-4">
+            <div className="p-3 bg-[hsl(210,80%,96%)] rounded-xl text-xs text-gray-500 mb-4">
               <p>Please contact your school administrator to have your role assigned.</p>
             </div>
             <button
@@ -254,12 +254,12 @@ const StudentDashboard = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {[
             { icon: User, label: "My Profile", desc: "View your personal information", color: "hsl(210,60%,50%)" },
-            { icon: FileText, label: "My Grades", desc: "View your academic performance", color: "hsl(170,50%,40%)" },
+            { icon: FileText, label: "My Grades", desc: "View your academic performance", color: "hsl(220,60%,35%)" },
             { icon: BookOpen, label: "My Report Card", desc: "View and download report cards", color: "hsl(35,60%,50%)" },
           ].map((item) => {
             const Icon = item.icon;
             return (
-              <div key={item.label} className="bg-white/70 backdrop-blur-md rounded-2xl border border-[hsl(170,30%,85%)]/30 p-5 shadow-sm">
+              <div key={item.label} className="bg-white/70 backdrop-blur-md rounded-2xl border border-[hsl(210,60%,85%)]/30 p-5 shadow-sm">
                 <div className="h-10 w-10 rounded-xl flex items-center justify-center mb-3" style={{ backgroundColor: `${item.color}15` }}>
                   <Icon className="h-5 w-5" style={{ color: item.color }} />
                 </div>
