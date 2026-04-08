@@ -173,6 +173,16 @@ export const StudentManagementTab = () => {
       if (error) throw error;
       if (data.error) throw new Error(data.error);
 
+      // Send notification about new student
+      const className = selectedClass?.name || "a class";
+      await supabase.from("notifications" as any).insert({
+        title: "New Student Added",
+        message: `${newStudent.full_name} has been added to ${className}.`,
+        type: "student_added",
+        target_role: "all",
+        created_by: (await supabase.auth.getUser()).data.user?.id,
+      } as any);
+
       toast({
         title: "Success",
         description: "Student account created successfully",
