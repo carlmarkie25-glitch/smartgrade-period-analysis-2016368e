@@ -1,13 +1,14 @@
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useUserManagement } from "@/hooks/useUserManagement";
-import { UserPlus, FileText, Palette } from "lucide-react";
+import { UserPlus, FileText, Palette, Bell } from "lucide-react";
 import { UserBiodataManagementTab } from "@/components/UserBiodataManagementTab";
 import { TeacherAssignmentDialog } from "@/components/TeacherAssignmentDialog";
 import { SponsorAssignmentDialog } from "@/components/SponsorAssignmentDialog";
 import { UserRoleManagement } from "@/components/UserRoleManagement";
 import AppShell from "@/components/AppShell";
 import { SettingsTab } from "@/components/SettingsTab";
+import { SendNotificationDialog } from "@/components/SendNotificationDialog";
 
 const Admin = () => {
   const { users, usersLoading, assignRole, removeRole } = useUserManagement();
