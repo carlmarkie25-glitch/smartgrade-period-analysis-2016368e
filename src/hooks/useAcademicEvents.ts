@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
 
 export interface AcademicEvent {
   id: string;
@@ -46,6 +47,7 @@ export const useAcademicEvents = () => {
 export const useCreateAcademicEvent = () => {
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  const { user } = useAuth();
 
   return useMutation({
     mutationFn: async (event: Omit<AcademicEvent, "id" | "created_at" | "updated_at">) => {
@@ -53,6 +55,16 @@ export const useCreateAcademicEvent = () => {
         .from("academic_events" as any)
         .insert(event as any);
       if (error) throw error;
+      // Auto-notify all users about new calendar event
+      if (user) {
+        await supabase.from("notifications" as any).insert({
+          title: "New Calendar Event",
+          message: `A new event "${event.title}" has been added to the academic calendar.`,
+          type: "calendar",
+          target_role: "all",
+          created_by: user.id,
+        } as any);
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["academic-events"] });
@@ -67,6 +79,7 @@ export const useCreateAcademicEvent = () => {
 export const useUpdateAcademicEvent = () => {
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  const { user } = useAuth();
 
   return useMutation({
     mutationFn: async ({ id, ...updates }: Partial<AcademicEvent> & { id: string }) => {
@@ -75,6 +88,16 @@ export const useUpdateAcademicEvent = () => {
         .update(updates as any)
         .eq("id", id);
       if (error) throw error;
+      // Auto-notify about calendar update
+      if (user && updates.title) {
+        await supabase.from("notifications" as any).insert({
+          title: "Calendar Event Updated",
+          message: `The event "${updates.title}" has been updated on the academic calendar.`,
+          type: "calendar",
+          target_role: "all",
+          created_by: user.id,
+        } as any);
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["academic-events"] });
