@@ -9,7 +9,6 @@ import { Button } from "@/components/ui/button";
 import { Download, Printer } from "lucide-react";
 import { useStudentReport } from "@/hooks/useStudentReport";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 interface StudentReportDialogProps {
   open: boolean;
@@ -31,6 +30,35 @@ const displayScore = (score: number | null | undefined, noGrades?: boolean): str
   return String(score);
 };
 
+// Get letter grade from average
+const getLetterGrade = (avg: number | null): { letter: string; color: string } => {
+  if (avg === null) return { letter: '--', color: 'bg-gray-400' };
+  if (avg >= 90) return { letter: 'A+', color: 'bg-[hsl(145,70%,42%)]' };
+  if (avg >= 80) return { letter: 'A', color: 'bg-[hsl(145,70%,42%)]' };
+  if (avg >= 75) return { letter: 'B+', color: 'bg-[hsl(170,50%,40%)]' };
+  if (avg >= 70) return { letter: 'B', color: 'bg-[hsl(170,50%,40%)]' };
+  if (avg >= 65) return { letter: 'C+', color: 'bg-[hsl(45,80%,50%)]' };
+  if (avg >= 60) return { letter: 'C', color: 'bg-[hsl(45,80%,50%)]' };
+  return { letter: 'F', color: 'bg-red-500' };
+};
+
+// Helper to compute period average from report subjects
+const computePeriodAvg = (subjects: any[], periodKey: string, hasIncomplete: boolean): string => {
+  if (hasIncomplete) return '--';
+  const scores = subjects.map((s: any) => s.periods?.[periodKey]?.score).filter((s: any) => s !== null && s !== undefined && s >= 60);
+  return scores.length > 0 ? (Math.floor((scores.reduce((a: number, b: number) => a + b, 0) / scores.length) * 10) / 10).toFixed(1) : '-';
+};
+
+// Helper to compute semester average from multiple periods
+const computeSemAvg = (subjects: any[], periods: string[], hasIncomplete: boolean): string => {
+  if (hasIncomplete) return '--';
+  const avgs = subjects.map((s: any) => {
+    const scores = periods.map(p => s.periods?.[p]?.score).filter((sc: any) => sc !== null && sc !== undefined && sc >= 60);
+    return scores.length === periods.length ? scores.reduce((a: number, b: number) => a + b, 0) / scores.length : null;
+  }).filter(Boolean);
+  return avgs.length > 0 ? (Math.floor(((avgs as number[]).reduce((a, b) => a + b, 0) / avgs.length) * 10) / 10).toFixed(1) : '-';
+};
+
 export const StudentReportDialog = ({
   open,
   onOpenChange,
@@ -45,7 +73,6 @@ export const StudentReportDialog = ({
   };
 
   const handleDownload = () => {
-    // In a real app, this would generate a PDF
     window.print();
   };
 
@@ -60,525 +87,312 @@ export const StudentReportDialog = ({
     }
   };
 
+  const getDepartmentLabel = (report: any) => {
+    // Try to derive from class name or department
+    return report.student?.departments?.name || className || "DEPARTMENT";
+  };
+
   const periodName = getPeriodName(period);
+  const grade = report ? getLetterGrade(report.overallAverage) : { letter: '--', color: 'bg-gray-400' };
+
+  // Determine columns based on period
+  const getColumns = () => {
+    if (period === 'semester1') return ['p1', 'p2', 'p3', 'exam_s1'];
+    if (period === 'semester2') return ['p4', 'p5', 'p6', 'exam_s2'];
+    if (period === 'yearly') return ['p1', 'p2', 'p3', 'exam_s1', 'p4', 'p5', 'p6', 'exam_s2'];
+    return [period]; // single period
+  };
+
+  const getColumnHeaders = () => {
+    if (period === 'semester1') return ['P1', 'P2', 'P3', 'S.AVC', 'P4', 'P5', 'P6', 'S.AVC', 'Y.AVG'];
+    if (period === 'semester2') return ['P4', 'P5', 'P6', 'S.AVC', 'Y.AVG'];
+    if (period === 'yearly') return ['P1', 'P2', 'P3', 'S.AVC', 'P4', 'P5', 'P6', 'S.AVC', 'Y.AVG'];
+    return ['Score'];
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto p-0 gap-0 border-none" style={{ background: '#f5f5f0' }}>
+        <DialogHeader className="sr-only">
           <DialogTitle>Student Report Card</DialogTitle>
-          <DialogDescription>
-            {periodName} - {className}
-          </DialogDescription>
+          <DialogDescription>{periodName}</DialogDescription>
         </DialogHeader>
 
         {isLoading ? (
-          <div className="space-y-4">
+          <div className="space-y-4 p-6">
             <Skeleton className="h-24 w-full" />
             <Skeleton className="h-48 w-full" />
             <Skeleton className="h-32 w-full" />
           </div>
         ) : report ? (
-          <div className="space-y-6" id="report-content">
-            {/* Student Header */}
-            <div className="flex items-start gap-4 p-4 border rounded-lg bg-muted/30">
-              <Avatar className="h-16 w-16">
-                <AvatarImage src={report.student.photo_url || ""} />
-                <AvatarFallback>
-                  {report.student.full_name.split(' ').map(n => n[0]).join('')}
-                </AvatarFallback>
-              </Avatar>
-              <div className="flex-1">
-                <h3 className="text-xl font-bold text-foreground">{report.student.full_name}</h3>
-                <p className="text-sm text-muted-foreground">
-                  Student ID: {report.student.student_id}
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  Class: {report.student.classes?.name}
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  Academic Year: {report.student.classes?.academic_years?.year_name}
-                </p>
+          <div id="report-content" className="font-sans">
+            {/* ===== DARK HEADER ===== */}
+            <div className="relative px-6 py-4" style={{ background: 'linear-gradient(135deg, #1a2744 0%, #243554 100%)' }}>
+              <div className="flex items-center justify-between">
+                <div>
+                  <h1 className="text-2xl font-extrabold text-white tracking-wider uppercase">REPORT</h1>
+                  <p className="text-xs font-semibold text-teal-300 uppercase tracking-widest mt-0.5">
+                    {getDepartmentLabel(report)}
+                  </p>
+                </div>
+                <div className="flex items-center gap-3">
+                  <span className="text-[10px] font-bold text-gray-300 uppercase tracking-wider">Student Grade</span>
+                  <div className={`${grade.color} text-white text-3xl font-black w-14 h-14 flex items-center justify-center rounded-md shadow-lg`}>
+                    {grade.letter}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* ===== STUDENT INFO ===== */}
+            <div className="px-6 py-3 border-b-2" style={{ borderColor: '#1a2744' }}>
+              <div className="grid grid-cols-2 gap-2">
+                <div className="flex items-center gap-2">
+                  <span className="text-[11px] font-bold text-gray-600 uppercase whitespace-nowrap">Name of Student</span>
+                  <span className="text-sm font-bold text-gray-900 uppercase border-b border-gray-400 flex-1 pb-0.5 text-center">
+                    {report.student.full_name}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-[11px] font-bold text-gray-600 uppercase whitespace-nowrap">Academic Year</span>
+                  <span className="text-sm font-bold text-gray-900 border-b border-gray-400 flex-1 pb-0.5 text-center">
+                    {report.student.classes?.academic_years?.year_name || '--'}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-[11px] font-bold text-gray-600 uppercase whitespace-nowrap">Grade Level</span>
+                  <span className="text-sm font-bold text-gray-900 uppercase border-b border-gray-400 flex-1 pb-0.5 text-center">
+                    {report.student.classes?.name || '--'}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-[11px] font-bold text-gray-600 uppercase whitespace-nowrap">Report Type</span>
+                  <span className="text-sm font-bold text-gray-900 border-b border-gray-400 flex-1 pb-0.5 text-center">
+                    {periodName}
+                  </span>
+                </div>
               </div>
             </div>
 
             {/* Incomplete Notice */}
             {report.hasIncomplete && (
-              <div className="p-3 border border-orange-300 rounded-lg bg-orange-50 dark:bg-orange-950/30">
-                <p className="text-sm text-orange-700 dark:text-orange-400 font-medium">
-                  ⚠️ This student has incomplete grades (marked as "I"). Averages and rankings cannot be calculated until all grades are complete (≥60).
-                </p>
+              <div className="mx-6 mt-3 p-2 rounded text-xs font-medium" style={{ background: '#fff3cd', color: '#856404', border: '1px solid #ffeaa7' }}>
+                ⚠️ This student has incomplete grades (marked as "I"). Averages and rankings cannot be calculated until all grades are complete.
               </div>
             )}
 
-            {/* Subjects Table */}
-            <div>
-              <h4 className="text-lg font-semibold text-foreground mb-3">Academic Performance</h4>
-              <div className="border rounded-lg overflow-hidden">
-                <table className="w-full">
-                  <thead className="bg-muted">
-                    <tr>
-                      <th className="text-left p-3 text-sm font-semibold text-foreground">Subject</th>
+            {/* ===== GRADES TABLE ===== */}
+            <div className="px-6 py-3">
+              <div className="overflow-hidden rounded border" style={{ borderColor: '#1a2744' }}>
+                <table className="w-full text-xs" style={{ borderCollapse: 'collapse' }}>
+                  <thead>
+                    <tr style={{ background: '#1a2744' }}>
+                      <th className="text-left px-3 py-2 text-white font-bold text-[11px] uppercase tracking-wide border-r border-gray-600">Subject</th>
                       {report.isSemesterReport ? (
-                        <>
-                          {period === 'semester1' && (
-                            <>
-                              <th className="text-center p-2 text-xs font-semibold text-foreground">P1</th>
-                              <th className="text-center p-2 text-xs font-semibold text-foreground">P2</th>
-                              <th className="text-center p-2 text-xs font-semibold text-foreground">P3</th>
-                              <th className="text-center p-2 text-xs font-semibold text-foreground">Exam</th>
-                              <th className="text-center p-2 text-xs font-semibold text-foreground">S1 Avg</th>
-                            </>
-                          )}
-                          {period === 'semester2' && (
-                            <>
-                              <th className="text-center p-2 text-xs font-semibold text-foreground">P4</th>
-                              <th className="text-center p-2 text-xs font-semibold text-foreground">P5</th>
-                              <th className="text-center p-2 text-xs font-semibold text-foreground">P6</th>
-                              <th className="text-center p-2 text-xs font-semibold text-foreground">Exam</th>
-                              <th className="text-center p-2 text-xs font-semibold text-foreground">S2 Avg</th>
-                            </>
-                          )}
-                          {period === 'yearly' && (
-                            <>
-                              <th className="text-center p-2 text-xs font-semibold text-foreground">P1</th>
-                              <th className="text-center p-2 text-xs font-semibold text-foreground">P2</th>
-                              <th className="text-center p-2 text-xs font-semibold text-foreground">P3</th>
-                              <th className="text-center p-2 text-xs font-semibold text-foreground">Ex S1</th>
-                              <th className="text-center p-2 text-xs font-semibold text-foreground">S1 Avg</th>
-                              <th className="text-center p-2 text-xs font-semibold text-foreground">P4</th>
-                              <th className="text-center p-2 text-xs font-semibold text-foreground">P5</th>
-                              <th className="text-center p-2 text-xs font-semibold text-foreground">P6</th>
-                              <th className="text-center p-2 text-xs font-semibold text-foreground">Ex S2</th>
-                              <th className="text-center p-2 text-xs font-semibold text-foreground">S2 Avg</th>
-                              <th className="text-center p-2 text-xs font-semibold text-foreground">Year Avg</th>
-                            </>
-                          )}
-                        </>
+                        period === 'yearly' ? (
+                          <>
+                            <th className="text-center px-1.5 py-2 text-white font-bold text-[10px] border-r border-gray-600">P1</th>
+                            <th className="text-center px-1.5 py-2 text-white font-bold text-[10px] border-r border-gray-600">P2</th>
+                            <th className="text-center px-1.5 py-2 text-white font-bold text-[10px] border-r border-gray-600">P3</th>
+                            <th className="text-center px-1.5 py-2 text-yellow-300 font-bold text-[10px] border-r border-gray-600">S.AVC</th>
+                            <th className="text-center px-1.5 py-2 text-white font-bold text-[10px] border-r border-gray-600">P4</th>
+                            <th className="text-center px-1.5 py-2 text-white font-bold text-[10px] border-r border-gray-600">P5</th>
+                            <th className="text-center px-1.5 py-2 text-white font-bold text-[10px] border-r border-gray-600">P6</th>
+                            <th className="text-center px-1.5 py-2 text-yellow-300 font-bold text-[10px] border-r border-gray-600">S.AVC</th>
+                            <th className="text-center px-1.5 py-2 text-green-300 font-bold text-[10px]">Y.AVG</th>
+                          </>
+                        ) : period === 'semester1' ? (
+                          <>
+                            <th className="text-center px-2 py-2 text-white font-bold text-[10px] border-r border-gray-600">P1</th>
+                            <th className="text-center px-2 py-2 text-white font-bold text-[10px] border-r border-gray-600">P2</th>
+                            <th className="text-center px-2 py-2 text-white font-bold text-[10px] border-r border-gray-600">P3</th>
+                            <th className="text-center px-2 py-2 text-white font-bold text-[10px] border-r border-gray-600">Exam</th>
+                            <th className="text-center px-2 py-2 text-yellow-300 font-bold text-[10px]">S.AVC</th>
+                          </>
+                        ) : (
+                          <>
+                            <th className="text-center px-2 py-2 text-white font-bold text-[10px] border-r border-gray-600">P4</th>
+                            <th className="text-center px-2 py-2 text-white font-bold text-[10px] border-r border-gray-600">P5</th>
+                            <th className="text-center px-2 py-2 text-white font-bold text-[10px] border-r border-gray-600">P6</th>
+                            <th className="text-center px-2 py-2 text-white font-bold text-[10px] border-r border-gray-600">Exam</th>
+                            <th className="text-center px-2 py-2 text-yellow-300 font-bold text-[10px]">S.AVC</th>
+                          </>
+                        )
                       ) : (
-                        <>
-                          <th className="text-center p-3 text-sm font-semibold text-foreground">Score</th>
-                        </>
+                        <th className="text-center px-3 py-2 text-white font-bold text-[11px]">Score</th>
                       )}
                     </tr>
                   </thead>
                   <tbody>
                     {report.subjects.map((subject: any, index: number) => {
+                      const isEven = index % 2 === 0;
+                      const rowBg = isEven ? '#ffffff' : '#f0f4f8';
                       return (
-                        <tr key={index} className="border-t">
-                          <td className="p-3 text-sm text-foreground font-medium">
+                        <tr key={index} style={{ background: rowBg, borderBottom: '1px solid #d1d5db' }}>
+                          <td className="px-3 py-1.5 font-semibold text-gray-800 text-[11px] uppercase border-r" style={{ borderColor: '#d1d5db' }}>
                             {subject.name}
                           </td>
                           {report.isSemesterReport ? (
-                            <>
-                              {period === 'semester1' && (
-                                <>
-                                  <td className={`p-2 text-xs text-center ${subject.periods?.p1?.noGrades ? 'text-muted-foreground' : subject.periods?.p1?.isIncomplete ? 'text-orange-500 font-bold' : 'text-foreground'}`}>
-                                    {displayScore(subject.periods?.p1?.score, subject.periods?.p1?.noGrades)}
+                            period === 'yearly' ? (
+                              <>
+                                {['p1','p2','p3'].map(p => (
+                                  <td key={p} className="text-center px-1.5 py-1.5 font-semibold text-gray-800 text-[11px] border-r" style={{ borderColor: '#d1d5db' }}>
+                                    {displayScore(subject.periods?.[p]?.score, subject.periods?.[p]?.noGrades)}
                                   </td>
-                                  <td className={`p-2 text-xs text-center ${subject.periods?.p2?.noGrades ? 'text-muted-foreground' : subject.periods?.p2?.isIncomplete ? 'text-orange-500 font-bold' : 'text-foreground'}`}>
-                                    {displayScore(subject.periods?.p2?.score, subject.periods?.p2?.noGrades)}
+                                ))}
+                                {/* S1 AVG */}
+                                <td className="text-center px-1.5 py-1.5 font-bold text-[11px] border-r" style={{ borderColor: '#d1d5db', color: '#1a2744' }}>
+                                  {(() => {
+                                    const s1Periods = ['p1', 'p2', 'p3', 'exam_s1'];
+                                    const hasS1Incomplete = s1Periods.some(p => subject.periods?.[p]?.isIncomplete);
+                                    if (hasS1Incomplete) return '--';
+                                    const s1Scores = s1Periods.map((p: string) => subject.periods?.[p]?.score).filter((s: any) => s !== null && s !== undefined);
+                                    return s1Scores.length === 4 ? (Math.floor((s1Scores.reduce((a: number, b: number) => a + b, 0) / s1Scores.length) * 10) / 10).toFixed(1) : '-';
+                                  })()}
+                                </td>
+                                {['p4','p5','p6'].map(p => (
+                                  <td key={p} className="text-center px-1.5 py-1.5 font-semibold text-gray-800 text-[11px] border-r" style={{ borderColor: '#d1d5db' }}>
+                                    {displayScore(subject.periods?.[p]?.score, subject.periods?.[p]?.noGrades)}
                                   </td>
-                                  <td className={`p-2 text-xs text-center ${subject.periods?.p3?.noGrades ? 'text-muted-foreground' : subject.periods?.p3?.isIncomplete ? 'text-orange-500 font-bold' : 'text-foreground'}`}>
-                                    {displayScore(subject.periods?.p3?.score, subject.periods?.p3?.noGrades)}
+                                ))}
+                                {/* S2 AVG */}
+                                <td className="text-center px-1.5 py-1.5 font-bold text-[11px] border-r" style={{ borderColor: '#d1d5db', color: '#1a2744' }}>
+                                  {(() => {
+                                    const s2Periods = ['p4', 'p5', 'p6', 'exam_s2'];
+                                    const hasS2Incomplete = s2Periods.some(p => subject.periods?.[p]?.isIncomplete);
+                                    if (hasS2Incomplete) return '--';
+                                    const s2Scores = s2Periods.map((p: string) => subject.periods?.[p]?.score).filter((s: any) => s !== null && s !== undefined);
+                                    return s2Scores.length === 4 ? (Math.floor((s2Scores.reduce((a: number, b: number) => a + b, 0) / s2Scores.length) * 10) / 10).toFixed(1) : '-';
+                                  })()}
+                                </td>
+                                {/* Y.AVG */}
+                                <td className="text-center px-1.5 py-1.5 font-black text-[11px]" style={{ color: '#16a34a' }}>
+                                  {subject.hasIncomplete ? '--' : (subject.semesterAverage !== null ? subject.semesterAverage.toFixed(1) : '-')}
+                                </td>
+                              </>
+                            ) : period === 'semester1' ? (
+                              <>
+                                {['p1','p2','p3','exam_s1'].map(p => (
+                                  <td key={p} className={`text-center px-2 py-1.5 font-semibold text-[11px] border-r ${subject.periods?.[p]?.noGrades ? 'text-gray-400' : subject.periods?.[p]?.isIncomplete ? 'text-orange-500 font-bold' : 'text-gray-800'}`} style={{ borderColor: '#d1d5db' }}>
+                                    {displayScore(subject.periods?.[p]?.score, subject.periods?.[p]?.noGrades)}
                                   </td>
-                                  <td className={`p-2 text-xs text-center ${subject.periods?.exam_s1?.noGrades ? 'text-muted-foreground' : subject.periods?.exam_s1?.isIncomplete ? 'text-orange-500 font-bold' : 'text-foreground'}`}>
-                                    {displayScore(subject.periods?.exam_s1?.score, subject.periods?.exam_s1?.noGrades)}
+                                ))}
+                                <td className="text-center px-2 py-1.5 font-bold text-[11px]" style={{ color: '#1a2744' }}>
+                                  {subject.hasIncomplete ? '--' : (subject.semesterAverage !== null ? subject.semesterAverage.toFixed(1) : '-')}
+                                </td>
+                              </>
+                            ) : (
+                              <>
+                                {['p4','p5','p6','exam_s2'].map(p => (
+                                  <td key={p} className={`text-center px-2 py-1.5 font-semibold text-[11px] border-r ${subject.periods?.[p]?.noGrades ? 'text-gray-400' : subject.periods?.[p]?.isIncomplete ? 'text-orange-500 font-bold' : 'text-gray-800'}`} style={{ borderColor: '#d1d5db' }}>
+                                    {displayScore(subject.periods?.[p]?.score, subject.periods?.[p]?.noGrades)}
                                   </td>
-                                  <td className="p-2 text-xs text-center font-semibold text-foreground">
-                                    {subject.hasIncomplete ? '--' : (subject.semesterAverage !== null ? subject.semesterAverage.toFixed(1) : '-')}
-                                  </td>
-                                </>
-                              )}
-                              {period === 'semester2' && (
-                                <>
-                                  <td className={`p-2 text-xs text-center ${subject.periods?.p4?.noGrades ? 'text-muted-foreground' : subject.periods?.p4?.isIncomplete ? 'text-orange-500 font-bold' : 'text-foreground'}`}>
-                                    {displayScore(subject.periods?.p4?.score, subject.periods?.p4?.noGrades)}
-                                  </td>
-                                  <td className={`p-2 text-xs text-center ${subject.periods?.p5?.noGrades ? 'text-muted-foreground' : subject.periods?.p5?.isIncomplete ? 'text-orange-500 font-bold' : 'text-foreground'}`}>
-                                    {displayScore(subject.periods?.p5?.score, subject.periods?.p5?.noGrades)}
-                                  </td>
-                                  <td className={`p-2 text-xs text-center ${subject.periods?.p6?.noGrades ? 'text-muted-foreground' : subject.periods?.p6?.isIncomplete ? 'text-orange-500 font-bold' : 'text-foreground'}`}>
-                                    {displayScore(subject.periods?.p6?.score, subject.periods?.p6?.noGrades)}
-                                  </td>
-                                  <td className={`p-2 text-xs text-center ${subject.periods?.exam_s2?.noGrades ? 'text-muted-foreground' : subject.periods?.exam_s2?.isIncomplete ? 'text-orange-500 font-bold' : 'text-foreground'}`}>
-                                    {displayScore(subject.periods?.exam_s2?.score, subject.periods?.exam_s2?.noGrades)}
-                                  </td>
-                                  <td className="p-2 text-xs text-center font-semibold text-foreground">
-                                    {subject.hasIncomplete ? '--' : (subject.semesterAverage !== null ? subject.semesterAverage.toFixed(1) : '-')}
-                                  </td>
-                                </>
-                              )}
-                              {period === 'yearly' && (
-                                <>
-                                  <td className={`p-2 text-xs text-center ${subject.periods?.p1?.noGrades ? 'text-muted-foreground' : subject.periods?.p1?.isIncomplete ? 'text-orange-500 font-bold' : 'text-foreground'}`}>
-                                    {displayScore(subject.periods?.p1?.score, subject.periods?.p1?.noGrades)}
-                                  </td>
-                                  <td className={`p-2 text-xs text-center ${subject.periods?.p2?.noGrades ? 'text-muted-foreground' : subject.periods?.p2?.isIncomplete ? 'text-orange-500 font-bold' : 'text-foreground'}`}>
-                                    {displayScore(subject.periods?.p2?.score, subject.periods?.p2?.noGrades)}
-                                  </td>
-                                  <td className={`p-2 text-xs text-center ${subject.periods?.p3?.noGrades ? 'text-muted-foreground' : subject.periods?.p3?.isIncomplete ? 'text-orange-500 font-bold' : 'text-foreground'}`}>
-                                    {displayScore(subject.periods?.p3?.score, subject.periods?.p3?.noGrades)}
-                                  </td>
-                                  <td className={`p-2 text-xs text-center ${subject.periods?.exam_s1?.noGrades ? 'text-muted-foreground' : subject.periods?.exam_s1?.isIncomplete ? 'text-orange-500 font-bold' : 'text-foreground'}`}>
-                                    {displayScore(subject.periods?.exam_s1?.score, subject.periods?.exam_s1?.noGrades)}
-                                  </td>
-                                  <td className="p-2 text-xs text-center font-semibold text-foreground">
-                                    {(() => {
-                                      const s1Periods = ['p1', 'p2', 'p3', 'exam_s1'];
-                                      const hasS1Incomplete = s1Periods.some(p => subject.periods?.[p]?.isIncomplete);
-                                      if (hasS1Incomplete) return '--';
-                                      const s1Scores = s1Periods.map(p => subject.periods?.[p]?.score).filter(s => s !== null && s !== undefined);
-                                      return s1Scores.length === 4 ? (Math.floor((s1Scores.reduce((a: number, b: number) => a + b, 0) / s1Scores.length) * 10) / 10).toFixed(1) : '-';
-                                    })()}
-                                  </td>
-                                  <td className={`p-2 text-xs text-center ${subject.periods?.p4?.noGrades ? 'text-muted-foreground' : subject.periods?.p4?.isIncomplete ? 'text-orange-500 font-bold' : 'text-foreground'}`}>
-                                    {displayScore(subject.periods?.p4?.score, subject.periods?.p4?.noGrades)}
-                                  </td>
-                                  <td className={`p-2 text-xs text-center ${subject.periods?.p5?.noGrades ? 'text-muted-foreground' : subject.periods?.p5?.isIncomplete ? 'text-orange-500 font-bold' : 'text-foreground'}`}>
-                                    {displayScore(subject.periods?.p5?.score, subject.periods?.p5?.noGrades)}
-                                  </td>
-                                  <td className={`p-2 text-xs text-center ${subject.periods?.p6?.noGrades ? 'text-muted-foreground' : subject.periods?.p6?.isIncomplete ? 'text-orange-500 font-bold' : 'text-foreground'}`}>
-                                    {displayScore(subject.periods?.p6?.score, subject.periods?.p6?.noGrades)}
-                                  </td>
-                                  <td className={`p-2 text-xs text-center ${subject.periods?.exam_s2?.noGrades ? 'text-muted-foreground' : subject.periods?.exam_s2?.isIncomplete ? 'text-orange-500 font-bold' : 'text-foreground'}`}>
-                                    {displayScore(subject.periods?.exam_s2?.score, subject.periods?.exam_s2?.noGrades)}
-                                  </td>
-                                  <td className="p-2 text-xs text-center font-semibold text-foreground">
-                                    {(() => {
-                                      const s2Periods = ['p4', 'p5', 'p6', 'exam_s2'];
-                                      const hasS2Incomplete = s2Periods.some(p => subject.periods?.[p]?.isIncomplete);
-                                      if (hasS2Incomplete) return '--';
-                                      const s2Scores = s2Periods.map(p => subject.periods?.[p]?.score).filter(s => s !== null && s !== undefined);
-                                      return s2Scores.length === 4 ? (Math.floor((s2Scores.reduce((a: number, b: number) => a + b, 0) / s2Scores.length) * 10) / 10).toFixed(1) : '-';
-                                    })()}
-                                  </td>
-                                  <td className="p-2 text-xs text-center font-semibold text-foreground">
-                                    {subject.hasIncomplete ? '--' : (subject.semesterAverage !== null ? subject.semesterAverage.toFixed(1) : '-')}
-                                  </td>
-                                </>
-                              )}
-                            </>
+                                ))}
+                                <td className="text-center px-2 py-1.5 font-bold text-[11px]" style={{ color: '#1a2744' }}>
+                                  {subject.hasIncomplete ? '--' : (subject.semesterAverage !== null ? subject.semesterAverage.toFixed(1) : '-')}
+                                </td>
+                              </>
+                            )
                           ) : (
-                            <>
-                              <td className={`p-3 text-sm text-center ${subject.noGrades ? 'text-muted-foreground' : subject.hasIncomplete ? 'text-orange-500 font-bold' : 'text-foreground'}`}>
-                                {subject.noGrades ? '--' : subject.hasIncomplete ? 'I' : subject.total}
-                              </td>
-                            </>
+                            <td className={`text-center px-3 py-1.5 font-bold text-[11px] ${subject.noGrades ? 'text-gray-400' : subject.hasIncomplete ? 'text-orange-500' : 'text-gray-800'}`}>
+                              {subject.noGrades ? '--' : subject.hasIncomplete ? 'I' : subject.total}
+                            </td>
                           )}
                         </tr>
                       );
                     })}
-                    {/* Average Row */}
-                    {report.isSemesterReport ? (
-                      <>
-                        <tr className="border-t-2 bg-muted/50">
-                          <td className="p-3 text-sm font-bold text-foreground">Average</td>
-                          {period === 'semester1' && (
-                            <>
-                              <td className="p-2 text-xs text-center font-semibold text-foreground">
-                                {report.hasIncomplete ? '--' : (() => {
-                                  const scores = report.subjects.map((s: any) => s.periods?.p1?.score).filter((s: any) => s !== null && s !== undefined && s >= 60);
-                                  return scores.length > 0 ? (Math.floor((scores.reduce((a: number, b: number) => a + b, 0) / scores.length) * 10) / 10).toFixed(1) : '-';
-                                })()}
-                              </td>
-                              <td className="p-2 text-xs text-center font-semibold text-foreground">
-                                {report.hasIncomplete ? '--' : (() => {
-                                  const scores = report.subjects.map((s: any) => s.periods?.p2?.score).filter((s: any) => s !== null && s !== undefined && s >= 60);
-                                  return scores.length > 0 ? (Math.floor((scores.reduce((a: number, b: number) => a + b, 0) / scores.length) * 10) / 10).toFixed(1) : '-';
-                                })()}
-                              </td>
-                              <td className="p-2 text-xs text-center font-semibold text-foreground">
-                                {report.hasIncomplete ? '--' : (() => {
-                                  const scores = report.subjects.map((s: any) => s.periods?.p3?.score).filter((s: any) => s !== null && s !== undefined && s >= 60);
-                                  return scores.length > 0 ? (Math.floor((scores.reduce((a: number, b: number) => a + b, 0) / scores.length) * 10) / 10).toFixed(1) : '-';
-                                })()}
-                              </td>
-                              <td className="p-2 text-xs text-center font-semibold text-foreground">
-                                {report.hasIncomplete ? '--' : (() => {
-                                  const scores = report.subjects.map((s: any) => s.periods?.exam_s1?.score).filter((s: any) => s !== null && s !== undefined && s >= 60);
-                                  return scores.length > 0 ? (Math.floor((scores.reduce((a: number, b: number) => a + b, 0) / scores.length) * 10) / 10).toFixed(1) : '-';
-                                })()}
-                              </td>
-                              <td className="p-2 text-xs text-center font-bold text-foreground">
-                                {report.hasIncomplete ? '--' : (report.overallAverage !== null ? (Math.floor(report.overallAverage * 10) / 10).toFixed(1) : '-')}
-                              </td>
-                            </>
-                          )}
-                          {period === 'semester2' && (
-                            <>
-                              <td className="p-2 text-xs text-center font-semibold text-foreground">
-                                {report.hasIncomplete ? '--' : (() => {
-                                  const scores = report.subjects.map((s: any) => s.periods?.p4?.score).filter((s: any) => s !== null && s !== undefined && s >= 60);
-                                  return scores.length > 0 ? (Math.floor((scores.reduce((a: number, b: number) => a + b, 0) / scores.length) * 10) / 10).toFixed(1) : '-';
-                                })()}
-                              </td>
-                              <td className="p-2 text-xs text-center font-semibold text-foreground">
-                                {report.hasIncomplete ? '--' : (() => {
-                                  const scores = report.subjects.map((s: any) => s.periods?.p5?.score).filter((s: any) => s !== null && s !== undefined && s >= 60);
-                                  return scores.length > 0 ? (Math.floor((scores.reduce((a: number, b: number) => a + b, 0) / scores.length) * 10) / 10).toFixed(1) : '-';
-                                })()}
-                              </td>
-                              <td className="p-2 text-xs text-center font-semibold text-foreground">
-                                {report.hasIncomplete ? '--' : (() => {
-                                  const scores = report.subjects.map((s: any) => s.periods?.p6?.score).filter((s: any) => s !== null && s !== undefined && s >= 60);
-                                  return scores.length > 0 ? (Math.floor((scores.reduce((a: number, b: number) => a + b, 0) / scores.length) * 10) / 10).toFixed(1) : '-';
-                                })()}
-                              </td>
-                              <td className="p-2 text-xs text-center font-semibold text-foreground">
-                                {report.hasIncomplete ? '--' : (() => {
-                                  const scores = report.subjects.map((s: any) => s.periods?.exam_s2?.score).filter((s: any) => s !== null && s !== undefined && s >= 60);
-                                  return scores.length > 0 ? (Math.floor((scores.reduce((a: number, b: number) => a + b, 0) / scores.length) * 10) / 10).toFixed(1) : '-';
-                                })()}
-                              </td>
-                              <td className="p-2 text-xs text-center font-bold text-foreground">
-                                {report.hasIncomplete ? '--' : (report.overallAverage !== null ? (Math.floor(report.overallAverage * 10) / 10).toFixed(1) : '-')}
-                              </td>
-                            </>
-                          )}
-                          {period === 'yearly' && (
-                            <>
-                              <td className="p-2 text-xs text-center font-semibold text-foreground">
-                                {report.hasIncomplete ? '--' : (() => {
-                                  const scores = report.subjects.map((s: any) => s.periods?.p1?.score).filter((s: any) => s !== null && s !== undefined && s >= 60);
-                                  return scores.length > 0 ? (Math.floor((scores.reduce((a: number, b: number) => a + b, 0) / scores.length) * 10) / 10).toFixed(1) : '-';
-                                })()}
-                              </td>
-                              <td className="p-2 text-xs text-center font-semibold text-foreground">
-                                {report.hasIncomplete ? '--' : (() => {
-                                  const scores = report.subjects.map((s: any) => s.periods?.p2?.score).filter((s: any) => s !== null && s !== undefined && s >= 60);
-                                  return scores.length > 0 ? (Math.floor((scores.reduce((a: number, b: number) => a + b, 0) / scores.length) * 10) / 10).toFixed(1) : '-';
-                                })()}
-                              </td>
-                              <td className="p-2 text-xs text-center font-semibold text-foreground">
-                                {report.hasIncomplete ? '--' : (() => {
-                                  const scores = report.subjects.map((s: any) => s.periods?.p3?.score).filter((s: any) => s !== null && s !== undefined && s >= 60);
-                                  return scores.length > 0 ? (Math.floor((scores.reduce((a: number, b: number) => a + b, 0) / scores.length) * 10) / 10).toFixed(1) : '-';
-                                })()}
-                              </td>
-                              <td className="p-2 text-xs text-center font-semibold text-foreground">
-                                {report.hasIncomplete ? '--' : (() => {
-                                  const scores = report.subjects.map((s: any) => s.periods?.exam_s1?.score).filter((s: any) => s !== null && s !== undefined && s >= 60);
-                                  return scores.length > 0 ? (Math.floor((scores.reduce((a: number, b: number) => a + b, 0) / scores.length) * 10) / 10).toFixed(1) : '-';
-                                })()}
-                              </td>
-                              <td className="p-2 text-xs text-center font-semibold text-foreground">
-                                {report.hasIncomplete ? '--' : (() => {
-                                  const s1Averages = report.subjects.map((s: any) => {
-                                    const s1Periods = ['p1', 'p2', 'p3', 'exam_s1'];
-                                    const s1Scores = s1Periods.map(p => s.periods?.[p]?.score).filter((sc: any) => sc !== null && sc !== undefined && sc >= 60);
-                                    return s1Scores.length === 4 ? s1Scores.reduce((a: number, b: number) => a + b, 0) / s1Scores.length : null;
-                                  }).filter(Boolean);
-                                  return s1Averages.length > 0 ? (Math.floor((s1Averages.reduce((a: number, b: number) => a + b, 0) / s1Averages.length) * 10) / 10).toFixed(1) : '-';
-                                })()}
-                              </td>
-                              <td className="p-2 text-xs text-center font-semibold text-foreground">
-                                {report.hasIncomplete ? '--' : (() => {
-                                  const scores = report.subjects.map((s: any) => s.periods?.p4?.score).filter((s: any) => s !== null && s !== undefined && s >= 60);
-                                  return scores.length > 0 ? (Math.floor((scores.reduce((a: number, b: number) => a + b, 0) / scores.length) * 10) / 10).toFixed(1) : '-';
-                                })()}
-                              </td>
-                              <td className="p-2 text-xs text-center font-semibold text-foreground">
-                                {report.hasIncomplete ? '--' : (() => {
-                                  const scores = report.subjects.map((s: any) => s.periods?.p5?.score).filter((s: any) => s !== null && s !== undefined && s >= 60);
-                                  return scores.length > 0 ? (Math.floor((scores.reduce((a: number, b: number) => a + b, 0) / scores.length) * 10) / 10).toFixed(1) : '-';
-                                })()}
-                              </td>
-                              <td className="p-2 text-xs text-center font-semibold text-foreground">
-                                {report.hasIncomplete ? '--' : (() => {
-                                  const scores = report.subjects.map((s: any) => s.periods?.p6?.score).filter((s: any) => s !== null && s !== undefined && s >= 60);
-                                  return scores.length > 0 ? (Math.floor((scores.reduce((a: number, b: number) => a + b, 0) / scores.length) * 10) / 10).toFixed(1) : '-';
-                                })()}
-                              </td>
-                              <td className="p-2 text-xs text-center font-semibold text-foreground">
-                                {report.hasIncomplete ? '--' : (() => {
-                                  const scores = report.subjects.map((s: any) => s.periods?.exam_s2?.score).filter((s: any) => s !== null && s !== undefined && s >= 60);
-                                  return scores.length > 0 ? (Math.floor((scores.reduce((a: number, b: number) => a + b, 0) / scores.length) * 10) / 10).toFixed(1) : '-';
-                                })()}
-                              </td>
-                              <td className="p-2 text-xs text-center font-semibold text-foreground">
-                                {report.hasIncomplete ? '--' : (() => {
-                                  const s2Averages = report.subjects.map((s: any) => {
-                                    const s2Periods = ['p4', 'p5', 'p6', 'exam_s2'];
-                                    const s2Scores = s2Periods.map(p => s.periods?.[p]?.score).filter((sc: any) => sc !== null && sc !== undefined && sc >= 60);
-                                    return s2Scores.length === 4 ? s2Scores.reduce((a: number, b: number) => a + b, 0) / s2Scores.length : null;
-                                  }).filter(Boolean);
-                                  return s2Averages.length > 0 ? (Math.floor((s2Averages.reduce((a: number, b: number) => a + b, 0) / s2Averages.length) * 10) / 10).toFixed(1) : '-';
-                                })()}
-                              </td>
-                              <td className="p-2 text-xs text-center font-bold text-foreground">
-                                {report.hasIncomplete ? '--' : (report.overallAverage !== null ? (Math.floor(report.overallAverage * 10) / 10).toFixed(1) : '-')}
-                              </td>
-                            </>
-                          )}
-                        </tr>
-                        {/* Rank Row */}
-                        <tr className="border-t bg-muted/30">
-                          <td className="p-3 text-sm font-bold text-foreground">Rank</td>
-                          {period === 'semester1' && (
-                            <>
-                              <td className="p-2 text-xs text-center font-semibold text-muted-foreground">
-                                {report.hasIncomplete ? '--' : (report.periodTotals?.get('p1')?.class_rank && report.periodCounts?.p1 
-                                  ? `${report.periodTotals.get('p1').class_rank}/${report.periodCounts.p1}` 
-                                  : '-')}
-                              </td>
-                              <td className="p-2 text-xs text-center font-semibold text-muted-foreground">
-                                {report.hasIncomplete ? '--' : (report.periodTotals?.get('p2')?.class_rank && report.periodCounts?.p2 
-                                  ? `${report.periodTotals.get('p2').class_rank}/${report.periodCounts.p2}` 
-                                  : '-')}
-                              </td>
-                              <td className="p-2 text-xs text-center font-semibold text-muted-foreground">
-                                {report.hasIncomplete ? '--' : (report.periodTotals?.get('p3')?.class_rank && report.periodCounts?.p3 
-                                  ? `${report.periodTotals.get('p3').class_rank}/${report.periodCounts.p3}` 
-                                  : '-')}
-                              </td>
-                              <td className="p-2 text-xs text-center font-semibold text-muted-foreground">
-                                {report.hasIncomplete ? '--' : (report.periodTotals?.get('exam_s1')?.class_rank && report.periodCounts?.exam_s1 
-                                  ? `${report.periodTotals.get('exam_s1').class_rank}/${report.periodCounts.exam_s1}` 
-                                  : '-')}
-                              </td>
-                              <td className="p-2 text-xs text-center font-bold text-muted-foreground">
-                                {report.hasIncomplete ? '--' : (report.yearlyTotal?.class_rank && report.periodCounts?.exam_s1 
-                                  ? `${report.yearlyTotal.class_rank}/${report.periodCounts.exam_s1}` 
-                                  : '-')}
-                              </td>
-                            </>
-                          )}
-                          {period === 'semester2' && (
-                            <>
-                              <td className="p-2 text-xs text-center font-semibold text-muted-foreground">
-                                {report.hasIncomplete ? '--' : (report.periodTotals?.get('p4')?.class_rank && report.periodCounts?.p4 
-                                  ? `${report.periodTotals.get('p4').class_rank}/${report.periodCounts.p4}` 
-                                  : '-')}
-                              </td>
-                              <td className="p-2 text-xs text-center font-semibold text-muted-foreground">
-                                {report.hasIncomplete ? '--' : (report.periodTotals?.get('p5')?.class_rank && report.periodCounts?.p5 
-                                  ? `${report.periodTotals.get('p5').class_rank}/${report.periodCounts.p5}` 
-                                  : '-')}
-                              </td>
-                              <td className="p-2 text-xs text-center font-semibold text-muted-foreground">
-                                {report.hasIncomplete ? '--' : (report.periodTotals?.get('p6')?.class_rank && report.periodCounts?.p6 
-                                  ? `${report.periodTotals.get('p6').class_rank}/${report.periodCounts.p6}` 
-                                  : '-')}
-                              </td>
-                              <td className="p-2 text-xs text-center font-semibold text-muted-foreground">
-                                {report.hasIncomplete ? '--' : (report.periodTotals?.get('exam_s2')?.class_rank && report.periodCounts?.exam_s2 
-                                  ? `${report.periodTotals.get('exam_s2').class_rank}/${report.periodCounts.exam_s2}` 
-                                  : '-')}
-                              </td>
-                              <td className="p-2 text-xs text-center font-bold text-muted-foreground">
-                                {report.hasIncomplete ? '--' : (report.yearlyTotal?.class_rank && report.periodCounts?.exam_s2 
-                                  ? `${report.yearlyTotal.class_rank}/${report.periodCounts.exam_s2}` 
-                                  : '-')}
-                              </td>
-                            </>
-                          )}
-                          {period === 'yearly' && (
-                            <>
-                              <td className="p-2 text-xs text-center font-semibold text-muted-foreground">
-                                {report.hasIncomplete ? '--' : (report.periodTotals?.get('p1')?.class_rank && report.periodCounts?.p1 
-                                  ? `${report.periodTotals.get('p1').class_rank}/${report.periodCounts.p1}` 
-                                  : '-')}
-                              </td>
-                              <td className="p-2 text-xs text-center font-semibold text-muted-foreground">
-                                {report.hasIncomplete ? '--' : (report.periodTotals?.get('p2')?.class_rank && report.periodCounts?.p2 
-                                  ? `${report.periodTotals.get('p2').class_rank}/${report.periodCounts.p2}` 
-                                  : '-')}
-                              </td>
-                              <td className="p-2 text-xs text-center font-semibold text-muted-foreground">
-                                {report.hasIncomplete ? '--' : (report.periodTotals?.get('p3')?.class_rank && report.periodCounts?.p3 
-                                  ? `${report.periodTotals.get('p3').class_rank}/${report.periodCounts.p3}` 
-                                  : '-')}
-                              </td>
-                              <td className="p-2 text-xs text-center font-semibold text-muted-foreground">
-                                {report.hasIncomplete ? '--' : (report.periodTotals?.get('exam_s1')?.class_rank && report.periodCounts?.exam_s1 
-                                  ? `${report.periodTotals.get('exam_s1').class_rank}/${report.periodCounts.exam_s1}` 
-                                  : '-')}
-                              </td>
-                              <td className="p-2 text-xs text-center font-semibold text-muted-foreground">
-                                --
-                              </td>
-                              <td className="p-2 text-xs text-center font-semibold text-muted-foreground">
-                                {report.hasIncomplete ? '--' : (report.periodTotals?.get('p4')?.class_rank && report.periodCounts?.p4 
-                                  ? `${report.periodTotals.get('p4').class_rank}/${report.periodCounts.p4}` 
-                                  : '-')}
-                              </td>
-                              <td className="p-2 text-xs text-center font-semibold text-muted-foreground">
-                                {report.hasIncomplete ? '--' : (report.periodTotals?.get('p5')?.class_rank && report.periodCounts?.p5 
-                                  ? `${report.periodTotals.get('p5').class_rank}/${report.periodCounts.p5}` 
-                                  : '-')}
-                              </td>
-                              <td className="p-2 text-xs text-center font-semibold text-muted-foreground">
-                                {report.hasIncomplete ? '--' : (report.periodTotals?.get('p6')?.class_rank && report.periodCounts?.p6 
-                                  ? `${report.periodTotals.get('p6').class_rank}/${report.periodCounts.p6}` 
-                                  : '-')}
-                              </td>
-                              <td className="p-2 text-xs text-center font-semibold text-muted-foreground">
-                                {report.hasIncomplete ? '--' : (report.periodTotals?.get('exam_s2')?.class_rank && report.periodCounts?.exam_s2 
-                                  ? `${report.periodTotals.get('exam_s2').class_rank}/${report.periodCounts.exam_s2}` 
-                                  : '-')}
-                              </td>
-                              <td className="p-2 text-xs text-center font-semibold text-muted-foreground">
-                                --
-                              </td>
-                              <td className="p-2 text-xs text-center font-bold text-muted-foreground">
-                                {report.hasIncomplete ? '--' : (report.yearlyTotal?.class_rank && report.periodCounts?.exam_s2 
-                                  ? `${report.yearlyTotal.class_rank}/${report.periodCounts.exam_s2}` 
-                                  : '-')}
-                              </td>
-                            </>
-                          )}
-                        </tr>
-                      </>
-                    ) : (
-                      /* Individual Period Report - Add Rank Row */
-                      <>
-                        <tr className="border-t-2 bg-muted/50">
-                          <td className="p-3 text-sm font-bold text-foreground">Average</td>
-                          <td className="p-3 text-sm text-center font-semibold text-foreground">
-                            {report.hasIncomplete ? '--' : (report.overallAverage !== null ? (Math.floor(report.overallAverage * 10) / 10).toFixed(1) : '-')}
-                          </td>
-                        </tr>
-                        <tr className="border-t bg-muted/30">
-                          <td className="p-3 text-sm font-bold text-foreground">Rank</td>
-                          <td className="p-3 text-sm text-center font-bold text-muted-foreground">
-                            {report.hasIncomplete ? '--' : (() => {
-                              const periodTotal = report.periodTotals?.get(period as any);
-                              const count = report.periodCounts?.[period];
-                              return periodTotal?.class_rank && count
-                                ? `${periodTotal.class_rank}/${count}` 
-                                : '-';
-                            })()}
-                          </td>
-                        </tr>
-                      </>
-                    )}
                   </tbody>
                 </table>
               </div>
             </div>
 
-            {/* Summary */}
-            <div className="grid grid-cols-2 gap-4">
-              <div className="p-4 border rounded-lg bg-primary/5">
-                <p className="text-sm text-muted-foreground mb-1">Overall Average</p>
-                <p className="text-3xl font-bold text-primary">
-                  {report.hasIncomplete ? '--' : (report.overallAverage !== null ? report.overallAverage.toFixed(1) : 'N/A')}
-                </p>
-              </div>
-              <div className="p-4 border rounded-lg bg-secondary/5">
-                <p className="text-sm text-muted-foreground mb-1">Overall Class Rank</p>
-                <p className="text-3xl font-bold text-secondary">
-                  {report.hasIncomplete ? '--' : (() => {
-                    const rank = report.yearlyTotal?.class_rank;
-                    return rank ? `${rank}${rank === 1 ? "st" : rank === 2 ? "nd" : rank === 3 ? "rd" : "th"}` : '-';
-                  })()}
-                </p>
+            {/* ===== TEACHER COMMENT ===== */}
+            <div className="px-6 py-2">
+              <div className="rounded border p-3 space-y-1.5" style={{ borderColor: '#d1d5db', background: '#fafafa' }}>
+                <div className="flex items-start gap-2">
+                  <span className="text-[10px] font-bold text-gray-600 uppercase whitespace-nowrap w-28">Teacher Comment:</span>
+                  <span className="text-[11px] text-gray-500 border-b border-gray-300 flex-1 min-h-[16px]"></span>
+                </div>
+                <div className="flex items-start gap-2">
+                  <span className="text-[10px] font-bold text-gray-600 uppercase whitespace-nowrap w-28">Excels In:</span>
+                  <span className="text-[11px] text-gray-500 border-b border-gray-300 flex-1 min-h-[16px]"></span>
+                </div>
+                <div className="flex items-start gap-2">
+                  <span className="text-[10px] font-bold text-gray-600 uppercase whitespace-nowrap w-28">Can Improve In:</span>
+                  <span className="text-[11px] text-gray-500 border-b border-gray-300 flex-1 min-h-[16px]"></span>
+                </div>
               </div>
             </div>
 
-            {/* Action Buttons */}
-            <div className="flex gap-2 pt-4 border-t print:hidden">
+            {/* ===== SEMESTER AVERAGE / GENERAL AVERAGE BAR ===== */}
+            <div className="mx-6 mt-1 rounded overflow-hidden">
+              <div className="flex items-center justify-between px-4 py-2" style={{ background: '#1a2744' }}>
+                <span className="text-[11px] font-bold text-white uppercase tracking-wider">Semester Average</span>
+                <span className="text-[11px] font-bold text-white uppercase tracking-wider">General Average</span>
+              </div>
+              <div className="flex items-center justify-between px-4 py-3" style={{ background: '#f0f4f8' }}>
+                <div className="space-y-1">
+                  {report.isSemesterReport && (period === 'yearly' || period === 'semester1') && (
+                    <div className="flex items-center gap-3">
+                      <span className="text-[11px] font-bold text-gray-700">SEM1</span>
+                      <span className="text-sm font-bold text-gray-900">
+                        {computeSemAvg(report.subjects, ['p1','p2','p3','exam_s1'], report.hasIncomplete)}%
+                      </span>
+                    </div>
+                  )}
+                  {report.isSemesterReport && (period === 'yearly' || period === 'semester2') && (
+                    <div className="flex items-center gap-3">
+                      <span className="text-[11px] font-bold text-gray-700">SEM2</span>
+                      <span className="text-sm font-bold text-gray-900">
+                        {computeSemAvg(report.subjects, ['p4','p5','p6','exam_s2'], report.hasIncomplete)}%
+                      </span>
+                    </div>
+                  )}
+                  {!report.isSemesterReport && (
+                    <div className="flex items-center gap-3">
+                      <span className="text-[11px] font-bold text-gray-700">Period</span>
+                      <span className="text-sm font-bold text-gray-900">
+                        {report.hasIncomplete ? '--' : (report.overallAverage !== null ? report.overallAverage.toFixed(1) + '%' : '-')}
+                      </span>
+                    </div>
+                  )}
+                  {/* Rank */}
+                  <div className="flex items-center gap-3 mt-1">
+                    <span className="text-[10px] font-bold text-gray-500 uppercase">Rank</span>
+                    <span className="text-xs font-bold text-gray-800">
+                      {report.hasIncomplete ? '--' : (() => {
+                        if (report.isSemesterReport) {
+                          const rank = report.yearlyTotal?.class_rank;
+                          const lastPeriod = period === 'semester1' ? 'exam_s1' : 'exam_s2';
+                          const count = report.periodCounts?.[lastPeriod];
+                          return rank && count ? `${rank}/${count}` : '-';
+                        }
+                        const pt = report.periodTotals?.get(period as any);
+                        const count = report.periodCounts?.[period];
+                        return pt?.class_rank && count ? `${pt.class_rank}/${count}` : '-';
+                      })()}
+                    </span>
+                  </div>
+                </div>
+                {/* Big green percentage */}
+                <div className="text-right">
+                  <span className="text-5xl font-black" style={{ color: '#16a34a' }}>
+                    {report.hasIncomplete ? '--' : (report.overallAverage !== null ? `${report.overallAverage.toFixed(1)}%` : '-')}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* ===== SPONSOR SIGNATURE ===== */}
+            <div className="px-6 py-3 flex justify-end">
+              <div className="text-right">
+                <div className="border-t border-gray-400 w-40 mb-0.5"></div>
+                <span className="text-[10px] font-bold text-gray-500 uppercase">Class Sponsor</span>
+              </div>
+            </div>
+
+            {/* ===== ACTION BUTTONS ===== */}
+            <div className="flex gap-2 px-6 py-4 border-t print:hidden" style={{ background: '#eee' }}>
               <Button onClick={handlePrint} className="gap-2 flex-1">
                 <Printer className="h-4 w-4" />
                 Print Report
