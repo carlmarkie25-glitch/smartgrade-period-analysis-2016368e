@@ -18,38 +18,16 @@ interface StudentReportDialogProps {
   className?: string;
 }
 
-// Helper to check if a score is incomplete (null, undefined, or below 60)
 const isIncompleteScore = (score: number | null | undefined): boolean => {
   return score === null || score === undefined || score < 60;
 };
 
-// Helper to display score or "I" for incomplete, "--" for no grades
 const displayScore = (score: number | null | undefined, noGrades?: boolean): string => {
   if (noGrades) return '--';
   if (isIncompleteScore(score)) return 'I';
   return String(score);
 };
 
-// Get letter grade from average
-const getLetterGrade = (avg: number | null): { letter: string; color: string } => {
-  if (avg === null) return { letter: '--', color: 'bg-gray-400' };
-  if (avg >= 90) return { letter: 'A+', color: 'bg-[hsl(145,70%,42%)]' };
-  if (avg >= 80) return { letter: 'A', color: 'bg-[hsl(145,70%,42%)]' };
-  if (avg >= 75) return { letter: 'B+', color: 'bg-[hsl(170,50%,40%)]' };
-  if (avg >= 70) return { letter: 'B', color: 'bg-[hsl(170,50%,40%)]' };
-  if (avg >= 65) return { letter: 'C+', color: 'bg-[hsl(45,80%,50%)]' };
-  if (avg >= 60) return { letter: 'C', color: 'bg-[hsl(45,80%,50%)]' };
-  return { letter: 'F', color: 'bg-red-500' };
-};
-
-// Helper to compute period average from report subjects
-const computePeriodAvg = (subjects: any[], periodKey: string, hasIncomplete: boolean): string => {
-  if (hasIncomplete) return '--';
-  const scores = subjects.map((s: any) => s.periods?.[periodKey]?.score).filter((s: any) => s !== null && s !== undefined && s >= 60);
-  return scores.length > 0 ? (Math.floor((scores.reduce((a: number, b: number) => a + b, 0) / scores.length) * 10) / 10).toFixed(1) : '-';
-};
-
-// Helper to compute semester average from multiple periods
 const computeSemAvg = (subjects: any[], periods: string[], hasIncomplete: boolean): string => {
   if (hasIncomplete) return '--';
   const avgs = subjects.map((s: any) => {
@@ -68,54 +46,53 @@ export const StudentReportDialog = ({
 }: StudentReportDialogProps) => {
   const { data: report, isLoading } = useStudentReport(studentId, period);
 
-  const handlePrint = () => {
-    window.print();
-  };
-
-  const handleDownload = () => {
-    window.print();
-  };
+  const handlePrint = () => window.print();
+  const handleDownload = () => window.print();
 
   const getPeriodName = (period: string) => {
-    switch(period) {
-      case "yearly": return "Final Year Report";
-      case "semester1": return "Semester 1 Report";
-      case "semester2": return "Semester 2 Report";
-      case "exam_s1": return "Semester 1 Exam Report";
-      case "exam_s2": return "Semester 2 Exam Report";
-      default: return `Period ${period.replace("p", "")} Report`;
+    switch (period) {
+      case "yearly": return "1 & 2";
+      case "semester1": return "1";
+      case "semester2": return "2";
+      case "exam_s1": return "Exam S1";
+      case "exam_s2": return "Exam S2";
+      default: return `P${period.replace("p", "")}`;
     }
   };
 
   const getDepartmentLabel = (report: any) => {
-    // Try to derive from class name or department
     return report.student?.departments?.name || className || "DEPARTMENT";
   };
 
-  const periodName = getPeriodName(period);
-  const grade = report ? getLetterGrade(report.overallAverage) : { letter: '--', color: 'bg-gray-400' };
+  const semesterLabel = getPeriodName(period);
 
-  // Determine columns based on period
-  const getColumns = () => {
-    if (period === 'semester1') return ['p1', 'p2', 'p3', 'exam_s1'];
-    if (period === 'semester2') return ['p4', 'p5', 'p6', 'exam_s2'];
-    if (period === 'yearly') return ['p1', 'p2', 'p3', 'exam_s1', 'p4', 'p5', 'p6', 'exam_s2'];
-    return [period]; // single period
+  // Compute subject yearly avg for yearly report
+  const computeSubjectYearlyAvg = (subject: any): string => {
+    if (subject.hasIncomplete) return '--';
+    const s1Periods = ['p1', 'p2', 'p3'];
+    const s2Periods = ['p4', 'p5', 'p6'];
+    const s1Scores = s1Periods.map(p => subject.periods?.[p]?.score).filter((s: any) => s !== null && s !== undefined && s >= 60);
+    const s2Scores = s2Periods.map(p => subject.periods?.[p]?.score).filter((s: any) => s !== null && s !== undefined && s >= 60);
+    if (s1Scores.length !== 3 || s2Scores.length !== 3) return '-';
+    const s1Avg = s1Scores.reduce((a: number, b: number) => a + b, 0) / 3;
+    const s2Avg = s2Scores.reduce((a: number, b: number) => a + b, 0) / 3;
+    return (Math.floor(((s1Avg + s2Avg) / 2) * 10) / 10).toFixed(0);
   };
 
-  const getColumnHeaders = () => {
-    if (period === 'semester1') return ['P1', 'P2', 'P3', 'S.AVC', 'P4', 'P5', 'P6', 'S.AVC', 'Y.AVG'];
-    if (period === 'semester2') return ['P4', 'P5', 'P6', 'S.AVC', 'Y.AVG'];
-    if (period === 'yearly') return ['P1', 'P2', 'P3', 'S.AVC', 'P4', 'P5', 'P6', 'S.AVC', 'Y.AVG'];
-    return ['Score'];
+  const computeSubjectSemAvg = (subject: any, periods: string[]): string => {
+    const hasInc = periods.some(p => subject.periods?.[p]?.isIncomplete || subject.periods?.[p]?.noGrades);
+    if (hasInc) return '--';
+    const scores = periods.map(p => subject.periods?.[p]?.score).filter((s: any) => s !== null && s !== undefined);
+    if (scores.length !== periods.length) return '-';
+    return (Math.floor((scores.reduce((a: number, b: number) => a + b, 0) / scores.length) * 10) / 10).toFixed(0);
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto p-0 gap-0 border-none" style={{ background: '#f5f5f0' }}>
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto p-0 gap-0 border-none" style={{ background: '#ffffff' }}>
         <DialogHeader className="sr-only">
           <DialogTitle>Student Report Card</DialogTitle>
-          <DialogDescription>{periodName}</DialogDescription>
+          <DialogDescription>Academic Report Card</DialogDescription>
         </DialogHeader>
 
         {isLoading ? (
@@ -125,50 +102,96 @@ export const StudentReportDialog = ({
             <Skeleton className="h-32 w-full" />
           </div>
         ) : report ? (
-          <div id="report-content" className="font-sans">
-            {/* ===== DARK HEADER ===== */}
-            <div className="relative px-6 py-4" style={{ background: 'linear-gradient(135deg, #1a2744 0%, #243554 100%)' }}>
-              <div className="flex items-center justify-between">
-                <div>
-                  <h1 className="text-2xl font-extrabold text-white tracking-wider uppercase">REPORT</h1>
-                  <p className="text-xs font-semibold text-teal-300 uppercase tracking-widest mt-0.5">
-                    {getDepartmentLabel(report)}
-                  </p>
+          <div id="report-content" style={{ fontFamily: "'Times New Roman', Times, serif" }}>
+
+            {/* ===== HEADER WITH LOGO SPACE ===== */}
+            <div className="px-6 pt-5 pb-3">
+              <div className="flex items-start justify-between">
+                {/* Left: Logo placeholder + School info */}
+                <div className="flex items-start gap-4">
+                  {/* Logo placeholder */}
+                  <div
+                    className="flex items-center justify-center rounded-full border-4 flex-shrink-0"
+                    style={{
+                      width: 80,
+                      height: 80,
+                      borderColor: '#1a2744',
+                      background: '#e8edf3',
+                    }}
+                  >
+                    <span className="text-[9px] font-bold text-center leading-tight" style={{ color: '#1a2744' }}>
+                      SCHOOL<br />LOGO
+                    </span>
+                  </div>
+                  <div className="pt-1">
+                    <h1 className="text-xl font-extrabold tracking-wide" style={{ color: '#1a2744' }}>
+                      SCHOOL NAME HERE
+                    </h1>
+                    <p className="text-[11px] text-gray-600">Address Line, City, Country</p>
+                    <p className="text-[11px] text-gray-600">Contact: (000) 000-0000000</p>
+                  </div>
                 </div>
-                <div className="flex items-center gap-3">
-                  <span className="text-[10px] font-bold text-gray-300 uppercase tracking-wider">Student Grade</span>
-                  <div className={`${grade.color} text-white text-3xl font-black w-14 h-14 flex items-center justify-center rounded-md shadow-lg`}>
-                    {grade.letter}
+                {/* Right: Report type & semester */}
+                <div className="text-right pt-1 space-y-1">
+                  <div className="flex items-center justify-end gap-2">
+                    <span className="text-[11px] font-bold text-gray-600 uppercase">Report Type:</span>
+                    <span
+                      className="text-[11px] font-bold px-3 py-0.5 border"
+                      style={{ borderColor: '#1a2744', color: '#1a2744' }}
+                    >
+                      {getDepartmentLabel(report).toUpperCase()}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-end gap-2">
+                    <span className="text-[11px] font-bold text-gray-600 uppercase">Semester:</span>
+                    <span
+                      className="text-[11px] font-bold px-3 py-0.5 border"
+                      style={{ borderColor: '#1a2744', color: '#1a2744' }}
+                    >
+                      {semesterLabel}
+                    </span>
                   </div>
                 </div>
               </div>
+
+              {/* Title */}
+              <div className="text-center mt-2">
+                <h2 className="text-lg font-extrabold tracking-wider uppercase" style={{ color: '#1a2744' }}>
+                  Academic Report Card
+                </h2>
+                <p className="text-[11px] text-gray-500">
+                  {report.student.classes?.academic_years?.year_name || '--'} SCHOOL YEAR
+                </p>
+              </div>
             </div>
 
-            {/* ===== STUDENT INFO ===== */}
-            <div className="px-6 py-3 border-b-2" style={{ borderColor: '#1a2744' }}>
-              <div className="grid grid-cols-2 gap-2">
-                <div className="flex items-center gap-2">
-                  <span className="text-[11px] font-bold text-gray-600 uppercase whitespace-nowrap">Name of Student</span>
-                  <span className="text-sm font-bold text-gray-900 uppercase border-b border-gray-400 flex-1 pb-0.5 text-center">
+            {/* ===== STUDENT INFO BAR ===== */}
+            <div className="mx-6 mb-3 border-t border-b py-2 space-y-1" style={{ borderColor: '#1a2744' }}>
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2 flex-1">
+                  <span className="text-[11px] font-bold text-gray-600 uppercase whitespace-nowrap" style={{ background: '#e0e5ec', padding: '2px 8px' }}>
+                    Name of Student
+                  </span>
+                  <span className="text-sm font-bold text-gray-900 border-b flex-1 text-center pb-0.5" style={{ borderColor: '#999' }}>
                     {report.student.full_name}
                   </span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-[11px] font-bold text-gray-600 uppercase whitespace-nowrap">Academic Year</span>
-                  <span className="text-sm font-bold text-gray-900 border-b border-gray-400 flex-1 pb-0.5 text-center">
-                    {report.student.classes?.academic_years?.year_name || '--'}
+              </div>
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2 flex-1">
+                  <span className="text-[11px] font-bold text-gray-600 uppercase whitespace-nowrap" style={{ background: '#e0e5ec', padding: '2px 8px' }}>
+                    Grade Level
                   </span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-[11px] font-bold text-gray-600 uppercase whitespace-nowrap">Grade Level</span>
-                  <span className="text-sm font-bold text-gray-900 uppercase border-b border-gray-400 flex-1 pb-0.5 text-center">
+                  <span className="text-sm font-bold text-gray-900 border-b flex-1 text-center pb-0.5" style={{ borderColor: '#999' }}>
                     {report.student.classes?.name || '--'}
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="text-[11px] font-bold text-gray-600 uppercase whitespace-nowrap">Report Type</span>
-                  <span className="text-sm font-bold text-gray-900 border-b border-gray-400 flex-1 pb-0.5 text-center">
-                    {periodName}
+                  <span className="text-[11px] font-bold text-gray-600 uppercase whitespace-nowrap" style={{ background: '#e0e5ec', padding: '2px 8px' }}>
+                    Student ID
+                  </span>
+                  <span className="text-sm font-bold text-gray-900 border-b text-center pb-0.5 w-28" style={{ borderColor: '#999' }}>
+                    {report.student.student_id}
                   </span>
                 </div>
               </div>
@@ -176,125 +199,115 @@ export const StudentReportDialog = ({
 
             {/* Incomplete Notice */}
             {report.hasIncomplete && (
-              <div className="mx-6 mt-3 p-2 rounded text-xs font-medium" style={{ background: '#fff3cd', color: '#856404', border: '1px solid #ffeaa7' }}>
+              <div className="mx-6 mb-2 p-2 rounded text-xs font-medium" style={{ background: '#fff3cd', color: '#856404', border: '1px solid #ffeaa7' }}>
                 ⚠️ This student has incomplete grades (marked as "I"). Averages and rankings cannot be calculated until all grades are complete.
               </div>
             )}
 
             {/* ===== GRADES TABLE ===== */}
-            <div className="px-6 py-3">
-              <div className="overflow-hidden rounded border" style={{ borderColor: '#1a2744' }}>
-                <table className="w-full text-xs" style={{ borderCollapse: 'collapse' }}>
+            <div className="px-6 pb-3">
+              <div className="overflow-hidden border-2" style={{ borderColor: '#1a2744' }}>
+                <table className="w-full" style={{ borderCollapse: 'collapse', fontSize: '13px' }}>
                   <thead>
                     <tr style={{ background: '#1a2744' }}>
-                      <th className="text-left px-3 py-2 text-white font-bold text-[11px] uppercase tracking-wide border-r border-gray-600">Subject</th>
+                      <th className="text-left px-3 py-2 text-white font-bold text-[12px] uppercase tracking-wide border-r border-gray-500" style={{ width: '120px' }}>
+                        Subject
+                      </th>
                       {report.isSemesterReport ? (
                         period === 'yearly' ? (
                           <>
-                            <th className="text-center px-1.5 py-2 text-white font-bold text-[10px] border-r border-gray-600">P1</th>
-                            <th className="text-center px-1.5 py-2 text-white font-bold text-[10px] border-r border-gray-600">P2</th>
-                            <th className="text-center px-1.5 py-2 text-white font-bold text-[10px] border-r border-gray-600">P3</th>
-                            <th className="text-center px-1.5 py-2 text-yellow-300 font-bold text-[10px] border-r border-gray-600">S.AVC</th>
-                            <th className="text-center px-1.5 py-2 text-white font-bold text-[10px] border-r border-gray-600">P4</th>
-                            <th className="text-center px-1.5 py-2 text-white font-bold text-[10px] border-r border-gray-600">P5</th>
-                            <th className="text-center px-1.5 py-2 text-white font-bold text-[10px] border-r border-gray-600">P6</th>
-                            <th className="text-center px-1.5 py-2 text-yellow-300 font-bold text-[10px] border-r border-gray-600">S.AVC</th>
-                            <th className="text-center px-1.5 py-2 text-green-300 font-bold text-[10px]">Y.AVG</th>
+                            <th className="text-center px-1 py-2 text-white font-bold text-[11px] border-r border-gray-500">P1</th>
+                            <th className="text-center px-1 py-2 text-white font-bold text-[11px] border-r border-gray-500">P2</th>
+                            <th className="text-center px-1 py-2 text-white font-bold text-[11px] border-r border-gray-500">P3</th>
+                            <th className="text-center px-1 py-2 font-bold text-[11px] border-r border-gray-500" style={{ color: '#fde68a' }}>S.AVG</th>
+                            <th className="text-center px-1 py-2 text-white font-bold text-[11px] border-r border-gray-500">P4</th>
+                            <th className="text-center px-1 py-2 text-white font-bold text-[11px] border-r border-gray-500">P5</th>
+                            <th className="text-center px-1 py-2 text-white font-bold text-[11px] border-r border-gray-500">P6</th>
+                            <th className="text-center px-1 py-2 font-bold text-[11px] border-r border-gray-500" style={{ color: '#fde68a' }}>S.AVG</th>
+                            <th className="text-center px-1 py-2 font-bold text-[12px]" style={{ color: '#86efac', background: '#1a2744' }}>Y.AVG</th>
                           </>
                         ) : period === 'semester1' ? (
                           <>
-                            <th className="text-center px-2 py-2 text-white font-bold text-[10px] border-r border-gray-600">P1</th>
-                            <th className="text-center px-2 py-2 text-white font-bold text-[10px] border-r border-gray-600">P2</th>
-                            <th className="text-center px-2 py-2 text-white font-bold text-[10px] border-r border-gray-600">P3</th>
-                            <th className="text-center px-2 py-2 text-white font-bold text-[10px] border-r border-gray-600">Exam</th>
-                            <th className="text-center px-2 py-2 text-yellow-300 font-bold text-[10px]">S.AVC</th>
+                            <th className="text-center px-2 py-2 text-white font-bold text-[11px] border-r border-gray-500">P1</th>
+                            <th className="text-center px-2 py-2 text-white font-bold text-[11px] border-r border-gray-500">P2</th>
+                            <th className="text-center px-2 py-2 text-white font-bold text-[11px] border-r border-gray-500">P3</th>
+                            <th className="text-center px-2 py-2 text-white font-bold text-[11px] border-r border-gray-500">Exam</th>
+                            <th className="text-center px-2 py-2 font-bold text-[11px]" style={{ color: '#fde68a' }}>S.AVG</th>
                           </>
                         ) : (
                           <>
-                            <th className="text-center px-2 py-2 text-white font-bold text-[10px] border-r border-gray-600">P4</th>
-                            <th className="text-center px-2 py-2 text-white font-bold text-[10px] border-r border-gray-600">P5</th>
-                            <th className="text-center px-2 py-2 text-white font-bold text-[10px] border-r border-gray-600">P6</th>
-                            <th className="text-center px-2 py-2 text-white font-bold text-[10px] border-r border-gray-600">Exam</th>
-                            <th className="text-center px-2 py-2 text-yellow-300 font-bold text-[10px]">S.AVC</th>
+                            <th className="text-center px-2 py-2 text-white font-bold text-[11px] border-r border-gray-500">P4</th>
+                            <th className="text-center px-2 py-2 text-white font-bold text-[11px] border-r border-gray-500">P5</th>
+                            <th className="text-center px-2 py-2 text-white font-bold text-[11px] border-r border-gray-500">P6</th>
+                            <th className="text-center px-2 py-2 text-white font-bold text-[11px] border-r border-gray-500">Exam</th>
+                            <th className="text-center px-2 py-2 font-bold text-[11px]" style={{ color: '#fde68a' }}>S.AVG</th>
                           </>
                         )
                       ) : (
-                        <th className="text-center px-3 py-2 text-white font-bold text-[11px]">Score</th>
+                        <th className="text-center px-3 py-2 text-white font-bold text-[12px]">Score</th>
                       )}
                     </tr>
                   </thead>
                   <tbody>
                     {report.subjects.map((subject: any, index: number) => {
                       const isEven = index % 2 === 0;
-                      const rowBg = isEven ? '#ffffff' : '#f0f4f8';
+                      const rowBg = isEven ? '#ffffff' : '#f5f7fa';
                       return (
-                        <tr key={index} style={{ background: rowBg, borderBottom: '1px solid #d1d5db' }}>
-                          <td className="px-3 py-1.5 font-semibold text-gray-800 text-[11px] uppercase border-r" style={{ borderColor: '#d1d5db' }}>
+                        <tr key={index} style={{ background: rowBg, borderBottom: '1px solid #cbd5e1' }}>
+                          <td className="px-3 py-1.5 font-bold text-[12px] uppercase border-r" style={{ borderColor: '#cbd5e1', color: '#1a2744' }}>
                             {subject.name}
                           </td>
                           {report.isSemesterReport ? (
                             period === 'yearly' ? (
                               <>
-                                {['p1','p2','p3'].map(p => (
-                                  <td key={p} className="text-center px-1.5 py-1.5 font-semibold text-gray-800 text-[11px] border-r" style={{ borderColor: '#d1d5db' }}>
+                                {['p1', 'p2', 'p3'].map(p => (
+                                  <td key={p} className="text-center px-1 py-1.5 font-semibold text-[12px] border-r" style={{ borderColor: '#cbd5e1', color: '#374151' }}>
                                     {displayScore(subject.periods?.[p]?.score, subject.periods?.[p]?.noGrades)}
                                   </td>
                                 ))}
                                 {/* S1 AVG */}
-                                <td className="text-center px-1.5 py-1.5 font-bold text-[11px] border-r" style={{ borderColor: '#d1d5db', color: '#1a2744' }}>
-                                  {(() => {
-                                    const s1Periods = ['p1', 'p2', 'p3', 'exam_s1'];
-                                    const hasS1Incomplete = s1Periods.some(p => subject.periods?.[p]?.isIncomplete);
-                                    if (hasS1Incomplete) return '--';
-                                    const s1Scores = s1Periods.map((p: string) => subject.periods?.[p]?.score).filter((s: any) => s !== null && s !== undefined);
-                                    return s1Scores.length === 4 ? (Math.floor((s1Scores.reduce((a: number, b: number) => a + b, 0) / s1Scores.length) * 10) / 10).toFixed(1) : '-';
-                                  })()}
+                                <td className="text-center px-1 py-1.5 font-bold text-[12px] border-r" style={{ borderColor: '#cbd5e1', color: '#1a2744' }}>
+                                  {computeSubjectSemAvg(subject, ['p1', 'p2', 'p3'])}
                                 </td>
-                                {['p4','p5','p6'].map(p => (
-                                  <td key={p} className="text-center px-1.5 py-1.5 font-semibold text-gray-800 text-[11px] border-r" style={{ borderColor: '#d1d5db' }}>
+                                {['p4', 'p5', 'p6'].map(p => (
+                                  <td key={p} className="text-center px-1 py-1.5 font-semibold text-[12px] border-r" style={{ borderColor: '#cbd5e1', color: '#374151' }}>
                                     {displayScore(subject.periods?.[p]?.score, subject.periods?.[p]?.noGrades)}
                                   </td>
                                 ))}
                                 {/* S2 AVG */}
-                                <td className="text-center px-1.5 py-1.5 font-bold text-[11px] border-r" style={{ borderColor: '#d1d5db', color: '#1a2744' }}>
-                                  {(() => {
-                                    const s2Periods = ['p4', 'p5', 'p6', 'exam_s2'];
-                                    const hasS2Incomplete = s2Periods.some(p => subject.periods?.[p]?.isIncomplete);
-                                    if (hasS2Incomplete) return '--';
-                                    const s2Scores = s2Periods.map((p: string) => subject.periods?.[p]?.score).filter((s: any) => s !== null && s !== undefined);
-                                    return s2Scores.length === 4 ? (Math.floor((s2Scores.reduce((a: number, b: number) => a + b, 0) / s2Scores.length) * 10) / 10).toFixed(1) : '-';
-                                  })()}
+                                <td className="text-center px-1 py-1.5 font-bold text-[12px] border-r" style={{ borderColor: '#cbd5e1', color: '#1a2744' }}>
+                                  {computeSubjectSemAvg(subject, ['p4', 'p5', 'p6'])}
                                 </td>
-                                {/* Y.AVG */}
-                                <td className="text-center px-1.5 py-1.5 font-black text-[11px]" style={{ color: '#16a34a' }}>
-                                  {subject.hasIncomplete ? '--' : (subject.semesterAverage !== null ? subject.semesterAverage.toFixed(1) : '-')}
+                                {/* Y.AVG - green bg */}
+                                <td className="text-center px-1 py-1.5 font-black text-[12px]" style={{ background: '#dcfce7', color: '#166534' }}>
+                                  {computeSubjectYearlyAvg(subject)}
                                 </td>
                               </>
                             ) : period === 'semester1' ? (
                               <>
-                                {['p1','p2','p3','exam_s1'].map(p => (
-                                  <td key={p} className={`text-center px-2 py-1.5 font-semibold text-[11px] border-r ${subject.periods?.[p]?.noGrades ? 'text-gray-400' : subject.periods?.[p]?.isIncomplete ? 'text-orange-500 font-bold' : 'text-gray-800'}`} style={{ borderColor: '#d1d5db' }}>
+                                {['p1', 'p2', 'p3', 'exam_s1'].map(p => (
+                                  <td key={p} className={`text-center px-2 py-1.5 font-semibold text-[12px] border-r`} style={{ borderColor: '#cbd5e1', color: subject.periods?.[p]?.noGrades ? '#9ca3af' : subject.periods?.[p]?.isIncomplete ? '#ea580c' : '#374151' }}>
                                     {displayScore(subject.periods?.[p]?.score, subject.periods?.[p]?.noGrades)}
                                   </td>
                                 ))}
-                                <td className="text-center px-2 py-1.5 font-bold text-[11px]" style={{ color: '#1a2744' }}>
+                                <td className="text-center px-2 py-1.5 font-bold text-[12px]" style={{ color: '#1a2744' }}>
                                   {subject.hasIncomplete ? '--' : (subject.semesterAverage !== null ? subject.semesterAverage.toFixed(1) : '-')}
                                 </td>
                               </>
                             ) : (
                               <>
-                                {['p4','p5','p6','exam_s2'].map(p => (
-                                  <td key={p} className={`text-center px-2 py-1.5 font-semibold text-[11px] border-r ${subject.periods?.[p]?.noGrades ? 'text-gray-400' : subject.periods?.[p]?.isIncomplete ? 'text-orange-500 font-bold' : 'text-gray-800'}`} style={{ borderColor: '#d1d5db' }}>
+                                {['p4', 'p5', 'p6', 'exam_s2'].map(p => (
+                                  <td key={p} className={`text-center px-2 py-1.5 font-semibold text-[12px] border-r`} style={{ borderColor: '#cbd5e1', color: subject.periods?.[p]?.noGrades ? '#9ca3af' : subject.periods?.[p]?.isIncomplete ? '#ea580c' : '#374151' }}>
                                     {displayScore(subject.periods?.[p]?.score, subject.periods?.[p]?.noGrades)}
                                   </td>
                                 ))}
-                                <td className="text-center px-2 py-1.5 font-bold text-[11px]" style={{ color: '#1a2744' }}>
+                                <td className="text-center px-2 py-1.5 font-bold text-[12px]" style={{ color: '#1a2744' }}>
                                   {subject.hasIncomplete ? '--' : (subject.semesterAverage !== null ? subject.semesterAverage.toFixed(1) : '-')}
                                 </td>
                               </>
                             )
                           ) : (
-                            <td className={`text-center px-3 py-1.5 font-bold text-[11px] ${subject.noGrades ? 'text-gray-400' : subject.hasIncomplete ? 'text-orange-500' : 'text-gray-800'}`}>
+                            <td className={`text-center px-3 py-1.5 font-bold text-[12px]`} style={{ color: subject.noGrades ? '#9ca3af' : subject.hasIncomplete ? '#ea580c' : '#374151' }}>
                               {subject.noGrades ? '--' : subject.hasIncomplete ? 'I' : subject.total}
                             </td>
                           )}
@@ -306,60 +319,63 @@ export const StudentReportDialog = ({
               </div>
             </div>
 
-            {/* ===== TEACHER COMMENT ===== */}
-            <div className="px-6 py-2">
-              <div className="rounded border p-3 space-y-1.5" style={{ borderColor: '#d1d5db', background: '#fafafa' }}>
-                <div className="flex items-start gap-2">
-                  <span className="text-[10px] font-bold text-gray-600 uppercase whitespace-nowrap w-28">Teacher Comment:</span>
-                  <span className="text-[11px] text-gray-500 border-b border-gray-300 flex-1 min-h-[16px]"></span>
+            {/* ===== TEACHER COMMENT SECTION ===== */}
+            <div className="px-6 pb-3">
+              <div className="space-y-2 border-t pt-3" style={{ borderColor: '#cbd5e1' }}>
+                <div className="flex items-center gap-3">
+                  <span className="text-[12px] font-bold uppercase whitespace-nowrap" style={{ color: '#1a2744' }}>Teacher Comment:</span>
+                  <div className="flex-1 border-b min-h-[20px]" style={{ borderColor: '#9ca3af', background: '#f0f0f0' }}></div>
                 </div>
-                <div className="flex items-start gap-2">
-                  <span className="text-[10px] font-bold text-gray-600 uppercase whitespace-nowrap w-28">Excels In:</span>
-                  <span className="text-[11px] text-gray-500 border-b border-gray-300 flex-1 min-h-[16px]"></span>
+                <div className="flex items-center gap-3">
+                  <span className="text-[12px] font-bold uppercase whitespace-nowrap" style={{ color: '#1a2744' }}>Excell In:</span>
+                  <div className="flex-1 border-b min-h-[20px]" style={{ borderColor: '#9ca3af', background: '#d1d5db' }}></div>
                 </div>
-                <div className="flex items-start gap-2">
-                  <span className="text-[10px] font-bold text-gray-600 uppercase whitespace-nowrap w-28">Can Improve In:</span>
-                  <span className="text-[11px] text-gray-500 border-b border-gray-300 flex-1 min-h-[16px]"></span>
+                <div className="flex items-center gap-3">
+                  <span className="text-[12px] font-bold uppercase whitespace-nowrap" style={{ color: '#1a2744' }}>Can Improve In:</span>
+                  <div className="flex-1 border-b min-h-[20px]" style={{ borderColor: '#9ca3af', background: '#d1d5db' }}></div>
                 </div>
               </div>
             </div>
 
             {/* ===== SEMESTER AVERAGE / GENERAL AVERAGE BAR ===== */}
-            <div className="mx-6 mt-1 rounded overflow-hidden">
+            <div className="mx-6 mt-1 overflow-hidden border-2" style={{ borderColor: '#1a2744' }}>
+              {/* Header bar */}
               <div className="flex items-center justify-between px-4 py-2" style={{ background: '#1a2744' }}>
-                <span className="text-[11px] font-bold text-white uppercase tracking-wider">Semester Average</span>
-                <span className="text-[11px] font-bold text-white uppercase tracking-wider">General Average</span>
+                <span className="text-[13px] font-extrabold text-white uppercase tracking-wider">Semester Average</span>
+                <span className="text-[13px] font-extrabold text-white uppercase tracking-wider">General Average</span>
               </div>
-              <div className="flex items-center justify-between px-4 py-3" style={{ background: '#f0f4f8' }}>
-                <div className="space-y-1">
+              {/* Content */}
+              <div className="flex items-center justify-between px-6 py-4">
+                {/* Left: Semester averages */}
+                <div className="space-y-2">
                   {report.isSemesterReport && (period === 'yearly' || period === 'semester1') && (
-                    <div className="flex items-center gap-3">
-                      <span className="text-[11px] font-bold text-gray-700">SEM1</span>
-                      <span className="text-sm font-bold text-gray-900">
-                        {computeSemAvg(report.subjects, ['p1','p2','p3','exam_s1'], report.hasIncomplete)}%
+                    <div className="flex items-center gap-4">
+                      <span className="text-[13px] font-bold" style={{ color: '#1a2744' }}>SEM1</span>
+                      <span className="text-base font-bold" style={{ color: '#374151' }}>
+                        {computeSemAvg(report.subjects, ['p1', 'p2', 'p3'], report.hasIncomplete)}%
                       </span>
                     </div>
                   )}
                   {report.isSemesterReport && (period === 'yearly' || period === 'semester2') && (
-                    <div className="flex items-center gap-3">
-                      <span className="text-[11px] font-bold text-gray-700">SEM2</span>
-                      <span className="text-sm font-bold text-gray-900">
-                        {computeSemAvg(report.subjects, ['p4','p5','p6','exam_s2'], report.hasIncomplete)}%
+                    <div className="flex items-center gap-4">
+                      <span className="text-[13px] font-bold" style={{ color: '#1a2744' }}>SEM2</span>
+                      <span className="text-base font-bold" style={{ color: '#374151' }}>
+                        {computeSemAvg(report.subjects, ['p4', 'p5', 'p6'], report.hasIncomplete)}%
                       </span>
                     </div>
                   )}
                   {!report.isSemesterReport && (
-                    <div className="flex items-center gap-3">
-                      <span className="text-[11px] font-bold text-gray-700">Period</span>
-                      <span className="text-sm font-bold text-gray-900">
+                    <div className="flex items-center gap-4">
+                      <span className="text-[13px] font-bold" style={{ color: '#1a2744' }}>Period</span>
+                      <span className="text-base font-bold" style={{ color: '#374151' }}>
                         {report.hasIncomplete ? '--' : (report.overallAverage !== null ? report.overallAverage.toFixed(1) + '%' : '-')}
                       </span>
                     </div>
                   )}
                   {/* Rank */}
-                  <div className="flex items-center gap-3 mt-1">
-                    <span className="text-[10px] font-bold text-gray-500 uppercase">Rank</span>
-                    <span className="text-xs font-bold text-gray-800">
+                  <div className="flex items-center gap-4 mt-1">
+                    <span className="text-[11px] font-bold text-gray-500 uppercase">Rank</span>
+                    <span className="text-sm font-bold" style={{ color: '#1a2744' }}>
                       {report.hasIncomplete ? '--' : (() => {
                         if (report.isSemesterReport) {
                           const rank = report.yearlyTotal?.class_rank;
@@ -374,21 +390,30 @@ export const StudentReportDialog = ({
                     </span>
                   </div>
                 </div>
-                {/* Big green percentage */}
+                {/* Right: Big green percentage */}
                 <div className="text-right">
-                  <span className="text-5xl font-black" style={{ color: '#16a34a' }}>
+                  <span className="font-black" style={{ fontSize: '56px', color: '#16a34a', lineHeight: 1 }}>
                     {report.hasIncomplete ? '--' : (report.overallAverage !== null ? `${report.overallAverage.toFixed(1)}%` : '-')}
                   </span>
                 </div>
               </div>
             </div>
 
-            {/* ===== SPONSOR SIGNATURE ===== */}
-            <div className="px-6 py-3 flex justify-end">
-              <div className="text-right">
-                <div className="border-t border-gray-400 w-40 mb-0.5"></div>
-                <span className="text-[10px] font-bold text-gray-500 uppercase">Class Sponsor</span>
+            {/* ===== APPROVED BY / SPONSOR SECTION ===== */}
+            <div className="px-6 py-4 flex justify-center">
+              <div className="text-center">
+                <p className="text-[11px] font-bold uppercase text-gray-600 mb-1">Approved By:</p>
+                <div className="border-t-2 w-48 mx-auto mb-1" style={{ borderColor: '#374151' }}></div>
+                <p className="text-[11px] font-bold uppercase" style={{ color: '#1a2744' }}>Class Sponsor</p>
+                <p className="text-[10px] text-gray-500 uppercase">Official School Seal</p>
               </div>
+            </div>
+
+            {/* ===== FOOTER ===== */}
+            <div className="text-center py-2 border-t" style={{ borderColor: '#1a2744', background: '#f5f7fa' }}>
+              <span className="text-[10px] text-gray-500">
+                Generated by SmartGrade School Management System
+              </span>
             </div>
 
             {/* ===== ACTION BUTTONS ===== */}
