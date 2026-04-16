@@ -550,10 +550,21 @@ export const StudentReportDialog = ({
                   CONDUCT & CHARACTER ASSESSMENT
                 </div>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', borderTop: '0.5px solid #ccc' }}>
-                  {['Behavior', 'Punctuality', 'Participation', 'Homework'].map((item, i) => (
-                    <div key={item} style={{ padding: '6px 10px', borderRight: i < 3 ? '0.5px solid #ccc' : 'none' }}>
-                      <label style={{ fontSize: '9px', color: '#888', textTransform: 'uppercase', fontWeight: 700, display: 'block' }}>{item}</label>
-                      <span style={{ fontSize: '11px', fontWeight: 700, color: navy }}>—</span>
+                  {([
+                    ['Behavior', 'behavior'],
+                    ['Punctuality', 'punctuality'],
+                    ['Participation', 'participation'],
+                    ['Homework', 'homework'],
+                  ] as const).map(([label, key], i) => (
+                    <div key={key} style={{ padding: '6px 10px', borderRight: i < 3 ? '0.5px solid #ccc' : 'none' }}>
+                      <label style={{ fontSize: '9px', color: '#888', textTransform: 'uppercase', fontWeight: 700, display: 'block', marginBottom: 3 }}>{label}</label>
+                      <EditableField
+                        value={(inputs[key] as string) || ''}
+                        onChange={setField(key)}
+                        editable={editing}
+                        options={RATING_OPTIONS}
+                        minHeight={22}
+                      />
                     </div>
                   ))}
                 </div>
@@ -565,16 +576,37 @@ export const StudentReportDialog = ({
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', borderTop: '0.5px solid #ccc' }}>
                   <div style={{ padding: '8px 10px', borderRight: '0.5px solid #ccc' }}>
                     <label style={{ fontSize: '9px', color: '#888', textTransform: 'uppercase', fontWeight: 700, display: 'block', marginBottom: 4 }}>Teacher Comment</label>
-                    <p style={{ fontSize: '11px', color: '#222', border: '0.5px solid #ddd', padding: '4px 6px', borderRadius: 3, background: '#fafafa', margin: 0, minHeight: 30 }}>&nbsp;</p>
+                    <EditableField
+                      value={inputs.teacher_comment || ''}
+                      onChange={setField('teacher_comment')}
+                      editable={editing}
+                      multiline
+                      minHeight={80}
+                      placeholder="Overall remarks about the student..."
+                    />
                   </div>
                   <div>
                     <div style={{ padding: '8px 10px', borderBottom: '0.5px solid #ccc' }}>
                       <label style={{ fontSize: '9px', color: '#888', textTransform: 'uppercase', fontWeight: 700, display: 'block', marginBottom: 4 }}>Can Improve In</label>
-                      <p style={{ fontSize: '11px', color: '#222', border: '0.5px solid #ddd', padding: '4px 6px', borderRadius: 3, background: '#fafafa', margin: 0 }}>&nbsp;</p>
+                      <EditableField
+                        value={inputs.can_improve_in || ''}
+                        onChange={setField('can_improve_in')}
+                        editable={editing}
+                        multiline
+                        minHeight={32}
+                        placeholder="Areas needing improvement..."
+                      />
                     </div>
                     <div style={{ padding: '8px 10px' }}>
                       <label style={{ fontSize: '9px', color: '#888', textTransform: 'uppercase', fontWeight: 700, display: 'block', marginBottom: 4 }}>Excels In</label>
-                      <p style={{ fontSize: '11px', color: '#222', border: '0.5px solid #ddd', padding: '4px 6px', borderRadius: 3, background: '#fafafa', margin: 0 }}>&nbsp;</p>
+                      <EditableField
+                        value={inputs.excels_in || ''}
+                        onChange={setField('excels_in')}
+                        editable={editing}
+                        multiline
+                        minHeight={32}
+                        placeholder="Subjects/areas of strength..."
+                      />
                     </div>
                   </div>
                 </div>
