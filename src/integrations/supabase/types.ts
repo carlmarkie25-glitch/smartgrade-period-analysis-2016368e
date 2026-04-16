@@ -1078,6 +1078,68 @@ export type Database = {
           },
         ]
       }
+      student_report_inputs: {
+        Row: {
+          administrator_name: string | null
+          behavior: string | null
+          can_improve_in: string | null
+          class_teacher_name: string | null
+          created_at: string
+          excels_in: string | null
+          homework: string | null
+          id: string
+          participation: string | null
+          period: string
+          punctuality: string | null
+          student_id: string
+          teacher_comment: string | null
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          administrator_name?: string | null
+          behavior?: string | null
+          can_improve_in?: string | null
+          class_teacher_name?: string | null
+          created_at?: string
+          excels_in?: string | null
+          homework?: string | null
+          id?: string
+          participation?: string | null
+          period: string
+          punctuality?: string | null
+          student_id: string
+          teacher_comment?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          administrator_name?: string | null
+          behavior?: string | null
+          can_improve_in?: string | null
+          class_teacher_name?: string | null
+          created_at?: string
+          excels_in?: string | null
+          homework?: string | null
+          id?: string
+          participation?: string | null
+          period?: string
+          punctuality?: string | null
+          student_id?: string
+          teacher_comment?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "student_report_inputs_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       student_yearly_totals: {
         Row: {
           class_rank: number | null
