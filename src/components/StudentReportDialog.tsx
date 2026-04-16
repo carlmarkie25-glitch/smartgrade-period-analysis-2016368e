@@ -128,6 +128,30 @@ export const StudentReportDialog = ({
   className,
 }: StudentReportDialogProps) => {
   const { data: report, isLoading } = useStudentReport(studentId, period);
+  const { data: savedInputs } = useReportInputs(studentId, period);
+  const canEdit = useCanEditReportInputs(studentId);
+  const saveMutation = useSaveReportInputs(studentId, period);
+
+  const [editing, setEditing] = useState(false);
+  const [inputs, setInputs] = useState<ReportInputs>({});
+
+  useEffect(() => {
+    setInputs(savedInputs ?? {});
+    setEditing(false);
+  }, [savedInputs, studentId, period]);
+
+  const setField = (k: keyof ReportInputs) => (v: string) =>
+    setInputs((prev) => ({ ...prev, [k]: v }));
+
+  const handleSave = async () => {
+    try {
+      await saveMutation.mutateAsync(inputs);
+      toast({ title: "Saved", description: "Report inputs updated." });
+      setEditing(false);
+    } catch (e: any) {
+      toast({ title: "Save failed", description: e.message, variant: "destructive" });
+    }
+  };
 
   const handlePrint = () => window.print();
 
