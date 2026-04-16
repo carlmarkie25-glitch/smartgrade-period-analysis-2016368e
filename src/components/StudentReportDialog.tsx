@@ -58,7 +58,7 @@ export const StudentReportDialog = ({
   };
 
   const getDepartmentLabel = () => {
-    return report?.student?.departments?.name || className || "PRIMARY";
+    return className || "PRIMARY";
   };
 
   // Compute subject semester average
