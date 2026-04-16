@@ -28,13 +28,13 @@ const displayScore = (score: number | null | undefined, noGrades?: boolean): str
   return String(score);
 };
 
-const computeSemAvg = (subjects: any[], periods: string[], hasIncomplete: boolean): string => {
-  if (hasIncomplete) return '--';
-  const avgs = subjects.map((s: any) => {
-    const scores = periods.map(p => s.periods?.[p]?.score).filter((sc: any) => sc !== null && sc !== undefined && sc >= 60);
-    return scores.length === periods.length ? scores.reduce((a: number, b: number) => a + b, 0) / scores.length : null;
-  }).filter(Boolean);
-  return avgs.length > 0 ? (Math.floor(((avgs as number[]).reduce((a, b) => a + b, 0) / avgs.length) * 10) / 10).toFixed(1) : '-';
+/** Score color class */
+const scoreColorStyle = (score: number | null | undefined): React.CSSProperties => {
+  if (score === null || score === undefined) return { color: '#999' };
+  if (score >= 90) return { color: '#155724', fontWeight: 700 };
+  if (score >= 75) return { color: '#1a3a6e', fontWeight: 600 };
+  if (score >= 60) return { color: '#856404' };
+  return { color: '#721c24' };
 };
 
 export const StudentReportDialog = ({
@@ -47,49 +47,64 @@ export const StudentReportDialog = ({
   const { data: report, isLoading } = useStudentReport(studentId, period);
 
   const handlePrint = () => window.print();
-  const handleDownload = () => window.print();
 
-  const getPeriodName = (period: string) => {
+  const getSemesterLabel = () => {
     switch (period) {
       case "yearly": return "1 & 2";
       case "semester1": return "1";
       case "semester2": return "2";
-      case "exam_s1": return "Exam S1";
-      case "exam_s2": return "Exam S2";
-      default: return `P${period.replace("p", "")}`;
+      default: return period.replace("p", "P").replace("exam_s", "Exam S");
     }
   };
 
-  const getDepartmentLabel = (report: any) => {
-    return report.student?.departments?.name || className || "DEPARTMENT";
+  const getDepartmentLabel = () => {
+    return className || "PRIMARY";
   };
 
-  const semesterLabel = getPeriodName(period);
-
-  // Compute subject yearly avg for yearly report
-  const computeSubjectYearlyAvg = (subject: any): string => {
-    if (subject.hasIncomplete) return '--';
-    const s1Periods = ['p1', 'p2', 'p3'];
-    const s2Periods = ['p4', 'p5', 'p6'];
-    const s1Scores = s1Periods.map(p => subject.periods?.[p]?.score).filter((s: any) => s !== null && s !== undefined && s >= 60);
-    const s2Scores = s2Periods.map(p => subject.periods?.[p]?.score).filter((s: any) => s !== null && s !== undefined && s >= 60);
-    if (s1Scores.length !== 3 || s2Scores.length !== 3) return '-';
-    const s1Avg = s1Scores.reduce((a: number, b: number) => a + b, 0) / 3;
-    const s2Avg = s2Scores.reduce((a: number, b: number) => a + b, 0) / 3;
-    return (Math.floor(((s1Avg + s2Avg) / 2) * 10) / 10).toFixed(0);
-  };
-
-  const computeSubjectSemAvg = (subject: any, periods: string[]): string => {
+  // Compute subject semester average
+  const computeSubjectSemAvg = (subject: any, periods: string[]): number | null => {
     const hasInc = periods.some(p => subject.periods?.[p]?.isIncomplete || subject.periods?.[p]?.noGrades);
-    if (hasInc) return '--';
+    if (hasInc) return null;
     const scores = periods.map(p => subject.periods?.[p]?.score).filter((s: any) => s !== null && s !== undefined);
-    if (scores.length !== periods.length) return '-';
-    return (Math.floor((scores.reduce((a: number, b: number) => a + b, 0) / scores.length) * 10) / 10).toFixed(0);
+    if (scores.length !== periods.length) return null;
+    return Math.round(scores.reduce((a: number, b: number) => a + b, 0) / scores.length);
   };
+
+  // Compute subject yearly average
+  const computeSubjectYearlyAvg = (subject: any): number | null => {
+    const s1 = computeSubjectSemAvg(subject, ['p1', 'p2', 'p3']);
+    const s2 = computeSubjectSemAvg(subject, ['p4', 'p5', 'p6']);
+    if (s1 === null || s2 === null) return null;
+    return Math.round((s1 + s2) / 2);
+  };
+
+  // Compute aggregate sums for a period key
+  const computeColumnSum = (subjects: any[], periodKey: string): number => {
+    return subjects.reduce((sum: number, s: any) => sum + (s.periods?.[periodKey]?.score ?? 0), 0);
+  };
+
+  // Compute column average
+  const computeColumnAvg = (subjects: any[], periodKey: string): number => {
+    const n = subjects.length;
+    if (n === 0) return 0;
+    return Math.round(computeColumnSum(subjects, periodKey) / n);
+  };
+
+  // Overall summary for averages
+  const computeOverallSemAvg = (subjects: any[], periods: string[]): number | null => {
+    const avgs = subjects.map((s: any) => computeSubjectSemAvg(s, periods)).filter(v => v !== null) as number[];
+    if (avgs.length !== subjects.length) return null;
+    return Math.round(avgs.reduce((a, b) => a + b, 0) / avgs.length);
+  };
+
+  // Styles
+  const navy = '#1a2a6e';
+  const gold = '#c8a84b';
+  const lightBlue = '#2a5298';
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto p-0 gap-0 border-none" style={{ background: '#ffffff' }}>
+      <DialogContent className="max-w-[850px] max-h-[95vh] overflow-y-auto p-0 gap-0 border-none" style={{ background: '#e8eaf0' }}>
         <DialogHeader className="sr-only">
           <DialogTitle>Student Report Card</DialogTitle>
           <DialogDescription>Academic Report Card</DialogDescription>
@@ -101,334 +116,429 @@ export const StudentReportDialog = ({
             <Skeleton className="h-48 w-full" />
             <Skeleton className="h-32 w-full" />
           </div>
-        ) : report ? (
-          <div id="report-content" style={{ fontFamily: "'Times New Roman', Times, serif" }}>
+        ) : report ? (() => {
+          const subjects = report.subjects || [];
+          const isYearly = period === 'yearly';
+          const isSem1 = period === 'semester1';
+          const isSem2 = period === 'semester2';
+          const isSemester = report.isSemesterReport;
 
-            {/* ===== HEADER WITH LOGO SPACE ===== */}
-            <div className="px-6 pt-5 pb-3">
-              <div className="flex items-start justify-between">
-                {/* Left: Logo placeholder + School info */}
-                <div className="flex items-start gap-4">
-                  {/* Logo placeholder */}
-                  <div
-                    className="flex items-center justify-center rounded-full border-4 flex-shrink-0"
-                    style={{
-                      width: 80,
-                      height: 80,
-                      borderColor: '#1a2744',
-                      background: '#e8edf3',
-                    }}
-                  >
-                    <span className="text-[9px] font-bold text-center leading-tight" style={{ color: '#1a2744' }}>
-                      SCHOOL<br />LOGO
-                    </span>
+          const s1Avg = computeOverallSemAvg(subjects, ['p1', 'p2', 'p3']);
+          const s2Avg = computeOverallSemAvg(subjects, ['p4', 'p5', 'p6']);
+          const generalAvg = (s1Avg !== null && s2Avg !== null) ? Math.round((s1Avg + s2Avg) / 2) : (report.overallAverage ?? null);
+
+          let letterGrade = 'N/A';
+          let gradeLabel = '';
+          if (generalAvg !== null) {
+            if (generalAvg >= 90) { letterGrade = 'A'; gradeLabel = 'Excellent'; }
+            else if (generalAvg >= 75) { letterGrade = 'B'; gradeLabel = 'Good Standing'; }
+            else if (generalAvg >= 60) { letterGrade = 'C'; gradeLabel = 'Satisfactory'; }
+            else { letterGrade = 'D'; gradeLabel = 'Needs Improvement'; }
+          }
+
+          // Aggregate sums
+          const periodKeys = isYearly ? ['p1','p2','p3','p4','p5','p6'] :
+                              isSem1 ? ['p1','p2','p3','exam_s1'] :
+                              isSem2 ? ['p4','p5','p6','exam_s2'] : [period];
+
+          return (
+            <div>
+              {/* ===== ACTION BUTTONS (screen only) ===== */}
+              <div className="flex gap-2 justify-center py-3 print:hidden" style={{ background: '#e8eaf0' }}>
+                <Button onClick={handlePrint} size="sm" className="gap-2" style={{ background: navy, color: '#fff' }}>
+                  <Printer className="h-4 w-4" /> Print / Save as PDF
+                </Button>
+                <Button onClick={handlePrint} size="sm" className="gap-2" style={{ background: gold, color: '#fff' }}>
+                  <Download className="h-4 w-4" /> Download PDF
+                </Button>
+              </div>
+
+              {/* ===== REPORT CARD PAPER ===== */}
+              <div id="report-content" style={{
+                background: '#fff', color: '#111', fontSize: '12px', fontFamily: 'Arial, sans-serif',
+                boxShadow: '0 4px 32px rgba(0,0,0,0.18)', border: '1px solid #bbb',
+              }}>
+
+                {/* ── HEADER ── */}
+                <div style={{ background: navy, color: '#fff', display: 'flex', alignItems: 'center', padding: '10px 14px', gap: '14px' }}>
+                  <div style={{
+                    width: 52, height: 52, borderRadius: '50%', background: '#fff',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontWeight: 700, fontSize: '9px', color: navy, textAlign: 'center', lineHeight: 1.2,
+                    border: `2px solid ${gold}`, flexShrink: 0,
+                  }}>
+                    SCHOOL<br />LOGO
                   </div>
-                  <div className="pt-1">
-                    <h1 className="text-xl font-extrabold tracking-wide" style={{ color: '#1a2744' }}>
+                  <div style={{ flex: 1 }}>
+                    <h1 style={{ fontSize: '18px', fontWeight: 700, color: '#fff', margin: 0 }}>
                       SCHOOL NAME HERE
                     </h1>
-                    <p className="text-[11px] text-gray-600">Address Line, City, Country</p>
-                    <p className="text-[11px] text-gray-600">Contact: (000) 000-0000000</p>
+                    <p style={{ fontSize: '11px', color: '#ccd', margin: 0 }}>
+                      Address Line, City, Country | Contact: (000) 000-0000
+                    </p>
+                    <p style={{ fontSize: '11px', color: '#ccd', margin: 0 }}>
+                      www.school.edu | info@school.edu
+                    </p>
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                    <div style={{
+                      background: gold, color: '#fff', textAlign: 'center', padding: '4px 10px',
+                      fontSize: '10px', fontWeight: 700, borderRadius: '3px', minWidth: '80px'
+                    }}>
+                      <small style={{ display: 'block', fontSize: '8px', fontWeight: 400, opacity: 0.85, letterSpacing: '0.5px' }}>REPORT TYPE</small>
+                      {getDepartmentLabel().toUpperCase()}
+                    </div>
+                    <div style={{
+                      background: gold, color: '#fff', textAlign: 'center', padding: '4px 10px',
+                      fontSize: '10px', fontWeight: 700, borderRadius: '3px', minWidth: '80px'
+                    }}>
+                      <small style={{ display: 'block', fontSize: '8px', fontWeight: 400, opacity: 0.85, letterSpacing: '0.5px' }}>SEMESTER</small>
+                      {getSemesterLabel()}
+                    </div>
                   </div>
                 </div>
-                {/* Right: Report type & semester */}
-                <div className="text-right pt-1 space-y-1">
-                  <div className="flex items-center justify-end gap-2">
-                    <span className="text-[11px] font-bold text-gray-600 uppercase">Report Type:</span>
-                    <span
-                      className="text-[11px] font-bold px-3 py-0.5 border"
-                      style={{ borderColor: '#1a2744', color: '#1a2744' }}
-                    >
-                      {getDepartmentLabel(report).toUpperCase()}
-                    </span>
+
+                {/* ── TITLE BAR ── */}
+                <div style={{ background: navy, textAlign: 'center', padding: '8px', borderTop: `2px solid ${gold}` }}>
+                  <h2 style={{ color: '#fff', fontSize: '14px', letterSpacing: '2px', fontWeight: 700, margin: 0 }}>
+                    ACADEMIC REPORT CARD
+                  </h2>
+                  <p style={{ color: gold, fontSize: '10px', margin: 0 }}>
+                    {report.student.classes?.academic_years?.year_name || '--'} School Year
+                  </p>
+                </div>
+
+                {/* ── STUDENT INFO ── */}
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', borderBottom: '1px solid #ccc' }}>
+                  {[
+                    ['Student Name', report.student.full_name],
+                    ['Student ID', report.student.student_id],
+                    ['Grade Level', report.student.classes?.name || '--'],
+                    ['Gender', report.student.gender || '--'],
+                    ['Date of Birth', report.student.date_of_birth || '--'],
+                    ['Class', report.student.classes?.name || '--'],
+                  ].map(([label, val], i) => (
+                    <div key={i} style={{
+                      display: 'flex', alignItems: 'center', gap: '8px', padding: '5px 10px',
+                      borderBottom: '0.5px solid #e5e5e5',
+                      borderRight: i % 2 === 0 ? '0.5px solid #ccc' : 'none',
+                    }}>
+                      <span style={{ fontSize: '9px', fontWeight: 700, color: '#666', textTransform: 'uppercase', minWidth: '90px' }}>
+                        {label}
+                      </span>
+                      <span style={{ fontSize: '11px', color: '#111' }}>{val}</span>
+                    </div>
+                  ))}
+                </div>
+
+                {/* ── INCOMPLETE NOTICE ── */}
+                {report.hasIncomplete && (
+                  <div style={{ margin: '8px 10px', padding: '6px 10px', background: '#fff3cd', color: '#856404', fontSize: '10px', fontWeight: 600, border: '1px solid #ffeaa7', borderRadius: '3px' }}>
+                    ⚠️ This student has incomplete grades (marked as "I"). Averages and rankings cannot be calculated until all grades are complete.
                   </div>
-                  <div className="flex items-center justify-end gap-2">
-                    <span className="text-[11px] font-bold text-gray-600 uppercase">Semester:</span>
-                    <span
-                      className="text-[11px] font-bold px-3 py-0.5 border"
-                      style={{ borderColor: '#1a2744', color: '#1a2744' }}
-                    >
-                      {semesterLabel}
-                    </span>
-                  </div>
-                </div>
-              </div>
+                )}
 
-              {/* Title */}
-              <div className="text-center mt-2">
-                <h2 className="text-lg font-extrabold tracking-wider uppercase" style={{ color: '#1a2744' }}>
-                  Academic Report Card
-                </h2>
-                <p className="text-[11px] text-gray-500">
-                  {report.student.classes?.academic_years?.year_name || '--'} SCHOOL YEAR
-                </p>
-              </div>
-            </div>
-
-            {/* ===== STUDENT INFO BAR ===== */}
-            <div className="mx-6 mb-3 border-t border-b py-2 space-y-1" style={{ borderColor: '#1a2744' }}>
-              <div className="flex items-center gap-4">
-                <div className="flex items-center gap-2 flex-1">
-                  <span className="text-[11px] font-bold text-gray-600 uppercase whitespace-nowrap" style={{ background: '#e0e5ec', padding: '2px 8px' }}>
-                    Name of Student
-                  </span>
-                  <span className="text-sm font-bold text-gray-900 border-b flex-1 text-center pb-0.5" style={{ borderColor: '#999' }}>
-                    {report.student.full_name}
-                  </span>
+                {/* ── SECTION: GRADES ── */}
+                <div style={{ background: navy, color: '#fff', padding: '5px 10px', fontSize: '10px', fontWeight: 700, letterSpacing: '1px' }}>
+                  ACADEMIC PERFORMANCE — GRADES BY PERIOD
                 </div>
-              </div>
-              <div className="flex items-center gap-4">
-                <div className="flex items-center gap-2 flex-1">
-                  <span className="text-[11px] font-bold text-gray-600 uppercase whitespace-nowrap" style={{ background: '#e0e5ec', padding: '2px 8px' }}>
-                    Grade Level
-                  </span>
-                  <span className="text-sm font-bold text-gray-900 border-b flex-1 text-center pb-0.5" style={{ borderColor: '#999' }}>
-                    {report.student.classes?.name || '--'}
-                  </span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-[11px] font-bold text-gray-600 uppercase whitespace-nowrap" style={{ background: '#e0e5ec', padding: '2px 8px' }}>
-                    Student ID
-                  </span>
-                  <span className="text-sm font-bold text-gray-900 border-b text-center pb-0.5 w-28" style={{ borderColor: '#999' }}>
-                    {report.student.student_id}
-                  </span>
-                </div>
-              </div>
-            </div>
 
-            {/* Incomplete Notice */}
-            {report.hasIncomplete && (
-              <div className="mx-6 mb-2 p-2 rounded text-xs font-medium" style={{ background: '#fff3cd', color: '#856404', border: '1px solid #ffeaa7' }}>
-                ⚠️ This student has incomplete grades (marked as "I"). Averages and rankings cannot be calculated until all grades are complete.
-              </div>
-            )}
-
-            {/* ===== GRADES TABLE ===== */}
-            <div className="px-6 pb-3">
-              <div className="overflow-hidden border-2" style={{ borderColor: '#1a2744' }}>
-                <table className="w-full" style={{ borderCollapse: 'collapse', fontSize: '13px' }}>
+                {/* ── GRADES TABLE ── */}
+                <table style={{ width: '100%', borderCollapse: 'collapse', tableLayout: 'fixed', fontSize: '11px' }}>
+                  <colgroup>
+                    <col style={{ width: 130 }} />
+                    {isSemester && isYearly ? (
+                      <>
+                        {[...Array(3)].map((_, i) => <col key={`s1p${i}`} style={{ width: '5%' }} />)}
+                        <col style={{ width: '6%' }} />{/* S.EXAM */}
+                        <col style={{ width: '6%' }} />{/* S.AVG */}
+                        {[...Array(3)].map((_, i) => <col key={`s2p${i}`} style={{ width: '5%' }} />)}
+                        <col style={{ width: '6%' }} />{/* S.EXAM */}
+                        <col style={{ width: '6%' }} />{/* S.AVG */}
+                        <col style={{ width: '6%' }} />{/* Y.AVG */}
+                      </>
+                    ) : isSemester ? (
+                      <>
+                        {[...Array(3)].map((_, i) => <col key={`p${i}`} style={{ width: '12%' }} />)}
+                        <col style={{ width: '12%' }} />
+                        <col style={{ width: '12%' }} />
+                      </>
+                    ) : (
+                      <col style={{ width: '30%' }} />
+                    )}
+                  </colgroup>
                   <thead>
-                    <tr style={{ background: '#1a2744' }}>
-                      <th className="text-left px-3 py-2 text-white font-bold text-[12px] uppercase tracking-wide border-r border-gray-500" style={{ width: '120px' }}>
-                        Subject
-                      </th>
-                      {report.isSemesterReport ? (
-                        period === 'yearly' ? (
-                          <>
-                            <th className="text-center px-1 py-2 text-white font-bold text-[11px] border-r border-gray-500">P1</th>
-                            <th className="text-center px-1 py-2 text-white font-bold text-[11px] border-r border-gray-500">P2</th>
-                            <th className="text-center px-1 py-2 text-white font-bold text-[11px] border-r border-gray-500">P3</th>
-                            <th className="text-center px-1 py-2 font-bold text-[11px] border-r border-gray-500" style={{ color: '#fde68a' }}>S.AVG</th>
-                            <th className="text-center px-1 py-2 text-white font-bold text-[11px] border-r border-gray-500">P4</th>
-                            <th className="text-center px-1 py-2 text-white font-bold text-[11px] border-r border-gray-500">P5</th>
-                            <th className="text-center px-1 py-2 text-white font-bold text-[11px] border-r border-gray-500">P6</th>
-                            <th className="text-center px-1 py-2 font-bold text-[11px] border-r border-gray-500" style={{ color: '#fde68a' }}>S.AVG</th>
-                            <th className="text-center px-1 py-2 font-bold text-[12px]" style={{ color: '#86efac', background: '#1a2744' }}>Y.AVG</th>
-                          </>
-                        ) : period === 'semester1' ? (
-                          <>
-                            <th className="text-center px-2 py-2 text-white font-bold text-[11px] border-r border-gray-500">P1</th>
-                            <th className="text-center px-2 py-2 text-white font-bold text-[11px] border-r border-gray-500">P2</th>
-                            <th className="text-center px-2 py-2 text-white font-bold text-[11px] border-r border-gray-500">P3</th>
-                            <th className="text-center px-2 py-2 text-white font-bold text-[11px] border-r border-gray-500">Exam</th>
-                            <th className="text-center px-2 py-2 font-bold text-[11px]" style={{ color: '#fde68a' }}>S.AVG</th>
-                          </>
-                        ) : (
-                          <>
-                            <th className="text-center px-2 py-2 text-white font-bold text-[11px] border-r border-gray-500">P4</th>
-                            <th className="text-center px-2 py-2 text-white font-bold text-[11px] border-r border-gray-500">P5</th>
-                            <th className="text-center px-2 py-2 text-white font-bold text-[11px] border-r border-gray-500">P6</th>
-                            <th className="text-center px-2 py-2 text-white font-bold text-[11px] border-r border-gray-500">Exam</th>
-                            <th className="text-center px-2 py-2 font-bold text-[11px]" style={{ color: '#fde68a' }}>S.AVG</th>
-                          </>
-                        )
-                      ) : (
-                        <th className="text-center px-3 py-2 text-white font-bold text-[12px]">Score</th>
-                      )}
-                    </tr>
+                    {isSemester && isYearly ? (
+                      <>
+                        <tr>
+                          <th rowSpan={2} style={{ ...thBase, background: navy, textAlign: 'left', paddingLeft: 8 }}>Subject</th>
+                          <th colSpan={5} style={{ ...thBase, background: lightBlue }}>Semester 1</th>
+                          <th colSpan={5} style={{ ...thBase, background: lightBlue }}>Semester 2</th>
+                          <th rowSpan={2} style={{ ...thBase, background: gold, color: '#fff', fontWeight: 700 }}>Y.AVG</th>
+                        </tr>
+                        <tr>
+                          <th style={thBase}>P1</th><th style={thBase}>P2</th><th style={thBase}>P3</th>
+                          <th style={{ ...thBase, background: lightBlue }}>S.EXAM</th>
+                          <th style={{ ...thBase, background: '#1a5276', color: '#fff', fontWeight: 700 }}>S.AVG</th>
+                          <th style={thBase}>P4</th><th style={thBase}>P5</th><th style={thBase}>P6</th>
+                          <th style={{ ...thBase, background: lightBlue }}>S.EXAM</th>
+                          <th style={{ ...thBase, background: '#1a5276', color: '#fff', fontWeight: 700 }}>S.AVG</th>
+                        </tr>
+                      </>
+                    ) : isSemester ? (
+                      <tr>
+                        <th style={{ ...thBase, background: navy, textAlign: 'left', paddingLeft: 8 }}>Subject</th>
+                        {(isSem1 ? ['P1','P2','P3','S.EXAM'] : ['P4','P5','P6','S.EXAM']).map(h => (
+                          <th key={h} style={{ ...thBase, background: h === 'S.EXAM' ? lightBlue : '#2a3a8e' }}>{h}</th>
+                        ))}
+                        <th style={{ ...thBase, background: '#1a5276', fontWeight: 700 }}>S.AVG</th>
+                      </tr>
+                    ) : (
+                      <tr>
+                        <th style={{ ...thBase, background: navy, textAlign: 'left', paddingLeft: 8 }}>Subject</th>
+                        <th style={{ ...thBase, background: '#2a3a8e' }}>Score</th>
+                      </tr>
+                    )}
                   </thead>
                   <tbody>
-                    {report.subjects.map((subject: any, index: number) => {
-                      const isEven = index % 2 === 0;
-                      const rowBg = isEven ? '#ffffff' : '#f5f7fa';
+                    {subjects.map((subject: any, idx: number) => {
+                      const s1avg = computeSubjectSemAvg(subject, ['p1', 'p2', 'p3']);
+                      const s2avg = computeSubjectSemAvg(subject, ['p4', 'p5', 'p6']);
+                      const yavg = computeSubjectYearlyAvg(subject);
+
                       return (
-                        <tr key={index} style={{ background: rowBg, borderBottom: '1px solid #cbd5e1' }}>
-                          <td className="px-3 py-1.5 font-bold text-[12px] uppercase border-r" style={{ borderColor: '#cbd5e1', color: '#1a2744' }}>
+                        <tr key={idx}>
+                          <td style={{ ...tdBase, textAlign: 'left', paddingLeft: 8, background: '#f9f9fc', color: '#111' }}>
                             {subject.name}
                           </td>
-                          {report.isSemesterReport ? (
-                            period === 'yearly' ? (
-                              <>
-                                {['p1', 'p2', 'p3'].map(p => (
-                                  <td key={p} className="text-center px-1 py-1.5 font-semibold text-[12px] border-r" style={{ borderColor: '#cbd5e1', color: '#374151' }}>
+                          {isSemester && isYearly ? (
+                            <>
+                              {['p1','p2','p3'].map(p => (
+                                <td key={p} style={{ ...tdBase, ...scoreColorStyle(subject.periods?.[p]?.score) }}>
+                                  {displayScore(subject.periods?.[p]?.score, subject.periods?.[p]?.noGrades)}
+                                </td>
+                              ))}
+                              <td style={{ ...tdBase, background: lightBlue, color: '#fff', fontWeight: 600 }}>
+                                {displayScore(subject.periods?.exam_s1?.score, subject.periods?.exam_s1?.noGrades)}
+                              </td>
+                              <td style={{ ...tdBase, background: '#1a5276', color: '#fff', fontWeight: 700 }}>
+                                {s1avg !== null ? s1avg : '--'}
+                              </td>
+                              {['p4','p5','p6'].map(p => (
+                                <td key={p} style={{ ...tdBase, ...scoreColorStyle(subject.periods?.[p]?.score) }}>
+                                  {displayScore(subject.periods?.[p]?.score, subject.periods?.[p]?.noGrades)}
+                                </td>
+                              ))}
+                              <td style={{ ...tdBase, background: lightBlue, color: '#fff', fontWeight: 600 }}>
+                                {displayScore(subject.periods?.exam_s2?.score, subject.periods?.exam_s2?.noGrades)}
+                              </td>
+                              <td style={{ ...tdBase, background: '#1a5276', color: '#fff', fontWeight: 700 }}>
+                                {s2avg !== null ? s2avg : '--'}
+                              </td>
+                              <td style={{ ...tdBase, background: gold, color: '#fff', fontWeight: 700 }}>
+                                {yavg !== null ? yavg : '--'}
+                              </td>
+                            </>
+                          ) : isSemester ? (
+                            <>
+                              {(isSem1 ? ['p1','p2','p3','exam_s1'] : ['p4','p5','p6','exam_s2']).map(p => {
+                                const isExam = p.startsWith('exam');
+                                return (
+                                  <td key={p} style={{
+                                    ...tdBase,
+                                    ...(isExam ? { background: lightBlue, color: '#fff', fontWeight: 600 } : scoreColorStyle(subject.periods?.[p]?.score))
+                                  }}>
                                     {displayScore(subject.periods?.[p]?.score, subject.periods?.[p]?.noGrades)}
                                   </td>
-                                ))}
-                                {/* S1 AVG */}
-                                <td className="text-center px-1 py-1.5 font-bold text-[12px] border-r" style={{ borderColor: '#cbd5e1', color: '#1a2744' }}>
-                                  {computeSubjectSemAvg(subject, ['p1', 'p2', 'p3'])}
-                                </td>
-                                {['p4', 'p5', 'p6'].map(p => (
-                                  <td key={p} className="text-center px-1 py-1.5 font-semibold text-[12px] border-r" style={{ borderColor: '#cbd5e1', color: '#374151' }}>
-                                    {displayScore(subject.periods?.[p]?.score, subject.periods?.[p]?.noGrades)}
-                                  </td>
-                                ))}
-                                {/* S2 AVG */}
-                                <td className="text-center px-1 py-1.5 font-bold text-[12px] border-r" style={{ borderColor: '#cbd5e1', color: '#1a2744' }}>
-                                  {computeSubjectSemAvg(subject, ['p4', 'p5', 'p6'])}
-                                </td>
-                                {/* Y.AVG - green bg */}
-                                <td className="text-center px-1 py-1.5 font-black text-[12px]" style={{ background: '#dcfce7', color: '#166534' }}>
-                                  {computeSubjectYearlyAvg(subject)}
-                                </td>
-                              </>
-                            ) : period === 'semester1' ? (
-                              <>
-                                {['p1', 'p2', 'p3', 'exam_s1'].map(p => (
-                                  <td key={p} className={`text-center px-2 py-1.5 font-semibold text-[12px] border-r`} style={{ borderColor: '#cbd5e1', color: subject.periods?.[p]?.noGrades ? '#9ca3af' : subject.periods?.[p]?.isIncomplete ? '#ea580c' : '#374151' }}>
-                                    {displayScore(subject.periods?.[p]?.score, subject.periods?.[p]?.noGrades)}
-                                  </td>
-                                ))}
-                                <td className="text-center px-2 py-1.5 font-bold text-[12px]" style={{ color: '#1a2744' }}>
-                                  {subject.hasIncomplete ? '--' : (subject.semesterAverage !== null ? subject.semesterAverage.toFixed(1) : '-')}
-                                </td>
-                              </>
-                            ) : (
-                              <>
-                                {['p4', 'p5', 'p6', 'exam_s2'].map(p => (
-                                  <td key={p} className={`text-center px-2 py-1.5 font-semibold text-[12px] border-r`} style={{ borderColor: '#cbd5e1', color: subject.periods?.[p]?.noGrades ? '#9ca3af' : subject.periods?.[p]?.isIncomplete ? '#ea580c' : '#374151' }}>
-                                    {displayScore(subject.periods?.[p]?.score, subject.periods?.[p]?.noGrades)}
-                                  </td>
-                                ))}
-                                <td className="text-center px-2 py-1.5 font-bold text-[12px]" style={{ color: '#1a2744' }}>
-                                  {subject.hasIncomplete ? '--' : (subject.semesterAverage !== null ? subject.semesterAverage.toFixed(1) : '-')}
-                                </td>
-                              </>
-                            )
+                                );
+                              })}
+                              <td style={{ ...tdBase, background: '#1a5276', color: '#fff', fontWeight: 700 }}>
+                                {(() => {
+                                  const avg = computeSubjectSemAvg(subject, isSem1 ? ['p1','p2','p3'] : ['p4','p5','p6']);
+                                  return avg !== null ? avg : '--';
+                                })()}
+                              </td>
+                            </>
                           ) : (
-                            <td className={`text-center px-3 py-1.5 font-bold text-[12px]`} style={{ color: subject.noGrades ? '#9ca3af' : subject.hasIncomplete ? '#ea580c' : '#374151' }}>
+                            <td style={{ ...tdBase, fontWeight: 700, color: subject.noGrades ? '#999' : subject.hasIncomplete ? '#721c24' : '#111' }}>
                               {subject.noGrades ? '--' : subject.hasIncomplete ? 'I' : subject.total}
                             </td>
                           )}
                         </tr>
                       );
                     })}
+
+                    {/* Aggregate row */}
+                    {isSemester && isYearly && (
+                      <>
+                        <tr>
+                          {(() => {
+                            const aggStyle: React.CSSProperties = { ...tdBase, background: '#e8f0e8', fontWeight: 700, color: '#1a5226' };
+                            const s1Sum = subjects.reduce((a: number, s: any) => a + (computeSubjectSemAvg(s, ['p1','p2','p3']) ?? 0), 0);
+                            const s2Sum = subjects.reduce((a: number, s: any) => a + (computeSubjectSemAvg(s, ['p4','p5','p6']) ?? 0), 0);
+                            return (
+                              <>
+                                <td style={{ ...aggStyle, textAlign: 'left', paddingLeft: 8 }}>Aggregate</td>
+                                {['p1','p2','p3'].map(p => <td key={p} style={aggStyle}>{computeColumnSum(subjects, p)}</td>)}
+                                <td style={{ ...aggStyle, background: lightBlue, color: '#fff' }}>{computeColumnSum(subjects, 'exam_s1')}</td>
+                                <td style={{ ...aggStyle, background: '#1a5276', color: '#fff' }}>{s1Sum}</td>
+                                {['p4','p5','p6'].map(p => <td key={p} style={aggStyle}>{computeColumnSum(subjects, p)}</td>)}
+                                <td style={{ ...aggStyle, background: lightBlue, color: '#fff' }}>{computeColumnSum(subjects, 'exam_s2')}</td>
+                                <td style={{ ...aggStyle, background: '#1a5276', color: '#fff' }}>{s2Sum}</td>
+                                <td style={{ ...aggStyle, background: gold, color: '#fff' }}>{s1Sum + s2Sum}</td>
+                              </>
+                            );
+                          })()}
+                        </tr>
+                        <tr>
+                          {(() => {
+                            const avgStyle: React.CSSProperties = { ...tdBase, background: '#fff3cd', fontWeight: 700, color: '#7d5a00' };
+                            return (
+                              <>
+                                <td style={{ ...avgStyle, textAlign: 'left', paddingLeft: 8 }}>Average</td>
+                                {['p1','p2','p3'].map(p => <td key={p} style={avgStyle}>{computeColumnAvg(subjects, p)}</td>)}
+                                <td style={{ ...avgStyle, background: lightBlue, color: '#fff' }}>{computeColumnAvg(subjects, 'exam_s1')}</td>
+                                <td style={{ ...avgStyle, background: '#1a5276', color: '#fff' }}>{s1Avg ?? '--'}</td>
+                                {['p4','p5','p6'].map(p => <td key={p} style={avgStyle}>{computeColumnAvg(subjects, p)}</td>)}
+                                <td style={{ ...avgStyle, background: lightBlue, color: '#fff' }}>{computeColumnAvg(subjects, 'exam_s2')}</td>
+                                <td style={{ ...avgStyle, background: '#1a5276', color: '#fff' }}>{s2Avg ?? '--'}</td>
+                                <td style={{ ...avgStyle, background: gold, color: '#fff' }}>{generalAvg ?? '--'}</td>
+                              </>
+                            );
+                          })()}
+                        </tr>
+                      </>
+                    )}
                   </tbody>
                 </table>
-              </div>
-            </div>
 
-            {/* ===== TEACHER COMMENT SECTION ===== */}
-            <div className="px-6 pb-3">
-              <div className="space-y-2 border-t pt-3" style={{ borderColor: '#cbd5e1' }}>
-                <div className="flex items-center gap-3">
-                  <span className="text-[12px] font-bold uppercase whitespace-nowrap" style={{ color: '#1a2744' }}>Teacher Comment:</span>
-                  <div className="flex-1 border-b min-h-[20px]" style={{ borderColor: '#9ca3af', background: '#f0f0f0' }}></div>
+                {/* ── CONDUCT ── */}
+                <div style={{ background: navy, color: '#fff', padding: '5px 10px', fontSize: '10px', fontWeight: 700, letterSpacing: '1px' }}>
+                  CONDUCT & CHARACTER ASSESSMENT
                 </div>
-                <div className="flex items-center gap-3">
-                  <span className="text-[12px] font-bold uppercase whitespace-nowrap" style={{ color: '#1a2744' }}>Excell In:</span>
-                  <div className="flex-1 border-b min-h-[20px]" style={{ borderColor: '#9ca3af', background: '#d1d5db' }}></div>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', borderTop: '0.5px solid #ccc' }}>
+                  {['Behavior', 'Punctuality', 'Participation', 'Homework'].map((item, i) => (
+                    <div key={item} style={{ padding: '6px 10px', borderRight: i < 3 ? '0.5px solid #ccc' : 'none' }}>
+                      <label style={{ fontSize: '9px', color: '#888', textTransform: 'uppercase', fontWeight: 700, display: 'block' }}>{item}</label>
+                      <span style={{ fontSize: '11px', fontWeight: 700, color: navy }}>—</span>
+                    </div>
+                  ))}
                 </div>
-                <div className="flex items-center gap-3">
-                  <span className="text-[12px] font-bold uppercase whitespace-nowrap" style={{ color: '#1a2744' }}>Can Improve In:</span>
-                  <div className="flex-1 border-b min-h-[20px]" style={{ borderColor: '#9ca3af', background: '#d1d5db' }}></div>
-                </div>
-              </div>
-            </div>
 
-            {/* ===== SEMESTER AVERAGE / GENERAL AVERAGE BAR ===== */}
-            <div className="mx-6 mt-1 overflow-hidden border-2" style={{ borderColor: '#1a2744' }}>
-              {/* Header bar */}
-              <div className="flex items-center justify-between px-4 py-2" style={{ background: '#1a2744' }}>
-                <span className="text-[13px] font-extrabold text-white uppercase tracking-wider">Semester Average</span>
-                <span className="text-[13px] font-extrabold text-white uppercase tracking-wider">General Average</span>
-              </div>
-              {/* Content */}
-              <div className="flex items-center justify-between px-6 py-4">
-                {/* Left: Semester averages */}
-                <div className="space-y-2">
-                  {report.isSemesterReport && (period === 'yearly' || period === 'semester1') && (
-                    <div className="flex items-center gap-4">
-                      <span className="text-[13px] font-bold" style={{ color: '#1a2744' }}>SEM1</span>
-                      <span className="text-base font-bold" style={{ color: '#374151' }}>
-                        {computeSemAvg(report.subjects, ['p1', 'p2', 'p3'], report.hasIncomplete)}%
-                      </span>
+                {/* ── TEACHER REMARKS ── */}
+                <div style={{ background: navy, color: '#fff', padding: '5px 10px', fontSize: '10px', fontWeight: 700, letterSpacing: '1px' }}>
+                  TEACHER REMARKS
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', borderTop: '0.5px solid #ccc' }}>
+                  <div style={{ padding: '8px 10px', borderRight: '0.5px solid #ccc' }}>
+                    <label style={{ fontSize: '9px', color: '#888', textTransform: 'uppercase', fontWeight: 700, display: 'block', marginBottom: 4 }}>Teacher Comment</label>
+                    <p style={{ fontSize: '11px', color: '#222', border: '0.5px solid #ddd', padding: '4px 6px', borderRadius: 3, background: '#fafafa', margin: 0, minHeight: 30 }}>&nbsp;</p>
+                  </div>
+                  <div>
+                    <div style={{ padding: '8px 10px', borderBottom: '0.5px solid #ccc' }}>
+                      <label style={{ fontSize: '9px', color: '#888', textTransform: 'uppercase', fontWeight: 700, display: 'block', marginBottom: 4 }}>Can Improve In</label>
+                      <p style={{ fontSize: '11px', color: '#222', border: '0.5px solid #ddd', padding: '4px 6px', borderRadius: 3, background: '#fafafa', margin: 0 }}>&nbsp;</p>
                     </div>
-                  )}
-                  {report.isSemesterReport && (period === 'yearly' || period === 'semester2') && (
-                    <div className="flex items-center gap-4">
-                      <span className="text-[13px] font-bold" style={{ color: '#1a2744' }}>SEM2</span>
-                      <span className="text-base font-bold" style={{ color: '#374151' }}>
-                        {computeSemAvg(report.subjects, ['p4', 'p5', 'p6'], report.hasIncomplete)}%
-                      </span>
+                    <div style={{ padding: '8px 10px' }}>
+                      <label style={{ fontSize: '9px', color: '#888', textTransform: 'uppercase', fontWeight: 700, display: 'block', marginBottom: 4 }}>Excels In</label>
+                      <p style={{ fontSize: '11px', color: '#222', border: '0.5px solid #ddd', padding: '4px 6px', borderRadius: 3, background: '#fafafa', margin: 0 }}>&nbsp;</p>
                     </div>
-                  )}
-                  {!report.isSemesterReport && (
-                    <div className="flex items-center gap-4">
-                      <span className="text-[13px] font-bold" style={{ color: '#1a2744' }}>Period</span>
-                      <span className="text-base font-bold" style={{ color: '#374151' }}>
-                        {report.hasIncomplete ? '--' : (report.overallAverage !== null ? report.overallAverage.toFixed(1) + '%' : '-')}
-                      </span>
-                    </div>
-                  )}
-                  {/* Rank */}
-                  <div className="flex items-center gap-4 mt-1">
-                    <span className="text-[11px] font-bold text-gray-500 uppercase">Rank</span>
-                    <span className="text-sm font-bold" style={{ color: '#1a2744' }}>
-                      {report.hasIncomplete ? '--' : (() => {
-                        if (report.isSemesterReport) {
-                          const rank = report.yearlyTotal?.class_rank;
-                          const lastPeriod = period === 'semester1' ? 'exam_s1' : 'exam_s2';
-                          const count = report.periodCounts?.[lastPeriod];
-                          return rank && count ? `${rank}/${count}` : '-';
-                        }
-                        const pt = report.periodTotals?.get(period as any);
-                        const count = report.periodCounts?.[period];
-                        return pt?.class_rank && count ? `${pt.class_rank}/${count}` : '-';
-                      })()}
-                    </span>
                   </div>
                 </div>
-                {/* Right: Big green percentage */}
-                <div className="text-right">
-                  <span className="font-black" style={{ fontSize: '56px', color: '#16a34a', lineHeight: 1 }}>
-                    {report.hasIncomplete ? '--' : (report.overallAverage !== null ? `${report.overallAverage.toFixed(1)}%` : '-')}
-                  </span>
+
+                {/* ── SEMESTER AVERAGES ── */}
+                <div style={{ background: navy, color: '#fff', padding: '5px 10px', fontSize: '10px', fontWeight: 700, letterSpacing: '1px' }}>
+                  SEMESTER AVERAGES
+                </div>
+                <div style={{ display: 'flex' }}>
+                  <div style={{ flex: 1, padding: '10px 14px', borderRight: '0.5px solid #ccc' }}>
+                    <table style={{ width: '100%', fontSize: '11px', borderCollapse: 'collapse' }}>
+                      <tbody>
+                        {(isYearly || isSem1) && (
+                          <tr>
+                            <td style={{ padding: '3px 0' }}>Semester 1 Average</td>
+                            <td style={{ padding: '3px 0', textAlign: 'right', fontWeight: 700 }}>{s1Avg !== null ? `${s1Avg}%` : '--'}</td>
+                          </tr>
+                        )}
+                        {(isYearly || isSem2) && (
+                          <tr>
+                            <td style={{ padding: '3px 0' }}>Semester 2 Average</td>
+                            <td style={{ padding: '3px 0', textAlign: 'right', fontWeight: 700 }}>{s2Avg !== null ? `${s2Avg}%` : '--'}</td>
+                          </tr>
+                        )}
+                        <tr>
+                          <td style={{ padding: '3px 0' }}>Class Position</td>
+                          <td style={{ padding: '3px 0', textAlign: 'right', fontWeight: 700 }}>
+                            {report.hasIncomplete ? '--' : (() => {
+                              if (isSemester) {
+                                const rank = report.yearlyTotal?.class_rank;
+                                const lastPeriod = isSem1 ? 'exam_s1' : 'exam_s2';
+                                const count = report.periodCounts?.[lastPeriod];
+                                return rank && count ? `${rank} / ${count}` : '-';
+                              }
+                              const pt = report.periodTotals?.get(period as any);
+                              const count = report.periodCounts?.[period];
+                              return pt?.class_rank && count ? `${pt.class_rank} / ${count}` : '-';
+                            })()}
+                          </td>
+                        </tr>
+                        <tr>
+                          <td colSpan={2} style={{ padding: '3px 0', fontSize: '10px', color: '#666' }}>
+                            A = 90–100 &nbsp;|&nbsp; B = 75–89 &nbsp;|&nbsp; C = 60–74
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                  <div style={{
+                    width: 200, background: navy, color: '#fff',
+                    display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                    padding: 14, textAlign: 'center',
+                  }}>
+                    <div style={{ fontSize: '10px', color: '#aab', letterSpacing: '1px', marginBottom: 4 }}>GENERAL AVERAGE</div>
+                    <div style={{ fontSize: '36px', fontWeight: 700, color: gold }}>
+                      {report.hasIncomplete ? '--' : (generalAvg !== null ? `${generalAvg}%` : '-')}
+                    </div>
+                    <div style={{ fontSize: '12px', color: gold }}>
+                      {report.hasIncomplete ? '' : `Grade: ${letterGrade} — ${gradeLabel}`}
+                    </div>
+                  </div>
+                </div>
+
+                {/* ── SIGNATURES ── */}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', padding: '10px 14px', borderTop: '1px solid #ccc' }}>
+                  <div style={{ textAlign: 'center', fontSize: '10px', color: '#333' }}>
+                    <div style={{ borderBottom: '1px solid #333', width: 80, margin: '18px auto 4px' }} />
+                    <div style={{ fontWeight: 700, fontSize: '11px', textTransform: 'uppercase' }}>Administrator</div>
+                    <div style={{ color: '#888' }}>School Sponsor</div>
+                  </div>
+                  <div style={{
+                    width: 50, height: 50, borderRadius: '50%', border: `2px solid ${gold}`,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontSize: '8px', color: gold, textAlign: 'center', fontWeight: 700, lineHeight: 1.2,
+                  }}>
+                    OFFICIAL<br />SCHOOL<br />SEAL
+                  </div>
+                  <div style={{ textAlign: 'center', fontSize: '10px', color: '#333' }}>
+                    <div style={{ borderBottom: '1px solid #333', width: 80, margin: '18px auto 4px' }} />
+                    <div style={{ fontWeight: 700, fontSize: '11px', textTransform: 'uppercase' }}>Class Teacher</div>
+                    <div style={{ color: '#888' }}>Teacher Signature</div>
+                  </div>
+                  <div style={{ textAlign: 'center', fontSize: '10px', color: '#333' }}>
+                    <div style={{ borderBottom: '1px solid #333', width: 80, margin: '18px auto 4px' }} />
+                    <div style={{ fontWeight: 700, fontSize: '11px', textTransform: 'uppercase' }}>Parent / Guardian</div>
+                    <div style={{ color: '#888' }}>Acknowledgement</div>
+                  </div>
+                </div>
+
+                {/* ── FOOTER ── */}
+                <div style={{ background: navy, color: '#fff', textAlign: 'center', fontSize: '9px', padding: '4px' }}>
+                  Generated by SmartGrade School Management System | Confidential — For Student & Family Use Only
                 </div>
               </div>
             </div>
-
-            {/* ===== APPROVED BY / SPONSOR SECTION ===== */}
-            <div className="px-6 py-4 flex justify-center">
-              <div className="text-center">
-                <p className="text-[11px] font-bold uppercase text-gray-600 mb-1">Approved By:</p>
-                <div className="border-t-2 w-48 mx-auto mb-1" style={{ borderColor: '#374151' }}></div>
-                <p className="text-[11px] font-bold uppercase" style={{ color: '#1a2744' }}>Class Sponsor</p>
-                <p className="text-[10px] text-gray-500 uppercase">Official School Seal</p>
-              </div>
-            </div>
-
-            {/* ===== FOOTER ===== */}
-            <div className="text-center py-2 border-t" style={{ borderColor: '#1a2744', background: '#f5f7fa' }}>
-              <span className="text-[10px] text-gray-500">
-                Generated by SmartGrade School Management System
-              </span>
-            </div>
-
-            {/* ===== ACTION BUTTONS ===== */}
-            <div className="flex gap-2 px-6 py-4 border-t print:hidden" style={{ background: '#eee' }}>
-              <Button onClick={handlePrint} className="gap-2 flex-1">
-                <Printer className="h-4 w-4" />
-                Print Report
-              </Button>
-              <Button onClick={handleDownload} variant="outline" className="gap-2 flex-1">
-                <Download className="h-4 w-4" />
-                Download PDF
-              </Button>
-            </div>
-          </div>
-        ) : (
+          );
+        })() : (
           <div className="text-center py-8 text-muted-foreground">
             No report data available
           </div>
@@ -436,4 +546,14 @@ export const StudentReportDialog = ({
       </DialogContent>
     </Dialog>
   );
+};
+
+// Shared cell styles
+const thBase: React.CSSProperties = {
+  border: '0.5px solid #ccc', textAlign: 'center', padding: '4px 2px',
+  fontSize: '10px', fontWeight: 600, background: '#2a3a8e', color: '#fff',
+};
+
+const tdBase: React.CSSProperties = {
+  border: '0.5px solid #ccc', textAlign: 'center', padding: '4px 2px', fontSize: '11px',
 };
