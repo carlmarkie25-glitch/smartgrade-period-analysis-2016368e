@@ -6,9 +6,92 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Download, Printer } from "lucide-react";
+import { Download, Printer, Save, Pencil } from "lucide-react";
 import { useStudentReport } from "@/hooks/useStudentReport";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useEffect, useState } from "react";
+import {
+  ReportInputs,
+  useCanEditReportInputs,
+  useReportInputs,
+  useSaveReportInputs,
+} from "@/hooks/useReportInputs";
+import { toast } from "@/hooks/use-toast";
+
+const RATING_OPTIONS = ["Excellent", "Very Good", "Good", "Fair", "Needs Improvement"];
+
+const EditableField = ({
+  value,
+  onChange,
+  editable,
+  multiline,
+  placeholder,
+  options,
+  minHeight,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  editable: boolean;
+  multiline?: boolean;
+  placeholder?: string;
+  options?: string[];
+  minHeight?: number;
+}) => {
+  const baseStyle: React.CSSProperties = {
+    fontSize: '11px',
+    color: '#222',
+    border: '0.5px solid #ddd',
+    padding: '4px 6px',
+    borderRadius: 3,
+    background: editable ? '#fff' : '#fafafa',
+    margin: 0,
+    minHeight: minHeight ?? 30,
+    width: '100%',
+    fontFamily: 'inherit',
+    outline: 'none',
+    resize: multiline ? 'vertical' : 'none',
+  };
+  if (!editable) {
+    return (
+      <p style={baseStyle as any}>
+        {value?.trim() ? value : '\u00A0'}
+      </p>
+    );
+  }
+  if (options) {
+    return (
+      <select
+        value={value || ''}
+        onChange={(e) => onChange(e.target.value)}
+        style={{ ...baseStyle, fontWeight: 700 }}
+      >
+        <option value="">—</option>
+        {options.map((o) => (
+          <option key={o} value={o}>{o}</option>
+        ))}
+      </select>
+    );
+  }
+  if (multiline) {
+    return (
+      <textarea
+        value={value || ''}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder}
+        style={baseStyle}
+      />
+    );
+  }
+  return (
+    <input
+      type="text"
+      value={value || ''}
+      onChange={(e) => onChange(e.target.value)}
+      placeholder={placeholder}
+      style={baseStyle}
+    />
+  );
+};
 
 interface StudentReportDialogProps {
   open: boolean;
