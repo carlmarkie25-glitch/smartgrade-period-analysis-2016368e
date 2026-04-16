@@ -672,8 +672,16 @@ export const StudentReportDialog = ({
 
                 {/* ── SIGNATURES ── */}
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', padding: '10px 14px', borderTop: '1px solid #ccc' }}>
-                  <div style={{ textAlign: 'center', fontSize: '10px', color: '#333' }}>
-                    <div style={{ borderBottom: '1px solid #333', width: 80, margin: '18px auto 4px' }} />
+                  <div style={{ textAlign: 'center', fontSize: '10px', color: '#333', minWidth: 140 }}>
+                    <div style={{ borderBottom: '1px solid #333', width: 120, margin: '18px auto 4px', minHeight: 16 }}>
+                      <EditableField
+                        value={inputs.administrator_name || ''}
+                        onChange={setField('administrator_name')}
+                        editable={editing}
+                        placeholder="Name"
+                        minHeight={16}
+                      />
+                    </div>
                     <div style={{ fontWeight: 700, fontSize: '11px', textTransform: 'uppercase' }}>Administrator</div>
                     <div style={{ color: '#888' }}>School Sponsor</div>
                   </div>
@@ -684,8 +692,16 @@ export const StudentReportDialog = ({
                   }}>
                     OFFICIAL<br />SCHOOL<br />SEAL
                   </div>
-                  <div style={{ textAlign: 'center', fontSize: '10px', color: '#333' }}>
-                    <div style={{ borderBottom: '1px solid #333', width: 80, margin: '18px auto 4px' }} />
+                  <div style={{ textAlign: 'center', fontSize: '10px', color: '#333', minWidth: 140 }}>
+                    <div style={{ borderBottom: '1px solid #333', width: 120, margin: '18px auto 4px', minHeight: 16 }}>
+                      <EditableField
+                        value={inputs.class_teacher_name || ''}
+                        onChange={setField('class_teacher_name')}
+                        editable={editing}
+                        placeholder="Name"
+                        minHeight={16}
+                      />
+                    </div>
                     <div style={{ fontWeight: 700, fontSize: '11px', textTransform: 'uppercase' }}>Class Teacher</div>
                     <div style={{ color: '#888' }}>Teacher Signature</div>
                   </div>
