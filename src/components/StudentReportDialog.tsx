@@ -6,9 +6,92 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Download, Printer } from "lucide-react";
+import { Download, Printer, Save, Pencil } from "lucide-react";
 import { useStudentReport } from "@/hooks/useStudentReport";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useEffect, useState } from "react";
+import {
+  ReportInputs,
+  useCanEditReportInputs,
+  useReportInputs,
+  useSaveReportInputs,
+} from "@/hooks/useReportInputs";
+import { toast } from "@/hooks/use-toast";
+
+const RATING_OPTIONS = ["Excellent", "Very Good", "Good", "Fair", "Needs Improvement"];
+
+const EditableField = ({
+  value,
+  onChange,
+  editable,
+  multiline,
+  placeholder,
+  options,
+  minHeight,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  editable: boolean;
+  multiline?: boolean;
+  placeholder?: string;
+  options?: string[];
+  minHeight?: number;
+}) => {
+  const baseStyle: React.CSSProperties = {
+    fontSize: '11px',
+    color: '#222',
+    border: '0.5px solid #ddd',
+    padding: '4px 6px',
+    borderRadius: 3,
+    background: editable ? '#fff' : '#fafafa',
+    margin: 0,
+    minHeight: minHeight ?? 30,
+    width: '100%',
+    fontFamily: 'inherit',
+    outline: 'none',
+    resize: multiline ? 'vertical' : 'none',
+  };
+  if (!editable) {
+    return (
+      <p style={baseStyle as any}>
+        {value?.trim() ? value : '\u00A0'}
+      </p>
+    );
+  }
+  if (options) {
+    return (
+      <select
+        value={value || ''}
+        onChange={(e) => onChange(e.target.value)}
+        style={{ ...baseStyle, fontWeight: 700 }}
+      >
+        <option value="">—</option>
+        {options.map((o) => (
+          <option key={o} value={o}>{o}</option>
+        ))}
+      </select>
+    );
+  }
+  if (multiline) {
+    return (
+      <textarea
+        value={value || ''}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder}
+        style={baseStyle}
+      />
+    );
+  }
+  return (
+    <input
+      type="text"
+      value={value || ''}
+      onChange={(e) => onChange(e.target.value)}
+      placeholder={placeholder}
+      style={baseStyle}
+    />
+  );
+};
 
 interface StudentReportDialogProps {
   open: boolean;
@@ -45,6 +128,30 @@ export const StudentReportDialog = ({
   className,
 }: StudentReportDialogProps) => {
   const { data: report, isLoading } = useStudentReport(studentId, period);
+  const { data: savedInputs } = useReportInputs(studentId, period);
+  const canEdit = useCanEditReportInputs(studentId);
+  const saveMutation = useSaveReportInputs(studentId, period);
+
+  const [editing, setEditing] = useState(false);
+  const [inputs, setInputs] = useState<ReportInputs>({});
+
+  useEffect(() => {
+    setInputs(savedInputs ?? {});
+    setEditing(false);
+  }, [savedInputs, studentId, period]);
+
+  const setField = (k: keyof ReportInputs) => (v: string) =>
+    setInputs((prev) => ({ ...prev, [k]: v }));
+
+  const handleSave = async () => {
+    try {
+      await saveMutation.mutateAsync(inputs);
+      toast({ title: "Saved", description: "Report inputs updated." });
+      setEditing(false);
+    } catch (e: any) {
+      toast({ title: "Save failed", description: e.message, variant: "destructive" });
+    }
+  };
 
   const handlePrint = () => window.print();
 
@@ -144,13 +251,39 @@ export const StudentReportDialog = ({
           return (
             <div>
               {/* ===== ACTION BUTTONS (screen only) ===== */}
-              <div className="flex gap-2 justify-center py-3 print:hidden" style={{ background: '#e8eaf0' }}>
+              <div className="flex gap-2 justify-center py-3 print:hidden flex-wrap" style={{ background: '#e8eaf0' }}>
                 <Button onClick={handlePrint} size="sm" className="gap-2" style={{ background: navy, color: '#fff' }}>
                   <Printer className="h-4 w-4" /> Print / Save as PDF
                 </Button>
                 <Button onClick={handlePrint} size="sm" className="gap-2" style={{ background: gold, color: '#fff' }}>
                   <Download className="h-4 w-4" /> Download PDF
                 </Button>
+                {canEdit && !editing && (
+                  <Button onClick={() => setEditing(true)} size="sm" variant="outline" className="gap-2">
+                    <Pencil className="h-4 w-4" /> Edit Teacher Inputs
+                  </Button>
+                )}
+                {canEdit && editing && (
+                  <>
+                    <Button
+                      onClick={handleSave}
+                      size="sm"
+                      className="gap-2"
+                      disabled={saveMutation.isPending}
+                      style={{ background: '#16a34a', color: '#fff' }}
+                    >
+                      <Save className="h-4 w-4" />
+                      {saveMutation.isPending ? 'Saving...' : 'Save Inputs'}
+                    </Button>
+                    <Button
+                      onClick={() => { setInputs(savedInputs ?? {}); setEditing(false); }}
+                      size="sm"
+                      variant="outline"
+                    >
+                      Cancel
+                    </Button>
+                  </>
+                )}
               </div>
 
               {/* ===== REPORT CARD PAPER ===== */}
@@ -417,10 +550,21 @@ export const StudentReportDialog = ({
                   CONDUCT & CHARACTER ASSESSMENT
                 </div>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', borderTop: '0.5px solid #ccc' }}>
-                  {['Behavior', 'Punctuality', 'Participation', 'Homework'].map((item, i) => (
-                    <div key={item} style={{ padding: '6px 10px', borderRight: i < 3 ? '0.5px solid #ccc' : 'none' }}>
-                      <label style={{ fontSize: '9px', color: '#888', textTransform: 'uppercase', fontWeight: 700, display: 'block' }}>{item}</label>
-                      <span style={{ fontSize: '11px', fontWeight: 700, color: navy }}>—</span>
+                  {([
+                    ['Behavior', 'behavior'],
+                    ['Punctuality', 'punctuality'],
+                    ['Participation', 'participation'],
+                    ['Homework', 'homework'],
+                  ] as const).map(([label, key], i) => (
+                    <div key={key} style={{ padding: '6px 10px', borderRight: i < 3 ? '0.5px solid #ccc' : 'none' }}>
+                      <label style={{ fontSize: '9px', color: '#888', textTransform: 'uppercase', fontWeight: 700, display: 'block', marginBottom: 3 }}>{label}</label>
+                      <EditableField
+                        value={(inputs[key] as string) || ''}
+                        onChange={setField(key)}
+                        editable={editing}
+                        options={RATING_OPTIONS}
+                        minHeight={22}
+                      />
                     </div>
                   ))}
                 </div>
@@ -432,16 +576,37 @@ export const StudentReportDialog = ({
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', borderTop: '0.5px solid #ccc' }}>
                   <div style={{ padding: '8px 10px', borderRight: '0.5px solid #ccc' }}>
                     <label style={{ fontSize: '9px', color: '#888', textTransform: 'uppercase', fontWeight: 700, display: 'block', marginBottom: 4 }}>Teacher Comment</label>
-                    <p style={{ fontSize: '11px', color: '#222', border: '0.5px solid #ddd', padding: '4px 6px', borderRadius: 3, background: '#fafafa', margin: 0, minHeight: 30 }}>&nbsp;</p>
+                    <EditableField
+                      value={inputs.teacher_comment || ''}
+                      onChange={setField('teacher_comment')}
+                      editable={editing}
+                      multiline
+                      minHeight={80}
+                      placeholder="Overall remarks about the student..."
+                    />
                   </div>
                   <div>
                     <div style={{ padding: '8px 10px', borderBottom: '0.5px solid #ccc' }}>
                       <label style={{ fontSize: '9px', color: '#888', textTransform: 'uppercase', fontWeight: 700, display: 'block', marginBottom: 4 }}>Can Improve In</label>
-                      <p style={{ fontSize: '11px', color: '#222', border: '0.5px solid #ddd', padding: '4px 6px', borderRadius: 3, background: '#fafafa', margin: 0 }}>&nbsp;</p>
+                      <EditableField
+                        value={inputs.can_improve_in || ''}
+                        onChange={setField('can_improve_in')}
+                        editable={editing}
+                        multiline
+                        minHeight={32}
+                        placeholder="Areas needing improvement..."
+                      />
                     </div>
                     <div style={{ padding: '8px 10px' }}>
                       <label style={{ fontSize: '9px', color: '#888', textTransform: 'uppercase', fontWeight: 700, display: 'block', marginBottom: 4 }}>Excels In</label>
-                      <p style={{ fontSize: '11px', color: '#222', border: '0.5px solid #ddd', padding: '4px 6px', borderRadius: 3, background: '#fafafa', margin: 0 }}>&nbsp;</p>
+                      <EditableField
+                        value={inputs.excels_in || ''}
+                        onChange={setField('excels_in')}
+                        editable={editing}
+                        multiline
+                        minHeight={32}
+                        placeholder="Subjects/areas of strength..."
+                      />
                     </div>
                   </div>
                 </div>
@@ -507,8 +672,16 @@ export const StudentReportDialog = ({
 
                 {/* ── SIGNATURES ── */}
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', padding: '10px 14px', borderTop: '1px solid #ccc' }}>
-                  <div style={{ textAlign: 'center', fontSize: '10px', color: '#333' }}>
-                    <div style={{ borderBottom: '1px solid #333', width: 80, margin: '18px auto 4px' }} />
+                  <div style={{ textAlign: 'center', fontSize: '10px', color: '#333', minWidth: 140 }}>
+                    <div style={{ borderBottom: '1px solid #333', width: 120, margin: '18px auto 4px', minHeight: 16 }}>
+                      <EditableField
+                        value={inputs.administrator_name || ''}
+                        onChange={setField('administrator_name')}
+                        editable={editing}
+                        placeholder="Name"
+                        minHeight={16}
+                      />
+                    </div>
                     <div style={{ fontWeight: 700, fontSize: '11px', textTransform: 'uppercase' }}>Administrator</div>
                     <div style={{ color: '#888' }}>School Sponsor</div>
                   </div>
@@ -519,8 +692,16 @@ export const StudentReportDialog = ({
                   }}>
                     OFFICIAL<br />SCHOOL<br />SEAL
                   </div>
-                  <div style={{ textAlign: 'center', fontSize: '10px', color: '#333' }}>
-                    <div style={{ borderBottom: '1px solid #333', width: 80, margin: '18px auto 4px' }} />
+                  <div style={{ textAlign: 'center', fontSize: '10px', color: '#333', minWidth: 140 }}>
+                    <div style={{ borderBottom: '1px solid #333', width: 120, margin: '18px auto 4px', minHeight: 16 }}>
+                      <EditableField
+                        value={inputs.class_teacher_name || ''}
+                        onChange={setField('class_teacher_name')}
+                        editable={editing}
+                        placeholder="Name"
+                        minHeight={16}
+                      />
+                    </div>
                     <div style={{ fontWeight: 700, fontSize: '11px', textTransform: 'uppercase' }}>Class Teacher</div>
                     <div style={{ color: '#888' }}>Teacher Signature</div>
                   </div>
