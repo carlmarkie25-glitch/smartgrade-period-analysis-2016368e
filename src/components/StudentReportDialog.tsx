@@ -251,13 +251,39 @@ export const StudentReportDialog = ({
           return (
             <div>
               {/* ===== ACTION BUTTONS (screen only) ===== */}
-              <div className="flex gap-2 justify-center py-3 print:hidden" style={{ background: '#e8eaf0' }}>
+              <div className="flex gap-2 justify-center py-3 print:hidden flex-wrap" style={{ background: '#e8eaf0' }}>
                 <Button onClick={handlePrint} size="sm" className="gap-2" style={{ background: navy, color: '#fff' }}>
                   <Printer className="h-4 w-4" /> Print / Save as PDF
                 </Button>
                 <Button onClick={handlePrint} size="sm" className="gap-2" style={{ background: gold, color: '#fff' }}>
                   <Download className="h-4 w-4" /> Download PDF
                 </Button>
+                {canEdit && !editing && (
+                  <Button onClick={() => setEditing(true)} size="sm" variant="outline" className="gap-2">
+                    <Pencil className="h-4 w-4" /> Edit Teacher Inputs
+                  </Button>
+                )}
+                {canEdit && editing && (
+                  <>
+                    <Button
+                      onClick={handleSave}
+                      size="sm"
+                      className="gap-2"
+                      disabled={saveMutation.isPending}
+                      style={{ background: '#16a34a', color: '#fff' }}
+                    >
+                      <Save className="h-4 w-4" />
+                      {saveMutation.isPending ? 'Saving...' : 'Save Inputs'}
+                    </Button>
+                    <Button
+                      onClick={() => { setInputs(savedInputs ?? {}); setEditing(false); }}
+                      size="sm"
+                      variant="outline"
+                    >
+                      Cancel
+                    </Button>
+                  </>
+                )}
               </div>
 
               {/* ===== REPORT CARD PAPER ===== */}
