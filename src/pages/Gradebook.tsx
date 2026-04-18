@@ -10,6 +10,7 @@ import { useClasses, useClassSubjects } from "@/hooks/useClasses";
 import { useStudents } from "@/hooks/useStudents";
 import { useGrades, useAssessmentTypes, useSaveGrades } from "@/hooks/useGrades";
 import { Skeleton } from "@/components/ui/skeleton";
+import { isKindergartenClass, scoreToLetter, letterColorClass, KG_SCALE } from "@/lib/kindergarten";
 
 const Gradebook = () => {
   const [selectedClass, setSelectedClass] = useState<string>("");
