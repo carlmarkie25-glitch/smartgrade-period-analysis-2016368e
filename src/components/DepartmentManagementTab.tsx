@@ -230,53 +230,95 @@ export const DepartmentManagementTab = () => {
             <DialogTitle>Assessment Types - {departments?.find(d => d.id === selectedDepartmentId)?.name}</DialogTitle>
             <DialogDescription>Manage assessment types for this department</DialogDescription>
           </DialogHeader>
-          <div className="space-y-4">
-            <div className="grid grid-cols-3 gap-4">
-              <div>
-                <Label>Assessment Name</Label>
-                <Input value={newAssessment.name} onChange={(e) => setNewAssessment({ ...newAssessment, name: e.target.value })} placeholder="e.g., Quiz 1" />
-              </div>
-              <div>
-                <Label>Max Points</Label>
-                <Input type="number" value={newAssessment.max_points} onChange={(e) => setNewAssessment({ ...newAssessment, max_points: parseInt(e.target.value) || 0 })} />
-              </div>
-              <div>
-                <Label>Display Order</Label>
-                <Input type="number" value={newAssessment.display_order} onChange={(e) => setNewAssessment({ ...newAssessment, display_order: parseInt(e.target.value) || 0 })} />
-              </div>
-            </div>
-            <Button onClick={handleAddAssessment} className="w-full"><Plus className="h-4 w-4 mr-2" />Add Assessment Type</Button>
+          {(() => {
+            const selectedDept = departments?.find(d => d.id === selectedDepartmentId);
+            const isKg = (selectedDept?.name || "").trim().toLowerCase() === "kindergarten";
 
-            {assessmentLoading ? (
-              <div className="space-y-2">{Array(3).fill(0).map((_, i) => (<Skeleton key={i} className="h-12 w-full" />))}</div>
-            ) : (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Order</TableHead>
-                    <TableHead>Assessment Name</TableHead>
-                    <TableHead>Max Points</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {assessments?.map((assessment) => (
-                    <TableRow key={assessment.id}>
-                      <TableCell>{assessment.display_order}</TableCell>
-                      <TableCell className="font-medium">{assessment.name}</TableCell>
-                      <TableCell>{assessment.max_points}</TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex justify-end gap-2">
-                          <Button variant="outline" size="sm"><Pencil className="h-4 w-4" /></Button>
-                          <Button variant="outline" size="sm" onClick={() => handleDeleteAssessment(assessment.id)}><Trash2 className="h-4 w-4" /></Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            )}
-          </div>
+            if (isKg) {
+              return (
+                <div className="space-y-4">
+                  <div className="rounded-md border border-border bg-muted/40 p-4 text-sm text-muted-foreground">
+                    <p className="font-medium text-foreground mb-1">Kindergarten uses a single Total Points assessment</p>
+                    <p>
+                      The Kindergarten division (Nursery, ABC, K1, K2) does not use multiple assessment types.
+                      Teachers enter one <strong>Total Points</strong> score (out of 100) per subject per period,
+                      and the system automatically converts it to a letter grade (A+ to F) on report cards.
+                    </p>
+                  </div>
+                  {assessmentLoading ? (
+                    <Skeleton className="h-12 w-full" />
+                  ) : (
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Assessment Name</TableHead>
+                          <TableHead>Max Points</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {assessments?.map((assessment) => (
+                          <TableRow key={assessment.id}>
+                            <TableCell className="font-medium">{assessment.name}</TableCell>
+                            <TableCell>{assessment.max_points}</TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  )}
+                </div>
+              );
+            }
+
+            return (
+              <div className="space-y-4">
+                <div className="grid grid-cols-3 gap-4">
+                  <div>
+                    <Label>Assessment Name</Label>
+                    <Input value={newAssessment.name} onChange={(e) => setNewAssessment({ ...newAssessment, name: e.target.value })} placeholder="e.g., Quiz 1" />
+                  </div>
+                  <div>
+                    <Label>Max Points</Label>
+                    <Input type="number" value={newAssessment.max_points} onChange={(e) => setNewAssessment({ ...newAssessment, max_points: parseInt(e.target.value) || 0 })} />
+                  </div>
+                  <div>
+                    <Label>Display Order</Label>
+                    <Input type="number" value={newAssessment.display_order} onChange={(e) => setNewAssessment({ ...newAssessment, display_order: parseInt(e.target.value) || 0 })} />
+                  </div>
+                </div>
+                <Button onClick={handleAddAssessment} className="w-full"><Plus className="h-4 w-4 mr-2" />Add Assessment Type</Button>
+
+                {assessmentLoading ? (
+                  <div className="space-y-2">{Array(3).fill(0).map((_, i) => (<Skeleton key={i} className="h-12 w-full" />))}</div>
+                ) : (
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Order</TableHead>
+                        <TableHead>Assessment Name</TableHead>
+                        <TableHead>Max Points</TableHead>
+                        <TableHead className="text-right">Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {assessments?.map((assessment) => (
+                        <TableRow key={assessment.id}>
+                          <TableCell>{assessment.display_order}</TableCell>
+                          <TableCell className="font-medium">{assessment.name}</TableCell>
+                          <TableCell>{assessment.max_points}</TableCell>
+                          <TableCell className="text-right">
+                            <div className="flex justify-end gap-2">
+                              <Button variant="outline" size="sm"><Pencil className="h-4 w-4" /></Button>
+                              <Button variant="outline" size="sm" onClick={() => handleDeleteAssessment(assessment.id)}><Trash2 className="h-4 w-4" /></Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                )}
+              </div>
+            );
+          })()}
         </DialogContent>
       </Dialog>
     </div>
