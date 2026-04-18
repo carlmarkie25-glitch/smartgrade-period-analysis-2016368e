@@ -1,4 +1,4 @@
-import { LayoutDashboard, Users, BookOpen, FileText, BarChart3, Settings, GraduationCap, CalendarDays, LogOut, UserCog, Calendar, Building, School, Layers, ChevronDown, PanelLeftClose, PanelLeft, UsersRound, Wallet, DollarSign, Receipt, TrendingUp, PieChart, CreditCard } from "lucide-react";
+import { LayoutDashboard, Users, BookOpen, FileText, BarChart3, Settings, GraduationCap, CalendarDays, LogOut, UserCog, Calendar, Building, School, Layers, ChevronDown, PanelLeftClose, PanelLeft, UsersRound, Wallet, DollarSign, Receipt, TrendingUp, PieChart, CreditCard, Archive } from "lucide-react";
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useUserRoles } from "@/hooks/useUserRoles";
@@ -88,6 +88,7 @@ export const Sidebar = ({ activeTab, onTabChange, collapsed = false, onToggle }:
       { id: "schedule", icon: CalendarDays, label: "Schedule", path: "/schedule", roles: ["admin"] },
       { id: "calendar", icon: Calendar, label: "Calendar", path: "/academic-calendar", roles: ["admin"] },
       { id: "analytics", icon: BarChart3, label: "Analytics", path: "/analytics", roles: ["teacher", "admin"] },
+      { id: "student-lifecycle", icon: Archive, label: "Lifecycle", path: "/student-lifecycle", roles: ["admin"] },
     ],
   };
 
