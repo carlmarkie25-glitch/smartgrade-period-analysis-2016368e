@@ -202,7 +202,7 @@ const StudentLifecycle = () => {
                         return (
                           <TableRow key={s.id}>
                             <TableCell className="font-mono text-xs">{sum.student_id ?? "—"}</TableCell>
-                            <TableCell><Badge variant="outline">{sum.final_status ?? "—"}</Badge></TableCell>
+                            <TableCell>{sum.final_status ? <StatusBadge status={sum.final_status} /> : <Badge variant="outline">—</Badge>}</TableCell>
                             <TableCell className="text-sm">
                               {s.archived_at ? format(new Date(s.archived_at), "MMM d, yyyy") : "—"}
                             </TableCell>
