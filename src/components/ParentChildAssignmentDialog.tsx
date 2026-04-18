@@ -197,10 +197,12 @@ export const ParentChildAssignmentDialog = ({
                     }`}
                     onClick={() => toggleStudent(student.id)}
                   >
-                    <Checkbox
-                      checked={isSelected}
-                      onCheckedChange={() => toggleStudent(student.id)}
-                    />
+                    <div onClick={(e) => e.stopPropagation()}>
+                      <Checkbox
+                        checked={isSelected}
+                        onCheckedChange={() => toggleStudent(student.id)}
+                      />
+                    </div>
                     <Avatar className="h-8 w-8">
                       <AvatarImage src={student.photo_url || ""} />
                       <AvatarFallback className="text-xs">
