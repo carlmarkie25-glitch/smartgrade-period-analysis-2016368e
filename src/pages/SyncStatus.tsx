@@ -7,7 +7,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useSyncStatus } from "@/hooks/useSyncStatus";
 import { offlineDB, SYNCED_TABLES } from "@/lib/offline/db";
 import { useEffect, useState } from "react";
-import { Cloud, CloudOff, RefreshCw, Trash2, AlertTriangle, CheckCircle2 } from "lucide-react";
+import { Cloud, CloudOff, RefreshCw, Trash2, AlertTriangle, CheckCircle2, RotateCw } from "lucide-react";
 import { format, formatDistanceToNow } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 
@@ -72,6 +72,15 @@ const SyncStatusPage = () => {
     toast({ title: "Outbox cleared" });
   };
 
+  const handleRetryEntry = async (id: number) => {
+    // Reset attempts so the sync engine doesn't keep deferring
+    await offlineDB.outbox.update(id, { attempts: 0, last_error: null });
+    await syncNow();
+    refresh();
+    toast({ title: "Retrying change…" });
+  };
+
+  const conflicts = outbox.filter((r) => r.attempts >= 3 || (r.last_error && r.attempts > 0));
   const totalCached = tableMeta.reduce((s, m) => s + m.cachedRows, 0);
 
   return (
