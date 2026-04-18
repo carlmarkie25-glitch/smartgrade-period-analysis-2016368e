@@ -10,9 +10,11 @@ import { useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { formatDistanceToNow } from "date-fns";
 import { useAuth } from "@/contexts/AuthContext";
+import StudentPortal from "@/components/portals/StudentPortal";
+import ParentPortal from "@/components/portals/ParentPortal";
 
 const Dashboard = () => {
-  const { isAdmin, isTeacher, isStudent, roles, isLoading: rolesLoading } = useUserRoles();
+  const { isAdmin, isTeacher, isStudent, isParent, roles, isLoading: rolesLoading } = useUserRoles();
 
   if (rolesLoading) {
     return (
@@ -39,8 +41,13 @@ const Dashboard = () => {
     return <NoRoleDashboard />;
   }
 
+  // Parent portal takes precedence for parent-only users
+  if (isParent && !isAdmin && !isTeacher) {
+    return <ParentPortal />;
+  }
+
   if (isStudent && !isAdmin && !isTeacher) {
-    return <StudentDashboard />;
+    return <StudentPortal />;
   }
 
   const showTeacherView = isTeacher && !isAdmin;
