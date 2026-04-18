@@ -1,0 +1,179 @@
+import AppShell from "@/components/AppShell";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Archive, RotateCcw, AlertTriangle } from "lucide-react";
+import { useArchivedStudents, useDepartedStudents, useReinstateStudent } from "@/hooks/useStudentLifecycle";
+import { format } from "date-fns";
+
+const statusColor: Record<string, string> = {
+  graduated: "bg-emerald-500/10 text-emerald-600 border-emerald-500/30",
+  transferred: "bg-blue-500/10 text-blue-600 border-blue-500/30",
+  withdrawn: "bg-amber-500/10 text-amber-600 border-amber-500/30",
+  expelled: "bg-red-500/10 text-red-600 border-red-500/30",
+};
+
+const StudentLifecycle = () => {
+  const departed = useDepartedStudents();
+  const archived = useArchivedStudents();
+  const reinstate = useReinstateStudent();
+
+  const today = new Date();
+  const daysLeft = (d: string | null) =>
+    d ? Math.ceil((new Date(d).getTime() - today.getTime()) / 86400000) : null;
+
+  return (
+    <AppShell activeTab="dashboard">
+      <div className="py-4 space-y-6">
+        <div>
+          <h1 className="text-2xl font-bold">Student Lifecycle & Retention</h1>
+          <p className="text-sm text-muted-foreground">
+            Manage departed students. Records auto-archive after 3 years (PRD §8).
+          </p>
+        </div>
+
+        <Tabs defaultValue="departed">
+          <TabsList>
+            <TabsTrigger value="departed">Departed</TabsTrigger>
+            <TabsTrigger value="archived">Archived</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="departed">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">Departed students</CardTitle>
+                <CardDescription>
+                  Graduated, transferred, withdrawn, or expelled. Excluded from billable seats.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {departed.isLoading ? (
+                  <div className="space-y-2">{[1, 2, 3].map((i) => <Skeleton key={i} className="h-12 w-full" />)}</div>
+                ) : !departed.data?.length ? (
+                  <p className="text-sm text-muted-foreground">No departed students yet.</p>
+                ) : (
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Student</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead>Departed</TableHead>
+                        <TableHead>Retention expires</TableHead>
+                        <TableHead className="text-right">Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {departed.data.map((s: any) => {
+                        const left = daysLeft(s.retention_expires_at);
+                        const urgent = left !== null && left <= 90;
+                        return (
+                          <TableRow key={s.id}>
+                            <TableCell>
+                              <div className="font-medium">{s.full_name}</div>
+                              <div className="text-xs text-muted-foreground">
+                                {s.student_id} · {s.classes?.name ?? "—"}
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <Badge variant="outline" className={statusColor[s.status] ?? ""}>
+                                {s.status}
+                              </Badge>
+                            </TableCell>
+                            <TableCell className="text-sm">
+                              {s.departure_date ? format(new Date(s.departure_date), "MMM d, yyyy") : "—"}
+                              {s.departure_reason && (
+                                <div className="text-xs text-muted-foreground line-clamp-1">{s.departure_reason}</div>
+                              )}
+                            </TableCell>
+                            <TableCell className="text-sm">
+                              {s.retention_expires_at ? (
+                                <div className={urgent ? "text-amber-600 font-medium flex items-center gap-1" : ""}>
+                                  {urgent && <AlertTriangle className="h-3 w-3" />}
+                                  {format(new Date(s.retention_expires_at), "MMM d, yyyy")}
+                                  <span className="text-xs text-muted-foreground ml-1">
+                                    ({left}d)
+                                  </span>
+                                </div>
+                              ) : "—"}
+                            </TableCell>
+                            <TableCell className="text-right">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => reinstate.mutate(s.id)}
+                                disabled={reinstate.isPending}
+                              >
+                                <RotateCcw className="h-4 w-4 mr-1" />
+                                Reinstate
+                              </Button>
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
+                    </TableBody>
+                  </Table>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="archived">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <Archive className="h-5 w-5" />
+                  Archived students
+                </CardTitle>
+                <CardDescription>
+                  Anonymized after 3 years. Only aggregate summaries are retained.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {archived.isLoading ? (
+                  <Skeleton className="h-24 w-full" />
+                ) : !archived.data?.length ? (
+                  <p className="text-sm text-muted-foreground">No archived records.</p>
+                ) : (
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Anon. ID</TableHead>
+                        <TableHead>Final status</TableHead>
+                        <TableHead>Archived</TableHead>
+                        <TableHead>Grades</TableHead>
+                        <TableHead>Total paid</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {archived.data.map((s: any) => {
+                        const sum = s.archive_summary ?? {};
+                        return (
+                          <TableRow key={s.id}>
+                            <TableCell className="font-mono text-xs">{sum.student_id ?? "—"}</TableCell>
+                            <TableCell><Badge variant="outline">{sum.final_status ?? "—"}</Badge></TableCell>
+                            <TableCell className="text-sm">
+                              {s.archived_at ? format(new Date(s.archived_at), "MMM d, yyyy") : "—"}
+                            </TableCell>
+                            <TableCell className="text-sm">{sum.grade_count ?? 0}</TableCell>
+                            <TableCell className="text-sm">
+                              ${Number(sum.total_paid ?? 0).toFixed(2)}
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
+                    </TableBody>
+                  </Table>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
+      </div>
+    </AppShell>
+  );
+};
+
+export default StudentLifecycle;
