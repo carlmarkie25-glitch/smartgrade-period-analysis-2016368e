@@ -37,6 +37,7 @@ import SchoolSettings from "./pages/SchoolSettings";
 import Billing from "./pages/Billing";
 import Attendance from "./pages/Attendance";
 import Install from "./pages/Install";
+import StudentLifecycle from "./pages/StudentLifecycle";
 
 const queryClient = new QueryClient();
 
