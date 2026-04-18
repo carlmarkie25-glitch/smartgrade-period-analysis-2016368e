@@ -10,8 +10,8 @@ export type Tier = "basic" | "standard" | "premium";
 
 // PRD §3 feature matrix
 const PLAN_FEATURES: Record<Tier, Feature[]> = {
-  basic: ["students", "grades", "reports"],
-  standard: ["students", "grades", "reports", "analytics", "branding", "schedule", "calendar"],
+  basic: ["students", "grades", "reports", "attendance"],
+  standard: ["students", "grades", "reports", "analytics", "branding", "schedule", "calendar", "attendance"],
   premium: [
     "students", "grades", "reports", "analytics", "branding",
     "schedule", "calendar", "attendance", "finance", "messaging", "api",
