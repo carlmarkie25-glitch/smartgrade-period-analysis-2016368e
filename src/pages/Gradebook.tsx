@@ -23,12 +23,12 @@ const Gradebook = () => {
   const { data: classes, isLoading: classesLoading } = useClasses();
   const { data: classSubjects, isLoading: subjectsLoading } = useClassSubjects(selectedClass);
   const { data: students, isLoading: studentsLoading } = useStudents(selectedClass);
-  const { data: assessmentTypes, isLoading: assessmentLoading } = useAssessmentTypes();
-  const { data: grades, isLoading: gradesLoading } = useGrades(selectedSubject, selectedPeriod);
-  const saveGradesMutation = useSaveGrades();
-
   const selectedClassObj = classes?.find((c) => c.id === selectedClass);
   const isKg = isKindergartenClass(selectedClassObj);
+  const departmentId = (selectedClassObj as any)?.department_id ?? (selectedClassObj as any)?.departments?.id;
+  const { data: assessmentTypes, isLoading: assessmentLoading } = useAssessmentTypes(departmentId);
+  const { data: grades, isLoading: gradesLoading } = useGrades(selectedSubject, selectedPeriod);
+  const saveGradesMutation = useSaveGrades();
 
   // Filter students based on search term
   const filteredStudents = useMemo(() => {

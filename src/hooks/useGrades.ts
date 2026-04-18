@@ -132,22 +132,22 @@ export const useSaveGrades = () => {
   });
 };
 
-export const useAssessmentTypes = () => {
+export const useAssessmentTypes = (departmentId?: string) => {
   return useQuery({
-    queryKey: ["assessment-types"],
+    queryKey: ["assessment-types", departmentId ?? "all"],
     queryFn: async () => {
       const fromCache = async () => {
         const rows = await offlineDB.assessment_types.toArray();
         return rows
           .map((r: any) => r.data)
+          .filter((d: any) => !departmentId || d.department_id === departmentId)
           .sort((a, b) => (a.display_order ?? 0) - (b.display_order ?? 0));
       };
       if (isOffline()) return fromCache();
       try {
-        const { data, error } = await supabase
-          .from("assessment_types")
-          .select("*")
-          .order("display_order");
+        let query = supabase.from("assessment_types").select("*").order("display_order");
+        if (departmentId) query = query.eq("department_id", departmentId);
+        const { data, error } = await query;
         if (error) throw error;
         for (const row of data ?? []) await writeCachedRow("assessment_types", row);
         return data;
