@@ -14,11 +14,11 @@ export const useBillableSeats = () => {
     queryKey: ["billable-seats", school?.id],
     enabled: !!school?.id,
     queryFn: async () => {
-      const { count, error } = await supabase
+      const { count, error } = await (supabase as any)
         .from("students")
         .select("id", { count: "exact", head: true })
         .eq("school_id", school!.id)
-        .eq("is_active" as any, true);
+        .eq("is_active", true);
 
       if (error) throw error;
       const active = count ?? 0;
