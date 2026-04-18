@@ -467,6 +467,12 @@ const SuperAdmin = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <SchoolDetailDrawer
+        school={viewing as any}
+        open={!!viewing}
+        onOpenChange={(o) => !o && setViewing(null)}
+      />
     </div>
   );
 };
