@@ -3,7 +3,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { X, GraduationCap, UserPlus, Eye, Pencil, Trash2 } from "lucide-react";
+import { X, GraduationCap, UserPlus, Eye, Pencil, Trash2, UserMinus } from "lucide-react";
+import { MarkDepartedDialog } from "./MarkDepartedDialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useUserManagement } from "@/hooks/useUserManagement";
@@ -45,6 +46,7 @@ export const StudentUsersTab = () => {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isBiodataDialogOpen, setIsBiodataDialogOpen] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState<any>(null);
+  const [departingStudent, setDepartingStudent] = useState<{ id: string; full_name: string } | null>(null);
   const [editingStudentId, setEditingStudentId] = useState<string | null>(null);
   const [editingStudentIdString, setEditingStudentIdString] = useState<string>("");
   const [isCreating, setIsCreating] = useState(false);
@@ -342,6 +344,14 @@ export const StudentUsersTab = () => {
                       <Button variant="outline" size="sm" onClick={() => handleEditClick(student)} title="Edit Student">
                         <Pencil className="h-4 w-4" />
                       </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setDepartingStudent({ id: student.id, full_name: student.full_name })}
+                        title="Mark as departed"
+                      >
+                        <UserMinus className="h-4 w-4" />
+                      </Button>
                       <Button variant="outline" size="sm" onClick={() => handleDeleteStudent(student.id)} title="Delete Student">
                         <Trash2 className="h-4 w-4" />
                       </Button>
@@ -384,6 +394,12 @@ export const StudentUsersTab = () => {
         student={selectedStudent}
         open={isBiodataDialogOpen}
         onOpenChange={setIsBiodataDialogOpen}
+      />
+
+      <MarkDepartedDialog
+        open={!!departingStudent}
+        onOpenChange={(o) => !o && setDepartingStudent(null)}
+        student={departingStudent}
       />
     </div>
   );
