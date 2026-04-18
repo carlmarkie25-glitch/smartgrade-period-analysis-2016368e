@@ -26,10 +26,11 @@ Deno.serve(async (req) => {
     }
     const userId = userData.user.id;
 
-    const { newPriceId, environment } = await req.json();
+    const { newPriceId, quantity, environment } = await req.json();
     if (!newPriceId) {
       return new Response(JSON.stringify({ error: 'newPriceId required' }), { status: 400, headers: corsHeaders });
     }
+    const seatQty = Math.max(50, Number(quantity) || 50); // enforce 50-seat minimum
     const env = (environment || 'sandbox') as PaddleEnv;
 
     // Look up the user's current subscription
@@ -52,9 +53,9 @@ Deno.serve(async (req) => {
     }
 
     const paddle = getPaddleClient(env);
-    // Swap the subscription's items immediately, prorated.
+    // Swap items + seat count immediately, prorated.
     const updated = await paddle.subscriptions.update(sub.paddle_subscription_id, {
-      items: [{ priceId: paddlePriceId, quantity: 1 }],
+      items: [{ priceId: paddlePriceId, quantity: seatQty }],
       prorationBillingMode: 'prorated_immediately',
     } as any);
 
