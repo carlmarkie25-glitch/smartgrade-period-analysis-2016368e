@@ -1,10 +1,14 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Users, GraduationCap, DollarSign, Activity, Mail, Phone, Globe, MapPin } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { toast } from "sonner";
+import { Users, GraduationCap, DollarSign, Activity, Mail, Phone, Globe, MapPin, ShieldAlert, Loader2 } from "lucide-react";
 
 type School = {
   id: string;
@@ -39,6 +43,55 @@ const lockColor: Record<string, string> = {
 
 export const SchoolDetailDrawer = ({ school, open, onOpenChange }: Props) => {
   const schoolId = school?.id;
+  const queryClient = useQueryClient();
+
+  const [subStatus, setSubStatus] = useState(school?.subscription_status ?? "trialing");
+  const [lockState, setLockState] = useState(school?.lockout_state ?? "none");
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    setSubStatus(school?.subscription_status ?? "trialing");
+    setLockState(school?.lockout_state ?? "none");
+  }, [school?.id, school?.subscription_status, school?.lockout_state]);
+
+  const dirty =
+    subStatus !== (school?.subscription_status ?? "trialing") ||
+    lockState !== (school?.lockout_state ?? "none");
+
+  const handleSaveOverride = async () => {
+    if (!school) return;
+    setSaving(true);
+    const { error } = await supabase
+      .from("schools")
+      .update({
+        subscription_status: subStatus,
+        lockout_state: lockState,
+        lockout_started_at: lockState === "none" ? null : new Date().toISOString(),
+      })
+      .eq("id", school.id);
+
+    if (error) {
+      toast.error("Override failed", { description: error.message });
+      setSaving(false);
+      return;
+    }
+
+    await supabase.rpc("write_audit_log", {
+      p_action: "super_admin.school.manual_override",
+      p_entity_type: "school",
+      p_entity_id: school.id,
+      p_metadata: {
+        school_name: school.name,
+        previous: { subscription_status: school.subscription_status, lockout_state: school.lockout_state },
+        next: { subscription_status: subStatus, lockout_state: lockState },
+      },
+    });
+
+    toast.success("School updated");
+    queryClient.invalidateQueries({ queryKey: ["schools"] });
+    queryClient.invalidateQueries({ queryKey: ["school-detail", school.id] });
+    setSaving(false);
+  };
 
   const { data, isLoading } = useQuery({
     queryKey: ["school-detail", schoolId],
