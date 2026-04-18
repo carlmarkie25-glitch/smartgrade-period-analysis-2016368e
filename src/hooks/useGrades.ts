@@ -136,21 +136,55 @@ export const useAssessmentTypes = (departmentId?: string) => {
   return useQuery({
     queryKey: ["assessment-types", departmentId ?? "all"],
     queryFn: async () => {
+      // When no departmentId is provided (number-grading classes), exclude
+      // assessment types tied to a Kindergarten department so the KG-only
+      // "Total Points" row doesn't bleed into standard gradebooks.
+      const isKgDept = (deptId: string | null | undefined, kgIds: Set<string>) =>
+        !!deptId && kgIds.has(deptId);
+
       const fromCache = async () => {
+        const deptRows = await offlineDB.departments.toArray();
+        const kgIds = new Set(
+          deptRows
+            .map((r: any) => r.data)
+            .filter((d: any) => typeof d?.name === "string" && d.name.trim().toLowerCase() === "kindergarten")
+            .map((d: any) => d.id),
+        );
         const rows = await offlineDB.assessment_types.toArray();
         return rows
           .map((r: any) => r.data)
-          .filter((d: any) => !departmentId || d.department_id === departmentId)
+          .filter((d: any) => {
+            if (departmentId) return d.department_id === departmentId;
+            return !isKgDept(d.department_id, kgIds);
+          })
           .sort((a, b) => (a.display_order ?? 0) - (b.display_order ?? 0));
       };
       if (isOffline()) return fromCache();
       try {
-        let query = supabase.from("assessment_types").select("*").order("display_order");
-        if (departmentId) query = query.eq("department_id", departmentId);
-        const { data, error } = await query;
+        if (departmentId) {
+          const { data, error } = await supabase
+            .from("assessment_types")
+            .select("*")
+            .eq("department_id", departmentId)
+            .order("display_order");
+          if (error) throw error;
+          for (const row of data ?? []) await writeCachedRow("assessment_types", row);
+          return data;
+        }
+        // No department filter: fetch all, then exclude KG-department rows
+        const { data, error } = await supabase
+          .from("assessment_types")
+          .select("*")
+          .order("display_order");
         if (error) throw error;
-        for (const row of data ?? []) await writeCachedRow("assessment_types", row);
-        return data;
+        const { data: kgDepts } = await supabase
+          .from("departments")
+          .select("id, name")
+          .ilike("name", "kindergarten");
+        const kgIds = new Set((kgDepts ?? []).map((d: any) => d.id));
+        const filtered = (data ?? []).filter((row: any) => !isKgDept(row.department_id, kgIds));
+        for (const row of filtered) await writeCachedRow("assessment_types", row);
+        return filtered;
       } catch {
         return fromCache();
       }
