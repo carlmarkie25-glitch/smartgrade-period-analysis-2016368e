@@ -5,9 +5,13 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Archive, RotateCcw, AlertTriangle } from "lucide-react";
+import { Archive, RotateCcw, AlertTriangle, Download, Loader2 } from "lucide-react";
 import { useArchivedStudents, useDepartedStudents, useReinstateStudent } from "@/hooks/useStudentLifecycle";
 import { format } from "date-fns";
+import { useState } from "react";
+import { generateTransferPack, downloadBlob } from "@/lib/transferPack";
+import { useToast } from "@/hooks/use-toast";
+import { useSchool } from "@/contexts/SchoolContext";
 
 const statusColor: Record<string, string> = {
   graduated: "bg-emerald-500/10 text-emerald-600 border-emerald-500/30",
@@ -20,6 +24,28 @@ const StudentLifecycle = () => {
   const departed = useDepartedStudents();
   const archived = useArchivedStudents();
   const reinstate = useReinstateStudent();
+  const { school } = useSchool();
+  const { toast } = useToast();
+  const [exportingId, setExportingId] = useState<string | null>(null);
+
+  const handleExport = async (s: any) => {
+    setExportingId(s.id);
+    try {
+      const blob = await generateTransferPack(s.id, {
+        name: school?.name,
+        address: (school as any)?.address,
+        phone: (school as any)?.phone,
+        email: (school as any)?.email,
+      });
+      const safeName = (s.full_name ?? "student").replace(/[^a-z0-9]+/gi, "_");
+      downloadBlob(blob, `transfer-pack-${safeName}-${s.student_id ?? s.id}.pdf`);
+      toast({ title: "Transfer Pack downloaded" });
+    } catch (err: any) {
+      toast({ title: "Export failed", description: err.message, variant: "destructive" });
+    } finally {
+      setExportingId(null);
+    }
+  };
 
   const today = new Date();
   const daysLeft = (d: string | null) =>
@@ -99,7 +125,20 @@ const StudentLifecycle = () => {
                                 </div>
                               ) : "—"}
                             </TableCell>
-                            <TableCell className="text-right">
+                            <TableCell className="text-right space-x-2">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleExport(s)}
+                                disabled={exportingId === s.id}
+                              >
+                                {exportingId === s.id ? (
+                                  <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                                ) : (
+                                  <Download className="h-4 w-4 mr-1" />
+                                )}
+                                Transfer Pack
+                              </Button>
                               <Button
                                 variant="outline"
                                 size="sm"
