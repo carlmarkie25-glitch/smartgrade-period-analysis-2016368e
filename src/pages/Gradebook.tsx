@@ -27,6 +27,9 @@ const Gradebook = () => {
   const { data: grades, isLoading: gradesLoading } = useGrades(selectedSubject, selectedPeriod);
   const saveGradesMutation = useSaveGrades();
 
+  const selectedClassObj = classes?.find((c) => c.id === selectedClass);
+  const isKg = isKindergartenClass(selectedClassObj);
+
   // Filter students based on search term
   const filteredStudents = useMemo(() => {
     if (!searchTerm || searchTerm.trim() === "") {
