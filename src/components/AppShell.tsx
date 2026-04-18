@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Sidebar } from "@/components/dashboard/Sidebar";
 import { Topbar } from "@/components/dashboard/Topbar";
 import { useAuth } from "@/contexts/AuthContext";
+import { EmailVerificationBanner } from "@/components/EmailVerificationBanner";
 
 interface AppShellProps {
   children: React.ReactNode;
@@ -19,6 +20,7 @@ const AppShell = ({ children, activeTab }: AppShellProps) => {
       <Sidebar activeTab={activeTab} collapsed={collapsed} onToggle={() => setCollapsed(!collapsed)} />
       <Topbar userName={profileName} userRole="Staff" sidebarCollapsed={collapsed} />
       <main className={`pt-[72px] pr-5 pb-5 transition-all duration-300 ${collapsed ? "pl-24" : "pl-60"}`}>
+        <EmailVerificationBanner />
         <div className="max-w-[1400px] mx-auto">
           {children}
         </div>

@@ -25,6 +25,21 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setSession(session);
         setUser(session?.user ?? null);
         setLoading(false);
+
+        // Seed IndexedDB on first login per user (full snapshot)
+        if (event === "SIGNED_IN" && session?.user) {
+          const seedKey = `lumini:seeded:${session.user.id}`;
+          if (typeof window !== "undefined" && !localStorage.getItem(seedKey)) {
+            // Defer to avoid blocking auth state propagation
+            setTimeout(() => {
+              import("@/lib/offline/sync").then(({ syncNow }) => {
+                syncNow().then(() => {
+                  try { localStorage.setItem(seedKey, new Date().toISOString()); } catch {}
+                }).catch(() => {});
+              });
+            }, 1500);
+          }
+        }
       }
     );
 

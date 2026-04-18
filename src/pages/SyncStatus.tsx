@@ -7,7 +7,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useSyncStatus } from "@/hooks/useSyncStatus";
 import { offlineDB, SYNCED_TABLES } from "@/lib/offline/db";
 import { useEffect, useState } from "react";
-import { Cloud, CloudOff, RefreshCw, Trash2, AlertTriangle, CheckCircle2 } from "lucide-react";
+import { Cloud, CloudOff, RefreshCw, Trash2, AlertTriangle, CheckCircle2, RotateCw } from "lucide-react";
 import { format, formatDistanceToNow } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 
@@ -72,6 +72,15 @@ const SyncStatusPage = () => {
     toast({ title: "Outbox cleared" });
   };
 
+  const handleRetryEntry = async (id: number) => {
+    // Reset attempts so the sync engine doesn't keep deferring
+    await offlineDB.outbox.update(id, { attempts: 0, last_error: null });
+    await syncNow();
+    refresh();
+    toast({ title: "Retrying change…" });
+  };
+
+  const conflicts = outbox.filter((r) => r.attempts >= 3 || (r.last_error && r.attempts > 0));
   const totalCached = tableMeta.reduce((s, m) => s + m.cachedRows, 0);
 
   return (
@@ -138,7 +147,57 @@ const SyncStatusPage = () => {
           </Card>
         )}
 
-        {/* Outbox */}
+        {/* Conflicts (failed entries) */}
+        {conflicts.length > 0 && (
+          <Card className="border-destructive/40">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-lg flex items-center gap-2 text-destructive">
+                <AlertTriangle className="h-5 w-5" /> Sync conflicts ({conflicts.length})
+              </CardTitle>
+              <CardDescription>
+                These changes failed after multiple attempts. Retry once the issue is resolved, or discard to drop them.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              {conflicts.map((c) => (
+                <div
+                  key={`conflict-${c.id}`}
+                  className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-destructive/20 bg-destructive/5 px-3 py-2 text-sm"
+                >
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2">
+                      <Badge variant="outline" className="font-mono text-xs">{c.table}</Badge>
+                      <Badge variant="outline">{c.op}</Badge>
+                      <span className="text-xs text-muted-foreground">
+                        {format(new Date(c.client_ts), "MMM d, HH:mm")}
+                      </span>
+                      <span className="text-xs text-amber-600">{c.attempts} attempts</span>
+                    </div>
+                    <div className="text-xs text-destructive mt-1 truncate">{c.last_error}</div>
+                  </div>
+                  <div className="flex gap-1 shrink-0">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => c.id && handleRetryEntry(c.id)}
+                      disabled={!online || syncing}
+                    >
+                      <RotateCw className="h-3.5 w-3.5 mr-1" /> Retry
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => c.id && handleClearEntry(c.id)}
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+        )}
+
         <Card>
           <CardHeader className="flex flex-row items-start justify-between gap-2 space-y-0">
             <div>
@@ -196,13 +255,27 @@ const SyncStatusPage = () => {
                         {row.last_error ?? "—"}
                       </TableCell>
                       <TableCell className="text-right">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => row.id && handleClearEntry(row.id)}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
+                        <div className="flex justify-end gap-1">
+                          {row.attempts > 0 && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => row.id && handleRetryEntry(row.id)}
+                              disabled={!online || syncing}
+                              title="Retry"
+                            >
+                              <RotateCw className="h-4 w-4" />
+                            </Button>
+                          )}
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => row.id && handleClearEntry(row.id)}
+                            title="Discard"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))}
