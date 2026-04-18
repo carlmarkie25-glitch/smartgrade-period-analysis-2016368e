@@ -22,6 +22,7 @@ type School = {
   website?: string | null;
   address?: string | null;
   country?: string | null;
+  owner_user_id?: string | null;
 };
 
 type Props = {
