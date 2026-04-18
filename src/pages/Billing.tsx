@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { Check, Loader2, Sparkles, ExternalLink, AlertTriangle } from "lucide-react";
+import { Check, Loader2, Sparkles, ExternalLink, AlertTriangle, Users } from "lucide-react";
 import MainLayout from "@/components/MainLayout";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -8,16 +8,19 @@ import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSchool } from "@/contexts/SchoolContext";
 import { useSubscription } from "@/hooks/useSubscription";
+import { useBillableSeats, MIN_SEATS } from "@/hooks/useBillableSeats";
 import { initializePaddle, getPaddlePriceId, paddleEnvironment } from "@/lib/paddle";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
+type TierId = "basic" | "standard" | "premium";
+
 interface Plan {
-  id: "starter" | "pro" | "premium";
+  id: TierId;
   productId: string;
   priceId: string;
   name: string;
-  price: string;
+  perStudent: number; // dollars per student per year
   description: string;
   features: string[];
   highlight?: boolean;
@@ -25,46 +28,77 @@ interface Plan {
 
 const PLANS: Plan[] = [
   {
-    id: "starter",
-    productId: "starter_plan",
-    priceId: "starter_monthly",
-    name: "Starter",
-    price: "$19",
+    id: "basic",
+    productId: "basic_plan",
+    priceId: "basic_yearly",
+    name: "Basic",
+    perStudent: 0.8,
     description: "Essentials to run your school",
-    features: ["Students & enrollment", "Gradebook", "Report cards", "Custom branding"],
+    features: [
+      "Student records & enrollment",
+      "Gradebook & grade entry",
+      "Standard report cards",
+      "Email support",
+    ],
   },
   {
-    id: "pro",
-    productId: "pro_plan",
-    priceId: "pro_monthly",
-    name: "Pro",
-    price: "$49",
-    description: "Add scheduling and analytics",
-    features: ["Everything in Starter", "Analytics dashboard", "Class schedule", "Academic calendar"],
+    id: "standard",
+    productId: "standard_plan",
+    priceId: "standard_yearly",
+    name: "Standard",
+    perStudent: 1.3,
+    description: "Adds analytics, branding & scheduling",
+    features: [
+      "Everything in Basic",
+      "Analytics dashboards",
+      "Custom school branding",
+      "Class schedule & academic calendar",
+    ],
     highlight: true,
   },
   {
     id: "premium",
-    productId: "premium_plan",
-    priceId: "premium_monthly",
+    productId: "premium_plan_v2",
+    priceId: "premium_yearly",
     name: "Premium",
-    price: "$99",
-    description: "The full platform",
-    features: ["Everything in Pro", "Finance & billing", "Messaging & notifications", "Priority support"],
+    perStudent: 2.0,
+    description: "Full platform incl. attendance & finance",
+    features: [
+      "Everything in Standard",
+      "Attendance tracking",
+      "Finance, billing & receipts",
+      "Messaging & notifications",
+      "API access & priority support",
+    ],
   },
 ];
+
+// Map any product_id (legacy or new) to TierId
+const productToTier = (productId?: string | null): TierId | null => {
+  if (!productId) return null;
+  const map: Record<string, TierId> = {
+    basic_plan: "basic", standard_plan: "standard", premium_plan_v2: "premium",
+    starter_plan: "basic", pro_plan: "standard", premium_plan: "premium",
+  };
+  return map[productId] ?? null;
+};
+
+const formatMoney = (n: number) =>
+  n.toLocaleString("en-US", { style: "currency", currency: "USD", minimumFractionDigits: 2 });
 
 export default function Billing() {
   const { user } = useAuth();
   const { school } = useSchool();
   const { subscription, isActive, refetch } = useSubscription();
+  const { data: seats, isLoading: seatsLoading } = useBillableSeats();
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
   const [portalLoading, setPortalLoading] = useState(false);
   const [params, setParams] = useSearchParams();
 
-  const currentProductId = subscription?.product_id;
+  const currentTier = productToTier(subscription?.product_id);
+  const billableSeats = seats?.billable ?? MIN_SEATS;
+  const activeSeats = seats?.active ?? 0;
 
-  // After Paddle redirects back, refetch a few times — webhook delivery is async.
   useEffect(() => {
     if (params.get("checkout") !== "success") return;
     toast.success("Subscription activated! Updating your account…");
@@ -72,7 +106,7 @@ export default function Billing() {
     const interval = setInterval(() => {
       refetch();
       tries += 1;
-      if (tries >= 6) clearInterval(interval); // ~12s
+      if (tries >= 6) clearInterval(interval);
     }, 2000);
     const next = new URLSearchParams(params);
     next.delete("checkout");
@@ -92,11 +126,12 @@ export default function Billing() {
       const paddlePriceId = await getPaddlePriceId(plan.priceId);
 
       window.Paddle.Checkout.open({
-        items: [{ priceId: paddlePriceId, quantity: 1 }],
+        items: [{ priceId: paddlePriceId, quantity: billableSeats }],
         customer: user.email ? { email: user.email } : undefined,
         customData: {
           userId: user.id,
           schoolId: school?.id ?? "",
+          tier: plan.id,
         },
         settings: {
           displayMode: "overlay",
@@ -123,7 +158,11 @@ export default function Billing() {
     setLoadingPlan(plan.id);
     try {
       const { data, error } = await supabase.functions.invoke("change-subscription", {
-        body: { newPriceId: plan.priceId, environment: paddleEnvironment() },
+        body: {
+          newPriceId: plan.priceId,
+          quantity: billableSeats,
+          environment: paddleEnvironment(),
+        },
       });
       if (error || data?.error) throw new Error(error?.message || data?.error);
       toast.success(`Switched to ${plan.name}. Charge prorated.`);
@@ -168,11 +207,27 @@ export default function Billing() {
         <div className="text-center space-y-2">
           <h1 className="text-3xl font-bold">Choose your plan</h1>
           <p className="text-muted-foreground">
-            {isActive
-              ? `You're on the ${subscription?.product_id?.replace("_plan", "") ?? ""} plan.`
-              : "Pick a plan to unlock features after your trial."}
+            Pay per active student, billed annually. 50-student minimum.
           </p>
         </div>
+
+        {/* Seat counter */}
+        <Card className="p-5 flex flex-col sm:flex-row sm:items-center gap-4 justify-between">
+          <div className="flex items-center gap-3">
+            <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
+              <Users className="h-5 w-5 text-primary" />
+            </div>
+            <div>
+              <p className="font-medium">
+                {seatsLoading ? "Counting students…" : `${activeSeats} active student${activeSeats === 1 ? "" : "s"}`}
+              </p>
+              <p className="text-sm text-muted-foreground">
+                Billed for <span className="font-medium text-foreground">{billableSeats}</span> seats
+                {activeSeats < MIN_SEATS && ` (50-seat minimum)`}
+              </p>
+            </div>
+          </div>
+        </Card>
 
         {subscription?.cancel_at_period_end && subscription.current_period_end && (
           <Card className="p-4 border-destructive/50 bg-destructive/5 flex items-start gap-3">
@@ -181,7 +236,6 @@ export default function Billing() {
               <p className="font-medium">Your subscription is set to cancel.</p>
               <p className="text-sm text-muted-foreground">
                 Access continues until {new Date(subscription.current_period_end).toLocaleDateString()}.
-                Reactivate from the customer portal.
               </p>
             </div>
             <Button size="sm" variant="outline" onClick={openPortal} disabled={portalLoading}>
@@ -192,7 +246,8 @@ export default function Billing() {
 
         <div className="grid md:grid-cols-3 gap-6">
           {PLANS.map((plan) => {
-            const isCurrent = currentProductId === plan.productId && isActive;
+            const isCurrent = currentTier === plan.id && isActive;
+            const yearTotal = plan.perStudent * billableSeats;
             const ctaLabel = loadingPlan === plan.id
               ? null
               : isCurrent
@@ -217,8 +272,13 @@ export default function Billing() {
                   <p className="text-sm text-muted-foreground">{plan.description}</p>
                 </div>
                 <div>
-                  <span className="text-4xl font-bold">{plan.price}</span>
-                  <span className="text-muted-foreground">/mo</span>
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-4xl font-bold">${plan.perStudent.toFixed(2)}</span>
+                    <span className="text-muted-foreground text-sm">/student/year</span>
+                  </div>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    {billableSeats} × ${plan.perStudent.toFixed(2)} = <span className="font-semibold text-foreground">{formatMoney(yearTotal)}/yr</span>
+                  </p>
                 </div>
                 <ul className="space-y-2 flex-1">
                   {plan.features.map((f) => (
@@ -250,7 +310,7 @@ export default function Billing() {
                   <dt className="text-muted-foreground">Status</dt>
                   <dd className="font-medium capitalize">{subscription.status}</dd>
                   <dt className="text-muted-foreground">Plan</dt>
-                  <dd className="font-medium">{subscription.product_id}</dd>
+                  <dd className="font-medium capitalize">{currentTier ?? subscription.product_id}</dd>
                   {subscription.current_period_end && (
                     <>
                       <dt className="text-muted-foreground">
@@ -273,7 +333,7 @@ export default function Billing() {
               </Button>
             </div>
             <p className="text-xs text-muted-foreground">
-              The customer portal opens in a new tab. Use it to update your payment method, view invoices, or cancel.
+              Seat count is automatically updated 7 days before each renewal based on your active student roster.
             </p>
           </Card>
         )}
