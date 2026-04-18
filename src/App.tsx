@@ -1,3 +1,4 @@
+import { lazy, Suspense } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -12,39 +13,53 @@ import { TeacherRoute } from "@/components/TeacherRoute";
 import { SuperAdminRoute } from "@/components/SuperAdminRoute";
 import { ImpersonationBanner } from "@/components/ImpersonationBanner";
 import { PWAInstallPrompt } from "@/components/PWAInstallPrompt";
-import Index from "./pages/Index";
+
+// Eager: landing + auth (first paint targets)
 import Landing from "./pages/Landing";
-import Signup from "./pages/Signup";
 import Auth from "./pages/Auth";
-import Dashboard from "./pages/Dashboard";
-import Schedule from "./pages/Schedule";
-import AcademicCalendar from "./pages/AcademicCalendar";
-import Gradebook from "./pages/Gradebook";
-import Reports from "./pages/Reports";
-import Analytics from "./pages/Analytics";
-import Admin from "./pages/Admin";
-import StudentPanel from "./pages/StudentPanel";
-import TeacherPanel from "./pages/TeacherPanel";
-import ParentPanel from "./pages/ParentPanel";
-import ClassesPage from "./pages/ClassesPage";
-import SubjectsPage from "./pages/SubjectsPage";
-import DepartmentsPage from "./pages/DepartmentsPage";
-import AcademicYearsPage from "./pages/AcademicYearsPage";
 import NotFound from "./pages/NotFound";
-import FeeManagement from "./pages/FeeManagement";
-import Payments from "./pages/Payments";
-import Expenses from "./pages/Expenses";
-import FinanceReports from "./pages/FinanceReports";
-import Notifications from "./pages/Notifications";
-import SchoolSettings from "./pages/SchoolSettings";
-import Billing from "./pages/Billing";
-import Attendance from "./pages/Attendance";
-import Install from "./pages/Install";
-import StudentLifecycle from "./pages/StudentLifecycle";
-import SyncStatusPage from "./pages/SyncStatus";
-import SuperAdmin from "./pages/SuperAdmin";
+
+// Lazy: everything behind auth or rarely visited
+const Index = lazy(() => import("./pages/Index"));
+const Signup = lazy(() => import("./pages/Signup"));
+const Dashboard = lazy(() => import("./pages/Dashboard"));
+const Schedule = lazy(() => import("./pages/Schedule"));
+const AcademicCalendar = lazy(() => import("./pages/AcademicCalendar"));
+const Gradebook = lazy(() => import("./pages/Gradebook"));
+const Reports = lazy(() => import("./pages/Reports"));
+const Analytics = lazy(() => import("./pages/Analytics"));
+const Admin = lazy(() => import("./pages/Admin"));
+const StudentPanel = lazy(() => import("./pages/StudentPanel"));
+const TeacherPanel = lazy(() => import("./pages/TeacherPanel"));
+const ParentPanel = lazy(() => import("./pages/ParentPanel"));
+const ClassesPage = lazy(() => import("./pages/ClassesPage"));
+const SubjectsPage = lazy(() => import("./pages/SubjectsPage"));
+const DepartmentsPage = lazy(() => import("./pages/DepartmentsPage"));
+const AcademicYearsPage = lazy(() => import("./pages/AcademicYearsPage"));
+const FeeManagement = lazy(() => import("./pages/FeeManagement"));
+const Payments = lazy(() => import("./pages/Payments"));
+const Expenses = lazy(() => import("./pages/Expenses"));
+const FinanceReports = lazy(() => import("./pages/FinanceReports"));
+const Notifications = lazy(() => import("./pages/Notifications"));
+const SchoolSettings = lazy(() => import("./pages/SchoolSettings"));
+const Billing = lazy(() => import("./pages/Billing"));
+const Attendance = lazy(() => import("./pages/Attendance"));
+const Install = lazy(() => import("./pages/Install"));
+const StudentLifecycle = lazy(() => import("./pages/StudentLifecycle"));
+const SyncStatusPage = lazy(() => import("./pages/SyncStatus"));
+const SuperAdmin = lazy(() => import("./pages/SuperAdmin"));
 
 const queryClient = new QueryClient();
+
+const PageFallback = () => (
+  <div
+    role="status"
+    aria-label="Loading page"
+    className="flex h-screen items-center justify-center"
+  >
+    <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+  </div>
+);
 
 const App = () => (
   <ThemeProvider>
@@ -57,6 +72,7 @@ const App = () => (
             <SchoolProvider>
             <ImpersonationBanner />
             <PWAInstallPrompt />
+            <Suspense fallback={<PageFallback />}>
             <Routes>
             <Route path="/" element={<Landing />} />
             <Route path="/install" element={<Install />} />
@@ -90,6 +106,7 @@ const App = () => (
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
             </Routes>
+            </Suspense>
             </SchoolProvider>
           </AuthProvider>
         </BrowserRouter>
