@@ -2,6 +2,7 @@ import { Search, Bell, ChevronDown } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useNotifications } from "@/hooks/useNotifications";
+import { SyncStatusIndicator } from "@/components/SyncStatusIndicator";
 
 interface TopbarProps {
   userName?: string;
@@ -36,6 +37,8 @@ export const Topbar = ({
 
       {/* Right Section */}
       <div className="flex items-center gap-4">
+        <SyncStatusIndicator />
+
         <button
           onClick={() => navigate("/notifications")}
           className="relative p-2 rounded-full hover:bg-[hsl(170,20%,95%)] transition-colors"
