@@ -14,6 +14,15 @@ export const TrialBanner = () => {
     );
   }
 
+  if (status === "expired") {
+    return (
+      <div className="bg-destructive text-destructive-foreground px-4 py-2 text-sm flex items-center justify-between">
+        <span>Your trial has ended. Subscribe to keep using the app.</span>
+        <Link to="/settings/billing" className="underline font-medium">Choose a plan</Link>
+      </div>
+    );
+  }
+
   if (!trialing) return null;
 
   return (

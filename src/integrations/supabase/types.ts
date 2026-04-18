@@ -1843,6 +1843,10 @@ export type Database = {
     }
     Functions: {
       current_school_id: { Args: never; Returns: string }
+      expire_stale_subscription_for_user: {
+        Args: { p_user_id: string }
+        Returns: undefined
+      }
       generate_all_student_bills: { Args: never; Returns: number }
       generate_student_bill: {
         Args: { p_student_id: string }
