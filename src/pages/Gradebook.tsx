@@ -26,7 +26,9 @@ const Gradebook = () => {
   const selectedClassObj = classes?.find((c) => c.id === selectedClass);
   const isKg = isKindergartenClass(selectedClassObj);
   const departmentId = (selectedClassObj as any)?.department_id ?? (selectedClassObj as any)?.departments?.id;
-  const { data: assessmentTypes, isLoading: assessmentLoading } = useAssessmentTypes(departmentId);
+  // Only filter assessments by department for KG (letters) classes.
+  // Number-grading classes (e.g. K2 set to numbers) should use the standard assessment types.
+  const { data: assessmentTypes, isLoading: assessmentLoading } = useAssessmentTypes(isKg ? departmentId : undefined);
   const { data: grades, isLoading: gradesLoading } = useGrades(selectedSubject, selectedPeriod);
   const saveGradesMutation = useSaveGrades();
 
