@@ -526,18 +526,6 @@ export const StudentManagementTab = () => {
         )}
       </CardContent>
 
-      <MarkDepartedDialog
-        open={!!departingStudent}
-        onOpenChange={(o) => !o && setDepartingStudent(null)}
-        student={departingStudent}
-      />
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        )}
-      </CardContent>
-
       {/* Edit Dialog */}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
         <DialogContent className="max-w-2xl">
@@ -567,6 +555,12 @@ export const StudentManagementTab = () => {
         student={selectedStudent}
         open={isBiodataDialogOpen}
         onOpenChange={setIsBiodataDialogOpen}
+      />
+
+      <MarkDepartedDialog
+        open={!!departingStudent}
+        onOpenChange={(o) => !o && setDepartingStudent(null)}
+        student={departingStudent}
       />
     </Card>
   );
