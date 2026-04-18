@@ -38,6 +38,7 @@ import Billing from "./pages/Billing";
 import Attendance from "./pages/Attendance";
 import Install from "./pages/Install";
 import StudentLifecycle from "./pages/StudentLifecycle";
+import SyncStatusPage from "./pages/SyncStatus";
 
 const queryClient = new QueryClient();
 
@@ -78,6 +79,7 @@ const App = () => (
             <Route path="/settings/school" element={<AdminRoute><SchoolSettings /></AdminRoute>} />
             <Route path="/settings/billing" element={<AdminRoute><Billing /></AdminRoute>} />
             <Route path="/student-lifecycle" element={<AdminRoute><StudentLifecycle /></AdminRoute>} />
+            <Route path="/sync-status" element={<ProtectedRoute><SyncStatusPage /></ProtectedRoute>} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
             </Routes>
