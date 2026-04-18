@@ -10,12 +10,14 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { ParentChildAssignmentDialog } from "./ParentChildAssignmentDialog";
+import { CreateParentDialog } from "./CreateParentDialog";
 
 export const ParentUsersTab = () => {
   const { users, usersLoading, assignRole, removeRole } = useUserManagement();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [assignmentParent, setAssignmentParent] = useState<any>(null);
+  const [createOpen, setCreateOpen] = useState(false);
 
   const parentUsers = users?.filter(
     (u) => u.user_roles.some((r: any) => r.role === "parent")
@@ -76,12 +78,18 @@ export const ParentUsersTab = () => {
     <div className="space-y-6">
       {/* Parent Users with linked children */}
       <Card>
-        <CardHeader>
-          <CardTitle className="text-lg flex items-center gap-2">
-            <Users className="h-5 w-5" />
-            Parents ({parentUsers.length})
-          </CardTitle>
-          <CardDescription>Manage parent accounts and their linked children</CardDescription>
+        <CardHeader className="flex flex-row items-start justify-between gap-4">
+          <div>
+            <CardTitle className="text-lg flex items-center gap-2">
+              <Users className="h-5 w-5" />
+              Parents ({parentUsers.length})
+            </CardTitle>
+            <CardDescription>Manage parent accounts and their linked children</CardDescription>
+          </div>
+          <Button size="sm" onClick={() => setCreateOpen(true)}>
+            <UserPlus className="h-4 w-4 mr-1" />
+            Add Parent
+          </Button>
         </CardHeader>
         <CardContent>
           {parentUsers.length === 0 ? (
@@ -226,6 +234,8 @@ export const ParentUsersTab = () => {
         onOpenChange={(open) => !open && setAssignmentParent(null)}
         parent={assignmentParent}
       />
+
+      <CreateParentDialog open={createOpen} onOpenChange={setCreateOpen} />
     </div>
   );
 };
