@@ -16,6 +16,7 @@ import { impersonation } from "@/lib/impersonation";
 import { Eye, ShieldAlert, ShieldCheck, Search, FileText, BarChart3 } from "lucide-react";
 import { SchoolDetailDrawer } from "@/components/SchoolDetailDrawer";
 import { PlatformMetrics } from "@/components/superadmin/PlatformMetrics";
+import { AuditLogTab } from "@/components/superadmin/AuditLogTab";
 
 type School = {
   id: string;
