@@ -116,9 +116,7 @@ const StudentLifecycle = () => {
                               </div>
                             </TableCell>
                             <TableCell>
-                              <Badge variant="outline" className={statusColor[s.status] ?? ""}>
-                                {s.status}
-                              </Badge>
+                              <StatusBadge status={s.status} />
                             </TableCell>
                             <TableCell className="text-sm">
                               {s.departure_date ? format(new Date(s.departure_date), "MMM d, yyyy") : "—"}
