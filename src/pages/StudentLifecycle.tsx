@@ -5,8 +5,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Archive, RotateCcw, AlertTriangle, Download, Loader2, GraduationCap, ArrowRightLeft, LogOut, Ban } from "lucide-react";
+import { Archive, RotateCcw, AlertTriangle, Download, Loader2, GraduationCap, ArrowRightLeft, LogOut, Ban, ScrollText } from "lucide-react";
 import { useArchivedStudents, useDepartedStudents, useReinstateStudent } from "@/hooks/useStudentLifecycle";
+import { useAuditLogs } from "@/hooks/useAuditLogs";
 import { format } from "date-fns";
 import { useState } from "react";
 import { generateTransferPack, downloadBlob } from "@/lib/transferPack";
@@ -77,6 +78,7 @@ const StudentLifecycle = () => {
           <TabsList>
             <TabsTrigger value="departed">Departed</TabsTrigger>
             <TabsTrigger value="archived">Archived</TabsTrigger>
+            <TabsTrigger value="audit">Audit Log</TabsTrigger>
           </TabsList>
 
           <TabsContent value="departed">
@@ -219,9 +221,67 @@ const StudentLifecycle = () => {
               </CardContent>
             </Card>
           </TabsContent>
+
+          <TabsContent value="audit">
+            <AuditLogTab />
+          </TabsContent>
         </Tabs>
       </div>
     </AppShell>
+  );
+};
+
+const AuditLogTab = () => {
+  const { data, isLoading } = useAuditLogs(200);
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-lg flex items-center gap-2">
+          <ScrollText className="h-5 w-5" />
+          Audit log
+        </CardTitle>
+        <CardDescription>
+          Sensitive admin actions (departures, archives, exports). Visible to admins only.
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        {isLoading ? (
+          <Skeleton className="h-24 w-full" />
+        ) : !data?.length ? (
+          <p className="text-sm text-muted-foreground">No audit entries yet.</p>
+        ) : (
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>When</TableHead>
+                <TableHead>Action</TableHead>
+                <TableHead>Entity</TableHead>
+                <TableHead>Details</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {data.map((row: any) => (
+                <TableRow key={row.id}>
+                  <TableCell className="text-xs whitespace-nowrap">
+                    {format(new Date(row.created_at), "MMM d, yyyy HH:mm")}
+                  </TableCell>
+                  <TableCell>
+                    <Badge variant="outline">{row.action}</Badge>
+                  </TableCell>
+                  <TableCell className="text-xs font-mono">
+                    {row.entity_type}
+                    {row.entity_id ? <span className="text-muted-foreground"> · {String(row.entity_id).slice(0, 8)}</span> : null}
+                  </TableCell>
+                  <TableCell className="text-xs text-muted-foreground max-w-md truncate">
+                    {row.metadata ? JSON.stringify(row.metadata) : "—"}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        )}
+      </CardContent>
+    </Card>
   );
 };
 
