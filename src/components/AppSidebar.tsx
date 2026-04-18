@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { LayoutDashboard, BookOpen, FileText, BarChart3, Settings, LogOut, CalendarDays, Calendar, ClipboardList, ChevronDown, CreditCard, UserCheck } from "lucide-react";
+import { LayoutDashboard, BookOpen, FileText, BarChart3, Settings, LogOut, CalendarDays, Calendar, ClipboardList, ChevronDown, CreditCard, UserCheck, Archive } from "lucide-react";
 import logo from "@/assets/logo.png";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -55,11 +55,12 @@ const AppSidebar = () => {
 
   const adminItems = [
     { path: "/analytics", icon: BarChart3, label: "Analytics" },
+    ...(isAdmin ? [{ path: "/student-lifecycle", icon: Archive, label: "Lifecycle" }] : []),
     { path: "/admin", icon: Settings, label: "Settings" },
     ...(isAdmin ? [{ path: "/settings/billing", icon: CreditCard, label: "Billing" }] : []),
   ];
 
-  const isAdminActive = isActive("/analytics") || isActive("/admin") || isActive("/settings/billing");
+  const isAdminActive = isActive("/analytics") || isActive("/admin") || isActive("/settings/billing") || isActive("/student-lifecycle");
   const [adminOpen, setAdminOpen] = useState(isAdminActive);
 
   const renderMenuItem = (item: { path: string; icon: any; label: string }) => {

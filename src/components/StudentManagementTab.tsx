@@ -8,12 +8,13 @@ import { useClasses } from "@/hooks/useClasses";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
-import { Pencil, Trash2, UserPlus, Eye } from "lucide-react";
+import { Pencil, Trash2, UserPlus, Eye, UserMinus } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Switch } from "@/components/ui/switch";
 import { StudentBiodataDialog } from "./StudentBiodataDialog";
 import { BiodataForm, StudentForm } from "./StudentBiodataForm";
+import { MarkDepartedDialog } from "./MarkDepartedDialog";
 
 const initialFormState: StudentForm = {
   full_name: "",
@@ -58,6 +59,7 @@ const getNextStudentId = async (): Promise<string> => {
 export const StudentManagementTab = () => {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [departingStudent, setDepartingStudent] = useState<{ id: string; full_name: string } | null>(null);
   const [isBiodataDialogOpen, setIsBiodataDialogOpen] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState<any>(null);
   const [editingStudentId, setEditingStudentId] = useState<string | null>(null);
@@ -502,6 +504,14 @@ export const StudentManagementTab = () => {
                       <Button
                         variant="outline"
                         size="sm"
+                        onClick={() => setDepartingStudent({ id: student.id, full_name: (student as any).full_name })}
+                        title="Mark as departed"
+                      >
+                        <UserMinus className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
                         onClick={() => handleDeleteStudent(student.id)}
                         title="Delete Student"
                       >
@@ -545,6 +555,12 @@ export const StudentManagementTab = () => {
         student={selectedStudent}
         open={isBiodataDialogOpen}
         onOpenChange={setIsBiodataDialogOpen}
+      />
+
+      <MarkDepartedDialog
+        open={!!departingStudent}
+        onOpenChange={(o) => !o && setDepartingStudent(null)}
+        student={departingStudent}
       />
     </Card>
   );
