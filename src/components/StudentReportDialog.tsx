@@ -17,6 +17,7 @@ import {
   useSaveReportInputs,
 } from "@/hooks/useReportInputs";
 import { toast } from "@/hooks/use-toast";
+import { isKindergartenClass, scoreToLetter, KG_SCALE, type KgLetter } from "@/lib/kindergarten";
 
 const RATING_OPTIONS = ["Excellent", "Very Good", "Good", "Fair", "Needs Improvement"];
 
@@ -229,6 +230,194 @@ export const StudentReportDialog = ({
           const isSem1 = period === 'semester1';
           const isSem2 = period === 'semester2';
           const isSemester = report.isSemesterReport;
+          const isKg = isKindergartenClass(report.student.classes);
+
+          // ============= KG (letter-only) report =============
+          if (isKg) {
+            const periodLabel = (() => {
+              switch (period) {
+                case 'yearly': return 'Final Year';
+                case 'semester1': return 'Semester 1';
+                case 'semester2': return 'Semester 2';
+                case 'exam_s1': return 'Semester 1 Exam';
+                case 'exam_s2': return 'Semester 2 Exam';
+                case 'p1': return 'Period 1';
+                case 'p2': return 'Period 2';
+                case 'p3': return 'Period 3';
+                case 'p4': return 'Period 4';
+                case 'p5': return 'Period 5';
+                case 'p6': return 'Period 6';
+                default: return period;
+              }
+            })();
+
+            // Compute one letter per subject for the selected period.
+            const subjectLetters: Array<{ name: string; letter: KgLetter | null; pct: number | null }> =
+              subjects.map((s: any) => {
+                let total = 0;
+                let max = 0;
+                if (report.isSemesterReport) {
+                  Object.values(s.periods || {}).forEach((p: any) => {
+                    if (p && !p.noGrades && typeof p.score === 'number') {
+                      total += p.score;
+                      max += p.max ?? 0;
+                    }
+                  });
+                } else {
+                  total = s.total ?? 0;
+                  max = s.max ?? 0;
+                }
+                if (!max || max <= 0) return { name: s.name, letter: null, pct: null };
+                const pct = (total / max) * 100;
+                return { name: s.name, letter: scoreToLetter(pct, 100), pct: Math.round(pct) };
+              });
+
+            return (
+              <div>
+                <div className="flex gap-2 justify-center py-3 print:hidden flex-wrap" style={{ background: '#e8eaf0' }}>
+                  <Button onClick={handlePrint} size="sm" className="gap-2" style={{ background: navy, color: '#fff' }}>
+                    <Printer className="h-4 w-4" /> Print / Save as PDF
+                  </Button>
+                  {canEdit && !editing && (
+                    <Button onClick={() => setEditing(true)} size="sm" variant="outline" className="gap-2">
+                      <Pencil className="h-4 w-4" /> Edit Teacher Inputs
+                    </Button>
+                  )}
+                  {canEdit && editing && (
+                    <>
+                      <Button onClick={handleSave} size="sm" className="gap-2" disabled={saveMutation.isPending} style={{ background: '#16a34a', color: '#fff' }}>
+                        <Save className="h-4 w-4" />
+                        {saveMutation.isPending ? 'Saving...' : 'Save Inputs'}
+                      </Button>
+                      <Button onClick={() => { setInputs(savedInputs ?? {}); setEditing(false); }} size="sm" variant="outline">
+                        Cancel
+                      </Button>
+                    </>
+                  )}
+                </div>
+
+                <div id="report-content" style={{ background: '#fff', color: '#111', fontSize: '12px', fontFamily: 'Arial, sans-serif', boxShadow: '0 4px 32px rgba(0,0,0,0.18)', border: '1px solid #bbb' }}>
+                  {/* Header */}
+                  <div style={{ background: navy, color: '#fff', padding: '14px 18px', textAlign: 'center', borderBottom: `3px solid ${gold}` }}>
+                    <h1 style={{ fontSize: '18px', fontWeight: 700, margin: 0, letterSpacing: '1px' }}>KINDERGARTEN PROGRESS REPORT</h1>
+                    <p style={{ fontSize: '11px', color: gold, margin: '4px 0 0' }}>
+                      {report.student.classes?.academic_years?.year_name || '--'} • {periodLabel}
+                    </p>
+                  </div>
+
+                  {/* Student info */}
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', borderBottom: '1px solid #ccc' }}>
+                    {[
+                      ['Pupil Name', report.student.full_name],
+                      ['Pupil ID', report.student.student_id],
+                      ['Class', report.student.classes?.name || '--'],
+                      ['Gender', report.student.gender || '--'],
+                    ].map(([label, val], i) => (
+                      <div key={i} style={{ display: 'flex', gap: 8, padding: '6px 12px', borderBottom: '0.5px solid #e5e5e5', borderRight: i % 2 === 0 ? '0.5px solid #ccc' : 'none' }}>
+                        <span style={{ fontSize: '9px', fontWeight: 700, color: '#666', textTransform: 'uppercase', minWidth: 90 }}>{label}</span>
+                        <span style={{ fontSize: '11px' }}>{val}</span>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Letter grades table */}
+                  <div style={{ background: navy, color: '#fff', padding: '6px 12px', fontSize: '10px', fontWeight: 700, letterSpacing: '1px' }}>
+                    SUBJECT PROGRESS — {periodLabel.toUpperCase()}
+                  </div>
+                  <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px' }}>
+                    <thead>
+                      <tr>
+                        <th style={{ ...thBase, background: navy, textAlign: 'left', paddingLeft: 10 }}>Subject / Activity</th>
+                        <th style={{ ...thBase, background: gold, color: '#fff', width: 100 }}>Grade</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {subjectLetters.length === 0 ? (
+                        <tr><td colSpan={2} style={{ ...tdBase, padding: 16, color: '#999' }}>No subjects assigned to this class.</td></tr>
+                      ) : subjectLetters.map((s, i) => (
+                        <tr key={i}>
+                          <td style={{ ...tdBase, textAlign: 'left', paddingLeft: 10, background: '#f9f9fc' }}>{s.name}</td>
+                          <td style={{ ...tdBase, fontWeight: 700, fontSize: 16, color: s.letter ? (s.letter === 'F' ? '#721c24' : s.letter.startsWith('A') ? '#155724' : s.letter.startsWith('B') ? '#1a3a6e' : s.letter.startsWith('C') ? '#7d5a00' : '#a04a00') : '#999' }}>
+                            {s.letter ?? '—'}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+
+                  {/* Legend */}
+                  <div style={{ padding: '10px 12px', borderTop: '1px solid #ccc', background: '#fafafa' }}>
+                    <div style={{ fontSize: 9, fontWeight: 700, color: '#666', textTransform: 'uppercase', marginBottom: 6 }}>Grading Legend</div>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 6, fontSize: 10 }}>
+                      {KG_SCALE.map((t) => (
+                        <div key={t.letter} style={{ display: 'flex', gap: 6, alignItems: 'baseline' }}>
+                          <strong style={{ minWidth: 24 }}>{t.letter}</strong>
+                          <span style={{ color: '#555' }}>{t.min}–{t.max} · {t.label}</span>
+                        </div>
+                      ))}
+                    </div>
+                    <p style={{ fontSize: 9, color: '#888', margin: '6px 0 0' }}>Scores below 60 are not permitted in the Liberian school system.</p>
+                  </div>
+
+                  {/* Conduct */}
+                  <div style={{ background: navy, color: '#fff', padding: '5px 12px', fontSize: '10px', fontWeight: 700, letterSpacing: '1px' }}>CONDUCT & DEVELOPMENT</div>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', borderTop: '0.5px solid #ccc' }}>
+                    {([
+                      ['Behavior', 'behavior'],
+                      ['Punctuality', 'punctuality'],
+                      ['Participation', 'participation'],
+                      ['Listening Skills', 'homework'],
+                    ] as const).map(([label, key], i) => (
+                      <div key={key} style={{ padding: '6px 10px', borderRight: i < 3 ? '0.5px solid #ccc' : 'none' }}>
+                        <label style={{ fontSize: '9px', color: '#888', textTransform: 'uppercase', fontWeight: 700, display: 'block', marginBottom: 3 }}>{label}</label>
+                        <EditableField value={(inputs[key] as string) || ''} onChange={setField(key)} editable={editing} options={RATING_OPTIONS} minHeight={22} />
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Teacher remarks */}
+                  <div style={{ background: navy, color: '#fff', padding: '5px 12px', fontSize: '10px', fontWeight: 700, letterSpacing: '1px' }}>TEACHER REMARKS</div>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', borderTop: '0.5px solid #ccc' }}>
+                    <div style={{ padding: '8px 10px', borderRight: '0.5px solid #ccc' }}>
+                      <label style={{ fontSize: '9px', color: '#888', textTransform: 'uppercase', fontWeight: 700, display: 'block', marginBottom: 4 }}>Teacher Comment</label>
+                      <EditableField value={inputs.teacher_comment || ''} onChange={setField('teacher_comment')} editable={editing} multiline minHeight={70} placeholder="Overall remarks about the pupil..." />
+                    </div>
+                    <div>
+                      <div style={{ padding: '8px 10px', borderBottom: '0.5px solid #ccc' }}>
+                        <label style={{ fontSize: '9px', color: '#888', textTransform: 'uppercase', fontWeight: 700, display: 'block', marginBottom: 4 }}>Excels In</label>
+                        <EditableField value={inputs.excels_in || ''} onChange={setField('excels_in')} editable={editing} multiline minHeight={28} placeholder="Strengths..." />
+                      </div>
+                      <div style={{ padding: '8px 10px' }}>
+                        <label style={{ fontSize: '9px', color: '#888', textTransform: 'uppercase', fontWeight: 700, display: 'block', marginBottom: 4 }}>Can Improve In</label>
+                        <EditableField value={inputs.can_improve_in || ''} onChange={setField('can_improve_in')} editable={editing} multiline minHeight={28} placeholder="Areas to work on..." />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Signatures */}
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', padding: '12px 14px', borderTop: '1px solid #ccc' }}>
+                    <div style={{ textAlign: 'center', fontSize: '10px', color: '#333', minWidth: 140 }}>
+                      <div style={{ borderBottom: '1px solid #333', width: 120, margin: '18px auto 4px', minHeight: 16 }}>
+                        <EditableField value={inputs.administrator_name || ''} onChange={setField('administrator_name')} editable={editing} placeholder="Name" minHeight={16} />
+                      </div>
+                      <div style={{ fontWeight: 700, fontSize: '11px', textTransform: 'uppercase' }}>Administrator</div>
+                    </div>
+                    <div style={{ textAlign: 'center', fontSize: '10px', color: '#333', minWidth: 140 }}>
+                      <div style={{ borderBottom: '1px solid #333', width: 120, margin: '18px auto 4px', minHeight: 16 }}>
+                        <EditableField value={inputs.class_teacher_name || ''} onChange={setField('class_teacher_name')} editable={editing} placeholder="Name" minHeight={16} />
+                      </div>
+                      <div style={{ fontWeight: 700, fontSize: '11px', textTransform: 'uppercase' }}>Class Teacher</div>
+                    </div>
+                    <div style={{ textAlign: 'center', fontSize: '10px', color: '#333' }}>
+                      <div style={{ borderBottom: '1px solid #333', width: 80, margin: '18px auto 4px' }} />
+                      <div style={{ fontWeight: 700, fontSize: '11px', textTransform: 'uppercase' }}>Parent / Guardian</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            );
+          }
+          // ============= /KG branch =============
 
           const s1Avg = computeOverallSemAvg(subjects, ['p1', 'p2', 'p3']);
           const s2Avg = computeOverallSemAvg(subjects, ['p4', 'p5', 'p6']);

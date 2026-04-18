@@ -10,6 +10,7 @@ import { useClasses, useClassSubjects } from "@/hooks/useClasses";
 import { useStudents } from "@/hooks/useStudents";
 import { useGrades, useAssessmentTypes, useSaveGrades } from "@/hooks/useGrades";
 import { Skeleton } from "@/components/ui/skeleton";
+import { isKindergartenClass, scoreToLetter, letterColorClass, KG_SCALE } from "@/lib/kindergarten";
 
 const Gradebook = () => {
   const [selectedClass, setSelectedClass] = useState<string>("");
@@ -25,6 +26,9 @@ const Gradebook = () => {
   const { data: assessmentTypes, isLoading: assessmentLoading } = useAssessmentTypes();
   const { data: grades, isLoading: gradesLoading } = useGrades(selectedSubject, selectedPeriod);
   const saveGradesMutation = useSaveGrades();
+
+  const selectedClassObj = classes?.find((c) => c.id === selectedClass);
+  const isKg = isKindergartenClass(selectedClassObj);
 
   // Filter students based on search term
   const filteredStudents = useMemo(() => {
@@ -246,6 +250,12 @@ const Gradebook = () => {
                   ? `Assessment breakdown: ${assessmentTypes.map(at => `${at.name} (${at.max_points})`).join(', ')}. Empty fields show as "I" (Incomplete). Totals under 60% show as "I".`
                   : 'No assessment types configured'
                 }
+                {isKg && (
+                  <span className="block mt-2 text-xs text-foreground">
+                    <strong>Kindergarten letter scale:</strong>{" "}
+                    {KG_SCALE.map((t) => `${t.letter} ${t.min}-${t.max}`).join(" • ")} • &lt;60 not allowed
+                  </span>
+                )}
               </CardDescription>
               <div className="mt-4">
                 <label className="text-sm font-medium text-foreground">Search Students</label>
@@ -352,6 +362,20 @@ const Gradebook = () => {
                                         placeholder=""
                                       />
                                     )}
+                                    {isKg && (() => {
+                                      const letter = scoreToLetter(
+                                        typeof currentValue === "number" ? currentValue : null,
+                                        at.max_points,
+                                      );
+                                      return (
+                                        <div
+                                          className={`mt-1 text-xs font-bold ${letterColorClass(letter)}`}
+                                          title={letter ? "KG letter grade" : "Below 60 — not allowed"}
+                                        >
+                                          {letter ?? "—"}
+                                        </div>
+                                      );
+                                    })()}
                                   </TableCell>
                                 );
                               })}

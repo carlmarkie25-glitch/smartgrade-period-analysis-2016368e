@@ -29,6 +29,10 @@ export const useStudentReport = (studentId: string, period: string) => {
           classes (
             id,
             name,
+            departments:department_id (
+              id,
+              name
+            ),
             academic_years (
               year_name
             )
