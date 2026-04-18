@@ -66,8 +66,7 @@ const SuperAdmin = () => {
     max_students: 0,
     trial_ends_at: "",
   });
-
-  const { data: schools, isLoading: schoolsLoading } = useQuery({
+  const [viewing, setViewing] = useState<School | null>(null);
     queryKey: ["super-admin-schools"],
     queryFn: async () => {
       const { data, error } = await supabase
