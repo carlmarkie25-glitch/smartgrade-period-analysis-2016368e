@@ -528,6 +528,21 @@ export const ClassManagementTab = () => {
                   </SelectContent>
                 </Select>
               </div>
+              <div>
+                <Label htmlFor="edit-grading-mode">Grading System</Label>
+                <Select
+                  value={editingClass.grading_mode}
+                  onValueChange={(value: "numbers" | "letters") => setEditingClass({ ...editingClass, grading_mode: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="numbers">Numbers (Grades 1–12, K1, K2)</SelectItem>
+                    <SelectItem value="letters">Letters (Nursery, ABC — A+ to F)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
               <Button onClick={handleEditClass} className="w-full">Save Changes</Button>
             </div>
           )}
