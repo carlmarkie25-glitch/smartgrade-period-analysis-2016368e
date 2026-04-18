@@ -125,7 +125,20 @@ const StudentLifecycle = () => {
                                 </div>
                               ) : "—"}
                             </TableCell>
-                            <TableCell className="text-right">
+                            <TableCell className="text-right space-x-2">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleExport(s)}
+                                disabled={exportingId === s.id}
+                              >
+                                {exportingId === s.id ? (
+                                  <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                                ) : (
+                                  <Download className="h-4 w-4 mr-1" />
+                                )}
+                                Transfer Pack
+                              </Button>
                               <Button
                                 variant="outline"
                                 size="sm"
