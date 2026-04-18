@@ -496,6 +496,7 @@ export type Database = {
           academic_year_id: string
           created_at: string
           department_id: string
+          grading_mode: string
           id: string
           name: string
           school_id: string | null
@@ -505,6 +506,7 @@ export type Database = {
           academic_year_id: string
           created_at?: string
           department_id: string
+          grading_mode?: string
           id?: string
           name: string
           school_id?: string | null
@@ -514,6 +516,7 @@ export type Database = {
           academic_year_id?: string
           created_at?: string
           department_id?: string
+          grading_mode?: string
           id?: string
           name?: string
           school_id?: string | null
