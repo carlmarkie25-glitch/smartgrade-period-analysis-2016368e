@@ -59,6 +59,7 @@ const getNextStudentId = async (): Promise<string> => {
 export const StudentManagementTab = () => {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [departingStudent, setDepartingStudent] = useState<{ id: string; full_name: string } | null>(null);
   const [isBiodataDialogOpen, setIsBiodataDialogOpen] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState<any>(null);
   const [editingStudentId, setEditingStudentId] = useState<string | null>(null);
