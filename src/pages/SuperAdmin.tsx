@@ -91,18 +91,7 @@ const SuperAdmin = () => {
     );
   }, [schools, search]);
 
-  const { data: auditLogs } = useQuery({
-    queryKey: ["super-admin-audit"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("audit_logs")
-        .select("*")
-        .order("created_at", { ascending: false })
-        .limit(200);
-      if (error) throw error;
-      return (data ?? []) as AuditLog[];
-    },
-  });
+  // Audit logs are managed inside <AuditLogTab />
 
   const setLockout = async (s: School, state: "none" | "soft" | "hard") => {
     const { error } = await supabase
