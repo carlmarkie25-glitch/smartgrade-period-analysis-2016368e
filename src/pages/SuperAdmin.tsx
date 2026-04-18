@@ -13,8 +13,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { impersonation } from "@/lib/impersonation";
-import { Eye, ShieldAlert, ShieldCheck, Search, FileText } from "lucide-react";
+import { Eye, ShieldAlert, ShieldCheck, Search, FileText, BarChart3 } from "lucide-react";
 import { SchoolDetailDrawer } from "@/components/SchoolDetailDrawer";
+import { PlatformMetrics } from "@/components/superadmin/PlatformMetrics";
 
 type School = {
   id: string;
@@ -182,12 +183,17 @@ const SuperAdmin = () => {
         </p>
       </div>
 
-      <Tabs defaultValue="schools">
+      <Tabs defaultValue="overview">
         <TabsList>
+          <TabsTrigger value="overview"><BarChart3 className="h-4 w-4 mr-1" /> Overview</TabsTrigger>
           <TabsTrigger value="schools">Schools</TabsTrigger>
           <TabsTrigger value="lockout">Lockouts</TabsTrigger>
           <TabsTrigger value="audit">Audit log</TabsTrigger>
         </TabsList>
+
+        <TabsContent value="overview" className="space-y-4">
+          <PlatformMetrics />
+        </TabsContent>
 
         {/* SCHOOLS */}
         <TabsContent value="schools" className="space-y-4">
