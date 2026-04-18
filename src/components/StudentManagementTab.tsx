@@ -266,21 +266,17 @@ export const StudentManagementTab = () => {
       
       if (editFileInputRef.current?.files?.[0]) {
         const file = editFileInputRef.current.files[0];
-        const arrayBuffer = await file.arrayBuffer();
-        const bytes = new Uint8Array(arrayBuffer);
-        let binary = '';
-        for (let i = 0; i < bytes.byteLength; i++) {
-          binary += String.fromCharCode(bytes[i]);
-        }
-        const photoBase64 = btoa(binary);
-        
+        const { resizeToWebP, blobToBase64 } = await import("@/lib/imageResize");
+        const { blob, contentType } = await resizeToWebP(file);
+        const photoBase64 = await blobToBase64(blob);
+
         const { data: photoData, error: photoError } = await supabase.functions.invoke(
           "update-student-photo",
           {
             body: {
               student_id: editingStudentId,
               photo_base64: photoBase64,
-              photo_content_type: file.type,
+              photo_content_type: contentType,
             },
           }
         );
