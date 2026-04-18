@@ -88,10 +88,10 @@ export const AuditLogTab = ({ schools }: { schools: School[] }) => {
       l.entity_type,
       l.entity_id ?? "",
       l.actor_user_id ?? "",
-      l.metadata ? JSON.stringify(l.metadata).replaceAll('"', '""') : "",
+      l.metadata ? JSON.stringify(l.metadata).split('"').join('""') : "",
     ]);
     const csv = [headers, ...rows]
-      .map((r) => r.map((c) => `"${String(c).replaceAll('"', '""')}"`).join(","))
+      .map((r) => r.map((c) => `"${String(c).split('"').join('""')}"`).join(","))
       .join("\n");
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
