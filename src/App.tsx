@@ -33,6 +33,7 @@ import Payments from "./pages/Payments";
 import Expenses from "./pages/Expenses";
 import FinanceReports from "./pages/FinanceReports";
 import Notifications from "./pages/Notifications";
+import SchoolSettings from "./pages/SchoolSettings";
 
 const queryClient = new QueryClient();
 
@@ -68,6 +69,8 @@ const App = () => (
             <Route path="/expenses" element={<AdminRoute><Expenses /></AdminRoute>} />
             <Route path="/finance-reports" element={<AdminRoute><FinanceReports /></AdminRoute>} />
             <Route path="/notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
+            <Route path="/settings/school" element={<AdminRoute><SchoolSettings /></AdminRoute>} />
+            <Route path="/settings/billing" element={<AdminRoute><SchoolSettings /></AdminRoute>} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
             </Routes>
