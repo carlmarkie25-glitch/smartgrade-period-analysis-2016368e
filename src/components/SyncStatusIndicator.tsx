@@ -1,4 +1,4 @@
-import { CloudOff, CloudCheck, RefreshCw, CloudUpload } from "lucide-react";
+import { CloudOff, Cloud, RefreshCw, CloudUpload } from "lucide-react";
 import { useSyncStatus } from "@/hooks/useSyncStatus";
 import { cn } from "@/lib/utils";
 import {
@@ -10,7 +10,7 @@ import {
 export const SyncStatusIndicator = () => {
   const { online, syncing, pendingOps, lastSyncAt, lastError, syncNow } = useSyncStatus();
 
-  let icon = <CloudCheck className="size-4" />;
+  let icon = <Cloud className="size-4" />;
   let label = "Synced";
   let color = "text-emerald-600";
 

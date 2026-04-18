@@ -49,8 +49,8 @@ const Install = () => {
         </div>
 
         {installed ? (
-          <Card className="p-6 flex items-center gap-4 border-emerald-500/30 bg-emerald-500/5">
-            <CheckCircle2 className="size-8 text-emerald-600 shrink-0" />
+          <Card className="p-6 flex items-center gap-4 border-primary/30 bg-primary/5">
+            <CheckCircle2 className="size-8 text-primary shrink-0" />
             <div>
               <h3 className="font-semibold">Lumini is installed</h3>
               <p className="text-sm text-muted-foreground">
