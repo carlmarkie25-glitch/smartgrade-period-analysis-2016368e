@@ -13,7 +13,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { impersonation } from "@/lib/impersonation";
-import { Eye, ShieldAlert, ShieldCheck, Search } from "lucide-react";
+import { Eye, ShieldAlert, ShieldCheck, Search, FileText } from "lucide-react";
+import { SchoolDetailDrawer } from "@/components/SchoolDetailDrawer";
 
 type School = {
   id: string;
@@ -28,6 +29,12 @@ type School = {
   max_students: number;
   billable_student_count: number;
   created_at: string;
+  owner_user_id: string | null;
+  email: string | null;
+  phone: string | null;
+  website: string | null;
+  address: string | null;
+  country: string | null;
 };
 
 type AuditLog = {
