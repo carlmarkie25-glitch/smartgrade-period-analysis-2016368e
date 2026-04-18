@@ -20,7 +20,7 @@ export const ImpersonationBanner = () => {
 
   if (!active) return null;
   return (
-    <div className="sticky top-0 z-50 flex items-center justify-between gap-3 border-b border-amber-500/40 bg-amber-500/15 px-4 py-2 text-sm text-amber-950 dark:text-amber-100">
+    <div className="sticky top-0 z-50 flex items-center justify-between gap-3 border-b border-warning/40 bg-warning/15 px-4 py-2 text-sm text-warning-foreground">
       <div className="flex items-center gap-2">
         <Eye className="h-4 w-4" />
         <span>
