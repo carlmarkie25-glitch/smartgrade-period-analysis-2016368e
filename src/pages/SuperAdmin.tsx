@@ -67,12 +67,14 @@ const SuperAdmin = () => {
     trial_ends_at: "",
   });
   const [viewing, setViewing] = useState<School | null>(null);
+
+  const { data: schools, isLoading: schoolsLoading } = useQuery({
     queryKey: ["super-admin-schools"],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("schools")
         .select(
-          "id,name,slug,subscription_tier,subscription_status,subscription_plan,lockout_state,lockout_started_at,trial_ends_at,max_students,billable_student_count,created_at"
+          "id,name,slug,subscription_tier,subscription_status,subscription_plan,lockout_state,lockout_started_at,trial_ends_at,max_students,billable_student_count,created_at,owner_user_id,email,phone,website,address,country"
         )
         .order("created_at", { ascending: false });
       if (error) throw error;
