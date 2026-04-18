@@ -1109,7 +1109,7 @@ Separate, role-gated section only accessible to `role = super_admin`.
 - [x] Create DB indexes on `school_id`, `student_id`, `class_id`
 - [x] `updated_at` columns on all relevant tables
 
-### 🟡 Phase 2: Offline-First Foundation — *foundation built, polish pending*
+### ✅ Phase 2: Offline-First Foundation — *complete*
 - [x] Install and configure Dexie.js with local schema (`src/lib/offline/db.ts`)
 - [x] Implement `pendingChanges` queue with INSERT/UPDATE/DELETE tracking
 - [x] Build SyncEngine (`src/lib/offline/sync.ts`): push queue + pull delta
@@ -1119,8 +1119,8 @@ Separate, role-gated section only accessible to `role = super_admin`.
 - [x] PWA manifest (icons, theme, standalone display) + `/install` page
 - [x] Register service worker (`src/lib/offline/registerSW.ts`)
 - [x] Connectivity status bar (`SyncStatusIndicator`)
-- [ ] Dedicated `/sync-status` page (pending changes, errors, force-sync button)
-- [ ] Conflict resolution UI for `_syncStatus: 'error'` records
+- [x] Dedicated `/sync-status` page (pending changes, errors, force-sync button)
+- [x] Conflict resolution UI for failed outbox entries (retry/discard)
 - [ ] End-to-end offline test: airplane mode → add student → reconnect → verify sync
 
 ### ✅ Phase 3: Auth & Onboarding — *complete*
@@ -1132,8 +1132,8 @@ Separate, role-gated section only accessible to `role = super_admin`.
 - [x] Password reset flow
 - [x] Contexts: `AuthContext`, `SchoolContext`, `ThemeContext`
 - [x] Route guards: `ProtectedRoute`, `AdminRoute`, `TeacherRoute`
-- [ ] Seed IndexedDB on first login (full school snapshot)
-- [ ] Email verification enforcement banner
+- [x] Seed IndexedDB on first login (full school snapshot)
+- [x] Email verification enforcement banner
 
 ### ✅ Phase 4: Billing Integration — *complete (Paddle, not Stripe)*
 > **Note:** Implemented with **Paddle** instead of Stripe. Pricing model = per-student/year as in the PRD.
