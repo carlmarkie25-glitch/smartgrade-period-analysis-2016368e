@@ -1,10 +1,14 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Users, GraduationCap, DollarSign, Activity, Mail, Phone, Globe, MapPin } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { toast } from "sonner";
+import { Users, GraduationCap, DollarSign, Activity, Mail, Phone, Globe, MapPin, ShieldAlert, Loader2 } from "lucide-react";
 
 type School = {
   id: string;
@@ -39,6 +43,55 @@ const lockColor: Record<string, string> = {
 
 export const SchoolDetailDrawer = ({ school, open, onOpenChange }: Props) => {
   const schoolId = school?.id;
+  const queryClient = useQueryClient();
+
+  const [subStatus, setSubStatus] = useState(school?.subscription_status ?? "trialing");
+  const [lockState, setLockState] = useState(school?.lockout_state ?? "none");
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    setSubStatus(school?.subscription_status ?? "trialing");
+    setLockState(school?.lockout_state ?? "none");
+  }, [school?.id, school?.subscription_status, school?.lockout_state]);
+
+  const dirty =
+    subStatus !== (school?.subscription_status ?? "trialing") ||
+    lockState !== (school?.lockout_state ?? "none");
+
+  const handleSaveOverride = async () => {
+    if (!school) return;
+    setSaving(true);
+    const { error } = await supabase
+      .from("schools")
+      .update({
+        subscription_status: subStatus,
+        lockout_state: lockState,
+        lockout_started_at: lockState === "none" ? null : new Date().toISOString(),
+      })
+      .eq("id", school.id);
+
+    if (error) {
+      toast.error("Override failed", { description: error.message });
+      setSaving(false);
+      return;
+    }
+
+    await supabase.rpc("write_audit_log", {
+      p_action: "super_admin.school.manual_override",
+      p_entity_type: "school",
+      p_entity_id: school.id,
+      p_metadata: {
+        school_name: school.name,
+        previous: { subscription_status: school.subscription_status, lockout_state: school.lockout_state },
+        next: { subscription_status: subStatus, lockout_state: lockState },
+      },
+    });
+
+    toast.success("School updated");
+    queryClient.invalidateQueries({ queryKey: ["schools"] });
+    queryClient.invalidateQueries({ queryKey: ["school-detail", school.id] });
+    setSaving(false);
+  };
 
   const { data, isLoading } = useQuery({
     queryKey: ["school-detail", schoolId],
@@ -149,7 +202,51 @@ export const SchoolDetailDrawer = ({ school, open, onOpenChange }: Props) => {
             </CardContent>
           </Card>
 
-          {/* Contact */}
+          {/* Manual override (super admin only) */}
+          <Card className="border-warning/30">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm flex items-center gap-2">
+                <ShieldAlert className="h-4 w-4 text-warning" /> Manual override
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <p className="text-xs text-muted-foreground">
+                Force a subscription or lockout state. Use only for support cases — Paddle webhooks may overwrite this on the next billing event.
+              </p>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <div className="text-muted-foreground text-xs mb-1">Subscription status</div>
+                  <Select value={subStatus} onValueChange={setSubStatus}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="trialing">trialing</SelectItem>
+                      <SelectItem value="active">active</SelectItem>
+                      <SelectItem value="past_due">past_due</SelectItem>
+                      <SelectItem value="canceled">canceled</SelectItem>
+                      <SelectItem value="paused">paused</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <div className="text-muted-foreground text-xs mb-1">Lockout state</div>
+                  <Select value={lockState} onValueChange={setLockState}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">none</SelectItem>
+                      <SelectItem value="soft">soft (read-only)</SelectItem>
+                      <SelectItem value="hard">hard (login blocked)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <Button size="sm" onClick={handleSaveOverride} disabled={!dirty || saving}>
+                {saving ? <Loader2 className="h-3 w-3 mr-2 animate-spin" /> : null}
+                Save override
+              </Button>
+            </CardContent>
+          </Card>
+
+
           {(school.email || school.phone || school.website || school.address) && (
             <Card>
               <CardHeader className="pb-2">

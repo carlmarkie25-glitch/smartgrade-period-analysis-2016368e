@@ -1170,12 +1170,12 @@ Separate, role-gated section only accessible to `role = super_admin`.
 - [ ] Client-side WebP resize before upload (≤400×400)
 - [ ] Messaging module (in/out conversations) — only one-way notifications today
 
-### ⏳ Phase 6: Super Admin Panel — *not started*
-- [ ] Super admin route group with role guard
-- [ ] Schools overview table (all schools, status, tier, student count)
-- [ ] Manual subscription status override
-- [ ] Global billing metrics dashboard
-- [ ] Impersonation feature (logged to audit_logs)
+### ✅ Phase 6: Super Admin Panel — *complete*
+- [x] Super admin route group with role guard (`SuperAdminRoute`)
+- [x] Schools overview table (all schools, status, tier, student count)
+- [x] Manual subscription status override (in `SchoolDetailDrawer`, audit-logged)
+- [x] Global billing metrics dashboard (`PlatformMetrics`)
+- [x] Impersonation feature (logged to `audit_logs`)
 
 ### ⏳ Phase 7: Polish, Testing & Deployment — *not started*
 - [ ] Custom PWA install prompt
