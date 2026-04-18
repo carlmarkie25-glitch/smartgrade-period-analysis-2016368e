@@ -20,11 +20,17 @@ export const ClassManagementTab = () => {
   const [isSubjectsDialogOpen, setIsSubjectsDialogOpen] = useState(false);
   const [selectedClassId, setSelectedClassId] = useState<string>("");
   const [selectedSubjectId, setSelectedSubjectId] = useState<string>("");
-  const [editingClass, setEditingClass] = useState<{ id: string; name: string; department_id: string; academic_year_id: string } | null>(null);
-  const [newClass, setNewClass] = useState({
+  const [editingClass, setEditingClass] = useState<{ id: string; name: string; department_id: string; academic_year_id: string; grading_mode: "numbers" | "letters" } | null>(null);
+  const [newClass, setNewClass] = useState<{
+    name: string;
+    department_id: string;
+    academic_year_id: string;
+    grading_mode: "numbers" | "letters";
+  }>({
     name: "",
     department_id: "",
     academic_year_id: "",
+    grading_mode: "numbers",
   });
 
   const { data: classes, isLoading } = useClasses();
@@ -142,6 +148,7 @@ export const ClassManagementTab = () => {
         name: "",
         department_id: "",
         academic_year_id: "",
+        grading_mode: "numbers",
       });
     } catch (error: any) {
       toast({
@@ -175,6 +182,7 @@ export const ClassManagementTab = () => {
           name: editingClass.name,
           department_id: editingClass.department_id,
           academic_year_id: editingClass.academic_year_id,
+          grading_mode: editingClass.grading_mode,
         })
         .eq("id", editingClass.id);
       if (error) throw error;
@@ -294,6 +302,24 @@ export const ClassManagementTab = () => {
                   </SelectContent>
                 </Select>
               </div>
+              <div>
+                <Label htmlFor="grading_mode">Grading System</Label>
+                <Select
+                  value={newClass.grading_mode}
+                  onValueChange={(value: "numbers" | "letters") => setNewClass({ ...newClass, grading_mode: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="numbers">Numbers (Grades 1–12, K1, K2)</SelectItem>
+                    <SelectItem value="letters">Letters (Nursery, ABC — A+ to F)</SelectItem>
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Letters mode uses a single "Total Points" assessment and shows letter grades only on reports.
+                </p>
+              </div>
               <Button onClick={handleAddClass} className="w-full">
                 Add Class
               </Button>
@@ -372,6 +398,7 @@ export const ClassManagementTab = () => {
                             name: cls.name,
                             department_id: cls.department_id,
                             academic_year_id: cls.academic_year_id,
+                            grading_mode: ((cls as any).grading_mode === "letters" ? "letters" : "numbers"),
                           });
                           setIsEditDialogOpen(true);
                         }}
@@ -498,6 +525,21 @@ export const ClassManagementTab = () => {
                         {year.year_name} {year.is_current && "(Current)"}
                       </SelectItem>
                     ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label htmlFor="edit-grading-mode">Grading System</Label>
+                <Select
+                  value={editingClass.grading_mode}
+                  onValueChange={(value: "numbers" | "letters") => setEditingClass({ ...editingClass, grading_mode: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="numbers">Numbers (Grades 1–12, K1, K2)</SelectItem>
+                    <SelectItem value="letters">Letters (Nursery, ABC — A+ to F)</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
