@@ -5,7 +5,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Archive, RotateCcw, AlertTriangle, Download, Loader2 } from "lucide-react";
+import { Archive, RotateCcw, AlertTriangle, Download, Loader2, GraduationCap, ArrowRightLeft, LogOut, Ban } from "lucide-react";
 import { useArchivedStudents, useDepartedStudents, useReinstateStudent } from "@/hooks/useStudentLifecycle";
 import { format } from "date-fns";
 import { useState } from "react";
