@@ -183,12 +183,17 @@ const SuperAdmin = () => {
         </p>
       </div>
 
-      <Tabs defaultValue="schools">
+      <Tabs defaultValue="overview">
         <TabsList>
+          <TabsTrigger value="overview"><BarChart3 className="h-4 w-4 mr-1" /> Overview</TabsTrigger>
           <TabsTrigger value="schools">Schools</TabsTrigger>
           <TabsTrigger value="lockout">Lockouts</TabsTrigger>
           <TabsTrigger value="audit">Audit log</TabsTrigger>
         </TabsList>
+
+        <TabsContent value="overview" className="space-y-4">
+          <PlatformMetrics />
+        </TabsContent>
 
         {/* SCHOOLS */}
         <TabsContent value="schools" className="space-y-4">
