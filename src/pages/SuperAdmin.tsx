@@ -13,7 +13,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { impersonation } from "@/lib/impersonation";
-import { Eye, ShieldAlert, ShieldCheck, Search } from "lucide-react";
+import { Eye, ShieldAlert, ShieldCheck, Search, FileText } from "lucide-react";
+import { SchoolDetailDrawer } from "@/components/SchoolDetailDrawer";
 
 type School = {
   id: string;
@@ -28,6 +29,12 @@ type School = {
   max_students: number;
   billable_student_count: number;
   created_at: string;
+  owner_user_id: string | null;
+  email: string | null;
+  phone: string | null;
+  website: string | null;
+  address: string | null;
+  country: string | null;
 };
 
 type AuditLog = {
@@ -59,6 +66,7 @@ const SuperAdmin = () => {
     max_students: 0,
     trial_ends_at: "",
   });
+  const [viewing, setViewing] = useState<School | null>(null);
 
   const { data: schools, isLoading: schoolsLoading } = useQuery({
     queryKey: ["super-admin-schools"],
@@ -66,7 +74,7 @@ const SuperAdmin = () => {
       const { data, error } = await supabase
         .from("schools")
         .select(
-          "id,name,slug,subscription_tier,subscription_status,subscription_plan,lockout_state,lockout_started_at,trial_ends_at,max_students,billable_student_count,created_at"
+          "id,name,slug,subscription_tier,subscription_status,subscription_plan,lockout_state,lockout_started_at,trial_ends_at,max_students,billable_student_count,created_at,owner_user_id,email,phone,website,address,country"
         )
         .order("created_at", { ascending: false });
       if (error) throw error;
@@ -240,6 +248,9 @@ const SuperAdmin = () => {
                               : "—"}
                           </TableCell>
                           <TableCell className="text-right space-x-2">
+                            <Button size="sm" variant="ghost" onClick={() => setViewing(s)}>
+                              <FileText className="h-3 w-3 mr-1" /> Details
+                            </Button>
                             <Button size="sm" variant="outline" onClick={() => impersonate(s)}>
                               <Eye className="h-3 w-3 mr-1" /> View as
                             </Button>
@@ -456,6 +467,12 @@ const SuperAdmin = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <SchoolDetailDrawer
+        school={viewing as any}
+        open={!!viewing}
+        onOpenChange={(o) => !o && setViewing(null)}
+      />
     </div>
   );
 };
