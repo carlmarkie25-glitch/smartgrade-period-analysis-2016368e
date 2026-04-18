@@ -71,7 +71,7 @@ export const SchoolDetailDrawer = ({ school, open, onOpenChange }: Props) => {
           .order("created_at", { ascending: false })
           .limit(10),
         school?.owner_user_id
-          ? supabase.from("profiles").select("full_name, email").eq("user_id", (school as any).owner_user_id).maybeSingle()
+          ? supabase.from("profiles").select("full_name, email").eq("user_id", school.owner_user_id).maybeSingle()
           : Promise.resolve({ data: null }),
       ]);
 
