@@ -210,6 +210,119 @@ export type Database = {
           },
         ]
       }
+      attendance_records: {
+        Row: {
+          created_at: string
+          id: string
+          note: string | null
+          school_id: string | null
+          session_id: string
+          status: Database["public"]["Enums"]["attendance_status"]
+          student_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          note?: string | null
+          school_id?: string | null
+          session_id: string
+          status?: Database["public"]["Enums"]["attendance_status"]
+          student_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          note?: string | null
+          school_id?: string | null
+          session_id?: string
+          status?: Database["public"]["Enums"]["attendance_status"]
+          student_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "attendance_records_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attendance_records_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "attendance_sessions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attendance_records_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      attendance_sessions: {
+        Row: {
+          class_id: string
+          class_subject_id: string | null
+          created_at: string
+          date: string
+          id: string
+          notes: string | null
+          school_id: string | null
+          taken_by: string | null
+          updated_at: string
+        }
+        Insert: {
+          class_id: string
+          class_subject_id?: string | null
+          created_at?: string
+          date: string
+          id?: string
+          notes?: string | null
+          school_id?: string | null
+          taken_by?: string | null
+          updated_at?: string
+        }
+        Update: {
+          class_id?: string
+          class_subject_id?: string | null
+          created_at?: string
+          date?: string
+          id?: string
+          notes?: string | null
+          school_id?: string | null
+          taken_by?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "attendance_sessions_class_id_fkey"
+            columns: ["class_id"]
+            isOneToOne: false
+            referencedRelation: "classes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attendance_sessions_class_subject_id_fkey"
+            columns: ["class_subject_id"]
+            isOneToOne: false
+            referencedRelation: "class_subjects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attendance_sessions_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       class_schedules: {
         Row: {
           class_id: string
@@ -1860,6 +1973,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      can_manage_class_attendance: {
+        Args: { _class_id: string }
+        Returns: boolean
+      }
       count_active_students: { Args: { p_school_id: string }; Returns: number }
       current_school_id: { Args: never; Returns: string }
       expire_stale_subscription_for_user: {
@@ -1916,6 +2033,7 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "teacher" | "student" | "parent" | "super_admin"
+      attendance_status: "present" | "absent" | "excused"
       department_type: "elementary" | "junior_high" | "senior_high"
       period_type:
         | "p1"
@@ -2058,6 +2176,7 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "teacher", "student", "parent", "super_admin"],
+      attendance_status: ["present", "absent", "excused"],
       department_type: ["elementary", "junior_high", "senior_high"],
       period_type: [
         "p1",
