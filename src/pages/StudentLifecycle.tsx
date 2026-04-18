@@ -41,6 +41,7 @@ const StudentLifecycle = () => {
   const { school } = useSchool();
   const { toast } = useToast();
   const [exportingId, setExportingId] = useState<string | null>(null);
+  const [sharingId, setSharingId] = useState<string | null>(null);
 
   const handleExport = async (s: any) => {
     setExportingId(s.id);
@@ -58,6 +59,28 @@ const StudentLifecycle = () => {
       toast({ title: "Export failed", description: err.message, variant: "destructive" });
     } finally {
       setExportingId(null);
+    }
+  };
+
+  const handleShareLink = async (s: any) => {
+    setSharingId(s.id);
+    try {
+      const { data, error } = await supabase.functions.invoke("generate-transfer-pack", {
+        body: { student_id: s.id },
+      });
+      if (error) throw error;
+      const url = data?.share_link as string;
+      if (!url) throw new Error("No share link returned");
+      await navigator.clipboard.writeText(url).catch(() => {});
+      const expires = data?.expires_at ? format(new Date(data.expires_at), "MMM d, yyyy") : "14 days";
+      toast({
+        title: "Share link copied to clipboard",
+        description: `Anyone with the link can download. Expires ${expires}.`,
+      });
+    } catch (err: any) {
+      toast({ title: "Share link failed", description: err.message, variant: "destructive" });
+    } finally {
+      setSharingId(null);
     }
   };
 
