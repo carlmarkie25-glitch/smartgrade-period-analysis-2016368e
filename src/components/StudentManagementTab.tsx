@@ -128,17 +128,13 @@ export const StudentManagementTab = () => {
       
       let photoBase64 = "";
       let photoContentType = "";
-      
+
       if (fileInputRef.current?.files?.[0]) {
         const file = fileInputRef.current.files[0];
-        photoContentType = file.type;
-        const arrayBuffer = await file.arrayBuffer();
-        const bytes = new Uint8Array(arrayBuffer);
-        let binary = '';
-        for (let i = 0; i < bytes.byteLength; i++) {
-          binary += String.fromCharCode(bytes[i]);
-        }
-        photoBase64 = btoa(binary);
+        const { resizeToWebP, blobToBase64 } = await import("@/lib/imageResize");
+        const { blob, contentType } = await resizeToWebP(file);
+        photoContentType = contentType;
+        photoBase64 = await blobToBase64(blob);
       }
 
       const { data, error } = await supabase.functions.invoke("create-student-account", {
