@@ -38,7 +38,11 @@ export const useMyChildren = () => {
   return useQuery({
     queryKey: ["my-children", user?.id],
     enabled: !!user?.id,
+    refetchOnMount: "always",
+    refetchOnWindowFocus: true,
+    staleTime: 0,
     queryFn: async () => {
+      if (!user?.id) return [];
       const { data, error } = await supabase
         .from("parent_student_assignments")
         .select(`
@@ -50,8 +54,12 @@ export const useMyChildren = () => {
             departments:department_id ( id, name )
           )
         `)
-        .eq("parent_user_id", user!.id);
-      if (error) throw error;
+        .eq("parent_user_id", user.id);
+      if (error) {
+        console.error("useMyChildren error:", error);
+        throw error;
+      }
+      console.log("useMyChildren rows:", data?.length, data);
       return (data ?? [])
         .map((row: any) => row.students)
         .filter(Boolean);
