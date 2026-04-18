@@ -178,6 +178,20 @@ const StudentLifecycle = () => {
                               <Button
                                 variant="outline"
                                 size="sm"
+                                onClick={() => handleShareLink(s)}
+                                disabled={sharingId === s.id}
+                                title="Generate a 14-day expiring link to share with the receiving school"
+                              >
+                                {sharingId === s.id ? (
+                                  <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                                ) : (
+                                  <Link2 className="h-4 w-4 mr-1" />
+                                )}
+                                Share Link
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="sm"
                                 onClick={() => reinstate.mutate(s.id)}
                                 disabled={reinstate.isPending}
                               >
