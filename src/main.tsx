@@ -4,6 +4,10 @@ import App from "./App.tsx";
 import "./index.css";
 import { installSyncEngine } from "@/lib/offline/sync";
 import { registerServiceWorker } from "@/lib/offline/registerSW";
+import { initSentry } from "@/lib/sentry";
+
+// Initialize Sentry error monitoring
+initSentry();
 
 // Boot offline sync (safe in all envs — uses IndexedDB only)
 installSyncEngine();
