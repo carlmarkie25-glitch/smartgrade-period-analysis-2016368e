@@ -202,7 +202,51 @@ export const SchoolDetailDrawer = ({ school, open, onOpenChange }: Props) => {
             </CardContent>
           </Card>
 
-          {/* Contact */}
+          {/* Manual override (super admin only) */}
+          <Card className="border-warning/30">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm flex items-center gap-2">
+                <ShieldAlert className="h-4 w-4 text-warning" /> Manual override
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <p className="text-xs text-muted-foreground">
+                Force a subscription or lockout state. Use only for support cases — Paddle webhooks may overwrite this on the next billing event.
+              </p>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <div className="text-muted-foreground text-xs mb-1">Subscription status</div>
+                  <Select value={subStatus} onValueChange={setSubStatus}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="trialing">trialing</SelectItem>
+                      <SelectItem value="active">active</SelectItem>
+                      <SelectItem value="past_due">past_due</SelectItem>
+                      <SelectItem value="canceled">canceled</SelectItem>
+                      <SelectItem value="paused">paused</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <div className="text-muted-foreground text-xs mb-1">Lockout state</div>
+                  <Select value={lockState} onValueChange={setLockState}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">none</SelectItem>
+                      <SelectItem value="soft">soft (read-only)</SelectItem>
+                      <SelectItem value="hard">hard (login blocked)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <Button size="sm" onClick={handleSaveOverride} disabled={!dirty || saving}>
+                {saving ? <Loader2 className="h-3 w-3 mr-2 animate-spin" /> : null}
+                Save override
+              </Button>
+            </CardContent>
+          </Card>
+
+
           {(school.email || school.phone || school.website || school.address) && (
             <Card>
               <CardHeader className="pb-2">
