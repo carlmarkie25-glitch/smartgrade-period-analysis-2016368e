@@ -362,6 +362,20 @@ const Gradebook = () => {
                                         placeholder=""
                                       />
                                     )}
+                                    {isKg && (() => {
+                                      const letter = scoreToLetter(
+                                        typeof currentValue === "number" ? currentValue : null,
+                                        at.max_points,
+                                      );
+                                      return (
+                                        <div
+                                          className={`mt-1 text-xs font-bold ${letterColorClass(letter)}`}
+                                          title={letter ? "KG letter grade" : "Below 60 — not allowed"}
+                                        >
+                                          {letter ?? "—"}
+                                        </div>
+                                      );
+                                    })()}
                                   </TableCell>
                                 );
                               })}
