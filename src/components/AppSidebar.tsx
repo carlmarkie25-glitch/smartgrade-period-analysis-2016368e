@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { LayoutDashboard, BookOpen, FileText, BarChart3, Settings, LogOut, CalendarDays, Calendar, ClipboardList, ChevronDown, CreditCard, UserCheck, Archive } from "lucide-react";
+import { LayoutDashboard, BookOpen, FileText, BarChart3, Settings, LogOut, CalendarDays, Calendar, ClipboardList, ChevronDown, CreditCard, UserCheck, Archive, RefreshCw } from "lucide-react";
 import logo from "@/assets/logo.png";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -45,6 +45,7 @@ const AppSidebar = () => {
     { path: "/dashboard", icon: LayoutDashboard, label: "Dashboard", roles: ["all"] },
     { path: "/schedule", icon: CalendarDays, label: "Schedule", roles: ["all"] },
     { path: "/academic-calendar", icon: Calendar, label: "Calendar", roles: ["all"] },
+    { path: "/sync-status", icon: RefreshCw, label: "Sync", roles: ["all"] },
   ];
 
   const academicsItems = [
