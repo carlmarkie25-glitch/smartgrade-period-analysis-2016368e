@@ -64,8 +64,16 @@ export const letterColorClass = (letter: KgLetter | null): string => {
   return "text-destructive";
 };
 
-/** Check whether a class object (with .departments.name) belongs to Kindergarten. */
+/**
+ * Check whether a class uses the KG-style letter grading.
+ * Priority:
+ *   1. Explicit `grading_mode === 'letters'` flag on the class (admin choice).
+ *   2. Fallback: department name is "Kindergarten" (legacy classes without flag).
+ */
 export const isKindergartenClass = (cls: any): boolean => {
+  if (!cls) return false;
+  if (cls.grading_mode === "letters") return true;
+  if (cls.grading_mode === "numbers") return false;
   const name =
     cls?.departments?.name ??
     cls?.department?.name ??

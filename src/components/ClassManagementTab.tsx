@@ -20,11 +20,17 @@ export const ClassManagementTab = () => {
   const [isSubjectsDialogOpen, setIsSubjectsDialogOpen] = useState(false);
   const [selectedClassId, setSelectedClassId] = useState<string>("");
   const [selectedSubjectId, setSelectedSubjectId] = useState<string>("");
-  const [editingClass, setEditingClass] = useState<{ id: string; name: string; department_id: string; academic_year_id: string } | null>(null);
-  const [newClass, setNewClass] = useState({
+  const [editingClass, setEditingClass] = useState<{ id: string; name: string; department_id: string; academic_year_id: string; grading_mode: "numbers" | "letters" } | null>(null);
+  const [newClass, setNewClass] = useState<{
+    name: string;
+    department_id: string;
+    academic_year_id: string;
+    grading_mode: "numbers" | "letters";
+  }>({
     name: "",
     department_id: "",
     academic_year_id: "",
+    grading_mode: "numbers",
   });
 
   const { data: classes, isLoading } = useClasses();
