@@ -24,6 +24,28 @@ const StudentLifecycle = () => {
   const departed = useDepartedStudents();
   const archived = useArchivedStudents();
   const reinstate = useReinstateStudent();
+  const { school } = useSchool();
+  const { toast } = useToast();
+  const [exportingId, setExportingId] = useState<string | null>(null);
+
+  const handleExport = async (s: any) => {
+    setExportingId(s.id);
+    try {
+      const blob = await generateTransferPack(s.id, {
+        name: school?.name,
+        address: (school as any)?.address,
+        phone: (school as any)?.phone,
+        email: (school as any)?.email,
+      });
+      const safeName = (s.full_name ?? "student").replace(/[^a-z0-9]+/gi, "_");
+      downloadBlob(blob, `transfer-pack-${safeName}-${s.student_id ?? s.id}.pdf`);
+      toast({ title: "Transfer Pack downloaded" });
+    } catch (err: any) {
+      toast({ title: "Export failed", description: err.message, variant: "destructive" });
+    } finally {
+      setExportingId(null);
+    }
+  };
 
   const today = new Date();
   const daysLeft = (d: string | null) =>
