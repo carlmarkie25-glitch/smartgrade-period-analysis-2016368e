@@ -250,6 +250,12 @@ const Gradebook = () => {
                   ? `Assessment breakdown: ${assessmentTypes.map(at => `${at.name} (${at.max_points})`).join(', ')}. Empty fields show as "I" (Incomplete). Totals under 60% show as "I".`
                   : 'No assessment types configured'
                 }
+                {isKg && (
+                  <span className="block mt-2 text-xs text-foreground">
+                    <strong>Kindergarten letter scale:</strong>{" "}
+                    {KG_SCALE.map((t) => `${t.letter} ${t.min}-${t.max}`).join(" • ")} • &lt;60 not allowed
+                  </span>
+                )}
               </CardDescription>
               <div className="mt-4">
                 <label className="text-sm font-medium text-foreground">Search Students</label>
