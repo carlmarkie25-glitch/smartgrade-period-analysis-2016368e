@@ -10,6 +10,8 @@ import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { AdminRoute } from "@/components/AdminRoute";
 import { TeacherRoute } from "@/components/TeacherRoute";
 import Index from "./pages/Index";
+import Landing from "./pages/Landing";
+import Signup from "./pages/Signup";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import Schedule from "./pages/Schedule";
@@ -44,7 +46,8 @@ const App = () => (
           <AuthProvider>
             <SchoolProvider>
             <Routes>
-            <Route path="/" element={<Index />} />
+            <Route path="/" element={<Landing />} />
+            <Route path="/signup" element={<Signup />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
             <Route path="/schedule" element={<ProtectedRoute><Schedule /></ProtectedRoute>} />
