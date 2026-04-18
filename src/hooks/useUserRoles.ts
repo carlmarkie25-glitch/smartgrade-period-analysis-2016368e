@@ -36,6 +36,7 @@ export const useUserRoles = () => {
   const isTeacher = hasRole("teacher");
   const isStudent = hasRole("student");
   const isParent = hasRole("parent");
+  const isSuperAdmin = hasRole("super_admin");
 
   return {
     roles: roles || [],
@@ -45,5 +46,6 @@ export const useUserRoles = () => {
     isTeacher,
     isStudent,
     isParent,
+    isSuperAdmin,
   };
 };
