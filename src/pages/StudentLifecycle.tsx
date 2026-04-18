@@ -5,7 +5,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Archive, RotateCcw, AlertTriangle, Download, Loader2, GraduationCap, ArrowRightLeft, LogOut, Ban, ScrollText } from "lucide-react";
+import { Archive, RotateCcw, AlertTriangle, Download, Loader2, GraduationCap, ArrowRightLeft, LogOut, Ban, ScrollText, Link2 } from "lucide-react";
 import { useArchivedStudents, useDepartedStudents, useReinstateStudent } from "@/hooks/useStudentLifecycle";
 import { useAuditLogs } from "@/hooks/useAuditLogs";
 import { format } from "date-fns";
@@ -13,6 +13,7 @@ import { useState } from "react";
 import { generateTransferPack, downloadBlob } from "@/lib/transferPack";
 import { useToast } from "@/hooks/use-toast";
 import { useSchool } from "@/contexts/SchoolContext";
+import { supabase } from "@/integrations/supabase/client";
 
 const statusConfig: Record<string, { color: string; icon: typeof GraduationCap; label: string }> = {
   graduated: { color: "bg-emerald-500/10 text-emerald-600 border-emerald-500/30", icon: GraduationCap, label: "Graduated" },
@@ -40,6 +41,7 @@ const StudentLifecycle = () => {
   const { school } = useSchool();
   const { toast } = useToast();
   const [exportingId, setExportingId] = useState<string | null>(null);
+  const [sharingId, setSharingId] = useState<string | null>(null);
 
   const handleExport = async (s: any) => {
     setExportingId(s.id);
@@ -57,6 +59,28 @@ const StudentLifecycle = () => {
       toast({ title: "Export failed", description: err.message, variant: "destructive" });
     } finally {
       setExportingId(null);
+    }
+  };
+
+  const handleShareLink = async (s: any) => {
+    setSharingId(s.id);
+    try {
+      const { data, error } = await supabase.functions.invoke("generate-transfer-pack", {
+        body: { student_id: s.id },
+      });
+      if (error) throw error;
+      const url = data?.share_link as string;
+      if (!url) throw new Error("No share link returned");
+      await navigator.clipboard.writeText(url).catch(() => {});
+      const expires = data?.expires_at ? format(new Date(data.expires_at), "MMM d, yyyy") : "14 days";
+      toast({
+        title: "Share link copied to clipboard",
+        description: `Anyone with the link can download. Expires ${expires}.`,
+      });
+    } catch (err: any) {
+      toast({ title: "Share link failed", description: err.message, variant: "destructive" });
+    } finally {
+      setSharingId(null);
     }
   };
 
@@ -150,6 +174,20 @@ const StudentLifecycle = () => {
                                   <Download className="h-4 w-4 mr-1" />
                                 )}
                                 Transfer Pack
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleShareLink(s)}
+                                disabled={sharingId === s.id}
+                                title="Generate a 14-day expiring link to share with the receiving school"
+                              >
+                                {sharingId === s.id ? (
+                                  <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                                ) : (
+                                  <Link2 className="h-4 w-4 mr-1" />
+                                )}
+                                Share Link
                               </Button>
                               <Button
                                 variant="outline"
