@@ -13,8 +13,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { impersonation } from "@/lib/impersonation";
-import { Eye, ShieldAlert, ShieldCheck, Search, FileText } from "lucide-react";
+import { Eye, ShieldAlert, ShieldCheck, Search, FileText, BarChart3 } from "lucide-react";
 import { SchoolDetailDrawer } from "@/components/SchoolDetailDrawer";
+import { PlatformMetrics } from "@/components/superadmin/PlatformMetrics";
 
 type School = {
   id: string;
