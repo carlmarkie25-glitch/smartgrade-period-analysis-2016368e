@@ -5,7 +5,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Archive, RotateCcw, AlertTriangle, Download, Loader2 } from "lucide-react";
+import { Archive, RotateCcw, AlertTriangle, Download, Loader2, GraduationCap, ArrowRightLeft, LogOut, Ban } from "lucide-react";
 import { useArchivedStudents, useDepartedStudents, useReinstateStudent } from "@/hooks/useStudentLifecycle";
 import { format } from "date-fns";
 import { useState } from "react";
@@ -13,11 +13,23 @@ import { generateTransferPack, downloadBlob } from "@/lib/transferPack";
 import { useToast } from "@/hooks/use-toast";
 import { useSchool } from "@/contexts/SchoolContext";
 
-const statusColor: Record<string, string> = {
-  graduated: "bg-emerald-500/10 text-emerald-600 border-emerald-500/30",
-  transferred: "bg-blue-500/10 text-blue-600 border-blue-500/30",
-  withdrawn: "bg-amber-500/10 text-amber-600 border-amber-500/30",
-  expelled: "bg-red-500/10 text-red-600 border-red-500/30",
+const statusConfig: Record<string, { color: string; icon: typeof GraduationCap; label: string }> = {
+  graduated: { color: "bg-emerald-500/10 text-emerald-600 border-emerald-500/30", icon: GraduationCap, label: "Graduated" },
+  transferred: { color: "bg-blue-500/10 text-blue-600 border-blue-500/30", icon: ArrowRightLeft, label: "Transferred" },
+  withdrawn: { color: "bg-amber-500/10 text-amber-600 border-amber-500/30", icon: LogOut, label: "Withdrawn" },
+  expelled: { color: "bg-red-500/10 text-red-600 border-red-500/30", icon: Ban, label: "Expelled" },
+};
+
+const StatusBadge = ({ status }: { status: string }) => {
+  const cfg = statusConfig[status];
+  if (!cfg) return <Badge variant="outline">{status}</Badge>;
+  const Icon = cfg.icon;
+  return (
+    <Badge variant="outline" className={`${cfg.color} gap-1`}>
+      <Icon className="h-3 w-3" />
+      {cfg.label}
+    </Badge>
+  );
 };
 
 const StudentLifecycle = () => {
@@ -104,9 +116,7 @@ const StudentLifecycle = () => {
                               </div>
                             </TableCell>
                             <TableCell>
-                              <Badge variant="outline" className={statusColor[s.status] ?? ""}>
-                                {s.status}
-                              </Badge>
+                              <StatusBadge status={s.status} />
                             </TableCell>
                             <TableCell className="text-sm">
                               {s.departure_date ? format(new Date(s.departure_date), "MMM d, yyyy") : "—"}
@@ -192,7 +202,7 @@ const StudentLifecycle = () => {
                         return (
                           <TableRow key={s.id}>
                             <TableCell className="font-mono text-xs">{sum.student_id ?? "—"}</TableCell>
-                            <TableCell><Badge variant="outline">{sum.final_status ?? "—"}</Badge></TableCell>
+                            <TableCell>{sum.final_status ? <StatusBadge status={sum.final_status} /> : <Badge variant="outline">—</Badge>}</TableCell>
                             <TableCell className="text-sm">
                               {s.archived_at ? format(new Date(s.archived_at), "MMM d, yyyy") : "—"}
                             </TableCell>
