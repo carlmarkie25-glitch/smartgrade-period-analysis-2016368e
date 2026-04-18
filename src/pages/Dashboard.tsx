@@ -41,16 +41,13 @@ const Dashboard = () => {
     return <NoRoleDashboard />;
   }
 
-  // Parent portal takes precedence for parent-only users
-  if (isParent && !isAdmin && !isTeacher) {
-    return <ParentPortal />;
-  }
+  // Admin > Teacher > Parent > Student precedence
+  if (isAdmin) return <AdminDashboard />;
+  if (isTeacher) return <TeacherDashboard />;
+  if (isParent) return <ParentPortal />;
+  if (isStudent) return <StudentPortal />;
 
-  if (isStudent && !isAdmin && !isTeacher) {
-    return <StudentPortal />;
-  }
-
-  const showTeacherView = isTeacher && !isAdmin;
+  const showTeacherView = false;
   
   return showTeacherView ? <TeacherDashboard /> : <AdminDashboard />;
 };
