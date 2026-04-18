@@ -25,8 +25,8 @@ export const TrialBanner = () => {
 
   if (status === "past_due") {
     return (
-      <div className="bg-amber-500/15 border-b border-amber-500/30 text-foreground px-4 py-2 text-sm flex items-center justify-between">
-        <span className="flex items-center gap-2"><Clock className="h-4 w-4 text-amber-600" /> Payment is past due. Please update your billing to avoid being locked out.</span>
+      <div className="bg-destructive/10 border-b border-destructive/30 text-foreground px-4 py-2 text-sm flex items-center justify-between">
+        <span className="flex items-center gap-2"><Clock className="h-4 w-4 text-destructive" /> Payment is past due. Please update your billing to avoid being locked out.</span>
         <Link to="/settings/billing" className="underline font-medium">Update billing</Link>
       </div>
     );
