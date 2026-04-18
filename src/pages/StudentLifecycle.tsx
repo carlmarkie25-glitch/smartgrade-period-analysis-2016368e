@@ -5,7 +5,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Archive, RotateCcw, AlertTriangle, Download, Loader2, GraduationCap, ArrowRightLeft, LogOut, Ban, ScrollText } from "lucide-react";
+import { Archive, RotateCcw, AlertTriangle, Download, Loader2, GraduationCap, ArrowRightLeft, LogOut, Ban, ScrollText, Link2 } from "lucide-react";
 import { useArchivedStudents, useDepartedStudents, useReinstateStudent } from "@/hooks/useStudentLifecycle";
 import { useAuditLogs } from "@/hooks/useAuditLogs";
 import { format } from "date-fns";
@@ -13,6 +13,7 @@ import { useState } from "react";
 import { generateTransferPack, downloadBlob } from "@/lib/transferPack";
 import { useToast } from "@/hooks/use-toast";
 import { useSchool } from "@/contexts/SchoolContext";
+import { supabase } from "@/integrations/supabase/client";
 
 const statusConfig: Record<string, { color: string; icon: typeof GraduationCap; label: string }> = {
   graduated: { color: "bg-emerald-500/10 text-emerald-600 border-emerald-500/30", icon: GraduationCap, label: "Graduated" },
