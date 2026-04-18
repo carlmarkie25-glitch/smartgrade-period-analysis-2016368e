@@ -29,8 +29,9 @@ export const registerServiceWorker = async (): Promise<void> => {
 
   // Dynamic import so the virtual module isn't pulled into preview builds
   try {
-    const { registerSW } = await import("virtual:pwa-register");
-    registerSW({ immediate: true });
+    // @ts-expect-error - virtual module provided by vite-plugin-pwa at build time
+    const mod = await import("virtual:pwa-register");
+    mod.registerSW({ immediate: true });
   } catch {
     // virtual module unavailable in dev — ignore
   }

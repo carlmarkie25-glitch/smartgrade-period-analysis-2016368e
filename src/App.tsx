@@ -36,6 +36,7 @@ import Notifications from "./pages/Notifications";
 import SchoolSettings from "./pages/SchoolSettings";
 import Billing from "./pages/Billing";
 import Attendance from "./pages/Attendance";
+import Install from "./pages/Install";
 
 const queryClient = new QueryClient();
 
@@ -50,6 +51,7 @@ const App = () => (
             <SchoolProvider>
             <Routes>
             <Route path="/" element={<Landing />} />
+            <Route path="/install" element={<Install />} />
             <Route path="/signup" element={<Signup />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
