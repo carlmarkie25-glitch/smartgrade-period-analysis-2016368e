@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Check, Loader2, Sparkles } from "lucide-react";
-import { MainLayout } from "@/components/MainLayout";
+import MainLayout from "@/components/MainLayout";
 import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
