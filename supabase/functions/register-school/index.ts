@@ -3,6 +3,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Content-Type": "application/json",
 };
 
 const PLAN_LIMITS: Record<string, number> = {
@@ -13,6 +14,12 @@ const PLAN_LIMITS: Record<string, number> = {
 
 function slugify(s: string) {
   return s.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 40) || "school";
+}
+
+// Always return HTTP 200 with { ok, ... } so the client can read the real error
+// instead of seeing a generic "Edge Function returned a non-2xx status code".
+function respond(payload: Record<string, unknown>) {
+  return new Response(JSON.stringify(payload), { status: 200, headers: corsHeaders });
 }
 
 Deno.serve(async (req) => {
@@ -31,12 +38,10 @@ Deno.serve(async (req) => {
     } = body;
 
     if (!school_name || !admin_full_name || !admin_email || !admin_password) {
-      return new Response(JSON.stringify({ error: "Missing required fields" }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      return respond({ ok: false, error: "Missing required fields" });
     }
     if (admin_password.length < 6) {
-      return new Response(JSON.stringify({ error: "Password must be at least 6 characters" }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      return respond({ ok: false, error: "Password must be at least 6 characters" });
     }
 
     // 1) Create auth user
@@ -47,8 +52,12 @@ Deno.serve(async (req) => {
       user_metadata: { full_name: admin_full_name },
     });
     if (authErr || !authData.user) {
-      return new Response(JSON.stringify({ error: authErr?.message ?? "Failed to create user" }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      const msg = authErr?.message ?? "Failed to create user";
+      // Friendlier message for the most common case
+      const friendly = /already.*registered|already exists|duplicate/i.test(msg)
+        ? "An account with this email already exists. Please sign in instead."
+        : msg;
+      return respond({ ok: false, error: friendly });
     }
     const userId = authData.user.id;
 
@@ -78,8 +87,7 @@ Deno.serve(async (req) => {
 
     if (schoolErr || !school) {
       await admin.auth.admin.deleteUser(userId);
-      return new Response(JSON.stringify({ error: schoolErr?.message ?? "Failed to create school" }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      return respond({ ok: false, error: schoolErr?.message ?? "Failed to create school" });
     }
 
     // 4) Profile + membership + admin role
@@ -89,12 +97,10 @@ Deno.serve(async (req) => {
     await admin.from("user_schools").insert({ user_id: userId, school_id: school.id, is_primary: true });
     await admin.from("user_roles").insert({ user_id: userId, role: "admin" });
 
-    return new Response(JSON.stringify({ success: true, school_id: school.id, slug: school.slug }),
-      { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    return respond({ ok: true, success: true, school_id: school.id, slug: school.slug });
   } catch (e) {
     const msg = e instanceof Error ? e.message : "Unknown error";
     console.error("register-school error:", msg);
-    return new Response(JSON.stringify({ error: msg }),
-      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    return respond({ ok: false, error: msg });
   }
 });
