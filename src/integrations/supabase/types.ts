@@ -1337,6 +1337,60 @@ export type Database = {
           },
         ]
       }
+      student_data_exports: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          download_count: number
+          expires_at: string
+          export_type: string
+          id: string
+          school_id: string | null
+          share_token: string | null
+          storage_path: string | null
+          student_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          download_count?: number
+          expires_at?: string
+          export_type?: string
+          id?: string
+          school_id?: string | null
+          share_token?: string | null
+          storage_path?: string | null
+          student_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          download_count?: number
+          expires_at?: string
+          export_type?: string
+          id?: string
+          school_id?: string | null
+          share_token?: string | null
+          storage_path?: string | null
+          student_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "student_data_exports_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "student_data_exports_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       student_grades: {
         Row: {
           assessment_type_id: string
@@ -1666,17 +1720,22 @@ export type Database = {
       students: {
         Row: {
           address: string | null
+          archive_summary: Json | null
+          archived_at: string | null
           class_id: string
           country: string | null
           county: string | null
           created_at: string
           date_of_birth: string | null
           department_id: string
+          departure_date: string | null
+          departure_reason: string | null
           disability: string | null
           emergency_contact_name: string | null
           emergency_contact_phone: string | null
           emergency_contact_relationship: string | null
           ethnicity: string | null
+          export_reminded_at: string | null
           father_contact: string | null
           father_name: string | null
           full_name: string
@@ -1692,24 +1751,31 @@ export type Database = {
           previous_class: string | null
           previous_school: string | null
           religion: string | null
+          retention_expires_at: string | null
           school_id: string | null
+          status: Database["public"]["Enums"]["student_status"]
           student_id: string
           updated_at: string
           user_id: string | null
         }
         Insert: {
           address?: string | null
+          archive_summary?: Json | null
+          archived_at?: string | null
           class_id: string
           country?: string | null
           county?: string | null
           created_at?: string
           date_of_birth?: string | null
           department_id: string
+          departure_date?: string | null
+          departure_reason?: string | null
           disability?: string | null
           emergency_contact_name?: string | null
           emergency_contact_phone?: string | null
           emergency_contact_relationship?: string | null
           ethnicity?: string | null
+          export_reminded_at?: string | null
           father_contact?: string | null
           father_name?: string | null
           full_name: string
@@ -1725,24 +1791,31 @@ export type Database = {
           previous_class?: string | null
           previous_school?: string | null
           religion?: string | null
+          retention_expires_at?: string | null
           school_id?: string | null
+          status?: Database["public"]["Enums"]["student_status"]
           student_id: string
           updated_at?: string
           user_id?: string | null
         }
         Update: {
           address?: string | null
+          archive_summary?: Json | null
+          archived_at?: string | null
           class_id?: string
           country?: string | null
           county?: string | null
           created_at?: string
           date_of_birth?: string | null
           department_id?: string
+          departure_date?: string | null
+          departure_reason?: string | null
           disability?: string | null
           emergency_contact_name?: string | null
           emergency_contact_phone?: string | null
           emergency_contact_relationship?: string | null
           ethnicity?: string | null
+          export_reminded_at?: string | null
           father_contact?: string | null
           father_name?: string | null
           full_name?: string
@@ -1758,7 +1831,9 @@ export type Database = {
           previous_class?: string | null
           previous_school?: string | null
           religion?: string | null
+          retention_expires_at?: string | null
           school_id?: string | null
+          status?: Database["public"]["Enums"]["student_status"]
           student_id?: string
           updated_at?: string
           user_id?: string | null
@@ -1973,6 +2048,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      archive_expired_students: { Args: never; Returns: number }
       can_manage_class_attendance: {
         Args: { _class_id: string }
         Returns: boolean
@@ -2030,6 +2106,25 @@ export type Database = {
         Returns: boolean
       }
       is_super_admin: { Args: never; Returns: boolean }
+      mark_student_departed: {
+        Args: {
+          p_departure_date?: string
+          p_reason?: string
+          p_status: Database["public"]["Enums"]["student_status"]
+          p_student_id: string
+        }
+        Returns: undefined
+      }
+      students_expiring_within: {
+        Args: { p_days: number }
+        Returns: {
+          days_left: number
+          full_name: string
+          retention_expires_at: string
+          school_id: string
+          student_id: string
+        }[]
+      }
     }
     Enums: {
       app_role: "admin" | "teacher" | "student" | "parent" | "super_admin"
@@ -2048,6 +2143,13 @@ export type Database = {
         | "semester2"
         | "yearly"
       semester_type: "semester1" | "semester2"
+      student_status:
+        | "active"
+        | "graduated"
+        | "transferred"
+        | "withdrawn"
+        | "expelled"
+        | "archived"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -2192,6 +2294,14 @@ export const Constants = {
         "yearly",
       ],
       semester_type: ["semester1", "semester2"],
+      student_status: [
+        "active",
+        "graduated",
+        "transferred",
+        "withdrawn",
+        "expelled",
+        "archived",
+      ],
     },
   },
 } as const
