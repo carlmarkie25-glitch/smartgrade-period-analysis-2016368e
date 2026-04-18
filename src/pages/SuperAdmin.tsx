@@ -13,10 +13,11 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { impersonation } from "@/lib/impersonation";
-import { Eye, ShieldAlert, ShieldCheck, Search, FileText, BarChart3 } from "lucide-react";
+import { Eye, ShieldAlert, ShieldCheck, Search, FileText, BarChart3, Megaphone } from "lucide-react";
 import { SchoolDetailDrawer } from "@/components/SchoolDetailDrawer";
 import { PlatformMetrics } from "@/components/superadmin/PlatformMetrics";
 import { AuditLogTab } from "@/components/superadmin/AuditLogTab";
+import { BroadcastTab } from "@/components/superadmin/BroadcastTab";
 
 type School = {
   id: string;
@@ -178,6 +179,7 @@ const SuperAdmin = () => {
           <TabsTrigger value="overview"><BarChart3 className="h-4 w-4 mr-1" /> Overview</TabsTrigger>
           <TabsTrigger value="schools">Schools</TabsTrigger>
           <TabsTrigger value="lockout">Lockouts</TabsTrigger>
+          <TabsTrigger value="broadcast"><Megaphone className="h-4 w-4 mr-1" /> Broadcast</TabsTrigger>
           <TabsTrigger value="audit">Audit log</TabsTrigger>
         </TabsList>
 
@@ -339,6 +341,11 @@ const SuperAdmin = () => {
               </Table>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        {/* BROADCAST */}
+        <TabsContent value="broadcast" className="space-y-4">
+          <BroadcastTab schools={(schools ?? []) as any} />
         </TabsContent>
 
         {/* AUDIT */}
