@@ -14,6 +14,24 @@ export const TrialBanner = () => {
     );
   }
 
+  if (status === "locked") {
+    return (
+      <div className="bg-destructive text-destructive-foreground px-4 py-2 text-sm flex items-center justify-between">
+        <span>Your account is locked (read-only). Pay your invoice to restore full access.</span>
+        <Link to="/settings/billing" className="underline font-medium">Manage billing</Link>
+      </div>
+    );
+  }
+
+  if (status === "past_due") {
+    return (
+      <div className="bg-destructive/10 border-b border-destructive/30 text-foreground px-4 py-2 text-sm flex items-center justify-between">
+        <span className="flex items-center gap-2"><Clock className="h-4 w-4 text-destructive" /> Payment is past due. Please update your billing to avoid being locked out.</span>
+        <Link to="/settings/billing" className="underline font-medium">Update billing</Link>
+      </div>
+    );
+  }
+
   if (status === "expired") {
     return (
       <div className="bg-destructive text-destructive-foreground px-4 py-2 text-sm flex items-center justify-between">

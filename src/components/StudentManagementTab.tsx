@@ -11,6 +11,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { Pencil, Trash2, UserPlus, Eye } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Switch } from "@/components/ui/switch";
 import { StudentBiodataDialog } from "./StudentBiodataDialog";
 import { BiodataForm, StudentForm } from "./StudentBiodataForm";
 
@@ -356,6 +357,24 @@ export const StudentManagementTab = () => {
     }
   };
 
+  const handleToggleActive = async (id: string, next: boolean) => {
+    try {
+      const { error } = await (supabase as any)
+        .from("students")
+        .update({ is_active: next })
+        .eq("id", id);
+      if (error) throw error;
+      toast({
+        title: next ? "Student activated" : "Student deactivated",
+        description: next ? "Counted in your billable seats." : "Excluded from billable seats.",
+      });
+      queryClient.invalidateQueries({ queryKey: ["students"] });
+      queryClient.invalidateQueries({ queryKey: ["billable-seats"] });
+    } catch (error: any) {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    }
+  };
+
   const handleDeleteStudent = async (id: string) => {
     if (!confirm("Are you sure you want to delete this student?")) return;
 
@@ -430,6 +449,7 @@ export const StudentManagementTab = () => {
                 <TableHead>Student ID</TableHead>
                 <TableHead>Class</TableHead>
                 <TableHead>Department</TableHead>
+                <TableHead>Active</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -450,6 +470,17 @@ export const StudentManagementTab = () => {
                   <TableCell>{student.student_id}</TableCell>
                   <TableCell>{student.classes?.name}</TableCell>
                   <TableCell>{student.departments?.name}</TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-2">
+                      <Switch
+                        checked={(student as any).is_active !== false}
+                        onCheckedChange={(v) => handleToggleActive(student.id, v)}
+                      />
+                      <span className="text-xs text-muted-foreground">
+                        {(student as any).is_active !== false ? "Billable" : "Inactive"}
+                      </span>
+                    </div>
+                  </TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-2">
                       <Button 
