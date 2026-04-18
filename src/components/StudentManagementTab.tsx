@@ -504,6 +504,14 @@ export const StudentManagementTab = () => {
                       <Button
                         variant="outline"
                         size="sm"
+                        onClick={() => setDepartingStudent({ id: student.id, full_name: (student as any).full_name })}
+                        title="Mark as departed"
+                      >
+                        <UserMinus className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
                         onClick={() => handleDeleteStudent(student.id)}
                         title="Delete Student"
                       >
@@ -511,6 +519,18 @@ export const StudentManagementTab = () => {
                       </Button>
                     </div>
                   </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        )}
+      </CardContent>
+
+      <MarkDepartedDialog
+        open={!!departingStudent}
+        onOpenChange={(o) => !o && setDepartingStudent(null)}
+        student={departingStudent}
+      />
                 </TableRow>
               ))}
             </TableBody>
