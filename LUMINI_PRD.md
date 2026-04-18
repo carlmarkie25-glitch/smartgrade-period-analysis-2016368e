@@ -1094,93 +1094,101 @@ Separate, role-gated section only accessible to `role = super_admin`.
 
 ## 14. Implementation Phase Tracker
 
-### ⏳ Phase 1: Database Architecture & Multi-Tenancy
-- [ ] Create all tables per Section 5.1 (schools, profiles, academic_years, classes, students, subjects, teaching_assignments, attendance, grades, fee_structures, fee_payments, messages, schedule_slots, audit_logs, billing_sync_logs, student_data_exports)
+> **Status legend:** ✅ done · 🟡 partial · ⏳ not started
+> Last reconciled with codebase: 2026-04-18
+
+### ✅ Phase 1: Database Architecture & Multi-Tenancy — *mostly complete*
+- [x] Create core tables (schools, profiles, academic_years, academic_periods, classes, students, subjects, departments, class_subjects, attendance_sessions, attendance_records, student_grades, student_period_totals, student_yearly_totals, fee_categories, fee_structures, fee_assignments, division_fee_rates, installment_plans, student_bills, student_bill_items, payments, student_payments, expenses, notifications, parent_student_assignments, sponsor_class_assignments, schedules, class_schedules, assessment_types, subscriptions)
 - [ ] Add retention columns to students table: departure_date, retention_expires_at (generated), export_reminded_at, archived_at, archive_summary
 - [ ] Create pg_cron jobs: 90-day warning, 30-day final warning, daily auto-archival (Section 8.4)
 - [ ] Create Transfer Pack Edge Function (Section 8.6)
-- [ ] Create `get_school_id()` and `get_user_role()` helper functions
-- [ ] Enable RLS on ALL tables
-- [ ] Write and test all RLS policies per Section 5.2
-- [ ] Create DB indexes: `school_id` on every table; `student_id` on grades/attendance/payments; `class_id` on students/attendance; `updated_at` on all tables (for delta sync)
-- [ ] Add `updated_at` trigger to all tables (auto-updates on row change — essential for delta sync)
+- [ ] Create `student_data_exports` + `audit_logs` + `billing_sync_logs` tables
+- [x] Create helper functions (`has_role`, `current_school_id`, `is_super_admin`, `can_manage_class_attendance`)
+- [x] Enable RLS on ALL tables
+- [x] Write and test RLS policies per role (admin, teacher, sponsor, parent, student)
+- [x] Create DB indexes on `school_id`, `student_id`, `class_id`
+- [x] `updated_at` columns on all relevant tables
 
-### ⏳ Phase 2: Offline-First Foundation
-- [ ] Install and configure Dexie.js with full local schema (Section 4.2)
-- [ ] Implement `pendingChanges` queue with INSERT/UPDATE/DELETE tracking
-- [ ] Build SyncEngine class (Section 4.4): push queue, pull delta, conflict resolution
-- [ ] Implement connectivity detection and auto-sync on reconnect
-- [ ] Implement offline auth token caching (7-day TTL)
-- [ ] Configure vite-plugin-pwa with Workbox (Section 4.7)
-- [ ] Create PWA manifest (icons, theme, standalone display)
-- [ ] Register service worker with NetworkFirst for API calls, CacheFirst for assets
-- [ ] Build `ConnectivityContext` and `SyncContext` providers
-- [ ] Build connectivity status bar component (🟢/🟡/🔴/⚠️)
-- [ ] Build `/app/sync-status` page (pending changes, errors, force sync button)
-- [ ] Test: full offline workflow — add student offline, reconnect, confirm sync to Supabase
+### 🟡 Phase 2: Offline-First Foundation — *foundation built, polish pending*
+- [x] Install and configure Dexie.js with local schema (`src/lib/offline/db.ts`)
+- [x] Implement `pendingChanges` queue with INSERT/UPDATE/DELETE tracking
+- [x] Build SyncEngine (`src/lib/offline/sync.ts`): push queue + pull delta
+- [x] Connectivity detection and auto-sync on reconnect
+- [x] Offline auth token caching (Supabase persistSession + localStorage)
+- [x] Configure vite-plugin-pwa with Workbox
+- [x] PWA manifest (icons, theme, standalone display) + `/install` page
+- [x] Register service worker (`src/lib/offline/registerSW.ts`)
+- [x] Connectivity status bar (`SyncStatusIndicator`)
+- [ ] Dedicated `/sync-status` page (pending changes, errors, force-sync button)
+- [ ] Conflict resolution UI for `_syncStatus: 'error'` records
+- [ ] End-to-end offline test: airplane mode → add student → reconnect → verify sync
 
-### ⏳ Phase 3: Auth & Onboarding
-- [ ] Set up Supabase Auth with email/password provider
-- [ ] Build 4-step registration wizard (Section 9) — mobile-first, one field per step on small screens
-- [ ] Server-side user creation flow (Edge Function with service role)
-- [ ] JWT metadata injection (`school_id`, `role`) on user creation
-- [ ] Seed IndexedDB on first login (pull school data for offline use)
-- [ ] Build `/login` page with error handling — works offline (shows cached state)
-- [ ] Email verification flow
-- [ ] Password reset flow
-- [ ] Create `SchoolContext`, `UserContext`, `BillingContext` providers
-- [ ] Subscription status guard on `/app` routes
+### ✅ Phase 3: Auth & Onboarding — *complete*
+- [x] Supabase Auth with email/password
+- [x] Registration wizard (`/signup` + `register-school` edge function)
+- [x] Server-side user/school creation (Edge Function with service role)
+- [x] Role assignment via `user_roles` table + `has_role()`
+- [x] `/auth` login page (works offline via cached session)
+- [x] Password reset flow
+- [x] Contexts: `AuthContext`, `SchoolContext`, `ThemeContext`
+- [x] Route guards: `ProtectedRoute`, `AdminRoute`, `TeacherRoute`
+- [ ] Seed IndexedDB on first login (full school snapshot)
+- [ ] Email verification enforcement banner
 
-### ⏳ Phase 4: Stripe Billing Integration
-- [ ] Create Stripe Products and annual Prices: $0.50 / $1.00 / $2.00 per student per year
-- [ ] Build Stripe Checkout session flow (initial subscription creation)
-- [ ] Build Stripe webhook handler Edge Function (all events in Section 7)
-- [ ] Build annual renewal CRON job (updates Stripe quantity 30 days before renewal)
-- [ ] Build mid-year upgrade flow (immediate prorated charge)
-- [ ] Build downgrade scheduling (flag for next renewal)
-- [ ] Integrate Stripe Customer Portal link in `/app/settings/billing`
-- [ ] Build trial countdown banner
-- [ ] Build renewal reminder banner (expected amount, 30 days before)
-- [ ] Build payment failure banner + grace period countdown (14-day window)
-- [ ] Build `/billing-issue` and `/trial-expired` pages
-- [ ] Ensure locked/suspended accounts still open app shell and show local data read-only
-- [ ] Send all email notifications via Resend (Section 10 templates)
+### ✅ Phase 4: Billing Integration — *complete (Paddle, not Stripe)*
+> **Note:** Implemented with **Paddle** instead of Stripe. Pricing model = per-student/year as in the PRD.
+- [x] Per-seat pricing tiers ($0.799 / $1.299 / $2.00 per student/year)
+- [x] Paddle checkout flow (`get-paddle-price`, `change-subscription`)
+- [x] Paddle webhook handler (`payments-webhook`)
+- [x] Seat sync job (`sync-subscription-seats`)
+- [x] Customer portal link (`customer-portal-session`)
+- [x] Trial countdown banner (`TrialBanner`)
+- [x] Payment test-mode banner (`PaymentTestModeBanner`)
+- [x] Lockout state machine (`schools.lockout_state`, `lockout_started_at`)
+- [x] `LockedFeatureBanner` + `SubscriptionGate`
+- [x] `/settings/billing` page
+- [ ] Renewal reminder banner (30 days before)
+- [ ] Resend transactional emails (Section 11 templates) — none wired yet
 
-### ⏳ Phase 5: Core App Modules (Mobile-First)
-- [ ] App shell layout — **bottom tab bar on mobile**, collapsible sidebar on desktop
-- [ ] Dashboard page (quick stats: student count, pending sync, billing status)
-- [ ] Student management (list, add, edit, profile, status change) — all offline-capable
-- [ ] Class management — offline-capable
-- [ ] Teacher/staff management (invite, assign classes, set role) — offline-capable
-- [ ] Gradebook module — offline-capable (teachers enter grades offline, sync later)
-- [ ] Attendance module [Premium] — offline-capable (mark whole class in one tap)
-- [ ] Finance module [Premium] — offline-capable (record cash payments offline)
-- [ ] Messaging module [Premium] — queued sending (messages queued offline, sent on reconnect)
-- [ ] Schedule/timetable [Premium] — offline-capable (view always, edit synced)
-- [ ] Academic calendar [Premium] — offline-capable
-- [ ] Analytics / Reports — cached locally, refreshes on sync
-- [ ] `useFeatureAccess` hook + `LockedFeatureBanner` component
-- [ ] Image upload with client-side resize to WebP before upload (max 400×400px)
+### ✅ Phase 5: Core App Modules — *complete*
+- [x] App shell + responsive sidebar (`AppShell`, `AppSidebar`)
+- [x] Dashboard with stats, charts, schedule, activity
+- [x] Student management (biodata, dialog, photo upload, panel)
+- [x] Class / Department / Subject / Academic Year / Academic Period management
+- [x] Teacher panel + assignments + sponsor assignments
+- [x] Parent panel + parent-child linking + parent portal
+- [x] Student portal (grades, attendance, fees view)
+- [x] Gradebook + Reports + Report preview/dialog
+- [x] Analytics (class performance, demographics, pass/fail, trends)
+- [x] Attendance module
+- [x] Finance: Fees, Payments, Expenses, Finance Reports, Receipts
+- [x] Notifications (in-app, role-targeted, real-time)
+- [x] Schedule + Academic Calendar
+- [x] School settings + theme toggle
+- [x] `useFeatureAccess` hook + `LockedFeatureBanner`
+- [x] Student photo upload (edge function `update-student-photo`)
+- [ ] Client-side WebP resize before upload (≤400×400)
+- [ ] Messaging module (in/out conversations) — only one-way notifications today
 
-### ⏳ Phase 6: Super Admin Panel
+### ⏳ Phase 6: Super Admin Panel — *not started*
 - [ ] Super admin route group with role guard
 - [ ] Schools overview table (all schools, status, tier, student count)
 - [ ] Manual subscription status override
 - [ ] Global billing metrics dashboard
 - [ ] Impersonation feature (logged to audit_logs)
 
-### ⏳ Phase 7: Polish, Testing & Deployment
-- [ ] PWA install prompt (custom "Add to Home Screen" prompt on Android/iOS)
-- [ ] Mobile responsive audit of all pages (test on 360px, 390px, 414px widths)
-- [ ] Offline scenario testing: airplane mode → use all features → reconnect → verify sync
-- [ ] Full RLS security audit (test with multiple school accounts)
-- [ ] End-to-end Stripe billing lifecycle test (trial → active → past_due → locked → reactivation)
-- [ ] Bandwidth test: measure full app sync on simulated 2G (50kbps) connection
+### ⏳ Phase 7: Polish, Testing & Deployment — *not started*
+- [ ] Custom PWA install prompt
+- [ ] Mobile responsive audit (360 / 390 / 414 px)
+- [ ] Offline scenario testing
+- [ ] Full RLS security audit (cross-school isolation tests)
+- [ ] End-to-end Paddle billing lifecycle test
+- [ ] Bandwidth test on 2G (~50 kbps)
 - [ ] Sentry integration (frontend + Edge Functions)
-- [ ] Performance: bundle size audit (target <200KB gzipped app shell)
-- [ ] Accessibility audit (WCAG 2.1 AA minimum; large touch targets)
-- [ ] Vercel deployment with proper env vars
-- [ ] Load test with simulated 50-school concurrent usage
+- [ ] Bundle size audit (<200 KB gzipped shell)
+- [ ] Accessibility audit (WCAG 2.1 AA)
+- [ ] Production deployment + env-var hardening
+- [ ] Load test (50 concurrent schools)
 
 ---
 
