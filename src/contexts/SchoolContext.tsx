@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { impersonation } from "@/lib/impersonation";
 
 export interface School {
   id: string;
@@ -39,14 +40,20 @@ export const SchoolProvider = ({ children }: { children: React.ReactNode }) => {
       return;
     }
     setLoading(true);
-    // RLS limits this to the user's own school
-    const { data } = await supabase.from("schools").select("*").limit(1).maybeSingle();
+    const imp = impersonation.get();
+    let query = supabase.from("schools").select("*");
+    if (imp) query = query.eq("id", imp.id);
+    else query = query.limit(1);
+    const { data } = await query.maybeSingle();
     setSchool((data as any) ?? null);
     setLoading(false);
   };
 
   useEffect(() => {
     load();
+    const onChange = () => load();
+    window.addEventListener("impersonation-changed", onChange);
+    return () => window.removeEventListener("impersonation-changed", onChange);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.id]);
 
