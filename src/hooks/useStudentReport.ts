@@ -29,6 +29,7 @@ export const useStudentReport = (studentId: string, period: string) => {
           classes (
             id,
             name,
+            grading_mode,
             departments:department_id (
               id,
               name
