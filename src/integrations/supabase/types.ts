@@ -995,10 +995,14 @@ export type Database = {
       schools: {
         Row: {
           address: string | null
+          billable_student_count: number
           country: string | null
           created_at: string
           email: string | null
           id: string
+          last_billing_snapshot_at: string | null
+          lockout_started_at: string | null
+          lockout_state: string
           logo_url: string | null
           max_students: number
           name: string
@@ -1010,16 +1014,21 @@ export type Database = {
           stripe_subscription_id: string | null
           subscription_plan: string
           subscription_status: string
+          subscription_tier: string
           trial_ends_at: string | null
           updated_at: string
           website: string | null
         }
         Insert: {
           address?: string | null
+          billable_student_count?: number
           country?: string | null
           created_at?: string
           email?: string | null
           id?: string
+          last_billing_snapshot_at?: string | null
+          lockout_started_at?: string | null
+          lockout_state?: string
           logo_url?: string | null
           max_students?: number
           name: string
@@ -1031,16 +1040,21 @@ export type Database = {
           stripe_subscription_id?: string | null
           subscription_plan?: string
           subscription_status?: string
+          subscription_tier?: string
           trial_ends_at?: string | null
           updated_at?: string
           website?: string | null
         }
         Update: {
           address?: string | null
+          billable_student_count?: number
           country?: string | null
           created_at?: string
           email?: string | null
           id?: string
+          last_billing_snapshot_at?: string | null
+          lockout_started_at?: string | null
+          lockout_state?: string
           logo_url?: string | null
           max_students?: number
           name?: string
@@ -1052,6 +1066,7 @@ export type Database = {
           stripe_subscription_id?: string | null
           subscription_plan?: string
           subscription_status?: string
+          subscription_tier?: string
           trial_ends_at?: string | null
           updated_at?: string
           website?: string | null
@@ -1555,6 +1570,7 @@ export type Database = {
           gender: string | null
           health_issues: string | null
           id: string
+          is_active: boolean
           mother_contact: string | null
           mother_name: string | null
           nationality: string | null
@@ -1587,6 +1603,7 @@ export type Database = {
           gender?: string | null
           health_issues?: string | null
           id?: string
+          is_active?: boolean
           mother_contact?: string | null
           mother_name?: string | null
           nationality?: string | null
@@ -1619,6 +1636,7 @@ export type Database = {
           gender?: string | null
           health_issues?: string | null
           id?: string
+          is_active?: boolean
           mother_contact?: string | null
           mother_name?: string | null
           nationality?: string | null
@@ -1842,6 +1860,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      count_active_students: { Args: { p_school_id: string }; Returns: number }
       current_school_id: { Args: never; Returns: string }
       expire_stale_subscription_for_user: {
         Args: { p_user_id: string }
@@ -1852,6 +1871,7 @@ export type Database = {
         Args: { p_student_id: string }
         Returns: undefined
       }
+      get_billable_seats: { Args: { p_school_id: string }; Returns: number }
       get_student_period_ranks: {
         Args: {
           p_periods: Database["public"]["Enums"]["period_type"][]
