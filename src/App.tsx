@@ -11,6 +11,7 @@ import { AdminRoute } from "@/components/AdminRoute";
 import { TeacherRoute } from "@/components/TeacherRoute";
 import { SuperAdminRoute } from "@/components/SuperAdminRoute";
 import { ImpersonationBanner } from "@/components/ImpersonationBanner";
+import { PWAInstallPrompt } from "@/components/PWAInstallPrompt";
 import Index from "./pages/Index";
 import Landing from "./pages/Landing";
 import Signup from "./pages/Signup";
@@ -55,6 +56,7 @@ const App = () => (
           <AuthProvider>
             <SchoolProvider>
             <ImpersonationBanner />
+            <PWAInstallPrompt />
             <Routes>
             <Route path="/" element={<Landing />} />
             <Route path="/install" element={<Install />} />

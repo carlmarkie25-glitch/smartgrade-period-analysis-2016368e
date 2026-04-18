@@ -19,7 +19,7 @@ const AppShell = ({ children, activeTab }: AppShellProps) => {
     <div className="min-h-screen" style={{ background: "linear-gradient(135deg, hsl(170, 25%, 95%) 0%, hsl(175, 20%, 96%) 50%, hsl(170, 25%, 95%) 100%)" }}>
       <Sidebar activeTab={activeTab} collapsed={collapsed} onToggle={() => setCollapsed(!collapsed)} />
       <Topbar userName={profileName} userRole="Staff" sidebarCollapsed={collapsed} />
-      <main className={`pt-[72px] pr-5 pb-5 transition-all duration-300 ${collapsed ? "pl-24" : "pl-60"}`}>
+      <main className={`pt-[72px] pb-5 px-3 md:pr-5 md:pb-5 transition-all duration-300 ${collapsed ? "md:pl-24" : "md:pl-60"}`}>
         <EmailVerificationBanner />
         <div className="max-w-[1400px] mx-auto">
           {children}

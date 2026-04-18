@@ -1178,8 +1178,8 @@ Separate, role-gated section only accessible to `role = super_admin`.
 - [x] Impersonation feature (logged to `audit_logs`)
 
 ### ⏳ Phase 7: Polish, Testing & Deployment — *not started*
-- [ ] Custom PWA install prompt
-- [ ] Mobile responsive audit (360 / 390 / 414 px)
+- [x] Custom PWA install prompt (`PWAInstallPrompt`, dismissible 14d)
+- [x] Mobile responsive audit (AppShell mobile padding fixed)
 - [ ] Offline scenario testing
 - [ ] Full RLS security audit (cross-school isolation tests)
 - [ ] End-to-end Paddle billing lifecycle test
