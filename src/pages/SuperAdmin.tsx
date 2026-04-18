@@ -16,6 +16,7 @@ import { impersonation } from "@/lib/impersonation";
 import { Eye, ShieldAlert, ShieldCheck, Search, FileText, BarChart3 } from "lucide-react";
 import { SchoolDetailDrawer } from "@/components/SchoolDetailDrawer";
 import { PlatformMetrics } from "@/components/superadmin/PlatformMetrics";
+import { AuditLogTab } from "@/components/superadmin/AuditLogTab";
 
 type School = {
   id: string;
@@ -91,18 +92,7 @@ const SuperAdmin = () => {
     );
   }, [schools, search]);
 
-  const { data: auditLogs } = useQuery({
-    queryKey: ["super-admin-audit"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("audit_logs")
-        .select("*")
-        .order("created_at", { ascending: false })
-        .limit(200);
-      if (error) throw error;
-      return (data ?? []) as AuditLog[];
-    },
-  });
+  // Audit logs are managed inside <AuditLogTab />
 
   const setLockout = async (s: School, state: "none" | "soft" | "hard") => {
     const { error } = await supabase
@@ -353,60 +343,7 @@ const SuperAdmin = () => {
 
         {/* AUDIT */}
         <TabsContent value="audit" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Audit log (last 200 across all schools)</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>When</TableHead>
-                      <TableHead>School</TableHead>
-                      <TableHead>Action</TableHead>
-                      <TableHead>Entity</TableHead>
-                      <TableHead>Actor</TableHead>
-                      <TableHead>Metadata</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {(auditLogs ?? []).map((l) => {
-                      const sch = schools?.find((s) => s.id === l.school_id);
-                      return (
-                        <TableRow key={l.id}>
-                          <TableCell className="whitespace-nowrap text-xs text-muted-foreground">
-                            {new Date(l.created_at).toLocaleString()}
-                          </TableCell>
-                          <TableCell className="text-sm">{sch?.name ?? "—"}</TableCell>
-                          <TableCell>
-                            <Badge variant="outline">{l.action}</Badge>
-                          </TableCell>
-                          <TableCell className="text-sm">
-                            {l.entity_type}
-                            {l.entity_id ? `:${l.entity_id.slice(0, 8)}` : ""}
-                          </TableCell>
-                          <TableCell className="text-xs text-muted-foreground">
-                            {l.actor_user_id?.slice(0, 8) ?? "—"}
-                          </TableCell>
-                          <TableCell className="text-xs max-w-md truncate font-mono">
-                            {l.metadata ? JSON.stringify(l.metadata) : ""}
-                          </TableCell>
-                        </TableRow>
-                      );
-                    })}
-                    {(auditLogs?.length ?? 0) === 0 && (
-                      <TableRow>
-                        <TableCell colSpan={6} className="text-center text-muted-foreground">
-                          No audit entries.
-                        </TableCell>
-                      </TableRow>
-                    )}
-                  </TableBody>
-                </Table>
-              </div>
-            </CardContent>
-          </Card>
+          <AuditLogTab schools={schools ?? []} />
         </TabsContent>
       </Tabs>
 
