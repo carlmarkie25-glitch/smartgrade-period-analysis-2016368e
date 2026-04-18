@@ -34,6 +34,7 @@ import Expenses from "./pages/Expenses";
 import FinanceReports from "./pages/FinanceReports";
 import Notifications from "./pages/Notifications";
 import SchoolSettings from "./pages/SchoolSettings";
+import Billing from "./pages/Billing";
 
 const queryClient = new QueryClient();
 
@@ -70,7 +71,7 @@ const App = () => (
             <Route path="/finance-reports" element={<AdminRoute><FinanceReports /></AdminRoute>} />
             <Route path="/notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
             <Route path="/settings/school" element={<AdminRoute><SchoolSettings /></AdminRoute>} />
-            <Route path="/settings/billing" element={<AdminRoute><SchoolSettings /></AdminRoute>} />
+            <Route path="/settings/billing" element={<AdminRoute><Billing /></AdminRoute>} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
             </Routes>
