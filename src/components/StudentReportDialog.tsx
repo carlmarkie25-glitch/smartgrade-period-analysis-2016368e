@@ -17,6 +17,7 @@ import {
   useSaveReportInputs,
 } from "@/hooks/useReportInputs";
 import { toast } from "@/hooks/use-toast";
+import { isKindergartenClass, scoreToLetter, KG_SCALE, type KgLetter } from "@/lib/kindergarten";
 
 const RATING_OPTIONS = ["Excellent", "Very Good", "Good", "Fair", "Needs Improvement"];
 
