@@ -13,11 +13,23 @@ import { generateTransferPack, downloadBlob } from "@/lib/transferPack";
 import { useToast } from "@/hooks/use-toast";
 import { useSchool } from "@/contexts/SchoolContext";
 
-const statusColor: Record<string, string> = {
-  graduated: "bg-emerald-500/10 text-emerald-600 border-emerald-500/30",
-  transferred: "bg-blue-500/10 text-blue-600 border-blue-500/30",
-  withdrawn: "bg-amber-500/10 text-amber-600 border-amber-500/30",
-  expelled: "bg-red-500/10 text-red-600 border-red-500/30",
+const statusConfig: Record<string, { color: string; icon: typeof GraduationCap; label: string }> = {
+  graduated: { color: "bg-emerald-500/10 text-emerald-600 border-emerald-500/30", icon: GraduationCap, label: "Graduated" },
+  transferred: { color: "bg-blue-500/10 text-blue-600 border-blue-500/30", icon: ArrowRightLeft, label: "Transferred" },
+  withdrawn: { color: "bg-amber-500/10 text-amber-600 border-amber-500/30", icon: LogOut, label: "Withdrawn" },
+  expelled: { color: "bg-red-500/10 text-red-600 border-red-500/30", icon: Ban, label: "Expelled" },
+};
+
+const StatusBadge = ({ status }: { status: string }) => {
+  const cfg = statusConfig[status];
+  if (!cfg) return <Badge variant="outline">{status}</Badge>;
+  const Icon = cfg.icon;
+  return (
+    <Badge variant="outline" className={`${cfg.color} gap-1`}>
+      <Icon className="h-3 w-3" />
+      {cfg.label}
+    </Badge>
+  );
 };
 
 const StudentLifecycle = () => {
