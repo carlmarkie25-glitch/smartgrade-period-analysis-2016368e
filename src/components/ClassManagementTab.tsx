@@ -302,6 +302,24 @@ export const ClassManagementTab = () => {
                   </SelectContent>
                 </Select>
               </div>
+              <div>
+                <Label htmlFor="grading_mode">Grading System</Label>
+                <Select
+                  value={newClass.grading_mode}
+                  onValueChange={(value: "numbers" | "letters") => setNewClass({ ...newClass, grading_mode: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="numbers">Numbers (Grades 1–12, K1, K2)</SelectItem>
+                    <SelectItem value="letters">Letters (Nursery, ABC — A+ to F)</SelectItem>
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Letters mode uses a single "Total Points" assessment and shows letter grades only on reports.
+                </p>
+              </div>
               <Button onClick={handleAddClass} className="w-full">
                 Add Class
               </Button>
