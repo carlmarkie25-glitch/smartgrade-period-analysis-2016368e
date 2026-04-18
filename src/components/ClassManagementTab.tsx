@@ -148,6 +148,7 @@ export const ClassManagementTab = () => {
         name: "",
         department_id: "",
         academic_year_id: "",
+        grading_mode: "numbers",
       });
     } catch (error: any) {
       toast({
@@ -181,6 +182,7 @@ export const ClassManagementTab = () => {
           name: editingClass.name,
           department_id: editingClass.department_id,
           academic_year_id: editingClass.academic_year_id,
+          grading_mode: editingClass.grading_mode,
         })
         .eq("id", editingClass.id);
       if (error) throw error;
@@ -378,6 +380,7 @@ export const ClassManagementTab = () => {
                             name: cls.name,
                             department_id: cls.department_id,
                             academic_year_id: cls.academic_year_id,
+                            grading_mode: ((cls as any).grading_mode === "letters" ? "letters" : "numbers"),
                           });
                           setIsEditDialogOpen(true);
                         }}
