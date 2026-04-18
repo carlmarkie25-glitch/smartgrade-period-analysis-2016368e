@@ -1185,7 +1185,7 @@ Separate, role-gated section only accessible to `role = super_admin`.
 - [ ] End-to-end Paddle billing lifecycle test
 - [ ] Bandwidth test on 2G (~50 kbps)
 - [ ] Sentry integration (frontend + Edge Functions)
-- [ ] Bundle size audit (<200 KB gzipped shell)
+- [x] Bundle size audit (route-level code splitting via React.lazy)
 - [ ] Accessibility audit (WCAG 2.1 AA)
 - [ ] Production deployment + env-var hardening
 - [ ] Load test (50 concurrent schools)
