@@ -248,6 +248,9 @@ const SuperAdmin = () => {
                               : "—"}
                           </TableCell>
                           <TableCell className="text-right space-x-2">
+                            <Button size="sm" variant="ghost" onClick={() => setViewing(s)}>
+                              <FileText className="h-3 w-3 mr-1" /> Details
+                            </Button>
                             <Button size="sm" variant="outline" onClick={() => impersonate(s)}>
                               <Eye className="h-3 w-3 mr-1" /> View as
                             </Button>
