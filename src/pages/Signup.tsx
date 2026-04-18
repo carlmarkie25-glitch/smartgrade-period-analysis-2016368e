@@ -44,7 +44,8 @@ export default function Signup() {
           plan,
         },
       });
-      if (error || (data as any)?.error) throw new Error((data as any)?.error || error?.message);
+      if (error) throw new Error(error.message);
+      if (!data?.ok) throw new Error(data?.error || "Signup failed. Please try again.");
 
       // Auto sign in
       const { error: signInErr } = await supabase.auth.signInWithPassword({
