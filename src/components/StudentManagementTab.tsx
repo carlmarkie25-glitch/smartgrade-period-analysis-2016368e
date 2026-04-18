@@ -8,12 +8,13 @@ import { useClasses } from "@/hooks/useClasses";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
-import { Pencil, Trash2, UserPlus, Eye } from "lucide-react";
+import { Pencil, Trash2, UserPlus, Eye, UserMinus } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Switch } from "@/components/ui/switch";
 import { StudentBiodataDialog } from "./StudentBiodataDialog";
 import { BiodataForm, StudentForm } from "./StudentBiodataForm";
+import { MarkDepartedDialog } from "./MarkDepartedDialog";
 
 const initialFormState: StudentForm = {
   full_name: "",
