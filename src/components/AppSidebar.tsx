@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { LayoutDashboard, BookOpen, FileText, BarChart3, Settings, LogOut, CalendarDays, Calendar, ClipboardList, ChevronDown, CreditCard } from "lucide-react";
+import { LayoutDashboard, BookOpen, FileText, BarChart3, Settings, LogOut, CalendarDays, Calendar, ClipboardList, ChevronDown, CreditCard, UserCheck } from "lucide-react";
 import logo from "@/assets/logo.png";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -29,7 +29,7 @@ const AppSidebar = () => {
   const isCollapsed = state === "collapsed";
 
   const isActive = (path: string) => location.pathname === path;
-  const isAcademicsActive = isActive("/gradebook") || isActive("/reports");
+  const isAcademicsActive = isActive("/gradebook") || isActive("/reports") || isActive("/attendance");
 
   const [academicsOpen, setAcademicsOpen] = useState(isAcademicsActive);
 
@@ -49,6 +49,7 @@ const AppSidebar = () => {
 
   const academicsItems = [
     { path: "/gradebook", icon: BookOpen, label: "Gradebook" },
+    { path: "/attendance", icon: UserCheck, label: "Attendance" },
     { path: "/reports", icon: FileText, label: "Reports" },
   ];
 

@@ -35,6 +35,7 @@ import FinanceReports from "./pages/FinanceReports";
 import Notifications from "./pages/Notifications";
 import SchoolSettings from "./pages/SchoolSettings";
 import Billing from "./pages/Billing";
+import Attendance from "./pages/Attendance";
 
 const queryClient = new QueryClient();
 
@@ -57,6 +58,7 @@ const App = () => (
             <Route path="/gradebook" element={<TeacherRoute><Gradebook /></TeacherRoute>} />
             <Route path="/reports" element={<TeacherRoute><Reports /></TeacherRoute>} />
             <Route path="/analytics" element={<TeacherRoute><Analytics /></TeacherRoute>} />
+            <Route path="/attendance" element={<TeacherRoute><Attendance /></TeacherRoute>} />
             <Route path="/classes" element={<AdminRoute><ClassesPage /></AdminRoute>} />
             <Route path="/subjects" element={<AdminRoute><SubjectsPage /></AdminRoute>} />
             <Route path="/departments" element={<AdminRoute><DepartmentsPage /></AdminRoute>} />
