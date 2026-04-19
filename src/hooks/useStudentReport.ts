@@ -437,6 +437,8 @@ export const useStudentReport = (studentId: string, period: string) => {
           period,
           isSemesterReport: false,
           hasIncomplete: hasMissingGrades || anySubjectIncomplete,
+          attendance,
+          classTeacherName,
         };
       }
 
