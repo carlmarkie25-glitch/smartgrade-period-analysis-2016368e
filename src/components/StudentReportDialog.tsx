@@ -696,7 +696,7 @@ export const StudentReportDialog = ({
                       );
                     })}
 
-                    {/* Aggregate row */}
+                    {/* Aggregate / Average rows */}
                     {isSemester && isYearly && (
                       <>
                         <tr>
@@ -737,6 +737,65 @@ export const StudentReportDialog = ({
                         </tr>
                       </>
                     )}
+
+                    {/* Aggregate / Average — single semester (S1 or S2) */}
+                    {isSemester && !isYearly && (() => {
+                      const cols = isSem1 ? ['p1','p2','p3','exam_s1'] : ['p4','p5','p6','exam_s2'];
+                      const periodAvgKeys = isSem1 ? ['p1','p2','p3'] : ['p4','p5','p6'];
+                      const semSum = subjects.reduce((a: number, s: any) => a + (computeSubjectSemAvg(s, periodAvgKeys) ?? 0), 0);
+                      const semAvg = isSem1 ? s1Avg : s2Avg;
+                      const aggStyle: React.CSSProperties = { ...tdBase, background: '#e8f0e8', fontWeight: 700, color: '#1a5226' };
+                      const avgStyle: React.CSSProperties = { ...tdBase, background: '#fff3cd', fontWeight: 700, color: '#7d5a00' };
+                      return (
+                        <>
+                          <tr>
+                            <td style={{ ...aggStyle, textAlign: 'left', paddingLeft: 8 }}>Aggregate</td>
+                            {cols.map((p) => {
+                              const isExam = p.startsWith('exam');
+                              return (
+                                <td key={p} style={isExam ? { ...aggStyle, background: lightBlue, color: '#fff' } : aggStyle}>
+                                  {computeColumnSum(subjects, p)}
+                                </td>
+                              );
+                            })}
+                            <td style={{ ...aggStyle, background: '#1a5276', color: '#fff' }}>{semSum}</td>
+                          </tr>
+                          <tr>
+                            <td style={{ ...avgStyle, textAlign: 'left', paddingLeft: 8 }}>Average</td>
+                            {cols.map((p) => {
+                              const isExam = p.startsWith('exam');
+                              return (
+                                <td key={p} style={isExam ? { ...avgStyle, background: lightBlue, color: '#fff' } : avgStyle}>
+                                  {computeColumnAvg(subjects, p)}
+                                </td>
+                              );
+                            })}
+                            <td style={{ ...avgStyle, background: '#1a5276', color: '#fff' }}>{semAvg ?? '--'}</td>
+                          </tr>
+                        </>
+                      );
+                    })()}
+
+                    {/* Aggregate / Average — single period view */}
+                    {!isSemester && subjects.length > 0 && (() => {
+                      const aggStyle: React.CSSProperties = { ...tdBase, background: '#e8f0e8', fontWeight: 700, color: '#1a5226' };
+                      const avgStyle: React.CSSProperties = { ...tdBase, background: '#fff3cd', fontWeight: 700, color: '#7d5a00' };
+                      const totalSum = subjects.reduce((a: number, s: any) => a + (s.noGrades || s.hasIncomplete ? 0 : (s.total ?? 0)), 0);
+                      const validSubjects = subjects.filter((s: any) => !s.noGrades && !s.hasIncomplete);
+                      const avg = validSubjects.length > 0 ? Math.round(totalSum / validSubjects.length) : 0;
+                      return (
+                        <>
+                          <tr>
+                            <td style={{ ...aggStyle, textAlign: 'left', paddingLeft: 8 }}>Aggregate</td>
+                            <td style={aggStyle}>{totalSum}</td>
+                          </tr>
+                          <tr>
+                            <td style={{ ...avgStyle, textAlign: 'left', paddingLeft: 8 }}>Average</td>
+                            <td style={avgStyle}>{avg}</td>
+                          </tr>
+                        </>
+                      );
+                    })()}
                   </tbody>
                 </table>
 
