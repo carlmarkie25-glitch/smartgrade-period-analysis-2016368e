@@ -327,6 +327,8 @@ export const useStudentReport = (studentId: string, period: string) => {
           period,
           isSemesterReport: true,
           hasIncomplete: hasMissingGrades || anySubjectIncomplete,
+          attendance,
+          classTeacherName,
         };
       } else {
         // Original logic for individual period reports
