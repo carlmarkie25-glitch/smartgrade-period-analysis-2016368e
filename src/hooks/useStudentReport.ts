@@ -398,8 +398,12 @@ export const useStudentReport = (studentId: string, period: string) => {
             };
           }
           const isIncomplete = isAggregateIncomplete(s.total, s.max, s.hasMissing);
+          // Normalize total to a 0-100 scale so all divisions follow the same
+          // elementary <60 rule regardless of differing assessment max totals.
+          const normalizedTotal = s.max > 0 ? Math.round((s.total / s.max) * 100) : 0;
           return {
             ...s,
+            total: normalizedTotal,
             hasIncomplete: isIncomplete,
             noGrades: false,
           };
