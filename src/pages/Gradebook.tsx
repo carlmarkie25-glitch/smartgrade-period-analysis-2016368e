@@ -355,17 +355,30 @@ const Gradebook = () => {
 
                           const isTotalIncomplete = hasAnyMissing || totalPercent < 60;
 
+                          // Student is blocked from submission if any entered grade is below 60.
+                          const hasFailingGrade = (assessmentTypes ?? []).some((at) => {
+                            const v = studentEditedGrades[at.id];
+                            return typeof v === "number" && v < 60;
+                          });
+
                           return (
-                            <TableRow key={student.id}>
-                              <TableCell className="font-medium">{student.full_name}</TableCell>
+                            <TableRow
+                              key={student.id}
+                              className={hasFailingGrade ? "bg-destructive/10 hover:bg-destructive/15" : ""}
+                            >
+                              <TableCell className={`font-medium ${hasFailingGrade ? "text-destructive" : ""}`}>
+                                {student.full_name}
+                                {hasFailingGrade && (
+                                  <span className="ml-2 text-xs font-semibold uppercase">
+                                    • Below 60 — not submitted
+                                  </span>
+                                )}
+                              </TableCell>
                               {assessmentTypes?.map((at) => {
                                 const currentValue = studentEditedGrades[at.id];
                                 const isIncomplete = currentValue === null || currentValue === undefined;
-                                const isRedGrade =
-                                  currentValue !== null &&
-                                  currentValue !== undefined &&
-                                  currentValue >= 60 &&
-                                  currentValue <= 69;
+                                const isFailing =
+                                  typeof currentValue === "number" && currentValue < 60;
                                 return (
                                   <TableCell key={at.id} className="text-center">
                                     {isLocked ? (
@@ -373,8 +386,8 @@ const Gradebook = () => {
                                         className={
                                           isIncomplete
                                             ? "text-orange-500 font-bold"
-                                            : isRedGrade
-                                              ? "text-red-500 font-semibold"
+                                            : isFailing
+                                              ? "text-destructive font-bold"
                                               : "text-muted-foreground"
                                         }
                                       >
@@ -390,12 +403,12 @@ const Gradebook = () => {
                                           handleGradeChange(student.id, at.id, e.target.value)
                                         }
                                         className={`w-20 text-center mx-auto ${
-                                          isIncomplete &&
-                                          currentValue !== null &&
-                                          currentValue !== undefined
-                                            ? "text-orange-500 font-bold border-orange-300"
-                                            : isRedGrade
-                                              ? "text-red-500 font-semibold"
+                                          isFailing
+                                            ? "text-destructive font-bold border-destructive"
+                                            : isIncomplete &&
+                                                currentValue !== null &&
+                                                currentValue !== undefined
+                                              ? "text-orange-500 font-bold border-orange-300"
                                               : ""
                                         }`}
                                         placeholder=""
@@ -419,7 +432,11 @@ const Gradebook = () => {
                                 );
                               })}
                               <TableCell className="text-center font-bold">
-                                {isTotalIncomplete ? (
+                                {hasFailingGrade ? (
+                                  <span className="text-destructive">
+                                    {totalScore > 0 ? totalScore.toFixed(0) : "-"}
+                                  </span>
+                                ) : isTotalIncomplete ? (
                                   <span className="text-orange-500">I</span>
                                 ) : (
                                   <span className="text-primary">
