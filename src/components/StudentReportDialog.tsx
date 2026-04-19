@@ -138,6 +138,9 @@ export const StudentReportDialog = ({
   const { data: savedInputs } = useReportInputs(studentId, period);
   const canEdit = useCanEditReportInputs(studentId);
   const saveMutation = useSaveReportInputs(studentId, period);
+  const { school } = useSchool();
+  const { data: rcSettingsData } = useReportCardSettings();
+  const rcSettings = rcSettingsData ?? DEFAULT_REPORT_CARD_SETTINGS;
 
   const [editing, setEditing] = useState(false);
   const [inputs, setInputs] = useState<ReportInputs>({});
