@@ -286,7 +286,7 @@ const Gradebook = () => {
               </CardTitle>
               <CardDescription>
                 {assessmentTypes && assessmentTypes.length > 0 
-                  ? `Assessment breakdown: ${assessmentTypes.map(at => `${at.name} (${at.max_points})`).join(', ')}. Empty fields show as "I" (Incomplete). Totals under 60% show as "I".`
+                  ? `Assessment breakdown: ${assessmentTypes.map(at => `${at.name} (${at.max_points})`).join(', ')}. Grades below 60 are NOT submitted — students with any failing grade will have their entire row flagged red and their grades withheld from the report card.`
                   : 'No assessment types configured'
                 }
                 {isKg && (
