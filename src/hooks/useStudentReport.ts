@@ -30,6 +30,7 @@ export const useStudentReport = (studentId: string, period: string) => {
             id,
             name,
             grading_mode,
+            teacher_id,
             departments:department_id (
               id,
               name
