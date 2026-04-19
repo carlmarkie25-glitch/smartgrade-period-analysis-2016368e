@@ -494,43 +494,67 @@ export const StudentReportDialog = ({
               }}>
 
                 {/* ── HEADER ── */}
-                <div style={{ background: navy, color: '#fff', display: 'flex', alignItems: 'center', padding: '10px 14px', gap: '14px' }}>
-                  <div style={{
-                    width: 52, height: 52, borderRadius: '50%', background: '#fff',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    fontWeight: 700, fontSize: '9px', color: navy, textAlign: 'center', lineHeight: 1.2,
-                    border: `2px solid ${gold}`, flexShrink: 0,
-                  }}>
-                    SCHOOL<br />LOGO
-                  </div>
-                  <div style={{ flex: 1 }}>
-                    <h1 style={{ fontSize: '18px', fontWeight: 700, color: '#fff', margin: 0 }}>
-                      SCHOOL NAME HERE
-                    </h1>
-                    <p style={{ fontSize: '11px', color: '#ccd', margin: 0 }}>
-                      Address Line, City, Country | Contact: (000) 000-0000
-                    </p>
-                    <p style={{ fontSize: '11px', color: '#ccd', margin: 0 }}>
-                      www.school.edu | info@school.edu
-                    </p>
-                  </div>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                    <div style={{
-                      background: gold, color: '#fff', textAlign: 'center', padding: '4px 10px',
-                      fontSize: '10px', fontWeight: 700, borderRadius: '3px', minWidth: '80px'
-                    }}>
-                      <small style={{ display: 'block', fontSize: '8px', fontWeight: 400, opacity: 0.85, letterSpacing: '0.5px' }}>REPORT TYPE</small>
-                      {getDepartmentLabel().toUpperCase()}
+                {(() => {
+                  const headerTitle = rcSettings.header_title || school?.name || 'School Name';
+                  const headerAddress = rcSettings.header_address || school?.address || '';
+                  const headerContact = rcSettings.header_contact || [school?.phone, school?.email].filter(Boolean).join(' • ');
+                  const headerWebsite = rcSettings.header_website || school?.website || '';
+                  const logo = rcSettings.logo_url || school?.logo_url || null;
+                  return (
+                    <div style={{ background: navy, color: '#fff', display: 'flex', alignItems: 'center', padding: '10px 14px', gap: '14px' }}>
+                      {logo ? (
+                        <img
+                          src={logo}
+                          alt="School logo"
+                          style={{ width: 52, height: 52, borderRadius: '50%', objectFit: 'cover', border: `2px solid ${gold}`, background: '#fff', flexShrink: 0 }}
+                        />
+                      ) : (
+                        <div style={{
+                          width: 52, height: 52, borderRadius: '50%', background: '#fff',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          fontWeight: 700, fontSize: '9px', color: navy, textAlign: 'center', lineHeight: 1.2,
+                          border: `2px solid ${gold}`, flexShrink: 0,
+                        }}>
+                          SCHOOL<br />LOGO
+                        </div>
+                      )}
+                      <div style={{ flex: 1 }}>
+                        <h1 style={{ fontSize: '18px', fontWeight: 700, color: '#fff', margin: 0 }}>
+                          {headerTitle.toUpperCase()}
+                        </h1>
+                        {rcSettings.header_subtitle && (
+                          <p style={{ fontSize: '10px', color: gold, margin: '2px 0 0', fontStyle: 'italic' }}>
+                            {rcSettings.header_subtitle}
+                          </p>
+                        )}
+                        {headerAddress && (
+                          <p style={{ fontSize: '11px', color: '#ccd', margin: 0 }}>
+                            {headerAddress}{headerContact ? ` | ${headerContact}` : ''}
+                          </p>
+                        )}
+                        {headerWebsite && (
+                          <p style={{ fontSize: '11px', color: '#ccd', margin: 0 }}>{headerWebsite}</p>
+                        )}
+                      </div>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                        <div style={{
+                          background: gold, color: '#fff', textAlign: 'center', padding: '4px 10px',
+                          fontSize: '10px', fontWeight: 700, borderRadius: '3px', minWidth: '80px'
+                        }}>
+                          <small style={{ display: 'block', fontSize: '8px', fontWeight: 400, opacity: 0.85, letterSpacing: '0.5px' }}>REPORT TYPE</small>
+                          {getDepartmentLabel().toUpperCase()}
+                        </div>
+                        <div style={{
+                          background: gold, color: '#fff', textAlign: 'center', padding: '4px 10px',
+                          fontSize: '10px', fontWeight: 700, borderRadius: '3px', minWidth: '80px'
+                        }}>
+                          <small style={{ display: 'block', fontSize: '8px', fontWeight: 400, opacity: 0.85, letterSpacing: '0.5px' }}>SEMESTER</small>
+                          {getSemesterLabel()}
+                        </div>
+                      </div>
                     </div>
-                    <div style={{
-                      background: gold, color: '#fff', textAlign: 'center', padding: '4px 10px',
-                      fontSize: '10px', fontWeight: 700, borderRadius: '3px', minWidth: '80px'
-                    }}>
-                      <small style={{ display: 'block', fontSize: '8px', fontWeight: 400, opacity: 0.85, letterSpacing: '0.5px' }}>SEMESTER</small>
-                      {getSemesterLabel()}
-                    </div>
-                  </div>
-                </div>
+                  );
+                })()}
 
                 {/* ── TITLE BAR ── */}
                 <div style={{ background: navy, textAlign: 'center', padding: '8px', borderTop: `2px solid ${gold}` }}>
