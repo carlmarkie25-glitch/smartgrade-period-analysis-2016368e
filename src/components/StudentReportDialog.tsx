@@ -444,6 +444,19 @@ export const StudentReportDialog = ({
           // averages cannot be computed until all I's are settled.
           const colAvg = (k: string): number | null => {
             if (subjects.length === 0) return null;
+
+            // Non-semester report: subjects have flat { total, hasIncomplete, noGrades }
+            // (no `.periods` map). Fall back to the same logic as the single-period
+            // Aggregate/Average row so the General Average matches what's shown.
+            if (!isSemester && k === period) {
+              const anyInc = subjects.some((s: any) => s.noGrades || s.hasIncomplete);
+              if (anyInc) return null;
+              const valid = subjects.filter((s: any) => !s.noGrades && !s.hasIncomplete);
+              if (valid.length === 0) return null;
+              const sum = valid.reduce((a: number, s: any) => a + (s.total ?? 0), 0);
+              return Math.round(sum / valid.length);
+            }
+
             const anyIncomplete = subjects.some((s: any) => {
               const p = s.periods?.[k];
               return p && (p.isIncomplete || p.noGrades);
