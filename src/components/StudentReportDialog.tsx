@@ -865,6 +865,41 @@ export const StudentReportDialog = ({
                   </div>
                 </div>
 
+                {/* ── PROMOTION STATUS (yearly only) ── */}
+                {isYearly && (() => {
+                  const grade = generalAvg;
+                  const passed = grade !== null && grade >= 60 && !report.hasIncomplete;
+                  const className = report.student.classes?.name || 'next class';
+                  const nextClassMatch = className.match(/(\d+)/);
+                  const nextLabel = nextClassMatch
+                    ? className.replace(nextClassMatch[1], String(parseInt(nextClassMatch[1], 10) + 1))
+                    : 'Next Class';
+                  return (
+                    <>
+                      <div style={{ background: navy, color: '#fff', padding: '5px 10px', fontSize: '10px', fontWeight: 700, letterSpacing: '1px' }}>
+                        PROMOTION STATUS
+                      </div>
+                      <div style={{ padding: '10px 14px', borderTop: '0.5px solid #ccc' }}>
+                        <div style={{
+                          padding: '8px 12px',
+                          borderRadius: 4,
+                          border: `1px solid ${passed ? '#16a34a' : '#dc2626'}`,
+                          background: passed ? '#e8f5e8' : '#fde8e8',
+                          color: passed ? '#15803d' : '#991b1b',
+                          fontWeight: 700,
+                          fontSize: '12px',
+                        }}>
+                          {report.hasIncomplete
+                            ? '⚠ Promotion pending — incomplete grades on record'
+                            : passed
+                              ? `✓ Promoted to ${nextLabel}`
+                              : `✗ Not promoted — must repeat ${className}`}
+                        </div>
+                      </div>
+                    </>
+                  );
+                })()}
+
                 {/* ── SEMESTER AVERAGES ── */}
                 <div style={{ background: navy, color: '#fff', padding: '5px 10px', fontSize: '10px', fontWeight: 700, letterSpacing: '1px' }}>
                   SEMESTER AVERAGES
