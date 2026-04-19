@@ -90,7 +90,8 @@ const Gradebook = () => {
     // Clamp value between 0 and maxScore
     const clampedValue = Math.min(Math.max(0, numValue), maxScore);
     
-    // If grade is below 60, it will be saved but marked as incomplete on reports
+    // Grades below 60 are still tracked in the UI (so the row can flag red and
+    // the total displays), but they will NOT be submitted to the database.
     setEditedGrades(prev => ({
       ...prev,
       [studentId]: {
