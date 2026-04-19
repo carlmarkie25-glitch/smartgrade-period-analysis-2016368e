@@ -439,9 +439,18 @@ export const StudentReportDialog = ({
             if (xs.length === 0) return null;
             return Math.round(xs.reduce((a, b) => a + b, 0) / xs.length);
           };
-          const colAvg = (k: string) => (subjects.length > 0 ? computeColumnAvg(subjects, k) : null);
+          // Returns null when no subject has any score for that period (so it's skipped in averages)
+          const colAvg = (k: string): number | null => {
+            if (subjects.length === 0) return null;
+            const hasAny = subjects.some((s: any) => {
+              const p = s.periods?.[k];
+              return p && p.score !== null && p.score !== undefined && p.max > 0;
+            });
+            if (!hasAny) return null;
+            return computeColumnAvg(subjects, k);
+          };
 
-          // Semester averages include the exam (4 columns averaged equally)
+          // Semester averages include the exam (4 columns averaged equally) — only over available periods
           const s1Avg = avgOf([colAvg('p1'), colAvg('p2'), colAvg('p3'), colAvg('exam_s1')]);
           const s2Avg = avgOf([colAvg('p4'), colAvg('p5'), colAvg('p6'), colAvg('exam_s2')]);
 
