@@ -176,6 +176,63 @@ export const ClassManagementTab = () => {
   const handleEditClass = async () => {
     if (!editingClass) return;
     try {
+      // Detect "structural" changes that invalidate existing grades:
+      // - department change → assessment types differ (KG vs Junior High vs Senior High)
+      // - grading mode change → numeric vs letter scale
+      const original = classes?.find((c: any) => c.id === editingClass.id);
+      const deptChanged = !!original && original.department_id !== editingClass.department_id;
+      const modeChanged = !!original && (original as any).grading_mode !== editingClass.grading_mode;
+
+      if (deptChanged || modeChanged) {
+        const what = deptChanged && modeChanged
+          ? "department and grading mode"
+          : deptChanged ? "department" : "grading mode";
+        const ok = confirm(
+          `Changing the ${what} for this class will permanently DELETE all existing ` +
+          `grades, period totals, and subject assignments for this class so the ` +
+          `gradebook can restart cleanly with the new assessment structure.\n\n` +
+          `This cannot be undone. Continue?`
+        );
+        if (!ok) return;
+
+        // Find class_subject ids for this class so we can wipe their grades.
+        const { data: csRows, error: csErr } = await supabase
+          .from("class_subjects")
+          .select("id")
+          .eq("class_id", editingClass.id);
+        if (csErr) throw csErr;
+        const csIds = (csRows ?? []).map((r: any) => r.id);
+
+        if (csIds.length > 0) {
+          // Wipe grades + cached totals tied to those class_subjects, then
+          // remove the class_subjects so admin re-adds them under the new
+          // department's assessment scheme.
+          const { error: gErr } = await supabase
+            .from("student_grades")
+            .delete()
+            .in("class_subject_id", csIds);
+          if (gErr) throw gErr;
+
+          const { error: ptErr } = await supabase
+            .from("student_period_totals")
+            .delete()
+            .in("class_subject_id", csIds);
+          if (ptErr) throw ptErr;
+
+          const { error: ytErr } = await supabase
+            .from("student_yearly_totals")
+            .delete()
+            .in("class_subject_id", csIds);
+          if (ytErr) throw ytErr;
+
+          const { error: csDelErr } = await supabase
+            .from("class_subjects")
+            .delete()
+            .in("id", csIds);
+          if (csDelErr) throw csDelErr;
+        }
+      }
+
       const { error } = await supabase
         .from("classes")
         .update({
@@ -187,8 +244,17 @@ export const ClassManagementTab = () => {
         .eq("id", editingClass.id);
       if (error) throw error;
 
-      toast({ title: "Success", description: "Class updated successfully" });
+      toast({
+        title: "Success",
+        description: (deptChanged || modeChanged)
+          ? "Class updated. Old grades cleared — re-add subjects to start fresh."
+          : "Class updated successfully",
+      });
       queryClient.invalidateQueries({ queryKey: ["classes"] });
+      queryClient.invalidateQueries({ queryKey: ["class-subjects"] });
+      queryClient.invalidateQueries({ queryKey: ["grades"] });
+      queryClient.invalidateQueries({ queryKey: ["student-report"] });
+      queryClient.invalidateQueries({ queryKey: ["assessment-types"] });
       setIsEditDialogOpen(false);
       setEditingClass(null);
     } catch (error: any) {
