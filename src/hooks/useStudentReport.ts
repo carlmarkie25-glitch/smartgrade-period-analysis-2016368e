@@ -1,21 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-
-// Helper function to check if a score is missing (null/undefined)
-const isMissingScore = (score: number | null | undefined): boolean => {
-  return score === null || score === undefined;
-};
-
-// A subject-period is incomplete if any assessment is missing OR the overall percentage is below 60
-const isAggregateIncomplete = (
-  totalScore: number,
-  totalMax: number,
-  hasMissing: boolean
-): boolean => {
-  if (hasMissing) return true;
-  if (!totalMax || totalMax <= 0) return true;
-  return (totalScore / totalMax) * 100 < 60;
-};
+import { isAggregateIncomplete, isMissingGrade } from "@/lib/grading";
 
 export const useStudentReport = (studentId: string, period: string) => {
   return useQuery({
@@ -95,7 +80,7 @@ export const useStudentReport = (studentId: string, period: string) => {
       if (gradesError) throw gradesError;
 
       // Check if student has any missing grades
-      const hasMissingGrades = grades?.some((grade: any) => isMissingScore(grade.score)) || false;
+      const hasMissingGrades = grades?.some((grade: any) => isMissingGrade(grade.score)) || false;
 
       // Get period ranks from the new RPC (computes overall class rank for each period)
       const { data: periodRanks, error: periodRanksError } = await supabase
@@ -201,7 +186,7 @@ export const useStudentReport = (studentId: string, period: string) => {
           const subjectCode = grade.class_subjects?.subjects?.code || "N/A";
           const gradePeriod = grade.period;
           const scoreValue: number | null = grade.score;
-          const isMissing = isMissingScore(scoreValue);
+          const isMissing = isMissingGrade(scoreValue);
 
           let existing = subjectGrades.get(subjectName);
 
@@ -367,7 +352,7 @@ export const useStudentReport = (studentId: string, period: string) => {
           const subjectName = grade.class_subjects?.subjects?.name || "Unknown";
           const subjectCode = grade.class_subjects?.subjects?.code || "N/A";
           const scoreValue: number | null = grade.score;
-          const isMissing = isMissingScore(scoreValue);
+          const isMissing = isMissingGrade(scoreValue);
 
           let existing = subjectGrades.get(subjectName);
           const assessment = {
