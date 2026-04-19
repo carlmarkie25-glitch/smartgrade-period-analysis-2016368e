@@ -101,33 +101,67 @@ const Gradebook = () => {
     }));
   };
 
+  // A student is "blocked" from submission if any of their entered grades are below 60.
+  const studentHasFailingGrade = (studentId: string): boolean => {
+    const row = editedGrades[studentId] || {};
+    return (assessmentTypes ?? []).some((at) => {
+      const v = row[at.id];
+      return typeof v === "number" && v < 60;
+    });
+  };
+
   const handleSaveGrades = () => {
-    const gradesToSave = [];
+    const gradesToSave: any[] = [];
+    let blockedCount = 0;
+
     for (const studentId in editedGrades) {
+      // Skip the entire student if any of their grades are below 60.
+      if (studentHasFailingGrade(studentId)) {
+        blockedCount += 1;
+        continue;
+      }
       for (const assessmentTypeId in editedGrades[studentId]) {
-        const existingGrade = grades?.find(g => 
-          g.student_id === studentId && g.assessment_type_id === assessmentTypeId
-        );
         const maxScore = assessmentTypes?.find(at => at.id === assessmentTypeId)?.max_points || 0;
         const gradeValue = editedGrades[studentId][assessmentTypeId];
-        
-        // Skip if no change (existing null and still null without an id means student may not have a row yet)
-        // But we always send a row so students get their grade row created.
 
-        const gradeData: Record<string, unknown> = {
+        // Only submit valid grades (>= 60). Empty/null values are skipped so the
+        // report card flags them as Incomplete naturally.
+        if (typeof gradeValue !== "number" || gradeValue < 60) continue;
+
+        gradesToSave.push({
           student_id: studentId,
           class_subject_id: selectedSubject,
           assessment_type_id: assessmentTypeId,
           period: selectedPeriod,
-          // Store null for empty grades, actual value otherwise
           score: gradeValue,
           max_score: maxScore,
           is_locked: isLocked,
-        };
-        gradesToSave.push(gradeData);
+        });
       }
     }
-    saveGradesMutation.mutate(gradesToSave);
+
+    if (gradesToSave.length === 0) {
+      toast({
+        title: "Nothing to submit",
+        description:
+          blockedCount > 0
+            ? `${blockedCount} student(s) have grades below 60 and were not submitted.`
+            : "Enter grades of 60 or above to submit.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    saveGradesMutation.mutate(gradesToSave, {
+      onSuccess: () => {
+        if (blockedCount > 0) {
+          toast({
+            title: "Some students were skipped",
+            description: `${blockedCount} student(s) had grades below 60 and were not submitted. Their rows are flagged red.`,
+          });
+        }
+      },
+    });
   };
 
   return (
