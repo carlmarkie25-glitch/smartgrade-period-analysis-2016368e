@@ -11,10 +11,8 @@ import { useStudents } from "@/hooks/useStudents";
 import { useGrades, useAssessmentTypes, useSaveGrades } from "@/hooks/useGrades";
 import { Skeleton } from "@/components/ui/skeleton";
 import { isKindergartenClass, scoreToLetter, letterColorClass, KG_SCALE } from "@/lib/kindergarten";
-import { useToast } from "@/hooks/use-toast";
 
 const Gradebook = () => {
-  const { toast } = useToast();
   const [selectedClass, setSelectedClass] = useState<string>("");
   const [selectedSubject, setSelectedSubject] = useState<string>("");
   const [selectedPeriod, setSelectedPeriod] = useState<string>("p1");
@@ -92,8 +90,7 @@ const Gradebook = () => {
     // Clamp value between 0 and maxScore
     const clampedValue = Math.min(Math.max(0, numValue), maxScore);
     
-    // Grades below 60 are still tracked in the UI (so the row can flag red and
-    // the total displays), but they will NOT be submitted to the database.
+    // If grade is below 60, it will be saved but marked as incomplete on reports
     setEditedGrades(prev => ({
       ...prev,
       [studentId]: {
@@ -103,67 +100,33 @@ const Gradebook = () => {
     }));
   };
 
-  // A student is "blocked" from submission if any of their entered grades are below 60.
-  const studentHasFailingGrade = (studentId: string): boolean => {
-    const row = editedGrades[studentId] || {};
-    return (assessmentTypes ?? []).some((at) => {
-      const v = row[at.id];
-      return typeof v === "number" && v < 60;
-    });
-  };
-
   const handleSaveGrades = () => {
-    const gradesToSave: any[] = [];
-    let blockedCount = 0;
-
+    const gradesToSave = [];
     for (const studentId in editedGrades) {
-      // Skip the entire student if any of their grades are below 60.
-      if (studentHasFailingGrade(studentId)) {
-        blockedCount += 1;
-        continue;
-      }
       for (const assessmentTypeId in editedGrades[studentId]) {
+        const existingGrade = grades?.find(g => 
+          g.student_id === studentId && g.assessment_type_id === assessmentTypeId
+        );
         const maxScore = assessmentTypes?.find(at => at.id === assessmentTypeId)?.max_points || 0;
         const gradeValue = editedGrades[studentId][assessmentTypeId];
+        
+        // Skip if no change (existing null and still null without an id means student may not have a row yet)
+        // But we always send a row so students get their grade row created.
 
-        // Only submit valid grades (>= 60). Empty/null values are skipped so the
-        // report card flags them as Incomplete naturally.
-        if (typeof gradeValue !== "number" || gradeValue < 60) continue;
-
-        gradesToSave.push({
+        const gradeData: Record<string, unknown> = {
           student_id: studentId,
           class_subject_id: selectedSubject,
           assessment_type_id: assessmentTypeId,
           period: selectedPeriod,
+          // Store null for empty grades, actual value otherwise
           score: gradeValue,
           max_score: maxScore,
           is_locked: isLocked,
-        });
+        };
+        gradesToSave.push(gradeData);
       }
     }
-
-    if (gradesToSave.length === 0) {
-      toast({
-        title: "Nothing to submit",
-        description:
-          blockedCount > 0
-            ? `${blockedCount} student(s) have grades below 60 and were not submitted.`
-            : "Enter grades of 60 or above to submit.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    saveGradesMutation.mutate(gradesToSave, {
-      onSuccess: () => {
-        if (blockedCount > 0) {
-          toast({
-            title: "Some students were skipped",
-            description: `${blockedCount} student(s) had grades below 60 and were not submitted. Their rows are flagged red.`,
-          });
-        }
-      },
-    });
+    saveGradesMutation.mutate(gradesToSave);
   };
 
   return (
@@ -286,7 +249,7 @@ const Gradebook = () => {
               </CardTitle>
               <CardDescription>
                 {assessmentTypes && assessmentTypes.length > 0 
-                  ? `Assessment breakdown: ${assessmentTypes.map(at => `${at.name} (${at.max_points})`).join(', ')}. Grades below 60 are NOT submitted — students with any failing grade will have their entire row flagged red and their grades withheld from the report card.`
+                  ? `Assessment breakdown: ${assessmentTypes.map(at => `${at.name} (${at.max_points})`).join(', ')}. Empty fields show as "I" (Incomplete). Totals under 60% show as "I".`
                   : 'No assessment types configured'
                 }
                 {isKg && (
@@ -355,30 +318,17 @@ const Gradebook = () => {
 
                           const isTotalIncomplete = hasAnyMissing || totalPercent < 60;
 
-                          // Student is blocked from submission if any entered grade is below 60.
-                          const hasFailingGrade = (assessmentTypes ?? []).some((at) => {
-                            const v = studentEditedGrades[at.id];
-                            return typeof v === "number" && v < 60;
-                          });
-
                           return (
-                            <TableRow
-                              key={student.id}
-                              className={hasFailingGrade ? "bg-destructive/10 hover:bg-destructive/15" : ""}
-                            >
-                              <TableCell className={`font-medium ${hasFailingGrade ? "text-destructive" : ""}`}>
-                                {student.full_name}
-                                {hasFailingGrade && (
-                                  <span className="ml-2 text-xs font-semibold uppercase">
-                                    • Below 60 — not submitted
-                                  </span>
-                                )}
-                              </TableCell>
+                            <TableRow key={student.id}>
+                              <TableCell className="font-medium">{student.full_name}</TableCell>
                               {assessmentTypes?.map((at) => {
                                 const currentValue = studentEditedGrades[at.id];
                                 const isIncomplete = currentValue === null || currentValue === undefined;
-                                const isFailing =
-                                  typeof currentValue === "number" && currentValue < 60;
+                                const isRedGrade =
+                                  currentValue !== null &&
+                                  currentValue !== undefined &&
+                                  currentValue >= 60 &&
+                                  currentValue <= 69;
                                 return (
                                   <TableCell key={at.id} className="text-center">
                                     {isLocked ? (
@@ -386,8 +336,8 @@ const Gradebook = () => {
                                         className={
                                           isIncomplete
                                             ? "text-orange-500 font-bold"
-                                            : isFailing
-                                              ? "text-destructive font-bold"
+                                            : isRedGrade
+                                              ? "text-red-500 font-semibold"
                                               : "text-muted-foreground"
                                         }
                                       >
@@ -403,12 +353,12 @@ const Gradebook = () => {
                                           handleGradeChange(student.id, at.id, e.target.value)
                                         }
                                         className={`w-20 text-center mx-auto ${
-                                          isFailing
-                                            ? "text-destructive font-bold border-destructive"
-                                            : isIncomplete &&
-                                                currentValue !== null &&
-                                                currentValue !== undefined
-                                              ? "text-orange-500 font-bold border-orange-300"
+                                          isIncomplete &&
+                                          currentValue !== null &&
+                                          currentValue !== undefined
+                                            ? "text-orange-500 font-bold border-orange-300"
+                                            : isRedGrade
+                                              ? "text-red-500 font-semibold"
                                               : ""
                                         }`}
                                         placeholder=""
@@ -432,11 +382,7 @@ const Gradebook = () => {
                                 );
                               })}
                               <TableCell className="text-center font-bold">
-                                {hasFailingGrade ? (
-                                  <span className="text-destructive">
-                                    {totalScore > 0 ? totalScore.toFixed(0) : "-"}
-                                  </span>
-                                ) : isTotalIncomplete ? (
+                                {isTotalIncomplete ? (
                                   <span className="text-orange-500">I</span>
                                 ) : (
                                   <span className="text-primary">
