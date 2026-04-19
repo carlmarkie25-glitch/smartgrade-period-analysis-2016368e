@@ -120,6 +120,35 @@ export const useStudentReport = (studentId: string, period: string) => {
         }
       }
 
+      // Attendance summary for this student (for Days Present / Days Absent on report)
+      const { data: attRows } = await supabase
+        .from("attendance_records")
+        .select("status")
+        .eq("student_id", studentId);
+      const attendance = (attRows ?? []).reduce(
+        (acc: any, r: any) => {
+          acc.total += 1;
+          if (r.status === "present") acc.present += 1;
+          else if (r.status === "late") { acc.present += 1; acc.late += 1; }
+          else if (r.status === "absent") acc.absent += 1;
+          else if (r.status === "excused") acc.excused += 1;
+          return acc;
+        },
+        { total: 0, present: 0, absent: 0, late: 0, excused: 0 }
+      );
+
+      // Class teacher name (from classes.teacher_id -> profiles.full_name)
+      let classTeacherName: string | null = null;
+      const teacherId = (student as any)?.classes?.teacher_id;
+      if (teacherId) {
+        const { data: tProfile } = await supabase
+          .from("profiles")
+          .select("full_name")
+          .eq("user_id", teacherId)
+          .maybeSingle();
+        classTeacherName = tProfile?.full_name ?? null;
+      }
+
       // Get semester/yearly totals if applicable
       let yearlyTotal = null;
       if (period === 'semester1' || period === 'semester2' || period === 'yearly') {
