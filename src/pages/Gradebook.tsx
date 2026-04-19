@@ -323,16 +323,12 @@ const Gradebook = () => {
                               <TableCell className="font-medium">{student.full_name}</TableCell>
                               {assessmentTypes?.map((at) => {
                                 const currentValue = studentEditedGrades[at.id];
-                                const maxPts = at.max_points || 0;
-                                // A grade below 60% of max is treated as Incomplete ("I")
-                                const isBelowThreshold =
+                                const isIncomplete = currentValue === null || currentValue === undefined;
+                                const isRedGrade =
                                   currentValue !== null &&
                                   currentValue !== undefined &&
-                                  maxPts > 0 &&
-                                  (currentValue / maxPts) * 100 < 60;
-                                const isIncomplete =
-                                  currentValue === null || currentValue === undefined || isBelowThreshold;
-                                const isRedGrade = false;
+                                  currentValue >= 60 &&
+                                  currentValue <= 69;
                                 return (
                                   <TableCell key={at.id} className="text-center">
                                     {isLocked ? (
