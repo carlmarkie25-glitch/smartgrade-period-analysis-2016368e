@@ -14,6 +14,7 @@ import { isKindergartenClass, scoreToLetter, letterColorClass, KG_SCALE } from "
 import { useToast } from "@/hooks/use-toast";
 
 const Gradebook = () => {
+  const { toast } = useToast();
   const [selectedClass, setSelectedClass] = useState<string>("");
   const [selectedSubject, setSelectedSubject] = useState<string>("");
   const [selectedPeriod, setSelectedPeriod] = useState<string>("p1");
