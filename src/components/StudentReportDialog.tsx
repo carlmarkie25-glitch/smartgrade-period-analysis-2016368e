@@ -440,8 +440,15 @@ export const StudentReportDialog = ({
             return Math.round(xs.reduce((a, b) => a + b, 0) / xs.length);
           };
           // Returns null when no subject has any score for that period (so it's skipped in averages)
+          // Also returns null if ANY subject has an incomplete ("I") grade in that period —
+          // averages cannot be computed until all I's are settled.
           const colAvg = (k: string): number | null => {
             if (subjects.length === 0) return null;
+            const anyIncomplete = subjects.some((s: any) => {
+              const p = s.periods?.[k];
+              return p && (p.isIncomplete || p.noGrades);
+            });
+            if (anyIncomplete) return null;
             const hasAny = subjects.some((s: any) => {
               const p = s.periods?.[k];
               return p && p.score !== null && p.score !== undefined && p.max > 0;
@@ -851,18 +858,22 @@ export const StudentReportDialog = ({
                     {!isSemester && subjects.length > 0 && (() => {
                       const aggStyle: React.CSSProperties = { ...tdBase, background: '#e8f0e8', fontWeight: 700, color: '#1a5226' };
                       const avgStyle: React.CSSProperties = { ...tdBase, background: '#fff3cd', fontWeight: 700, color: '#7d5a00' };
+                      const anyIncomplete = subjects.some((s: any) => s.noGrades || s.hasIncomplete);
                       const totalSum = subjects.reduce((a: number, s: any) => a + (s.noGrades || s.hasIncomplete ? 0 : (s.total ?? 0)), 0);
                       const validSubjects = subjects.filter((s: any) => !s.noGrades && !s.hasIncomplete);
-                      const avg = validSubjects.length > 0 ? Math.round(totalSum / validSubjects.length) : 0;
+                      // Do not compute average if any subject is incomplete — must settle I's first
+                      const avgDisplay = anyIncomplete
+                        ? 'I'
+                        : (validSubjects.length > 0 ? Math.round(totalSum / validSubjects.length) : '--');
                       return (
                         <>
                           <tr>
                             <td style={{ ...aggStyle, textAlign: 'left', paddingLeft: 8 }}>Aggregate</td>
-                            <td style={aggStyle}>{totalSum}</td>
+                            <td style={aggStyle}>{anyIncomplete ? 'I' : totalSum}</td>
                           </tr>
                           <tr>
                             <td style={{ ...avgStyle, textAlign: 'left', paddingLeft: 8 }}>Average</td>
-                            <td style={avgStyle}>{avg}</td>
+                            <td style={avgStyle}>{avgDisplay}</td>
                           </tr>
                         </>
                       );
