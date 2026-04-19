@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useUserManagement } from "@/hooks/useUserManagement";
-import { UserPlus, FileText, Palette, Bell } from "lucide-react";
+import { UserPlus, FileText, Palette, Bell, ScrollText } from "lucide-react";
 import { UserBiodataManagementTab } from "@/components/UserBiodataManagementTab";
 import { TeacherAssignmentDialog } from "@/components/TeacherAssignmentDialog";
 import { SponsorAssignmentDialog } from "@/components/SponsorAssignmentDialog";
@@ -9,6 +9,7 @@ import { UserRoleManagement } from "@/components/UserRoleManagement";
 import AppShell from "@/components/AppShell";
 import { SettingsTab } from "@/components/SettingsTab";
 import { SendNotificationDialog } from "@/components/SendNotificationDialog";
+import { ReportCardSettingsTab } from "@/components/ReportCardSettingsTab";
 
 const Admin = () => {
   const { users, usersLoading, assignRole, removeRole } = useUserManagement();
@@ -54,7 +55,7 @@ const Admin = () => {
 
         <div className="neu-card p-6">
           <Tabs defaultValue="users" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-4">
+            <TabsList className="grid w-full grid-cols-5">
               <TabsTrigger value="users">
               <UserPlus className="h-4 w-4 mr-2" />
               Users
@@ -66,6 +67,10 @@ const Admin = () => {
             <TabsTrigger value="notifications">
               <Bell className="h-4 w-4 mr-2" />
               Notifications
+            </TabsTrigger>
+            <TabsTrigger value="report-card">
+              <ScrollText className="h-4 w-4 mr-2" />
+              Report Card
             </TabsTrigger>
             <TabsTrigger value="theme">
               <Palette className="h-4 w-4 mr-2" />
@@ -98,6 +103,10 @@ const Admin = () => {
                 <SendNotificationDialog />
               </div>
             </div>
+          </TabsContent>
+
+          <TabsContent value="report-card">
+            <ReportCardSettingsTab />
           </TabsContent>
 
           <TabsContent value="theme">

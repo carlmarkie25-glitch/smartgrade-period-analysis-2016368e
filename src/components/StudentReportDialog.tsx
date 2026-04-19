@@ -18,6 +18,12 @@ import {
 } from "@/hooks/useReportInputs";
 import { toast } from "@/hooks/use-toast";
 import { isKindergartenClass, scoreToLetter, KG_SCALE, type KgLetter } from "@/lib/kindergarten";
+import { useSchool } from "@/contexts/SchoolContext";
+import {
+  DEFAULT_REPORT_CARD_SETTINGS,
+  gradeFromSettings,
+  useReportCardSettings,
+} from "@/hooks/useReportCardSettings";
 
 const RATING_OPTIONS = ["Excellent", "Very Good", "Good", "Fair", "Needs Improvement"];
 
@@ -132,6 +138,9 @@ export const StudentReportDialog = ({
   const { data: savedInputs } = useReportInputs(studentId, period);
   const canEdit = useCanEditReportInputs(studentId);
   const saveMutation = useSaveReportInputs(studentId, period);
+  const { school } = useSchool();
+  const { data: rcSettingsData } = useReportCardSettings();
+  const rcSettings = rcSettingsData ?? DEFAULT_REPORT_CARD_SETTINGS;
 
   const [editing, setEditing] = useState(false);
   const [inputs, setInputs] = useState<ReportInputs>({});
@@ -419,18 +428,21 @@ export const StudentReportDialog = ({
           }
           // ============= /KG branch =============
 
-          const s1Avg = computeOverallSemAvg(subjects, ['p1', 'p2', 'p3']);
-          const s2Avg = computeOverallSemAvg(subjects, ['p4', 'p5', 'p6']);
-          const generalAvg = (s1Avg !== null && s2Avg !== null) ? Math.round((s1Avg + s2Avg) / 2) : (report.overallAverage ?? null);
+          // Unified averaging — these match the "Average" row of the grades table
+          // so the General Average always equals the row totals shown above.
+          const s1Avg = subjects.length > 0
+            ? Math.round((computeColumnAvg(subjects, 'p1') + computeColumnAvg(subjects, 'p2') + computeColumnAvg(subjects, 'p3')) / 3)
+            : null;
+          const s2Avg = subjects.length > 0
+            ? Math.round((computeColumnAvg(subjects, 'p4') + computeColumnAvg(subjects, 'p5') + computeColumnAvg(subjects, 'p6')) / 3)
+            : null;
+          const generalAvg = isYearly
+            ? (s1Avg !== null && s2Avg !== null ? Math.round((s1Avg + s2Avg) / 2) : null)
+            : isSem1 ? s1Avg
+            : isSem2 ? s2Avg
+            : (subjects.length > 0 ? computeColumnAvg(subjects, period) : null);
 
-          let letterGrade = 'N/A';
-          let gradeLabel = '';
-          if (generalAvg !== null) {
-            if (generalAvg >= 90) { letterGrade = 'A'; gradeLabel = 'Excellent'; }
-            else if (generalAvg >= 75) { letterGrade = 'B'; gradeLabel = 'Good Standing'; }
-            else if (generalAvg >= 60) { letterGrade = 'C'; gradeLabel = 'Satisfactory'; }
-            else { letterGrade = 'D'; gradeLabel = 'Needs Improvement'; }
-          }
+          const { letter: letterGrade, label: gradeLabel } = gradeFromSettings(generalAvg, rcSettings);
 
           // Aggregate sums
           const periodKeys = isYearly ? ['p1','p2','p3','p4','p5','p6'] :
@@ -482,43 +494,67 @@ export const StudentReportDialog = ({
               }}>
 
                 {/* ── HEADER ── */}
-                <div style={{ background: navy, color: '#fff', display: 'flex', alignItems: 'center', padding: '10px 14px', gap: '14px' }}>
-                  <div style={{
-                    width: 52, height: 52, borderRadius: '50%', background: '#fff',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    fontWeight: 700, fontSize: '9px', color: navy, textAlign: 'center', lineHeight: 1.2,
-                    border: `2px solid ${gold}`, flexShrink: 0,
-                  }}>
-                    SCHOOL<br />LOGO
-                  </div>
-                  <div style={{ flex: 1 }}>
-                    <h1 style={{ fontSize: '18px', fontWeight: 700, color: '#fff', margin: 0 }}>
-                      SCHOOL NAME HERE
-                    </h1>
-                    <p style={{ fontSize: '11px', color: '#ccd', margin: 0 }}>
-                      Address Line, City, Country | Contact: (000) 000-0000
-                    </p>
-                    <p style={{ fontSize: '11px', color: '#ccd', margin: 0 }}>
-                      www.school.edu | info@school.edu
-                    </p>
-                  </div>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                    <div style={{
-                      background: gold, color: '#fff', textAlign: 'center', padding: '4px 10px',
-                      fontSize: '10px', fontWeight: 700, borderRadius: '3px', minWidth: '80px'
-                    }}>
-                      <small style={{ display: 'block', fontSize: '8px', fontWeight: 400, opacity: 0.85, letterSpacing: '0.5px' }}>REPORT TYPE</small>
-                      {getDepartmentLabel().toUpperCase()}
+                {(() => {
+                  const headerTitle = rcSettings.header_title || school?.name || 'School Name';
+                  const headerAddress = rcSettings.header_address || school?.address || '';
+                  const headerContact = rcSettings.header_contact || [school?.phone, school?.email].filter(Boolean).join(' • ');
+                  const headerWebsite = rcSettings.header_website || school?.website || '';
+                  const logo = rcSettings.logo_url || school?.logo_url || null;
+                  return (
+                    <div style={{ background: navy, color: '#fff', display: 'flex', alignItems: 'center', padding: '10px 14px', gap: '14px' }}>
+                      {logo ? (
+                        <img
+                          src={logo}
+                          alt="School logo"
+                          style={{ width: 52, height: 52, borderRadius: '50%', objectFit: 'cover', border: `2px solid ${gold}`, background: '#fff', flexShrink: 0 }}
+                        />
+                      ) : (
+                        <div style={{
+                          width: 52, height: 52, borderRadius: '50%', background: '#fff',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          fontWeight: 700, fontSize: '9px', color: navy, textAlign: 'center', lineHeight: 1.2,
+                          border: `2px solid ${gold}`, flexShrink: 0,
+                        }}>
+                          SCHOOL<br />LOGO
+                        </div>
+                      )}
+                      <div style={{ flex: 1 }}>
+                        <h1 style={{ fontSize: '18px', fontWeight: 700, color: '#fff', margin: 0 }}>
+                          {headerTitle.toUpperCase()}
+                        </h1>
+                        {rcSettings.header_subtitle && (
+                          <p style={{ fontSize: '10px', color: gold, margin: '2px 0 0', fontStyle: 'italic' }}>
+                            {rcSettings.header_subtitle}
+                          </p>
+                        )}
+                        {headerAddress && (
+                          <p style={{ fontSize: '11px', color: '#ccd', margin: 0 }}>
+                            {headerAddress}{headerContact ? ` | ${headerContact}` : ''}
+                          </p>
+                        )}
+                        {headerWebsite && (
+                          <p style={{ fontSize: '11px', color: '#ccd', margin: 0 }}>{headerWebsite}</p>
+                        )}
+                      </div>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                        <div style={{
+                          background: gold, color: '#fff', textAlign: 'center', padding: '4px 10px',
+                          fontSize: '10px', fontWeight: 700, borderRadius: '3px', minWidth: '80px'
+                        }}>
+                          <small style={{ display: 'block', fontSize: '8px', fontWeight: 400, opacity: 0.85, letterSpacing: '0.5px' }}>REPORT TYPE</small>
+                          {getDepartmentLabel().toUpperCase()}
+                        </div>
+                        <div style={{
+                          background: gold, color: '#fff', textAlign: 'center', padding: '4px 10px',
+                          fontSize: '10px', fontWeight: 700, borderRadius: '3px', minWidth: '80px'
+                        }}>
+                          <small style={{ display: 'block', fontSize: '8px', fontWeight: 400, opacity: 0.85, letterSpacing: '0.5px' }}>SEMESTER</small>
+                          {getSemesterLabel()}
+                        </div>
+                      </div>
                     </div>
-                    <div style={{
-                      background: gold, color: '#fff', textAlign: 'center', padding: '4px 10px',
-                      fontSize: '10px', fontWeight: 700, borderRadius: '3px', minWidth: '80px'
-                    }}>
-                      <small style={{ display: 'block', fontSize: '8px', fontWeight: 400, opacity: 0.85, letterSpacing: '0.5px' }}>SEMESTER</small>
-                      {getSemesterLabel()}
-                    </div>
-                  </div>
-                </div>
+                  );
+                })()}
 
                 {/* ── TITLE BAR ── */}
                 <div style={{ background: navy, textAlign: 'center', padding: '8px', borderTop: `2px solid ${gold}` }}>
@@ -868,7 +904,7 @@ export const StudentReportDialog = ({
                 {/* ── PROMOTION STATUS (yearly only) ── */}
                 {isYearly && (() => {
                   const grade = generalAvg;
-                  const passed = grade !== null && grade >= 60 && !report.hasIncomplete;
+                  const passed = grade !== null && grade >= rcSettings.pass_mark && !report.hasIncomplete;
                   const className = report.student.classes?.name || 'next class';
                   const nextClassMatch = className.match(/(\d+)/);
                   const nextLabel = nextClassMatch
@@ -938,7 +974,7 @@ export const StudentReportDialog = ({
                         </tr>
                         <tr>
                           <td colSpan={2} style={{ padding: '3px 0', fontSize: '10px', color: '#666' }}>
-                            A = 90–100 &nbsp;|&nbsp; B = 75–89 &nbsp;|&nbsp; C = 60–74
+                            A = {rcSettings.grade_a_min}–100 &nbsp;|&nbsp; B = {rcSettings.grade_b_min}–{rcSettings.grade_a_min - 1} &nbsp;|&nbsp; C = {rcSettings.grade_c_min}–{rcSettings.grade_b_min - 1} &nbsp;|&nbsp; D = {rcSettings.grade_d_min}–{rcSettings.grade_c_min - 1} &nbsp;|&nbsp; Pass: {rcSettings.pass_mark}%
                           </td>
                         </tr>
                       </tbody>
@@ -964,7 +1000,7 @@ export const StudentReportDialog = ({
                   <div style={{ textAlign: 'center', fontSize: '10px', color: '#333', minWidth: 140 }}>
                     <div style={{ borderBottom: '1px solid #333', width: 120, margin: '18px auto 4px', minHeight: 16 }}>
                       <EditableField
-                        value={inputs.administrator_name || ''}
+                        value={inputs.administrator_name || rcSettings.default_administrator_name || ''}
                         onChange={setField('administrator_name')}
                         editable={editing}
                         placeholder="Name"
@@ -984,7 +1020,7 @@ export const StudentReportDialog = ({
                   <div style={{ textAlign: 'center', fontSize: '10px', color: '#333', minWidth: 140 }}>
                     <div style={{ borderBottom: '1px solid #333', width: 120, margin: '18px auto 4px', minHeight: 16 }}>
                       <EditableField
-                        value={inputs.class_teacher_name || ''}
+                        value={inputs.class_teacher_name || (report as any).classTeacherName || rcSettings.default_class_teacher_name || ''}
                         onChange={setField('class_teacher_name')}
                         editable={editing}
                         placeholder="Name"
@@ -1003,7 +1039,7 @@ export const StudentReportDialog = ({
 
                 {/* ── FOOTER ── */}
                 <div style={{ background: navy, color: '#fff', textAlign: 'center', fontSize: '9px', padding: '4px' }}>
-                  Generated by SmartGrade School Management System | Confidential — For Student & Family Use Only
+                  {rcSettings.footer_note || 'Generated by SmartGrade School Management System | Confidential — For Student & Family Use Only'}
                 </div>
               </div>
             </div>
