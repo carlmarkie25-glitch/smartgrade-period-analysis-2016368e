@@ -11,6 +11,7 @@ import { useStudents } from "@/hooks/useStudents";
 import { useGrades, useAssessmentTypes, useSaveGrades } from "@/hooks/useGrades";
 import { Skeleton } from "@/components/ui/skeleton";
 import { isKindergartenClass, scoreToLetter, letterColorClass, KG_SCALE } from "@/lib/kindergarten";
+import { isAggregateIncomplete } from "@/lib/grading";
 
 const Gradebook = () => {
   const [selectedClass, setSelectedClass] = useState<string>("");
@@ -314,9 +315,7 @@ const Gradebook = () => {
                             (sum, at) => sum + (at.max_points ?? 0),
                             0
                           );
-                          const totalPercent = totalMax > 0 ? (totalScore / totalMax) * 100 : 0;
-
-                          const isTotalIncomplete = hasAnyMissing || totalPercent < 60;
+                          const isTotalIncomplete = isAggregateIncomplete(totalScore, totalMax, hasAnyMissing);
 
                           return (
                             <TableRow key={student.id}>
