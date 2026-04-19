@@ -352,7 +352,7 @@ export const useStudentReport = (studentId: string, period: string) => {
           const subjectName = grade.class_subjects?.subjects?.name || "Unknown";
           const subjectCode = grade.class_subjects?.subjects?.code || "N/A";
           const scoreValue: number | null = grade.score;
-          const isMissing = isMissingScore(scoreValue);
+          const isMissing = isMissingGrade(scoreValue);
 
           let existing = subjectGrades.get(subjectName);
           const assessment = {
