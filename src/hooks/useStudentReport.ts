@@ -240,10 +240,15 @@ export const useStudentReport = (studentId: string, period: string) => {
 
               const isIncomplete = isAggregateIncomplete(pData.score, pData.max, pData.hasMissing);
 
+              // Normalize to a 0-100 scale so all divisions follow the same
+              // elementary <60 rule regardless of differing assessment max totals.
+              const normalizedScore =
+                pData.max > 0 ? Math.round((pData.score / pData.max) * 100) : 0;
+
               periodData[p] = {
                 ...pData,
                 // When incomplete, hide the numeric value (show "I" in UI)
-                score: isIncomplete ? null : pData.score,
+                score: isIncomplete ? null : normalizedScore,
                 isIncomplete,
                 percentage,
               };
@@ -393,8 +398,12 @@ export const useStudentReport = (studentId: string, period: string) => {
             };
           }
           const isIncomplete = isAggregateIncomplete(s.total, s.max, s.hasMissing);
+          // Normalize total to a 0-100 scale so all divisions follow the same
+          // elementary <60 rule regardless of differing assessment max totals.
+          const normalizedTotal = s.max > 0 ? Math.round((s.total / s.max) * 100) : 0;
           return {
             ...s,
+            total: normalizedTotal,
             hasIncomplete: isIncomplete,
             noGrades: false,
           };
