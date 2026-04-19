@@ -18,6 +18,12 @@ import {
 } from "@/hooks/useReportInputs";
 import { toast } from "@/hooks/use-toast";
 import { isKindergartenClass, scoreToLetter, KG_SCALE, type KgLetter } from "@/lib/kindergarten";
+import { useSchool } from "@/contexts/SchoolContext";
+import {
+  DEFAULT_REPORT_CARD_SETTINGS,
+  gradeFromSettings,
+  useReportCardSettings,
+} from "@/hooks/useReportCardSettings";
 
 const RATING_OPTIONS = ["Excellent", "Very Good", "Good", "Fair", "Needs Improvement"];
 
