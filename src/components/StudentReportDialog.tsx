@@ -1022,10 +1022,10 @@ export const StudentReportDialog = ({
                   }}>
                     <div style={{ fontSize: '10px', color: '#aab', letterSpacing: '1px', marginBottom: 4 }}>GENERAL AVERAGE</div>
                     <div style={{ fontSize: '36px', fontWeight: 700, color: gold }}>
-                      {report.hasIncomplete ? '--' : (generalAvg !== null ? `${generalAvg}%` : '-')}
+                      {generalAvg !== null ? `${generalAvg}%` : '--'}
                     </div>
                     <div style={{ fontSize: '12px', color: gold }}>
-                      {report.hasIncomplete ? '' : `Grade: ${letterGrade} — ${gradeLabel}`}
+                      {generalAvg !== null ? `Grade: ${letterGrade} — ${gradeLabel}` : ''}
                     </div>
                   </div>
                 </div>
