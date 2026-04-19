@@ -532,14 +532,20 @@ export const StudentReportDialog = ({
 
                 {/* ── STUDENT INFO ── */}
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', borderBottom: '1px solid #ccc' }}>
-                  {[
-                    ['Student Name', report.student.full_name],
-                    ['Student ID', report.student.student_id],
-                    ['Grade Level', report.student.classes?.name || '--'],
-                    ['Gender', report.student.gender || '--'],
-                    ['Date of Birth', report.student.date_of_birth || '--'],
-                    ['Class', report.student.classes?.name || '--'],
-                  ].map(([label, val], i) => (
+                  {(() => {
+                    const att = (report as any).attendance ?? { total: 0, present: 0, absent: 0 };
+                    const teacherName = (report as any).classTeacherName || inputs.class_teacher_name || '--';
+                    return [
+                      ['Student Name', report.student.full_name],
+                      ['Student ID', report.student.student_id],
+                      ['Grade Level', report.student.classes?.name || '--'],
+                      ['Class Teacher', teacherName],
+                      ['Date of Birth', report.student.date_of_birth || '--'],
+                      ['Days Present', `${att.present} / ${att.total}`],
+                      ['Gender', report.student.gender || '--'],
+                      ['Days Absent', String(att.absent)],
+                    ];
+                  })().map(([label, val], i) => (
                     <div key={i} style={{
                       display: 'flex', alignItems: 'center', gap: '8px', padding: '5px 10px',
                       borderBottom: '0.5px solid #e5e5e5',
