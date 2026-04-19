@@ -385,7 +385,7 @@ const Gradebook = () => {
                                   <span className="text-orange-500">I</span>
                                 ) : (
                                   <span className="text-primary">
-                                    {totalScore > 0 ? totalScore.toFixed(0) : "-"}
+                                    {totalMax > 0 ? Math.trunc((totalScore / totalMax) * 100) : "-"}
                                   </span>
                                 )}
                               </TableCell>
