@@ -316,6 +316,11 @@ const Gradebook = () => {
                             0
                           );
                           const isTotalIncomplete = isAggregateIncomplete(totalScore, totalMax, hasAnyMissing);
+                          // Always display total as a percentage (out of 100) so the
+                          // 60% Incomplete threshold is consistent across departments
+                          // whose assessment max points sum to less than 100 (e.g.
+                          // Junior High = 50, Senior High = 80).
+                          const totalPercentage = totalMax > 0 ? (totalScore / totalMax) * 100 : 0;
 
                           return (
                             <TableRow key={student.id}>
