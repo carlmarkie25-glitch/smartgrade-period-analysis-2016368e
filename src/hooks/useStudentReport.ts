@@ -30,6 +30,7 @@ export const useStudentReport = (studentId: string, period: string) => {
             id,
             name,
             grading_mode,
+            teacher_id,
             departments:department_id (
               id,
               name
@@ -118,6 +119,35 @@ export const useStudentReport = (studentId: string, period: string) => {
           });
           periodCounts[row.period] = row.total_students;
         }
+      }
+
+      // Attendance summary for this student (for Days Present / Days Absent on report)
+      const { data: attRows } = await supabase
+        .from("attendance_records")
+        .select("status")
+        .eq("student_id", studentId);
+      const attendance = (attRows ?? []).reduce(
+        (acc: any, r: any) => {
+          acc.total += 1;
+          if (r.status === "present") acc.present += 1;
+          else if (r.status === "late") { acc.present += 1; acc.late += 1; }
+          else if (r.status === "absent") acc.absent += 1;
+          else if (r.status === "excused") acc.excused += 1;
+          return acc;
+        },
+        { total: 0, present: 0, absent: 0, late: 0, excused: 0 }
+      );
+
+      // Class teacher name (from classes.teacher_id -> profiles.full_name)
+      let classTeacherName: string | null = null;
+      const teacherId = (student as any)?.classes?.teacher_id;
+      if (teacherId) {
+        const { data: tProfile } = await supabase
+          .from("profiles")
+          .select("full_name")
+          .eq("user_id", teacherId)
+          .maybeSingle();
+        classTeacherName = tProfile?.full_name ?? null;
       }
 
       // Get semester/yearly totals if applicable
@@ -297,6 +327,8 @@ export const useStudentReport = (studentId: string, period: string) => {
           period,
           isSemesterReport: true,
           hasIncomplete: hasMissingGrades || anySubjectIncomplete,
+          attendance,
+          classTeacherName,
         };
       } else {
         // Original logic for individual period reports
@@ -405,6 +437,8 @@ export const useStudentReport = (studentId: string, period: string) => {
           period,
           isSemesterReport: false,
           hasIncomplete: hasMissingGrades || anySubjectIncomplete,
+          attendance,
+          classTeacherName,
         };
       }
 

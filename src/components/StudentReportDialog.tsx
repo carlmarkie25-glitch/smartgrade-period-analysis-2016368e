@@ -532,14 +532,20 @@ export const StudentReportDialog = ({
 
                 {/* ── STUDENT INFO ── */}
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', borderBottom: '1px solid #ccc' }}>
-                  {[
-                    ['Student Name', report.student.full_name],
-                    ['Student ID', report.student.student_id],
-                    ['Grade Level', report.student.classes?.name || '--'],
-                    ['Gender', report.student.gender || '--'],
-                    ['Date of Birth', report.student.date_of_birth || '--'],
-                    ['Class', report.student.classes?.name || '--'],
-                  ].map(([label, val], i) => (
+                  {(() => {
+                    const att = (report as any).attendance ?? { total: 0, present: 0, absent: 0 };
+                    const teacherName = (report as any).classTeacherName || inputs.class_teacher_name || '--';
+                    return [
+                      ['Student Name', report.student.full_name],
+                      ['Student ID', report.student.student_id],
+                      ['Grade Level', report.student.classes?.name || '--'],
+                      ['Class Teacher', teacherName],
+                      ['Date of Birth', report.student.date_of_birth || '--'],
+                      ['Days Present', `${att.present} / ${att.total}`],
+                      ['Gender', report.student.gender || '--'],
+                      ['Days Absent', String(att.absent)],
+                    ];
+                  })().map(([label, val], i) => (
                     <div key={i} style={{
                       display: 'flex', alignItems: 'center', gap: '8px', padding: '5px 10px',
                       borderBottom: '0.5px solid #e5e5e5',
@@ -690,7 +696,7 @@ export const StudentReportDialog = ({
                       );
                     })}
 
-                    {/* Aggregate row */}
+                    {/* Aggregate / Average rows */}
                     {isSemester && isYearly && (
                       <>
                         <tr>
@@ -731,6 +737,65 @@ export const StudentReportDialog = ({
                         </tr>
                       </>
                     )}
+
+                    {/* Aggregate / Average — single semester (S1 or S2) */}
+                    {isSemester && !isYearly && (() => {
+                      const cols = isSem1 ? ['p1','p2','p3','exam_s1'] : ['p4','p5','p6','exam_s2'];
+                      const periodAvgKeys = isSem1 ? ['p1','p2','p3'] : ['p4','p5','p6'];
+                      const semSum = subjects.reduce((a: number, s: any) => a + (computeSubjectSemAvg(s, periodAvgKeys) ?? 0), 0);
+                      const semAvg = isSem1 ? s1Avg : s2Avg;
+                      const aggStyle: React.CSSProperties = { ...tdBase, background: '#e8f0e8', fontWeight: 700, color: '#1a5226' };
+                      const avgStyle: React.CSSProperties = { ...tdBase, background: '#fff3cd', fontWeight: 700, color: '#7d5a00' };
+                      return (
+                        <>
+                          <tr>
+                            <td style={{ ...aggStyle, textAlign: 'left', paddingLeft: 8 }}>Aggregate</td>
+                            {cols.map((p) => {
+                              const isExam = p.startsWith('exam');
+                              return (
+                                <td key={p} style={isExam ? { ...aggStyle, background: lightBlue, color: '#fff' } : aggStyle}>
+                                  {computeColumnSum(subjects, p)}
+                                </td>
+                              );
+                            })}
+                            <td style={{ ...aggStyle, background: '#1a5276', color: '#fff' }}>{semSum}</td>
+                          </tr>
+                          <tr>
+                            <td style={{ ...avgStyle, textAlign: 'left', paddingLeft: 8 }}>Average</td>
+                            {cols.map((p) => {
+                              const isExam = p.startsWith('exam');
+                              return (
+                                <td key={p} style={isExam ? { ...avgStyle, background: lightBlue, color: '#fff' } : avgStyle}>
+                                  {computeColumnAvg(subjects, p)}
+                                </td>
+                              );
+                            })}
+                            <td style={{ ...avgStyle, background: '#1a5276', color: '#fff' }}>{semAvg ?? '--'}</td>
+                          </tr>
+                        </>
+                      );
+                    })()}
+
+                    {/* Aggregate / Average — single period view */}
+                    {!isSemester && subjects.length > 0 && (() => {
+                      const aggStyle: React.CSSProperties = { ...tdBase, background: '#e8f0e8', fontWeight: 700, color: '#1a5226' };
+                      const avgStyle: React.CSSProperties = { ...tdBase, background: '#fff3cd', fontWeight: 700, color: '#7d5a00' };
+                      const totalSum = subjects.reduce((a: number, s: any) => a + (s.noGrades || s.hasIncomplete ? 0 : (s.total ?? 0)), 0);
+                      const validSubjects = subjects.filter((s: any) => !s.noGrades && !s.hasIncomplete);
+                      const avg = validSubjects.length > 0 ? Math.round(totalSum / validSubjects.length) : 0;
+                      return (
+                        <>
+                          <tr>
+                            <td style={{ ...aggStyle, textAlign: 'left', paddingLeft: 8 }}>Aggregate</td>
+                            <td style={aggStyle}>{totalSum}</td>
+                          </tr>
+                          <tr>
+                            <td style={{ ...avgStyle, textAlign: 'left', paddingLeft: 8 }}>Average</td>
+                            <td style={avgStyle}>{avg}</td>
+                          </tr>
+                        </>
+                      );
+                    })()}
                   </tbody>
                 </table>
 
@@ -799,6 +864,41 @@ export const StudentReportDialog = ({
                     </div>
                   </div>
                 </div>
+
+                {/* ── PROMOTION STATUS (yearly only) ── */}
+                {isYearly && (() => {
+                  const grade = generalAvg;
+                  const passed = grade !== null && grade >= 60 && !report.hasIncomplete;
+                  const className = report.student.classes?.name || 'next class';
+                  const nextClassMatch = className.match(/(\d+)/);
+                  const nextLabel = nextClassMatch
+                    ? className.replace(nextClassMatch[1], String(parseInt(nextClassMatch[1], 10) + 1))
+                    : 'Next Class';
+                  return (
+                    <>
+                      <div style={{ background: navy, color: '#fff', padding: '5px 10px', fontSize: '10px', fontWeight: 700, letterSpacing: '1px' }}>
+                        PROMOTION STATUS
+                      </div>
+                      <div style={{ padding: '10px 14px', borderTop: '0.5px solid #ccc' }}>
+                        <div style={{
+                          padding: '8px 12px',
+                          borderRadius: 4,
+                          border: `1px solid ${passed ? '#16a34a' : '#dc2626'}`,
+                          background: passed ? '#e8f5e8' : '#fde8e8',
+                          color: passed ? '#15803d' : '#991b1b',
+                          fontWeight: 700,
+                          fontSize: '12px',
+                        }}>
+                          {report.hasIncomplete
+                            ? '⚠ Promotion pending — incomplete grades on record'
+                            : passed
+                              ? `✓ Promoted to ${nextLabel}`
+                              : `✗ Not promoted — must repeat ${className}`}
+                        </div>
+                      </div>
+                    </>
+                  );
+                })()}
 
                 {/* ── SEMESTER AVERAGES ── */}
                 <div style={{ background: navy, color: '#fff', padding: '5px 10px', fontSize: '10px', fontWeight: 700, letterSpacing: '1px' }}>
