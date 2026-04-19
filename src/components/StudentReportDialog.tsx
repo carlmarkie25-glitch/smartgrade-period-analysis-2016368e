@@ -436,11 +436,37 @@ export const StudentReportDialog = ({
           const s2Avg = subjects.length > 0
             ? Math.round((computeColumnAvg(subjects, 'p4') + computeColumnAvg(subjects, 'p5') + computeColumnAvg(subjects, 'p6')) / 3)
             : null;
-          const generalAvg = isYearly
-            ? (s1Avg !== null && s2Avg !== null ? Math.round((s1Avg + s2Avg) / 2) : null)
-            : isSem1 ? s1Avg
-            : isSem2 ? s2Avg
-            : (subjects.length > 0 ? computeColumnAvg(subjects, period) : null);
+
+          // Cumulative General Average:
+          // p1 → avg(p1); p2 → avg(p1,p2); p3 → avg(p1..p3);
+          // exam_s1/semester1 → s1Avg; p4 → avg(s1Avg, p4); p5 → avg(s1Avg, p4, p5);
+          // p6 → avg(s1Avg, p4..p6); exam_s2/semester2 → avg(s1Avg, s2Avg); yearly → avg(s1Avg, s2Avg).
+          const avgOf = (vals: (number | null)[]): number | null => {
+            const xs = vals.filter((v): v is number => v !== null && v !== undefined);
+            if (xs.length === 0) return null;
+            return Math.round(xs.reduce((a, b) => a + b, 0) / xs.length);
+          };
+          const colAvg = (k: string) => (subjects.length > 0 ? computeColumnAvg(subjects, k) : null);
+          let generalAvg: number | null;
+          if (isYearly || isSem2 || period === 'exam_s2') {
+            generalAvg = avgOf([s1Avg, s2Avg]);
+          } else if (isSem1 || period === 'exam_s1') {
+            generalAvg = s1Avg;
+          } else if (period === 'p1') {
+            generalAvg = colAvg('p1');
+          } else if (period === 'p2') {
+            generalAvg = avgOf([colAvg('p1'), colAvg('p2')]);
+          } else if (period === 'p3') {
+            generalAvg = avgOf([colAvg('p1'), colAvg('p2'), colAvg('p3')]);
+          } else if (period === 'p4') {
+            generalAvg = avgOf([s1Avg, colAvg('p4')]);
+          } else if (period === 'p5') {
+            generalAvg = avgOf([s1Avg, colAvg('p4'), colAvg('p5')]);
+          } else if (period === 'p6') {
+            generalAvg = avgOf([s1Avg, colAvg('p4'), colAvg('p5'), colAvg('p6')]);
+          } else {
+            generalAvg = colAvg(period);
+          }
 
           const { letter: letterGrade, label: gradeLabel } = gradeFromSettings(generalAvg, rcSettings);
 
