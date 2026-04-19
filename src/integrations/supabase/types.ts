@@ -1099,6 +1099,92 @@ export type Database = {
           },
         ]
       }
+      report_card_settings: {
+        Row: {
+          created_at: string
+          default_administrator_name: string | null
+          default_class_teacher_name: string | null
+          footer_note: string | null
+          grade_a_label: string
+          grade_a_min: number
+          grade_b_label: string
+          grade_b_min: number
+          grade_c_label: string
+          grade_c_min: number
+          grade_d_label: string
+          grade_d_min: number
+          grade_f_label: string
+          header_address: string | null
+          header_contact: string | null
+          header_subtitle: string | null
+          header_title: string | null
+          header_website: string | null
+          id: string
+          logo_url: string | null
+          pass_mark: number
+          school_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          default_administrator_name?: string | null
+          default_class_teacher_name?: string | null
+          footer_note?: string | null
+          grade_a_label?: string
+          grade_a_min?: number
+          grade_b_label?: string
+          grade_b_min?: number
+          grade_c_label?: string
+          grade_c_min?: number
+          grade_d_label?: string
+          grade_d_min?: number
+          grade_f_label?: string
+          header_address?: string | null
+          header_contact?: string | null
+          header_subtitle?: string | null
+          header_title?: string | null
+          header_website?: string | null
+          id?: string
+          logo_url?: string | null
+          pass_mark?: number
+          school_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          default_administrator_name?: string | null
+          default_class_teacher_name?: string | null
+          footer_note?: string | null
+          grade_a_label?: string
+          grade_a_min?: number
+          grade_b_label?: string
+          grade_b_min?: number
+          grade_c_label?: string
+          grade_c_min?: number
+          grade_d_label?: string
+          grade_d_min?: number
+          grade_f_label?: string
+          header_address?: string | null
+          header_contact?: string | null
+          header_subtitle?: string | null
+          header_title?: string | null
+          header_website?: string | null
+          id?: string
+          logo_url?: string | null
+          pass_mark?: number
+          school_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "report_card_settings_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: true
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       schedules: {
         Row: {
           created_at: string
