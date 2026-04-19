@@ -428,18 +428,21 @@ export const StudentReportDialog = ({
           }
           // ============= /KG branch =============
 
-          const s1Avg = computeOverallSemAvg(subjects, ['p1', 'p2', 'p3']);
-          const s2Avg = computeOverallSemAvg(subjects, ['p4', 'p5', 'p6']);
-          const generalAvg = (s1Avg !== null && s2Avg !== null) ? Math.round((s1Avg + s2Avg) / 2) : (report.overallAverage ?? null);
+          // Unified averaging — these match the "Average" row of the grades table
+          // so the General Average always equals the row totals shown above.
+          const s1Avg = subjects.length > 0
+            ? Math.round((computeColumnAvg(subjects, 'p1') + computeColumnAvg(subjects, 'p2') + computeColumnAvg(subjects, 'p3')) / 3)
+            : null;
+          const s2Avg = subjects.length > 0
+            ? Math.round((computeColumnAvg(subjects, 'p4') + computeColumnAvg(subjects, 'p5') + computeColumnAvg(subjects, 'p6')) / 3)
+            : null;
+          const generalAvg = isYearly
+            ? (s1Avg !== null && s2Avg !== null ? Math.round((s1Avg + s2Avg) / 2) : null)
+            : isSem1 ? s1Avg
+            : isSem2 ? s2Avg
+            : (subjects.length > 0 ? computeColumnAvg(subjects, period) : null);
 
-          let letterGrade = 'N/A';
-          let gradeLabel = '';
-          if (generalAvg !== null) {
-            if (generalAvg >= 90) { letterGrade = 'A'; gradeLabel = 'Excellent'; }
-            else if (generalAvg >= 75) { letterGrade = 'B'; gradeLabel = 'Good Standing'; }
-            else if (generalAvg >= 60) { letterGrade = 'C'; gradeLabel = 'Satisfactory'; }
-            else { letterGrade = 'D'; gradeLabel = 'Needs Improvement'; }
-          }
+          const { letter: letterGrade, label: gradeLabel } = gradeFromSettings(generalAvg, rcSettings);
 
           // Aggregate sums
           const periodKeys = isYearly ? ['p1','p2','p3','p4','p5','p6'] :
