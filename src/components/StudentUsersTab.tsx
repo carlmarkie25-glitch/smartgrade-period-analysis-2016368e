@@ -1,9 +1,10 @@
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useMemo } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { X, GraduationCap, UserPlus, Eye, Pencil, Trash2, UserMinus } from "lucide-react";
+import { X, GraduationCap, UserPlus, Eye, Pencil, Trash2, UserMinus, Search } from "lucide-react";
 import { MarkDepartedDialog } from "./MarkDepartedDialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -44,6 +45,7 @@ export const StudentUsersTab = () => {
   const queryClient = useQueryClient();
 
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isBiodataDialogOpen, setIsBiodataDialogOpen] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState<any>(null);
@@ -67,6 +69,21 @@ export const StudentUsersTab = () => {
   const unassignedUsers = users?.filter(u => {
     return !u.user_roles || u.user_roles.length === 0;
   }) || [];
+
+  const filteredStudents = useMemo(() => {
+    if (!students) return [];
+    const term = searchTerm.toLowerCase().trim();
+    if (!term) return students;
+    return students.filter((s: any) => {
+      return (
+        (s.full_name || "").toLowerCase().includes(term) ||
+        (s.student_id || "").toLowerCase().includes(term) ||
+        (s.classes?.name || "").toLowerCase().includes(term) ||
+        (s.departments?.name || "").toLowerCase().includes(term) ||
+        (s.phone_number || "").toLowerCase().includes(term)
+      );
+    });
+  }, [students, searchTerm]);
 
   const handlePhotoSelect = (e: React.ChangeEvent<HTMLInputElement>, isEdit: boolean = false) => {
     const file = e.target.files?.[0];
