@@ -43,6 +43,7 @@ export interface ReportCardSettings {
   header_bg_color: string;
   accent_color: string;
   secondary_bg_color: string;
+  header_chip_color: string;
   // Text colors
   general_average_text_color: string;
   header_meta_text_color: string;
@@ -55,6 +56,7 @@ export interface DepartmentReportColors {
   header_bg_color: string | null;
   accent_color: string | null;
   secondary_bg_color: string | null;
+  header_chip_color: string | null;
   general_average_text_color?: string | null;
   header_meta_text_color?: string | null;
 }
@@ -96,6 +98,7 @@ export const DEFAULT_REPORT_CARD_SETTINGS: ReportCardSettings = {
   header_bg_color: "#1a2a6e",
   accent_color: "#c8a84b",
   secondary_bg_color: "#2a5298",
+  header_chip_color: "#c8a84b",
   general_average_text_color: "#ffffff",
   header_meta_text_color: "#c8a84b",
 };
@@ -222,6 +225,7 @@ export const resolveReportColors = (
   header_bg_color: string;
   accent_color: string;
   secondary_bg_color: string;
+  header_chip_color: string;
   general_average_text_color: string;
   header_meta_text_color: string;
 } => {
@@ -232,6 +236,7 @@ export const resolveReportColors = (
     header_bg_color: override?.header_bg_color || settings.header_bg_color,
     accent_color: override?.accent_color || settings.accent_color,
     secondary_bg_color: override?.secondary_bg_color || settings.secondary_bg_color,
+    header_chip_color: override?.header_chip_color || settings.header_chip_color,
     general_average_text_color:
       override?.general_average_text_color || settings.general_average_text_color,
     header_meta_text_color:
