@@ -10,7 +10,10 @@ import { useClasses } from "@/hooks/useClasses";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Pencil, Trash2, Plus, BookOpen, UserCheck, GripVertical } from "lucide-react";
+import { Pencil, Trash2, Plus, BookOpen, UserCheck, GripVertical, Check, ChevronsUpDown } from "lucide-react";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
+import { cn } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -617,18 +620,39 @@ export const ClassManagementTab = () => {
           </DialogHeader>
           <div className="space-y-4 pt-4">
             <div className="flex gap-2">
-              <Select value={selectedSubjectId} onValueChange={setSelectedSubjectId}>
-                <SelectTrigger className="flex-1">
-                  <SelectValue placeholder="Select Subject" />
-                </SelectTrigger>
-                <SelectContent>
-                  {subjects?.map((subject) => (
-                    <SelectItem key={subject.id} value={subject.id}>
-                      {subject.name} ({subject.code})
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" role="combobox" className="flex-1 justify-between font-normal">
+                    {selectedSubjectId
+                      ? (() => {
+                          const s = subjects?.find((x) => x.id === selectedSubjectId);
+                          return s ? `${s.name} (${s.code})` : "Select Subject";
+                        })()
+                      : "Select Subject"}
+                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="p-0 w-[--radix-popover-trigger-width]" align="start">
+                  <Command>
+                    <CommandInput placeholder="Search subjects..." />
+                    <CommandList>
+                      <CommandEmpty>No subject found.</CommandEmpty>
+                      <CommandGroup>
+                        {subjects?.map((subject) => (
+                          <CommandItem
+                            key={subject.id}
+                            value={`${subject.name} ${subject.code}`}
+                            onSelect={() => setSelectedSubjectId(subject.id)}
+                          >
+                            <Check className={cn("mr-2 h-4 w-4", selectedSubjectId === subject.id ? "opacity-100" : "opacity-0")} />
+                            {subject.name} ({subject.code})
+                          </CommandItem>
+                        ))}
+                      </CommandGroup>
+                    </CommandList>
+                  </Command>
+                </PopoverContent>
+              </Popover>
               <Button onClick={handleAddSubjectToClass} disabled={!selectedSubjectId}>
                 Add Subject
               </Button>
