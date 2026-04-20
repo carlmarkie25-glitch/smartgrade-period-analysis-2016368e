@@ -647,13 +647,13 @@ export const StudentReportDialog = ({
                             return (
                               <>
                                 <td style={{ ...avgStyle, textAlign: 'left', paddingLeft: 8 }}>Average</td>
-                                {['p1','p2','p3'].map(p => <td key={p} style={avgStyle}>{computeColumnAvg(subjects, p)}</td>)}
-                                <td style={{ ...avgStyle, background: lightBlue, color: '#fff' }}>{computeColumnAvg(subjects, 'exam_s1')}</td>
-                                <td style={{ ...avgStyle, background: '#1a5276', color: '#fff' }}>{s1Avg ?? '--'}</td>
-                                {['p4','p5','p6'].map(p => <td key={p} style={avgStyle}>{computeColumnAvg(subjects, p)}</td>)}
-                                <td style={{ ...avgStyle, background: lightBlue, color: '#fff' }}>{computeColumnAvg(subjects, 'exam_s2')}</td>
-                                <td style={{ ...avgStyle, background: '#1a5276', color: '#fff' }}>{s2Avg ?? '--'}</td>
-                                <td style={{ ...avgStyle, background: gold, color: '#fff' }}>{generalAvg ?? '--'}</td>
+                                {['p1','p2','p3'].map(p => <td key={p} style={avgStyle}>{kgWrap(computeColumnAvg(subjects, p))}</td>)}
+                                <td style={{ ...avgStyle, background: lightBlue, color: '#fff' }}>{kgWrap(computeColumnAvg(subjects, 'exam_s1'))}</td>
+                                <td style={{ ...avgStyle, background: '#1a5276', color: '#fff' }}>{s1Avg !== null && s1Avg !== undefined ? kgWrap(s1Avg) : '--'}</td>
+                                {['p4','p5','p6'].map(p => <td key={p} style={avgStyle}>{kgWrap(computeColumnAvg(subjects, p))}</td>)}
+                                <td style={{ ...avgStyle, background: lightBlue, color: '#fff' }}>{kgWrap(computeColumnAvg(subjects, 'exam_s2'))}</td>
+                                <td style={{ ...avgStyle, background: '#1a5276', color: '#fff' }}>{s2Avg !== null && s2Avg !== undefined ? kgWrap(s2Avg) : '--'}</td>
+                                <td style={{ ...avgStyle, background: gold, color: '#fff' }}>{generalAvg !== null && generalAvg !== undefined ? kgWrap(generalAvg) : '--'}</td>
                               </>
                             );
                           })()}
