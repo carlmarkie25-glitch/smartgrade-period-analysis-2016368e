@@ -245,19 +245,21 @@ export const StudentReportDialog = ({
           // and numeric scores are rendered as letter grades (A+, A, B+, …).
 
           // Wrap a numeric score for display: shows letter for KG, raw number otherwise.
-          const kgWrap = (v: any, max: number = 100): any => {
+          // Scores in `report` are ALREADY normalized to 0–100, so we always treat
+          // max as 100 when converting to a KG letter (ignore the raw assessment max).
+          const kgWrap = (v: any, _max: number = 100): any => {
             if (!isKg) return v;
             if (v === null || v === undefined || v === '--' || v === 'I') return v;
             const n = typeof v === 'number' ? v : Number(v);
             if (!Number.isFinite(n)) return v;
-            return scoreToLetter(n, max) ?? '—';
+            return scoreToLetter(n, 100) ?? '—';
           };
           // Wrap displayScore output (handles 'I' / '--' passthrough)
-          const kgDisp = (score: number | null | undefined, noGrades?: boolean, max: number = 100): string => {
+          const kgDisp = (score: number | null | undefined, noGrades?: boolean, _max: number = 100): string => {
             const base = displayScore(score, noGrades);
             if (!isKg) return base;
             if (base === '--' || base === 'I') return base;
-            return scoreToLetter(score as number, max) ?? '—';
+            return scoreToLetter(score as number, 100) ?? '—';
           };
 
           // Unified averaging — these match the "Average" row of the grades table
@@ -619,8 +621,8 @@ export const StudentReportDialog = ({
                       );
                     })}
 
-                    {/* Aggregate / Average rows */}
-                    {isSemester && isYearly && (
+                    {/* Aggregate / Average rows — hidden for KG (letter grades only) */}
+                    {!isKg && isSemester && isYearly && (
                       <>
                         <tr>
                           {(() => {
@@ -662,7 +664,7 @@ export const StudentReportDialog = ({
                     )}
 
                     {/* Aggregate / Average — single semester (S1 or S2) */}
-                    {isSemester && !isYearly && (() => {
+                    {!isKg && isSemester && !isYearly && (() => {
                       const cols = isSem1 ? ['p1','p2','p3','exam_s1'] : ['p4','p5','p6','exam_s2'];
                       const periodAvgKeys = isSem1 ? ['p1','p2','p3'] : ['p4','p5','p6'];
                       const semSum = subjects.reduce((a: number, s: any) => a + (computeSubjectSemAvg(s, periodAvgKeys) ?? 0), 0);
@@ -700,7 +702,7 @@ export const StudentReportDialog = ({
                     })()}
 
                     {/* Aggregate / Average — single period view */}
-                    {!isSemester && subjects.length > 0 && (() => {
+                    {!isKg && !isSemester && subjects.length > 0 && (() => {
                       const aggStyle: React.CSSProperties = { ...tdBase, background: '#e8f0e8', fontWeight: 700, color: '#1a5226' };
                       const avgStyle: React.CSSProperties = { ...tdBase, background: '#fff3cd', fontWeight: 700, color: '#7d5a00' };
                       const anyIncomplete = subjects.some((s: any) => s.noGrades || s.hasIncomplete);
