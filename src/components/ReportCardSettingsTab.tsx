@@ -23,6 +23,8 @@ export const ReportCardSettingsTab = () => {
 
   const [form, setForm] = useState<ReportCardSettings>(DEFAULT_REPORT_CARD_SETTINGS);
   const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [sealFile, setSealFile] = useState<File | null>(null);
+  const [signatureFile, setSignatureFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
@@ -32,21 +34,31 @@ export const ReportCardSettingsTab = () => {
   const set = <K extends keyof ReportCardSettings>(k: K, v: ReportCardSettings[K]) =>
     setForm((p) => ({ ...p, [k]: v }));
 
+  const uploadAsset = async (file: File, prefix: string): Promise<string> => {
+    const path = `${school!.id}/${prefix}-${Date.now()}-${file.name}`;
+    const { error: upErr } = await supabase.storage
+      .from("school-assets")
+      .upload(path, file, { upsert: true });
+    if (upErr) throw upErr;
+    return supabase.storage.from("school-assets").getPublicUrl(path).data.publicUrl;
+  };
+
   const handleSave = async () => {
     try {
       let logo_url = form.logo_url;
-      if (logoFile && school?.id) {
+      let seal_url = form.seal_url;
+      let admin_signature_url = form.admin_signature_url;
+      if ((logoFile || sealFile || signatureFile) && school?.id) {
         setUploading(true);
-        const path = `${school.id}/report-logo-${Date.now()}-${logoFile.name}`;
-        const { error: upErr } = await supabase.storage
-          .from("school-assets")
-          .upload(path, logoFile, { upsert: true });
-        if (upErr) throw upErr;
-        logo_url = supabase.storage.from("school-assets").getPublicUrl(path).data.publicUrl;
+        if (logoFile) logo_url = await uploadAsset(logoFile, "report-logo");
+        if (sealFile) seal_url = await uploadAsset(sealFile, "report-seal");
+        if (signatureFile) admin_signature_url = await uploadAsset(signatureFile, "admin-signature");
       }
-      await save.mutateAsync({ ...form, logo_url });
+      await save.mutateAsync({ ...form, logo_url, seal_url, admin_signature_url });
       toast({ title: "Saved", description: "Report card settings updated." });
       setLogoFile(null);
+      setSealFile(null);
+      setSignatureFile(null);
     } catch (e: any) {
       toast({ title: "Save failed", description: e.message, variant: "destructive" });
     } finally {
