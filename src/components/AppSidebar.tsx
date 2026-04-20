@@ -173,20 +173,20 @@ const AppSidebar = () => {
         )}
       </SidebarContent>
 
-      <SidebarFooter className="bg-sidebar p-4 space-y-2">
-        <div className="flex items-center justify-between px-3 py-2.5 rounded-lg bg-sidebar-accent/50">
+      <SidebarFooter className="bg-transparent p-4 space-y-2">
+        <div className="flex items-center justify-between px-3 py-2 rounded-full bg-white/15">
           {!isCollapsed && <span className="text-sm font-medium text-sidebar-foreground">Theme</span>}
           <ThemeToggle />
         </div>
         <button
           onClick={signOut}
           className={cn(
-            "flex items-center gap-3 w-full px-3 py-2.5 rounded-lg",
-            "text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-foreground",
-            "transition-all duration-200"
+            "flex items-center justify-center gap-2 w-full px-4 py-2.5 rounded-full",
+            "bg-white/20 text-sidebar-foreground hover:bg-white/30",
+            "transition-all duration-300 shadow-sm font-medium text-sm"
           )}
         >
-          <LogOut className="h-5 w-5" />
+          <LogOut className="h-4 w-4" />
           {!isCollapsed && <span>Sign Out</span>}
         </button>
       </SidebarFooter>
