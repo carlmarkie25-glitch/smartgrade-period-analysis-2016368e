@@ -16,7 +16,8 @@ export const useClasses = (filterMode: "teaching" | "sponsor" = "teaching") => {
           *,
           departments:department_id (
             id,
-            name
+            name,
+            display_order
           ),
           academic_years:academic_year_id (
             id,
@@ -28,7 +29,31 @@ export const useClasses = (filterMode: "teaching" | "sponsor" = "teaching") => {
             full_name
           )
         `)
-        .order("name");
+        .order("display_order", { ascending: true })
+        .order("name", { ascending: true });
+
+      // Helper: sort by department order first, then class order, then name (with natural numeric tiebreak)
+      const sortClasses = (rows: any[]) => {
+        const naturalNum = (s: string) => {
+          const m = String(s ?? "").match(/\d+/);
+          return m ? parseInt(m[0], 10) : Number.MAX_SAFE_INTEGER;
+        };
+        return [...(rows ?? [])].sort((a, b) => {
+          const da = a.departments?.display_order ?? 9999;
+          const db = b.departments?.display_order ?? 9999;
+          if (da !== db) return da - db;
+          const dna = String(a.departments?.name ?? "");
+          const dnb = String(b.departments?.name ?? "");
+          if (dna !== dnb) return dna.localeCompare(dnb);
+          const ca = a.display_order ?? 0;
+          const cb = b.display_order ?? 0;
+          if (ca !== cb) return ca - cb;
+          const na = naturalNum(a.name);
+          const nb = naturalNum(b.name);
+          if (na !== nb) return na - nb;
+          return String(a.name ?? "").localeCompare(String(b.name ?? ""));
+        });
+      };
 
       // If admin, show all classes
       if (isAdmin) {
