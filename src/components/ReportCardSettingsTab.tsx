@@ -198,10 +198,17 @@ export const ReportCardSettingsTab = () => {
             value={form.header_meta_text_color}
             onChange={(v) => set("header_meta_text_color", v)}
           />
+          <ColorRow
+            label="Header chips background"
+            help="Background color for the REPORT TYPE and SEMESTER chips in the header."
+            value={form.header_chip_color}
+            onChange={(v) => set("header_chip_color", v)}
+          />
           <ReportColorPreview
             header={form.header_bg_color}
             accent={form.accent_color}
             secondary={form.secondary_bg_color}
+            chipBg={form.header_chip_color}
           />
         </CardContent>
       </Card>

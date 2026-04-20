@@ -349,6 +349,7 @@ export const StudentReportDialog = ({
   const colors = resolveReportColors(rcSettings, deptColorsData, departmentId);
   const navy = greyMode ? '#9aa0a6' : colors.header_bg_color;
   const gold = greyMode ? '#ffffff' : colors.accent_color;
+  const chipBg = greyMode ? '#d1d5db' : colors.header_chip_color;
   // Text color to use ON the accent background. In grey mode the accent becomes white,
   // so white text would disappear — use black for legibility.
   const goldText = greyMode ? '#000000' : '#ffffff';
