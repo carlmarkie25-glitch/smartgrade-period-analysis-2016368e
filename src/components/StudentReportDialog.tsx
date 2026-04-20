@@ -180,18 +180,60 @@ export const StudentReportDialog = ({
       toast({ title: 'Error', description: 'Report not ready', variant: 'destructive' });
       return;
     }
+
+    // Ensure we capture the read-only view (not the editor with form controls,
+    // which html2canvas mis-aligns vs static text).
+    const wasEditing = editing;
+    if (wasEditing) setEditing(false);
+    // Wait a tick for React to commit the change.
+    await new Promise((r) => setTimeout(r, 50));
+
+    // Replace form controls (textarea/input/select) inside the report with their
+    // text values during capture, so html2canvas renders them as plain text
+    // with no baseline shifts. Restore them after.
+    const controls = Array.from(
+      el.querySelectorAll('textarea, input, select')
+    ) as (HTMLTextAreaElement | HTMLInputElement | HTMLSelectElement)[];
+    const placeholders: { control: HTMLElement; replacement: HTMLElement }[] = [];
+    controls.forEach((ctrl) => {
+      const span = document.createElement('div');
+      let val = '';
+      if (ctrl instanceof HTMLSelectElement) {
+        val = ctrl.options[ctrl.selectedIndex]?.text || '';
+      } else {
+        val = (ctrl as HTMLInputElement | HTMLTextAreaElement).value || '';
+      }
+      span.textContent = val.trim() ? val : '\u00A0';
+      span.style.cssText = ctrl.style.cssText;
+      span.style.whiteSpace = 'pre-wrap';
+      span.style.display = 'block';
+      ctrl.parentNode?.insertBefore(span, ctrl);
+      ctrl.style.display = 'none';
+      placeholders.push({ control: ctrl, replacement: span });
+    });
+
     try {
       setDownloading(true);
       const [{ default: html2canvas }, { default: jsPDF }] = await Promise.all([
         import('html2canvas'),
         import('jspdf'),
       ]);
+
+      // Use the element's natural rendered width so captured layout matches preview.
+      const renderWidth = el.scrollWidth;
+
       const canvas = await html2canvas(el, {
         scale: 2,
         useCORS: true,
         backgroundColor: '#ffffff',
+        windowWidth: renderWidth,
+        width: renderWidth,
+        scrollX: 0,
+        scrollY: -window.scrollY,
+        logging: false,
       });
-      const imgData = canvas.toDataURL('image/jpeg', 0.95);
+
+      const imgData = canvas.toDataURL('image/png');
       const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
       const pageW = pdf.internal.pageSize.getWidth();
       const pageH = pdf.internal.pageSize.getHeight();
@@ -200,12 +242,12 @@ export const StudentReportDialog = ({
 
       let heightLeft = imgH;
       let position = 0;
-      pdf.addImage(imgData, 'JPEG', 0, position, imgW, imgH);
+      pdf.addImage(imgData, 'PNG', 0, position, imgW, imgH);
       heightLeft -= pageH;
       while (heightLeft > 0) {
-        position = heightLeft - imgH;
+        position -= pageH;
         pdf.addPage();
-        pdf.addImage(imgData, 'JPEG', 0, position, imgW, imgH);
+        pdf.addImage(imgData, 'PNG', 0, position, imgW, imgH);
         heightLeft -= pageH;
       }
 
@@ -215,6 +257,12 @@ export const StudentReportDialog = ({
     } catch (e: any) {
       toast({ title: 'Download failed', description: e?.message || 'Could not generate PDF', variant: 'destructive' });
     } finally {
+      // Restore form controls
+      placeholders.forEach(({ control, replacement }) => {
+        replacement.remove();
+        control.style.display = '';
+      });
+      if (wasEditing) setEditing(true);
       setDownloading(false);
     }
   };
