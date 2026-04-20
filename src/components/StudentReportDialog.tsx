@@ -689,11 +689,11 @@ export const StudentReportDialog = ({
                               const isExam = p.startsWith('exam');
                               return (
                                 <td key={p} style={isExam ? { ...avgStyle, background: lightBlue, color: '#fff' } : avgStyle}>
-                                  {computeColumnAvg(subjects, p)}
+                                  {kgWrap(computeColumnAvg(subjects, p))}
                                 </td>
                               );
                             })}
-                            <td style={{ ...avgStyle, background: '#1a5276', color: '#fff' }}>{semAvg ?? '--'}</td>
+                            <td style={{ ...avgStyle, background: '#1a5276', color: '#fff' }}>{semAvg !== null && semAvg !== undefined ? kgWrap(semAvg) : '--'}</td>
                           </tr>
                         </>
                       );
