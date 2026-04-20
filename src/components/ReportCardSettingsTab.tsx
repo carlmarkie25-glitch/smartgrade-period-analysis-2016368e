@@ -591,6 +591,7 @@ const DepartmentColorsCard = ({
           const header = ov?.header_bg_color ?? schoolDefaults.header_bg_color;
           const accent = ov?.accent_color ?? schoolDefaults.accent_color;
           const secondary = ov?.secondary_bg_color ?? schoolDefaults.secondary_bg_color;
+          const chipBg = ov?.header_chip_color ?? schoolDefaults.header_chip_color;
           const genAvgText =
             ov?.general_average_text_color ?? schoolDefaults.general_average_text_color;
           const metaText =
@@ -643,8 +644,13 @@ const DepartmentColorsCard = ({
                   value={metaText}
                   onCommit={(v) => handleSave(d.id, { header_meta_text_color: v })}
                 />
+                <DeptColorField
+                  label="Header chips bg"
+                  value={chipBg}
+                  onCommit={(v) => handleSave(d.id, { header_chip_color: v })}
+                />
               </div>
-              <ReportColorPreview header={header} accent={accent} secondary={secondary} />
+              <ReportColorPreview header={header} accent={accent} secondary={secondary} chipBg={chipBg} />
             </div>
           );
         })}
