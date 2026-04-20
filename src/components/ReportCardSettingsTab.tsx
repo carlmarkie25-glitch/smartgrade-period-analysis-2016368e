@@ -536,6 +536,7 @@ const DepartmentColorsCard = ({
       header_bg_color: existing?.header_bg_color ?? schoolDefaults.header_bg_color,
       accent_color: existing?.accent_color ?? schoolDefaults.accent_color,
       secondary_bg_color: existing?.secondary_bg_color ?? schoolDefaults.secondary_bg_color,
+      header_chip_color: existing?.header_chip_color ?? schoolDefaults.header_chip_color,
       general_average_text_color:
         existing?.general_average_text_color ?? schoolDefaults.general_average_text_color,
       header_meta_text_color:
