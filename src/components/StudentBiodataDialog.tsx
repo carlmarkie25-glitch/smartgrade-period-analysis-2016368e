@@ -417,19 +417,7 @@ Health Issues: ${student.health_issues || 'None'}
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="flex items-center justify-between">
-            <span>Student Biodata</span>
-            <div className="flex gap-2">
-              <Button variant="outline" size="sm" onClick={handleDownload}>
-                <Download className="h-4 w-4 mr-2" />
-                Download
-              </Button>
-              <Button variant="outline" size="sm" onClick={handlePrint}>
-                <Printer className="h-4 w-4 mr-2" />
-                Print
-              </Button>
-            </div>
-          </DialogTitle>
+          <DialogTitle>Student Biodata</DialogTitle>
         </DialogHeader>
         
         <div ref={printRef} className="space-y-6 pt-4">
