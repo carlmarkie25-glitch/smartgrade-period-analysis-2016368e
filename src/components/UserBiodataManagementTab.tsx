@@ -25,13 +25,21 @@ interface StudentBiodata {
   gender: string | null;
   photo_url: string | null;
   nationality: string | null;
+  ethnicity: string | null;
   county: string | null;
   country: string | null;
   address: string | null;
+  disability: string | null;
+  health_issues: string | null;
   father_name: string | null;
+  father_contact: string | null;
   mother_name: string | null;
+  mother_contact: string | null;
   emergency_contact_name: string | null;
   emergency_contact_phone: string | null;
+  emergency_contact_relationship: string | null;
+  previous_school: string | null;
+  previous_class: string | null;
   student_id?: string | null;
   class_id?: string | null;
   department_id?: string | null;
@@ -45,6 +53,7 @@ export const UserBiodataManagementTab = () => {
   const [selectedUser, setSelectedUser] = useState<StudentBiodata | null>(null);
   const [isBiodataDialogOpen, setIsBiodataDialogOpen] = useState(false);
   const [isDownloadOpen, setIsDownloadOpen] = useState(false);
+  const [isDownloading, setIsDownloading] = useState(false);
   const [downloadScope, setDownloadScope] = useState<"all" | "class" | "department">("all");
   const [downloadClassId, setDownloadClassId] = useState<string>("");
   const [downloadDeptId, setDownloadDeptId] = useState<string>("");
@@ -57,7 +66,7 @@ export const UserBiodataManagementTab = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("students")
-        .select("id, user_id, full_name, photo_url, gender, student_id, phone_number, date_of_birth, religion, nationality, county, country, address, father_name, mother_name, emergency_contact_name, emergency_contact_phone, class_id, department_id, classes(name), departments(name)")
+        .select("id, user_id, full_name, photo_url, gender, student_id, phone_number, date_of_birth, religion, nationality, ethnicity, county, country, address, disability, health_issues, father_name, father_contact, mother_name, mother_contact, emergency_contact_name, emergency_contact_phone, emergency_contact_relationship, previous_school, previous_class, class_id, department_id, classes(name), departments(name)")
         .order("full_name");
 
       if (error) throw error;
@@ -72,13 +81,21 @@ export const UserBiodataManagementTab = () => {
         gender: s.gender ?? null,
         photo_url: s.photo_url ?? null,
         nationality: s.nationality ?? null,
+        ethnicity: s.ethnicity ?? null,
         county: s.county ?? null,
         country: s.country ?? null,
         address: s.address ?? null,
+        disability: s.disability ?? null,
+        health_issues: s.health_issues ?? null,
         father_name: s.father_name ?? null,
+        father_contact: s.father_contact ?? null,
         mother_name: s.mother_name ?? null,
+        mother_contact: s.mother_contact ?? null,
         emergency_contact_name: s.emergency_contact_name ?? null,
         emergency_contact_phone: s.emergency_contact_phone ?? null,
+        emergency_contact_relationship: s.emergency_contact_relationship ?? null,
+        previous_school: s.previous_school ?? null,
+        previous_class: s.previous_class ?? null,
         student_id: s.student_id ?? null,
         class_id: s.class_id ?? null,
         department_id: s.department_id ?? null,
@@ -88,6 +105,18 @@ export const UserBiodataManagementTab = () => {
       }));
 
       return allUsers;
+    },
+    staleTime: 1000 * 60 * 5,
+  });
+
+  const { data: schoolHeader } = useQuery({
+    queryKey: ["biodata-school-header"],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("report_card_settings")
+        .select("header_title, header_subtitle, header_address, header_contact, header_website, logo_url, header_bg_color, accent_color")
+        .maybeSingle();
+      return data;
     },
     staleTime: 1000 * 60 * 5,
   });
