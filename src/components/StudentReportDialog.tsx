@@ -355,19 +355,35 @@ export const StudentReportDialog = ({
           // Wrap a numeric score for display: shows letter for KG, raw number otherwise.
           // Scores in `report` are ALREADY normalized to 0–100, so we always treat
           // max as 100 when converting to a KG letter (ignore the raw assessment max).
+          // Render a KG letter so the base letter (A, B, C, D, F) is centered in a
+          // fixed slot and any +/- modifier sits in its own fixed slot to the right.
+          // This keeps a column of "A", "A+", "B", "B+" visually aligned (the base
+          // letter does not shift left when a "+" is added).
+          const renderKgLetter = (letter: string): any => {
+            const base = letter.charAt(0);
+            const mod = letter.slice(1); // "", "+", "-"
+            return (
+              <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', lineHeight: 1 }}>
+                <span style={{ display: 'inline-block', width: '0.7em', textAlign: 'center' }}>{base}</span>
+                <span style={{ display: 'inline-block', width: '0.45em', textAlign: 'left' }}>{mod}</span>
+              </span>
+            );
+          };
           const kgWrap = (v: any, _max: number = 100): any => {
             if (!isKg) return v;
             if (v === null || v === undefined || v === '--' || v === 'I') return v;
             const n = typeof v === 'number' ? v : Number(v);
             if (!Number.isFinite(n)) return v;
-            return scoreToLetter(n, 100) ?? '—';
+            const letter = scoreToLetter(n, 100);
+            return letter ? renderKgLetter(letter) : '—';
           };
           // Wrap displayScore output (handles 'I' / '--' passthrough)
-          const kgDisp = (score: number | null | undefined, noGrades?: boolean, _max: number = 100): string => {
+          const kgDisp = (score: number | null | undefined, noGrades?: boolean, _max: number = 100): any => {
             const base = displayScore(score, noGrades);
             if (!isKg) return base;
             if (base === '--' || base === 'I') return base;
-            return scoreToLetter(score as number, 100) ?? '—';
+            const letter = scoreToLetter(score as number, 100);
+            return letter ? renderKgLetter(letter) : '—';
           };
 
           // Unified averaging — these match the "Average" row of the grades table
