@@ -140,7 +140,8 @@ export const Sidebar = ({ activeTab, onTabChange, collapsed = false, onToggle }:
     return (
       <div
         key={item.id}
-        className={`relative ${active && !collapsed ? "sidebar-notch-active -mr-3" : ""}`}
+        className={`relative ${active && !collapsed ? "sidebar-notch-active" : ""}`}
+        style={active && !collapsed ? { marginRight: "-12px" } : undefined}
       >
         <button
           onClick={() => handleClick(item)}
