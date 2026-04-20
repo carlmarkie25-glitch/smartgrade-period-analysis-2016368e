@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -9,8 +9,74 @@ import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Pencil, Trash2, Plus, FileText } from "lucide-react";
+import { Pencil, Trash2, Plus, FileText, GripVertical } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  DndContext,
+  closestCenter,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  arrayMove,
+  SortableContext,
+  useSortable,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+
+type Dept = { id: string; name: string; description: string | null; display_order: number };
+
+const SortableDeptRow = ({
+  dept,
+  onAssessments,
+  onEdit,
+  onDelete,
+}: {
+  dept: Dept;
+  onAssessments: (id: string) => void;
+  onEdit: (d: Dept) => void;
+  onDelete: (id: string) => void;
+}) => {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: dept.id });
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  };
+  return (
+    <TableRow ref={setNodeRef} style={style}>
+      <TableCell className="w-10">
+        <button
+          type="button"
+          className="cursor-grab active:cursor-grabbing text-muted-foreground hover:text-foreground touch-none"
+          {...attributes}
+          {...listeners}
+          aria-label="Drag to reorder"
+        >
+          <GripVertical className="h-4 w-4" />
+        </button>
+      </TableCell>
+      <TableCell className="font-medium">{dept.name}</TableCell>
+      <TableCell>{dept.description || "—"}</TableCell>
+      <TableCell className="text-right">
+        <div className="flex justify-end gap-2">
+          <Button variant="outline" size="sm" onClick={() => onAssessments(dept.id)}>
+            <FileText className="h-4 w-4 mr-1" />Assessments
+          </Button>
+          <Button variant="outline" size="sm" onClick={() => onEdit(dept)}>
+            <Pencil className="h-4 w-4" />
+          </Button>
+          <Button variant="outline" size="sm" onClick={() => onDelete(dept.id)}>
+            <Trash2 className="h-4 w-4" />
+          </Button>
+        </div>
+      </TableCell>
+    </TableRow>
+  );
+};
 
 export const DepartmentManagementTab = () => {
   const [isDeptDialogOpen, setIsDeptDialogOpen] = useState(false);
@@ -20,18 +86,28 @@ export const DepartmentManagementTab = () => {
   const [editingDepartment, setEditingDepartment] = useState<{ id: string; name: string; description: string }>({ id: "", name: "", description: "" });
   const [newDepartment, setNewDepartment] = useState({ name: "", description: "" });
   const [newAssessment, setNewAssessment] = useState({ name: "", max_points: 100, display_order: 0 });
+  const [orderedDepts, setOrderedDepts] = useState<Dept[]>([]);
 
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
 
   const { data: departments, isLoading: deptLoading } = useQuery({
     queryKey: ["departments"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("departments").select("*").order("name");
+      const { data, error } = await supabase
+        .from("departments")
+        .select("*")
+        .order("display_order")
+        .order("name");
       if (error) throw error;
-      return data;
+      return data as Dept[];
     },
   });
+
+  useEffect(() => {
+    if (departments) setOrderedDepts(departments);
+  }, [departments]);
 
   const { data: assessments, isLoading: assessmentLoading } = useQuery({
     queryKey: ["assessment-types", selectedDepartmentId],
@@ -48,9 +124,34 @@ export const DepartmentManagementTab = () => {
     enabled: !!selectedDepartmentId,
   });
 
+  const handleDragEnd = async (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+    const oldIndex = orderedDepts.findIndex((d) => d.id === active.id);
+    const newIndex = orderedDepts.findIndex((d) => d.id === over.id);
+    if (oldIndex === -1 || newIndex === -1) return;
+    const next = arrayMove(orderedDepts, oldIndex, newIndex);
+    setOrderedDepts(next);
+
+    // Persist new order (10, 20, 30, ...)
+    try {
+      await Promise.all(
+        next.map((d, i) =>
+          supabase.from("departments").update({ display_order: (i + 1) * 10 }).eq("id", d.id),
+        ),
+      );
+      queryClient.invalidateQueries({ queryKey: ["departments"] });
+      queryClient.invalidateQueries({ queryKey: ["classes"] });
+      toast({ title: "Order saved", description: "Department order updated." });
+    } catch (error: any) {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    }
+  };
+
   const handleAddDepartment = async () => {
     try {
-      const { error } = await supabase.from("departments").insert(newDepartment);
+      const nextOrder = (orderedDepts[orderedDepts.length - 1]?.display_order ?? 0) + 10;
+      const { error } = await supabase.from("departments").insert({ ...newDepartment, display_order: nextOrder });
       if (error) throw error;
       toast({ title: "Success", description: "Department created successfully" });
       queryClient.invalidateQueries({ queryKey: ["departments"] });
@@ -80,7 +181,6 @@ export const DepartmentManagementTab = () => {
     if (!confirm("Are you sure you want to delete this department? This will also delete all associated assessments.")) return;
 
     try {
-      // Check if any students or classes reference this department
       const [{ count: studentCount }, { count: classCount }] = await Promise.all([
         supabase.from("students").select("id", { count: "exact", head: true }).eq("department_id", id),
         supabase.from("classes").select("id", { count: "exact", head: true }).eq("department_id", id),
@@ -138,7 +238,9 @@ export const DepartmentManagementTab = () => {
           <div className="flex items-center justify-between">
             <div>
               <CardTitle>Departments</CardTitle>
-              <CardDescription>Manage school departments and their assessment types</CardDescription>
+              <CardDescription>
+                Drag to reorder from lowest level (Nursery) to highest (Senior High). Order applies everywhere classes are listed.
+              </CardDescription>
             </div>
             <Dialog open={isDeptDialogOpen} onOpenChange={setIsDeptDialogOpen}>
               <DialogTrigger asChild>
@@ -168,36 +270,31 @@ export const DepartmentManagementTab = () => {
           {deptLoading ? (
             <div className="space-y-2">{Array(3).fill(0).map((_, i) => (<Skeleton key={i} className="h-16 w-full" />))}</div>
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Department Name</TableHead>
-                  <TableHead>Description</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {departments?.map((dept) => (
-                  <TableRow key={dept.id}>
-                    <TableCell className="font-medium">{dept.name}</TableCell>
-                    <TableCell>{dept.description || "—"}</TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex justify-end gap-2">
-                        <Button variant="outline" size="sm" onClick={() => { setSelectedDepartmentId(dept.id); setIsAssessmentDialogOpen(true); }}>
-                          <FileText className="h-4 w-4 mr-1" />Assessments
-                        </Button>
-                        <Button variant="outline" size="sm" onClick={() => { setEditingDepartment({ id: dept.id, name: dept.name, description: dept.description || "" }); setIsEditDialogOpen(true); }}>
-                          <Pencil className="h-4 w-4" />
-                        </Button>
-                        <Button variant="outline" size="sm" onClick={() => handleDeleteDepartment(dept.id)}>
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </TableCell>
+            <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-10"></TableHead>
+                    <TableHead>Department Name</TableHead>
+                    <TableHead>Description</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <SortableContext items={orderedDepts.map((d) => d.id)} strategy={verticalListSortingStrategy}>
+                  <TableBody>
+                    {orderedDepts.map((dept) => (
+                      <SortableDeptRow
+                        key={dept.id}
+                        dept={dept}
+                        onAssessments={(id) => { setSelectedDepartmentId(id); setIsAssessmentDialogOpen(true); }}
+                        onEdit={(d) => { setEditingDepartment({ id: d.id, name: d.name, description: d.description || "" }); setIsEditDialogOpen(true); }}
+                        onDelete={handleDeleteDepartment}
+                      />
+                    ))}
+                  </TableBody>
+                </SortableContext>
+              </Table>
+            </DndContext>
           )}
         </CardContent>
       </Card>
