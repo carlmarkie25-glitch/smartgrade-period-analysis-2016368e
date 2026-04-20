@@ -126,11 +126,14 @@ const displayScore = (score: number | null | undefined, noGrades?: boolean): str
 /** Score color class */
 const scoreColorStyle = (score: number | null | undefined): React.CSSProperties => {
   if (score === null || score === undefined) return { color: '#999' };
-  if (score >= 90) return { color: '#155724', fontWeight: 700 };
-  if (score >= 75) return { color: '#1a3a6e', fontWeight: 600 };
-  // 60–69 is failing-range under the no-D scale → red
-  if (score >= 70) return { color: '#856404' };
-  return { color: '#721c24', fontWeight: 700 };
+  const n = typeof score === 'number' ? score : Number(score);
+  if (!Number.isFinite(n)) return { color: '#999' };
+  if (n >= 90) return { color: '#155724', fontWeight: 700 };
+  if (n >= 75) return { color: '#1a3a6e', fontWeight: 600 };
+  // 70–74 amber
+  if (n >= 70) return { color: '#856404', fontWeight: 600 };
+  // 60–69 (and anything below) → red, since D tier was removed
+  return { color: '#c0392b', fontWeight: 700 };
 };
 
 export const StudentReportDialog = ({
