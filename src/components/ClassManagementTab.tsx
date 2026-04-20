@@ -65,6 +65,68 @@ export const ClassManagementTab = () => {
   const { data: classes, isLoading } = useClasses();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
+
+  // Local order state mirrors `classes` so drag reorder feels instant
+  const [orderedClasses, setOrderedClasses] = useState<any[]>([]);
+  useEffect(() => {
+    if (classes) setOrderedClasses(classes as any[]);
+  }, [classes]);
+
+  // Group classes by department for grouped rendering
+  const groupedByDept = useMemo(() => {
+    const groups = new Map<string, { name: string; order: number; items: any[] }>();
+    for (const c of orderedClasses) {
+      const id = c.department_id;
+      const name = c.departments?.name ?? "—";
+      const order = c.departments?.display_order ?? 9999;
+      if (!groups.has(id)) groups.set(id, { name, order, items: [] });
+      groups.get(id)!.items.push(c);
+    }
+    return [...groups.entries()]
+      .map(([id, g]) => ({ id, ...g }))
+      .sort((a, b) => a.order - b.order || a.name.localeCompare(b.name));
+  }, [orderedClasses]);
+
+  const handleDragEnd = async (deptId: string, event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+    const group = groupedByDept.find((g) => g.id === deptId);
+    if (!group) return;
+    const oldIndex = group.items.findIndex((c) => c.id === active.id);
+    const newIndex = group.items.findIndex((c) => c.id === over.id);
+    if (oldIndex === -1 || newIndex === -1) return;
+    const reordered = arrayMove(group.items, oldIndex, newIndex);
+
+    // Rebuild orderedClasses with the new in-department order
+    const next = orderedClasses.map((c) => c);
+    const otherIds = next.filter((c) => c.department_id !== deptId);
+    const merged = [...otherIds, ...reordered].sort((a, b) => {
+      const da = a.departments?.display_order ?? 9999;
+      const db = b.departments?.display_order ?? 9999;
+      if (da !== db) return da - db;
+      return 0;
+    });
+    // Place reordered group items in their new positions
+    const finalList: any[] = [];
+    for (const g of groupedByDept) {
+      if (g.id === deptId) finalList.push(...reordered);
+      else finalList.push(...g.items);
+    }
+    setOrderedClasses(finalList);
+
+    try {
+      await Promise.all(
+        reordered.map((c, i) =>
+          supabase.from("classes").update({ display_order: (i + 1) * 10 }).eq("id", c.id),
+        ),
+      );
+      queryClient.invalidateQueries({ queryKey: ["classes"] });
+      toast({ title: "Order saved", description: `Updated class order in ${group.name}.` });
+    } catch (error: any) {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    }
+  };
 
   const { data: departments } = useQuery({
     queryKey: ["departments"],
