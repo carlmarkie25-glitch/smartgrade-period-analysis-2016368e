@@ -114,3 +114,21 @@ export const gradeFromSettings = (
   if (pct >= s.grade_d_min) return { letter: "D", label: s.grade_d_label };
   return { letter: "F", label: s.grade_f_label };
 };
+
+/** Standing label for the Kindergarten letter scale, sourced from admin settings. */
+export const kgLabelFromSettings = (
+  letter: string | null | undefined,
+  s: ReportCardSettings,
+): string => {
+  switch (letter) {
+    case "A+": return s.kg_a_plus_label;
+    case "A":  return s.kg_a_label;
+    case "B+": return s.kg_b_plus_label;
+    case "B":  return s.kg_b_label;
+    case "C+": return s.kg_c_plus_label;
+    case "C":  return s.kg_c_label;
+    case "D":  return s.kg_d_label;
+    case "F":  return s.kg_f_label;
+    default:   return "";
+  }
+};
