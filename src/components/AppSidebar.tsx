@@ -71,17 +71,16 @@ const AppSidebar = () => {
       <SidebarMenuItem key={item.path}>
         <SidebarMenuButton
           asChild
-          isActive={active}
           className={cn(
-            "mx-2 rounded-lg transition-all duration-200",
+            "mx-3 my-0.5 rounded-full transition-all duration-300 h-11",
             active
-              ? "bg-sidebar-primary text-sidebar-primary-foreground font-medium"
-              : "text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-foreground"
+              ? "bg-sidebar-primary text-sidebar-primary-foreground font-semibold shadow-md hover:bg-sidebar-primary hover:text-sidebar-primary-foreground"
+              : "text-sidebar-foreground/90 hover:bg-white/15 hover:text-sidebar-foreground"
           )}
         >
-          <Link to={item.path} className="flex items-center gap-3 px-3 py-2.5">
-            <Icon className="h-5 w-5" />
-            {!isCollapsed && <span>{item.label}</span>}
+          <Link to={item.path} className="flex items-center gap-3 px-4">
+            <Icon className="h-5 w-5 shrink-0" />
+            {!isCollapsed && <span className="text-sm">{item.label}</span>}
           </Link>
         </SidebarMenuButton>
       </SidebarMenuItem>
