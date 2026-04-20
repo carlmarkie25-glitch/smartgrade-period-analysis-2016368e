@@ -326,6 +326,7 @@ export const StudentReportDialog = ({
   const navy = greyMode ? '#9aa0a6' : '#1a2a6e';
   const gold = '#c8a84b';
   const lightBlue = greyMode ? '#bfc4ca' : '#2a5298';
+  const headerBlue = greyMode ? '#a8aeb4' : '#2a3a8e';
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
