@@ -237,19 +237,15 @@ export const StudentReportDialog = ({
       const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
       const pageW = pdf.internal.pageSize.getWidth();
       const pageH = pdf.internal.pageSize.getHeight();
-      const imgW = pageW;
-      const imgH = (canvas.height * imgW) / canvas.width;
 
-      let heightLeft = imgH;
-      let position = 0;
-      pdf.addImage(imgData, 'PNG', 0, position, imgW, imgH);
-      heightLeft -= pageH;
-      while (heightLeft > 0) {
-        position -= pageH;
-        pdf.addPage();
-        pdf.addImage(imgData, 'PNG', 0, position, imgW, imgH);
-        heightLeft -= pageH;
-      }
+      // Fit the entire report onto a SINGLE A4 page by scaling proportionally.
+      const ratio = Math.min(pageW / canvas.width, pageH / canvas.height);
+      const imgW = canvas.width * ratio;
+      const imgH = canvas.height * ratio;
+      // Center horizontally; align to top vertically.
+      const x = (pageW - imgW) / 2;
+      const y = 0;
+      pdf.addImage(imgData, 'PNG', x, y, imgW, imgH);
 
       const studentName = (report?.student?.full_name || 'student').replace(/\s+/g, '_');
       pdf.save(`Report_${studentName}_${period}.pdf`);
@@ -572,14 +568,14 @@ export const StudentReportDialog = ({
                     ];
                   })().map(([label, val], i) => (
                     <div key={i} style={{
-                      display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 12px',
+                      display: 'flex', alignItems: 'center', gap: '8px', padding: '4px 12px',
                       borderBottom: '0.5px solid #e5e5e5',
                       borderRight: i % 2 === 0 ? '0.5px solid #ccc' : 'none',
                     }}>
-                      <span style={{ fontSize: '11px', fontWeight: 700, color: '#444', textTransform: 'uppercase', minWidth: '100px' }}>
+                      <span style={{ fontSize: '10px', fontWeight: 700, color: '#444', textTransform: 'uppercase', minWidth: '100px' }}>
                         {label}
                       </span>
-                      <span style={{ fontSize: '13px', color: '#111', fontWeight: 500 }}>{val}</span>
+                      <span style={{ fontSize: '12px', color: '#111', fontWeight: 600 }}>{val}</span>
                     </div>
                   ))}
                 </div>
@@ -592,7 +588,7 @@ export const StudentReportDialog = ({
                 )}
 
                 {/* ── SECTION: GRADES ── */}
-                <div style={{ background: navy, color: '#fff', padding: '8px 12px', fontSize: '12px', fontWeight: 700, letterSpacing: '1px' }}>
+                <div style={{ background: navy, color: '#fff', padding: '5px 12px', fontSize: '11px', fontWeight: 700, letterSpacing: '1px' }}>
                   ACADEMIC PERFORMANCE — GRADES BY PERIOD
                 </div>
 
@@ -839,7 +835,7 @@ export const StudentReportDialog = ({
                 </table>
 
                 {/* ── CONDUCT ── */}
-                <div style={{ background: navy, color: '#fff', padding: '8px 12px', fontSize: '12px', fontWeight: 700, letterSpacing: '1px' }}>
+                <div style={{ background: navy, color: '#fff', padding: '5px 12px', fontSize: '11px', fontWeight: 700, letterSpacing: '1px' }}>
                   CONDUCT & CHARACTER ASSESSMENT
                 </div>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', borderTop: '0.5px solid #ccc' }}>
@@ -849,55 +845,55 @@ export const StudentReportDialog = ({
                     ['Participation', 'participation'],
                     ['Homework', 'homework'],
                   ] as const).map(([label, key], i) => (
-                    <div key={key} style={{ padding: '10px 12px', borderRight: i < 3 ? '0.5px solid #ccc' : 'none' }}>
-                      <label style={{ fontSize: '11px', color: '#444', textTransform: 'uppercase', fontWeight: 700, display: 'block', marginBottom: 4 }}>{label}</label>
+                    <div key={key} style={{ padding: '5px 10px', borderRight: i < 3 ? '0.5px solid #ccc' : 'none' }}>
+                      <label style={{ fontSize: '10px', color: '#444', textTransform: 'uppercase', fontWeight: 700, display: 'block', marginBottom: 2 }}>{label}</label>
                       <EditableField
                         value={(inputs[key] as string) || ''}
                         onChange={setField(key)}
                         editable={editing}
                         options={RATING_OPTIONS}
-                        minHeight={28}
+                        minHeight={22}
                       />
                     </div>
                   ))}
                 </div>
 
                 {/* ── TEACHER REMARKS ── */}
-                <div style={{ background: navy, color: '#fff', padding: '8px 12px', fontSize: '12px', fontWeight: 700, letterSpacing: '1px' }}>
+                <div style={{ background: navy, color: '#fff', padding: '5px 12px', fontSize: '11px', fontWeight: 700, letterSpacing: '1px' }}>
                   TEACHER REMARKS
                 </div>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', borderTop: '0.5px solid #ccc' }}>
-                  <div style={{ padding: '10px 12px', borderRight: '0.5px solid #ccc' }}>
-                    <label style={{ fontSize: '11px', color: '#444', textTransform: 'uppercase', fontWeight: 700, display: 'block', marginBottom: 6 }}>Teacher Comment</label>
+                  <div style={{ padding: '6px 10px', borderRight: '0.5px solid #ccc' }}>
+                    <label style={{ fontSize: '10px', color: '#444', textTransform: 'uppercase', fontWeight: 700, display: 'block', marginBottom: 3 }}>Teacher Comment</label>
                     <EditableField
                       value={inputs.teacher_comment || ''}
                       onChange={setField('teacher_comment')}
                       editable={editing}
                       multiline
-                      minHeight={100}
+                      minHeight={60}
                       placeholder="Overall remarks about the student..."
                     />
                   </div>
                   <div>
-                    <div style={{ padding: '10px 12px', borderBottom: '0.5px solid #ccc' }}>
-                      <label style={{ fontSize: '11px', color: '#444', textTransform: 'uppercase', fontWeight: 700, display: 'block', marginBottom: 6 }}>Can Improve In</label>
+                    <div style={{ padding: '6px 10px', borderBottom: '0.5px solid #ccc' }}>
+                      <label style={{ fontSize: '10px', color: '#444', textTransform: 'uppercase', fontWeight: 700, display: 'block', marginBottom: 3 }}>Can Improve In</label>
                       <EditableField
                         value={inputs.can_improve_in || ''}
                         onChange={setField('can_improve_in')}
                         editable={editing}
                         multiline
-                        minHeight={40}
+                        minHeight={26}
                         placeholder="Areas needing improvement..."
                       />
                     </div>
-                    <div style={{ padding: '10px 12px' }}>
-                      <label style={{ fontSize: '11px', color: '#444', textTransform: 'uppercase', fontWeight: 700, display: 'block', marginBottom: 6 }}>Excels In</label>
+                    <div style={{ padding: '6px 10px' }}>
+                      <label style={{ fontSize: '10px', color: '#444', textTransform: 'uppercase', fontWeight: 700, display: 'block', marginBottom: 3 }}>Excels In</label>
                       <EditableField
                         value={inputs.excels_in || ''}
                         onChange={setField('excels_in')}
                         editable={editing}
                         multiline
-                        minHeight={32}
+                        minHeight={22}
                         placeholder="Subjects/areas of strength..."
                       />
                     </div>
@@ -935,7 +931,7 @@ export const StudentReportDialog = ({
 
                   return (
                     <>
-                      <div style={{ background: navy, color: '#fff', padding: '8px 12px', fontSize: '12px', fontWeight: 700, letterSpacing: '1px' }}>
+                      <div style={{ background: navy, color: '#fff', padding: '5px 12px', fontSize: '11px', fontWeight: 700, letterSpacing: '1px' }}>
                         PROMOTION STATEMENT
                       </div>
                       <div style={{ padding: '12px 16px', borderTop: '0.5px solid #ccc' }}>
@@ -978,28 +974,28 @@ export const StudentReportDialog = ({
                 })()}
 
                 {/* ── SEMESTER AVERAGES ── */}
-                <div style={{ background: navy, color: '#fff', padding: '8px 12px', fontSize: '12px', fontWeight: 700, letterSpacing: '1px' }}>
+                <div style={{ background: navy, color: '#fff', padding: '5px 12px', fontSize: '11px', fontWeight: 700, letterSpacing: '1px' }}>
                   SEMESTER AVERAGES
                 </div>
                 <div style={{ display: 'flex' }}>
-                  <div style={{ flex: 1, padding: '12px 16px', borderRight: '0.5px solid #ccc' }}>
-                    <table style={{ width: '100%', fontSize: '12px', borderCollapse: 'collapse' }}>
+                  <div style={{ flex: 1, padding: '6px 12px', borderRight: '0.5px solid #ccc' }}>
+                    <table style={{ width: '100%', fontSize: '11px', borderCollapse: 'collapse' }}>
                       <tbody>
                         <tr>
-                          <td style={{ padding: '4px 0' }}>Semester 1 Average</td>
-                          <td style={{ padding: '4px 0', textAlign: 'right', fontWeight: 700 }}>
+                          <td style={{ padding: '2px 0' }}>Semester 1 Average</td>
+                          <td style={{ padding: '2px 0', textAlign: 'right', fontWeight: 700 }}>
                             {s1Avg !== null ? (isKg ? (scoreToLetter(s1Avg, 100) ?? '') : `${s1Avg}%`) : ''}
                           </td>
                         </tr>
                         <tr>
-                          <td style={{ padding: '4px 0' }}>Semester 2 Average</td>
-                          <td style={{ padding: '4px 0', textAlign: 'right', fontWeight: 700 }}>
+                          <td style={{ padding: '2px 0' }}>Semester 2 Average</td>
+                          <td style={{ padding: '2px 0', textAlign: 'right', fontWeight: 700 }}>
                             {s2Avg !== null ? (isKg ? (scoreToLetter(s2Avg, 100) ?? '') : `${s2Avg}%`) : ''}
                           </td>
                         </tr>
                         <tr>
-                          <td style={{ padding: '4px 0' }}>Class Position</td>
-                          <td style={{ padding: '4px 0', textAlign: 'right', fontWeight: 700 }}>
+                          <td style={{ padding: '2px 0' }}>Class Position</td>
+                          <td style={{ padding: '2px 0', textAlign: 'right', fontWeight: 700 }}>
                             {report.hasIncomplete ? '--' : (() => {
                               if (isSemester) {
                                 const rank = report.yearlyTotal?.class_rank;
@@ -1014,15 +1010,15 @@ export const StudentReportDialog = ({
                           </td>
                         </tr>
                         <tr>
-                          <td colSpan={2} style={{ padding: '8px 0 0', fontSize: '11px', color: '#666', lineHeight: 1.6 }}>
+                          <td colSpan={2} style={{ padding: '4px 0 0', fontSize: '10px', color: '#666', lineHeight: 1.5 }}>
                             {isKg ? (
-                              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px 10px' }}>
+                              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '2px 8px' }}>
                                 {KG_SCALE.map((t) => (
                                   <span key={t.letter} style={{ whiteSpace: 'nowrap' }}>{t.letter} = {t.min}–{t.max}</span>
                                 ))}
                               </div>
                             ) : (
-                              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px 10px' }}>
+                              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '2px 8px' }}>
                                 <span style={{ whiteSpace: 'nowrap' }}>A = {rcSettings.grade_a_min}–100</span>
                                 <span style={{ whiteSpace: 'nowrap' }}>B = {rcSettings.grade_b_min}–{rcSettings.grade_a_min - 1}</span>
                                 <span style={{ whiteSpace: 'nowrap' }}>C = {rcSettings.grade_c_min}–{rcSettings.grade_b_min - 1}</span>
@@ -1036,15 +1032,15 @@ export const StudentReportDialog = ({
                     </table>
                   </div>
                   <div style={{
-                    width: 200, background: navy, color: '#fff',
+                    width: 180, background: navy, color: '#fff',
                     display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-                    padding: 16, textAlign: 'center',
+                    padding: 10, textAlign: 'center',
                   }}>
-                    <div style={{ fontSize: '11px', color: '#aab', letterSpacing: '1px', marginBottom: 6 }}>GENERAL AVERAGE</div>
-                    <div style={{ fontSize: '56px', fontWeight: 800, color: gold, lineHeight: 1 }}>
+                    <div style={{ fontSize: '10px', color: '#aab', letterSpacing: '1px', marginBottom: 4 }}>GENERAL AVERAGE</div>
+                    <div style={{ fontSize: '40px', fontWeight: 800, color: gold, lineHeight: 1 }}>
                       {generalAvg !== null ? (isKg ? (scoreToLetter(generalAvg, 100) ?? '—') : `${generalAvg}%`) : '--'}
                     </div>
-                    <div style={{ fontSize: '13px', color: gold, marginTop: 4 }}>
+                    <div style={{ fontSize: '11px', color: gold, marginTop: 3 }}>
                       {generalAvg !== null
                         ? (isKg
                             ? (() => {
@@ -1059,7 +1055,7 @@ export const StudentReportDialog = ({
                 </div>
 
                 {/* ── SIGNATURES ── */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', padding: '14px 18px', borderTop: '1px solid #ccc', gap: 16 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', padding: '8px 16px', borderTop: '1px solid #ccc', gap: 16 }}>
                   {/* Administrator (left) — admin signature image acts as watermark behind name */}
                   <div style={{ textAlign: 'center', fontSize: '11px', color: '#333', flex: 1, position: 'relative' }}>
                     {rcSettings.admin_signature_url && (
@@ -1079,7 +1075,7 @@ export const StudentReportDialog = ({
                         }}
                       />
                     )}
-                    <div style={{ borderBottom: '1px solid #333', width: 160, margin: '40px auto 4px', minHeight: 18, position: 'relative' }}>
+                    <div style={{ borderBottom: '1px solid #333', width: 160, margin: '20px auto 2px', minHeight: 18, position: 'relative' }}>
                       <EditableField
                         value={inputs.administrator_name || rcSettings.default_administrator_name || ''}
                         onChange={setField('administrator_name')}
@@ -1110,7 +1106,7 @@ export const StudentReportDialog = ({
 
                   {/* Class Teacher (right) */}
                   <div style={{ textAlign: 'center', fontSize: '11px', color: '#333', flex: 1 }}>
-                    <div style={{ borderBottom: '1px solid #333', width: 160, margin: '40px auto 4px', minHeight: 18 }}>
+                    <div style={{ borderBottom: '1px solid #333', width: 160, margin: '20px auto 2px', minHeight: 18 }}>
                       <EditableField
                         value={inputs.class_teacher_name || (report as any).classTeacherName || rcSettings.default_class_teacher_name || ''}
                         onChange={setField('class_teacher_name')}
@@ -1146,13 +1142,13 @@ export const StudentReportDialog = ({
   );
 };
 
-// Shared cell styles
+// Shared cell styles — compact to fit on a single A4 page
 const thBase: React.CSSProperties = {
-  border: '0.5px solid #ccc', textAlign: 'center', padding: '7px 4px',
-  fontSize: '12px', fontWeight: 700, background: '#2a3a8e', color: '#fff',
+  border: '0.5px solid #ccc', textAlign: 'center', padding: '4px 3px',
+  fontSize: '11px', fontWeight: 700, background: '#2a3a8e', color: '#fff',
 };
 
 const tdBase: React.CSSProperties = {
-  border: '0.5px solid #ccc', textAlign: 'center', padding: '7px 4px', fontSize: '13px',
+  border: '0.5px solid #ccc', textAlign: 'center', padding: '4px 3px', fontSize: '12px',
   fontWeight: 700, color: '#111',
 };
