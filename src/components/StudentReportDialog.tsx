@@ -815,35 +815,35 @@ export const StudentReportDialog = ({
                 </div>
 
                 {/* ── TEACHER REMARKS ── */}
-                <div style={{ background: navy, color: '#fff', padding: '5px 10px', fontSize: '10px', fontWeight: 700, letterSpacing: '1px' }}>
+                <div style={{ background: navy, color: '#fff', padding: '8px 12px', fontSize: '12px', fontWeight: 700, letterSpacing: '1px' }}>
                   TEACHER REMARKS
                 </div>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', borderTop: '0.5px solid #ccc' }}>
-                  <div style={{ padding: '8px 10px', borderRight: '0.5px solid #ccc' }}>
-                    <label style={{ fontSize: '9px', color: '#888', textTransform: 'uppercase', fontWeight: 700, display: 'block', marginBottom: 4 }}>Teacher Comment</label>
+                  <div style={{ padding: '10px 12px', borderRight: '0.5px solid #ccc' }}>
+                    <label style={{ fontSize: '11px', color: '#444', textTransform: 'uppercase', fontWeight: 700, display: 'block', marginBottom: 6 }}>Teacher Comment</label>
                     <EditableField
                       value={inputs.teacher_comment || ''}
                       onChange={setField('teacher_comment')}
                       editable={editing}
                       multiline
-                      minHeight={80}
+                      minHeight={100}
                       placeholder="Overall remarks about the student..."
                     />
                   </div>
                   <div>
-                    <div style={{ padding: '8px 10px', borderBottom: '0.5px solid #ccc' }}>
-                      <label style={{ fontSize: '9px', color: '#888', textTransform: 'uppercase', fontWeight: 700, display: 'block', marginBottom: 4 }}>Can Improve In</label>
+                    <div style={{ padding: '10px 12px', borderBottom: '0.5px solid #ccc' }}>
+                      <label style={{ fontSize: '11px', color: '#444', textTransform: 'uppercase', fontWeight: 700, display: 'block', marginBottom: 6 }}>Can Improve In</label>
                       <EditableField
                         value={inputs.can_improve_in || ''}
                         onChange={setField('can_improve_in')}
                         editable={editing}
                         multiline
-                        minHeight={32}
+                        minHeight={40}
                         placeholder="Areas needing improvement..."
                       />
                     </div>
-                    <div style={{ padding: '8px 10px' }}>
-                      <label style={{ fontSize: '9px', color: '#888', textTransform: 'uppercase', fontWeight: 700, display: 'block', marginBottom: 4 }}>Excels In</label>
+                    <div style={{ padding: '10px 12px' }}>
+                      <label style={{ fontSize: '11px', color: '#444', textTransform: 'uppercase', fontWeight: 700, display: 'block', marginBottom: 6 }}>Excels In</label>
                       <EditableField
                         value={inputs.excels_in || ''}
                         onChange={setField('excels_in')}
