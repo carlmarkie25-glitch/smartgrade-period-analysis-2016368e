@@ -974,7 +974,7 @@ export const StudentReportDialog = ({
                 })()}
 
                 {/* ── SEMESTER AVERAGES ── */}
-                <div style={{ background: navy, color: '#fff', padding: '8px 12px', fontSize: '12px', fontWeight: 700, letterSpacing: '1px' }}>
+                <div style={{ background: navy, color: '#fff', padding: '5px 12px', fontSize: '11px', fontWeight: 700, letterSpacing: '1px' }}>
                   SEMESTER AVERAGES
                 </div>
                 <div style={{ display: 'flex' }}>
