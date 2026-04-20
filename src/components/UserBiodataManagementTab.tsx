@@ -40,87 +40,75 @@ export const UserBiodataManagementTab = () => {
   const printRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
-  // Fetch all users with their biodata
+  // Fetch list view in parallel — only the columns shown in the table
   const { data: users = [], isLoading, error: queryError } = useQuery({
-    queryKey: ["all-users-biodata"],
+    queryKey: ["all-users-biodata-list"],
     queryFn: async () => {
-      try {
-        let allUsers: UserBiodata[] = [];
-
-        // Fetch students (they have biodata)
-        const { data: studentsData, error: studentsError } = await supabase
+      const [studentsRes, profilesRes] = await Promise.all([
+        supabase
           .from("students")
-          .select("*");
-
-        if (studentsError) {
-          console.error("Error fetching students:", studentsError);
-        } else if (studentsData && Array.isArray(studentsData)) {
-          console.log("Students fetched:", studentsData.length);
-          allUsers = studentsData.map((student: any) => ({
-            id: student.id,
-            user_id: student.user_id,
-            full_name: student.full_name || "Unknown",
-            email: student.email || "",
-            phone_number: student.phone_number,
-            date_of_birth: student.date_of_birth,
-            gender: student.gender,
-            photo_url: student.photo_url,
-            nationality: student.nationality,
-            county: student.county,
-            country: student.country,
-            address: student.address,
-            father_name: student.father_name,
-            mother_name: student.mother_name,
-            emergency_contact_name: student.emergency_contact_name,
-            emergency_contact_phone: student.emergency_contact_phone,
-            student_id: student.student_id,
-          })) as UserBiodata[];
-        }
-
-        // Fetch profiles for additional users (teachers/staff)
-        const { data: profilesData, error: profilesError } = await supabase
+          .select("id, user_id, full_name, photo_url, gender, student_id, email, phone_number")
+          .order("full_name"),
+        supabase
           .from("profiles")
-          .select("*")
-          .order("full_name");
+          .select("id, full_name, email")
+          .order("full_name"),
+      ]);
 
-        if (profilesError) {
-          console.error("Error fetching profiles:", profilesError);
-        } else if (profilesData && Array.isArray(profilesData)) {
-          console.log("Profiles fetched:", profilesData.length);
-          // Filter out users that are already in the students list
-          const studentUserIds = new Set(allUsers.map(s => s.user_id));
-          const additionalUsers = profilesData
-            .filter((profile: any) => !studentUserIds.has(profile.id))
-            .map((profile: any) => ({
-              id: profile.id,
-              user_id: profile.id,
-              full_name: profile.full_name || "Unknown",
-              email: profile.email || "",
-              phone_number: profile.phone_number || null,
-              date_of_birth: null,
-              gender: null,
-              photo_url: null,
-              nationality: null,
-              county: null,
-              country: null,
-              address: null,
-              father_name: null,
-              mother_name: null,
-              emergency_contact_name: null,
-              emergency_contact_phone: null,
-            }));
+      const allUsers: UserBiodata[] = [];
 
-          allUsers = [...allUsers, ...additionalUsers];
+      if (studentsRes.data) {
+        for (const s of studentsRes.data as any[]) {
+          allUsers.push({
+            id: s.id,
+            user_id: s.user_id,
+            full_name: s.full_name || "Unknown",
+            email: s.email || "",
+            phone_number: s.phone_number ?? null,
+            date_of_birth: null,
+            gender: s.gender ?? null,
+            photo_url: s.photo_url ?? null,
+            nationality: null,
+            county: null,
+            country: null,
+            address: null,
+            father_name: null,
+            mother_name: null,
+            emergency_contact_name: null,
+            emergency_contact_phone: null,
+            student_id: s.student_id ?? null,
+          });
         }
-
-        console.log("Total users loaded:", allUsers.length);
-        return allUsers;
-      } catch (error) {
-        console.error("Error in biodata query:", error);
-        return [];
       }
+
+      if (profilesRes.data) {
+        const studentUserIds = new Set(allUsers.map((s) => s.user_id));
+        for (const p of profilesRes.data as any[]) {
+          if (studentUserIds.has(p.id)) continue;
+          allUsers.push({
+            id: p.id,
+            user_id: p.id,
+            full_name: p.full_name || "Unknown",
+            email: p.email || "",
+            phone_number: null,
+            date_of_birth: null,
+            gender: null,
+            photo_url: null,
+            nationality: null,
+            county: null,
+            country: null,
+            address: null,
+            father_name: null,
+            mother_name: null,
+            emergency_contact_name: null,
+            emergency_contact_phone: null,
+          });
+        }
+      }
+
+      return allUsers;
     },
-    staleTime: 1000 * 60 * 5, // 5 minutes
+    staleTime: 1000 * 60 * 5,
   });
 
   // Filter users based on search term
