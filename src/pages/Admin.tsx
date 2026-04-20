@@ -1,13 +1,11 @@
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useUserManagement } from "@/hooks/useUserManagement";
-import { UserPlus, FileText, Bell, ScrollText } from "lucide-react";
-import { UserBiodataManagementTab } from "@/components/UserBiodataManagementTab";
+import { UserPlus, Bell, ScrollText } from "lucide-react";
 import { TeacherAssignmentDialog } from "@/components/TeacherAssignmentDialog";
 import { SponsorAssignmentDialog } from "@/components/SponsorAssignmentDialog";
 import { UserRoleManagement } from "@/components/UserRoleManagement";
 import AppShell from "@/components/AppShell";
-import { SettingsTab } from "@/components/SettingsTab";
 import { SendNotificationDialog } from "@/components/SendNotificationDialog";
 import { ReportCardSettingsTab } from "@/components/ReportCardSettingsTab";
 
@@ -50,7 +48,7 @@ const Admin = () => {
       <div className="py-4">
         <div className="mb-8">
           <h1 className="text-4xl font-bold text-foreground mb-2">Settings</h1>
-          <p className="text-muted-foreground">Manage users, biodata, and system settings</p>
+          <p className="text-muted-foreground">Manage users and system settings</p>
         </div>
 
         <div className="neu-card p-6">
