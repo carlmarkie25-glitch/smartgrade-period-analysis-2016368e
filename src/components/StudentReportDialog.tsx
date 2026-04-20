@@ -349,6 +349,7 @@ export const StudentReportDialog = ({
   const colors = resolveReportColors(rcSettings, deptColorsData, departmentId);
   const navy = greyMode ? '#9aa0a6' : colors.header_bg_color;
   const gold = greyMode ? '#ffffff' : colors.accent_color;
+  const chipBg = greyMode ? '#d1d5db' : colors.header_chip_color;
   // Text color to use ON the accent background. In grey mode the accent becomes white,
   // so white text would disappear — use black for legibility.
   const goldText = greyMode ? '#000000' : '#ffffff';
@@ -590,20 +591,20 @@ export const StudentReportDialog = ({
                       </div>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                          <div style={{
-                           background: gold, color: headerMetaText, textAlign: 'center', padding: '4px 10px',
+                           background: chipBg, color: headerMetaText, textAlign: 'center', padding: '4px 10px',
                            fontSize: '11px', fontWeight: 700, borderRadius: '3px', minWidth: '80px'
                          }}>
                            <small style={{ display: 'block', fontSize: '9px', fontWeight: 400, opacity: 0.85, letterSpacing: '0.5px' }}>REPORT TYPE</small>
                            {getDepartmentLabel().toUpperCase()}
                          </div>
                          <div style={{
-                           background: gold, color: headerMetaText, textAlign: 'center', padding: '4px 10px',
+                           background: chipBg, color: headerMetaText, textAlign: 'center', padding: '4px 10px',
                            fontSize: '11px', fontWeight: 700, borderRadius: '3px', minWidth: '80px'
                          }}>
                            <small style={{ display: 'block', fontSize: '9px', fontWeight: 400, opacity: 0.85, letterSpacing: '0.5px' }}>SEMESTER</small>
                            {getSemesterLabel()}
                          </div>
-                      </div>
+                       </div>
                     </div>
                   );
                 })()}

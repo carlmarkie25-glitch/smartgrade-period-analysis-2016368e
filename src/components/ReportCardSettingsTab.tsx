@@ -198,10 +198,17 @@ export const ReportCardSettingsTab = () => {
             value={form.header_meta_text_color}
             onChange={(v) => set("header_meta_text_color", v)}
           />
+          <ColorRow
+            label="Header chips background"
+            help="Background color for the REPORT TYPE and SEMESTER chips in the header."
+            value={form.header_chip_color}
+            onChange={(v) => set("header_chip_color", v)}
+          />
           <ReportColorPreview
             header={form.header_bg_color}
             accent={form.accent_color}
             secondary={form.secondary_bg_color}
+            chipBg={form.header_chip_color}
           />
         </CardContent>
       </Card>
@@ -479,10 +486,12 @@ const ReportColorPreview = ({
   header,
   accent,
   secondary,
+  chipBg,
 }: {
   header: string;
   accent: string;
   secondary: string;
+  chipBg?: string;
 }) => (
   <div className="rounded-md border overflow-hidden">
     <div style={{ background: header, color: "#fff", padding: "10px 14px", fontSize: 12, fontWeight: 700, letterSpacing: 1 }}>
@@ -496,6 +505,12 @@ const ReportColorPreview = ({
         YEAR AVERAGE
       </div>
     </div>
+    {chipBg && (
+      <div className="flex gap-2 p-2" style={{ background: '#f8f9fa' }}>
+        <div style={{ background: chipBg, color: '#000', padding: '4px 10px', fontSize: 10, fontWeight: 700, borderRadius: 3 }}>REPORT TYPE</div>
+        <div style={{ background: chipBg, color: '#000', padding: '4px 10px', fontSize: 10, fontWeight: 700, borderRadius: 3 }}>SEMESTER</div>
+      </div>
+    )}
   </div>
 );
 
@@ -536,6 +551,7 @@ const DepartmentColorsCard = ({
       header_bg_color: existing?.header_bg_color ?? schoolDefaults.header_bg_color,
       accent_color: existing?.accent_color ?? schoolDefaults.accent_color,
       secondary_bg_color: existing?.secondary_bg_color ?? schoolDefaults.secondary_bg_color,
+      header_chip_color: existing?.header_chip_color ?? schoolDefaults.header_chip_color,
       general_average_text_color:
         existing?.general_average_text_color ?? schoolDefaults.general_average_text_color,
       header_meta_text_color:
@@ -575,6 +591,7 @@ const DepartmentColorsCard = ({
           const header = ov?.header_bg_color ?? schoolDefaults.header_bg_color;
           const accent = ov?.accent_color ?? schoolDefaults.accent_color;
           const secondary = ov?.secondary_bg_color ?? schoolDefaults.secondary_bg_color;
+          const chipBg = ov?.header_chip_color ?? schoolDefaults.header_chip_color;
           const genAvgText =
             ov?.general_average_text_color ?? schoolDefaults.general_average_text_color;
           const metaText =
@@ -627,8 +644,13 @@ const DepartmentColorsCard = ({
                   value={metaText}
                   onCommit={(v) => handleSave(d.id, { header_meta_text_color: v })}
                 />
+                <DeptColorField
+                  label="Header chips bg"
+                  value={chipBg}
+                  onCommit={(v) => handleSave(d.id, { header_chip_color: v })}
+                />
               </div>
-              <ReportColorPreview header={header} accent={accent} secondary={secondary} />
+              <ReportColorPreview header={header} accent={accent} secondary={secondary} chipBg={chipBg} />
             </div>
           );
         })}
