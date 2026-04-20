@@ -145,25 +145,25 @@ const AppSidebar = () => {
           <SidebarGroup>
             <Collapsible open={isCollapsed ? false : adminOpen} onOpenChange={setAdminOpen}>
               <CollapsibleTrigger className={cn(
-                "flex items-center justify-between w-full mx-2 px-3 py-2.5 rounded-lg transition-all duration-200",
+                "flex items-center justify-between w-full mx-3 my-0.5 px-4 h-11 rounded-full transition-all duration-300",
                 isAdminActive
-                  ? "text-sidebar-foreground font-medium"
-                  : "text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-foreground"
+                  ? "text-sidebar-foreground font-semibold"
+                  : "text-sidebar-foreground/90 hover:bg-white/15 hover:text-sidebar-foreground"
               )}>
                 <div className="flex items-center gap-3">
                   <Settings className="h-5 w-5" />
-                  {!isCollapsed && <span>Administration</span>}
+                  {!isCollapsed && <span className="text-sm">Administration</span>}
                 </div>
                 {!isCollapsed && (
                   <ChevronDown className={cn(
-                    "h-4 w-4 transition-transform duration-200",
+                    "h-4 w-4 transition-transform duration-300",
                     adminOpen ? "rotate-180" : ""
                   )} />
                 )}
               </CollapsibleTrigger>
-              <CollapsibleContent>
+              <CollapsibleContent className="overflow-hidden data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down">
                 <SidebarGroupContent>
-                  <SidebarMenu className="pl-4">
+                  <SidebarMenu className="pl-3">
                     {adminItems.map(renderMenuItem)}
                   </SidebarMenu>
                 </SidebarGroupContent>
