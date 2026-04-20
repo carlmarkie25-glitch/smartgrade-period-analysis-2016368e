@@ -1106,7 +1106,7 @@ export const StudentReportDialog = ({
 
                   {/* Class Teacher (right) */}
                   <div style={{ textAlign: 'center', fontSize: '11px', color: '#333', flex: 1 }}>
-                    <div style={{ borderBottom: '1px solid #333', width: 160, margin: '40px auto 4px', minHeight: 18 }}>
+                    <div style={{ borderBottom: '1px solid #333', width: 160, margin: '20px auto 2px', minHeight: 18 }}>
                       <EditableField
                         value={inputs.class_teacher_name || (report as any).classTeacherName || rcSettings.default_class_teacher_name || ''}
                         onChange={setField('class_teacher_name')}
