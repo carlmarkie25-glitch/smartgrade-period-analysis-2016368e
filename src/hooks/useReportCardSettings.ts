@@ -39,6 +39,19 @@ export interface ReportCardSettings {
   administrator_subtitle: string | null;
   class_teacher_role_label: string;
   class_teacher_subtitle: string | null;
+  // Report card colors (school-wide defaults)
+  header_bg_color: string;
+  accent_color: string;
+  secondary_bg_color: string;
+}
+
+export interface DepartmentReportColors {
+  id?: string;
+  school_id?: string;
+  department_id: string;
+  header_bg_color: string | null;
+  accent_color: string | null;
+  secondary_bg_color: string | null;
 }
 
 export const DEFAULT_REPORT_CARD_SETTINGS: ReportCardSettings = {
@@ -75,6 +88,9 @@ export const DEFAULT_REPORT_CARD_SETTINGS: ReportCardSettings = {
   administrator_subtitle: null,
   class_teacher_role_label: "Class Teacher",
   class_teacher_subtitle: null,
+  header_bg_color: "#1a2a6e",
+  accent_color: "#c8a84b",
+  secondary_bg_color: "#2a5298",
 };
 
 export const useReportCardSettings = () => {
@@ -125,6 +141,85 @@ export const gradeFromSettings = (
   if (pct >= s.grade_c_min) return { letter: "C", label: s.grade_c_label };
   // D tier removed by design — anything below C is F (e.g., 67 → F).
   return { letter: "F", label: s.grade_f_label };
+};
+
+// ============================================================================
+// Per-department color overrides
+// ============================================================================
+
+export const useDepartmentReportColors = () => {
+  const { school } = useSchool();
+  return useQuery({
+    queryKey: ["dept-report-colors", school?.id],
+    enabled: !!school?.id,
+    queryFn: async (): Promise<DepartmentReportColors[]> => {
+      const { data, error } = await (supabase as any)
+        .from("department_report_colors")
+        .select("*")
+        .eq("school_id", school!.id);
+      if (error) throw error;
+      return (data ?? []) as DepartmentReportColors[];
+    },
+  });
+};
+
+export const useSaveDepartmentReportColors = () => {
+  const qc = useQueryClient();
+  const { school } = useSchool();
+  return useMutation({
+    mutationFn: async (values: DepartmentReportColors) => {
+      if (!school?.id) throw new Error("No school context");
+      const payload = { ...values, school_id: school.id };
+      const { data, error } = await (supabase as any)
+        .from("department_report_colors")
+        .upsert(payload, { onConflict: "school_id,department_id" })
+        .select()
+        .single();
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["dept-report-colors"] });
+    },
+  });
+};
+
+export const useDeleteDepartmentReportColors = () => {
+  const qc = useQueryClient();
+  const { school } = useSchool();
+  return useMutation({
+    mutationFn: async (departmentId: string) => {
+      if (!school?.id) throw new Error("No school context");
+      const { error } = await (supabase as any)
+        .from("department_report_colors")
+        .delete()
+        .eq("school_id", school.id)
+        .eq("department_id", departmentId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["dept-report-colors"] });
+    },
+  });
+};
+
+/**
+ * Resolve effective report card colors for a given department, falling back to
+ * school-wide defaults when a department has no override.
+ */
+export const resolveReportColors = (
+  settings: ReportCardSettings,
+  deptOverrides: DepartmentReportColors[] | undefined,
+  departmentId: string | null | undefined,
+): { header_bg_color: string; accent_color: string; secondary_bg_color: string } => {
+  const override = departmentId
+    ? deptOverrides?.find((d) => d.department_id === departmentId)
+    : undefined;
+  return {
+    header_bg_color: override?.header_bg_color || settings.header_bg_color,
+    accent_color: override?.accent_color || settings.accent_color,
+    secondary_bg_color: override?.secondary_bg_color || settings.secondary_bg_color,
+  };
 };
 
 /** Standing label for the Kindergarten letter scale, sourced from admin settings. */
