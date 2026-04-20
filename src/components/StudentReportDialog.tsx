@@ -664,7 +664,7 @@ export const StudentReportDialog = ({
                     )}
 
                     {/* Aggregate / Average — single semester (S1 or S2) */}
-                    {isSemester && !isYearly && (() => {
+                    {!isKg && isSemester && !isYearly && (() => {
                       const cols = isSem1 ? ['p1','p2','p3','exam_s1'] : ['p4','p5','p6','exam_s2'];
                       const periodAvgKeys = isSem1 ? ['p1','p2','p3'] : ['p4','p5','p6'];
                       const semSum = subjects.reduce((a: number, s: any) => a + (computeSubjectSemAvg(s, periodAvgKeys) ?? 0), 0);
