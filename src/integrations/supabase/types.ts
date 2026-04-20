@@ -1750,6 +1750,8 @@ export type Database = {
           id: string
           participation: string | null
           period: string
+          promotion_condition: string | null
+          promotion_status: string | null
           punctuality: string | null
           school_id: string | null
           student_id: string
@@ -1768,6 +1770,8 @@ export type Database = {
           id?: string
           participation?: string | null
           period: string
+          promotion_condition?: string | null
+          promotion_status?: string | null
           punctuality?: string | null
           school_id?: string | null
           student_id: string
@@ -1786,6 +1790,8 @@ export type Database = {
           id?: string
           participation?: string | null
           period?: string
+          promotion_condition?: string | null
+          promotion_status?: string | null
           punctuality?: string | null
           school_id?: string | null
           student_id?: string
