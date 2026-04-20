@@ -2,20 +2,41 @@ import AppShell from "@/components/AppShell";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { FileText, Eye } from "lucide-react";
+import { Download, Eye } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useClasses } from "@/hooks/useClasses";
 import { useStudents } from "@/hooks/useStudents";
 import { Skeleton } from "@/components/ui/skeleton";
 import { StudentReportDialog } from "@/components/StudentReportDialog";
 import { useToast } from "@/hooks/use-toast";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
 
 const Reports = () => {
   const [selectedClass, setSelectedClass] = useState<string>("");
   const [selectedPeriod, setSelectedPeriod] = useState<string>("p1");
   const [selectedStudent, setSelectedStudent] = useState<string>("");
   const [dialogOpen, setDialogOpen] = useState(false);
+
+  // Batch download state
+  const [modeDialogOpen, setModeDialogOpen] = useState(false);
+  const [chosenMode, setChosenMode] = useState<"color" | "grey">("color");
+  const [batchOpen, setBatchOpen] = useState(false);
+  const [batchIndex, setBatchIndex] = useState(0);
+  const [batchProgress, setBatchProgress] = useState({ done: 0, total: 0 });
+  const zipRef = useRef<any>(null);
+  const cancelRef = useRef(false);
 
   const { data: classes, isLoading: classesLoading } = useClasses("sponsor");
   const { data: students, isLoading: studentsLoading } = useStudents(selectedClass);
@@ -26,16 +47,152 @@ const Reports = () => {
     setDialogOpen(true);
   };
 
-  const handleGenerateAll = () => {
+  const handleDownloadAllClick = () => {
+    if (!students || students.length === 0) return;
+    setChosenMode("color");
+    setModeDialogOpen(true);
+  };
+
+  const startBatch = async () => {
+    setModeDialogOpen(false);
+    if (!students || students.length === 0) return;
+    const { default: JSZip } = await import("jszip");
+    zipRef.current = new JSZip();
+    cancelRef.current = false;
+    setBatchProgress({ done: 0, total: students.length });
+    setBatchIndex(0);
+    setBatchOpen(true);
     toast({
-      title: "Generating Reports",
-      description: `Generating ${students?.length || 0} report cards...`,
+      title: "Downloading reports",
+      description: `Generating ${students.length} report${students.length > 1 ? "s" : ""}...`,
     });
-    // In a real app, this would trigger batch PDF generation
+  };
+
+  // Called by the hidden dialog once the report is rendered & data loaded
+  const handleReportReady = async (studentName: string) => {
+    if (cancelRef.current) {
+      finishBatch();
+      return;
+    }
+    try {
+      const el = document.getElementById("report-content");
+      if (!el) return;
+
+      // Replace form controls with text spans, mirroring the single-report flow
+      const controls = Array.from(
+        el.querySelectorAll("textarea, input, select")
+      ) as (HTMLTextAreaElement | HTMLInputElement | HTMLSelectElement)[];
+      const placeholders: { control: HTMLElement; replacement: HTMLElement }[] = [];
+      controls.forEach((ctrl) => {
+        const span = document.createElement("div");
+        let val = "";
+        if (ctrl instanceof HTMLSelectElement) {
+          val = ctrl.options[ctrl.selectedIndex]?.text || "";
+        } else {
+          val = (ctrl as HTMLInputElement | HTMLTextAreaElement).value || "";
+        }
+        span.textContent = val.trim() ? val : "\u00A0";
+        span.style.cssText = ctrl.style.cssText;
+        span.style.whiteSpace = "pre-wrap";
+        span.style.display = "block";
+        ctrl.parentNode?.insertBefore(span, ctrl);
+        ctrl.style.display = "none";
+        placeholders.push({ control: ctrl, replacement: span });
+      });
+
+      const [{ default: html2canvas }, { default: jsPDF }] = await Promise.all([
+        import("html2canvas"),
+        import("jspdf"),
+      ]);
+
+      const renderWidth = el.scrollWidth;
+      const canvas = await html2canvas(el, {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: "#ffffff",
+        windowWidth: renderWidth,
+        width: renderWidth,
+        scrollX: 0,
+        scrollY: -window.scrollY,
+        logging: false,
+      });
+
+      const imgData = canvas.toDataURL("image/png");
+      const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
+      const pageW = pdf.internal.pageSize.getWidth();
+      const pageH = pdf.internal.pageSize.getHeight();
+      const ratio = Math.min(pageW / canvas.width, pageH / canvas.height);
+      const imgW = canvas.width * ratio;
+      const imgH = canvas.height * ratio;
+      const x = (pageW - imgW) / 2;
+      pdf.addImage(imgData, "PNG", x, 0, imgW, imgH);
+      const pdfBlob = pdf.output("blob");
+
+      const safeName = studentName.replace(/\s+/g, "_").replace(/[^a-zA-Z0-9_-]/g, "");
+      zipRef.current.file(`Report_${safeName}_${selectedPeriod}.pdf`, pdfBlob);
+
+      // Restore controls
+      placeholders.forEach(({ control, replacement }) => {
+        replacement.remove();
+        control.style.display = "";
+      });
+
+      const nextIndex = batchIndex + 1;
+      setBatchProgress({ done: nextIndex, total: students!.length });
+
+      if (nextIndex >= students!.length) {
+        await finishBatch();
+      } else {
+        // Move to next student — close dialog briefly so report-content unmounts/remounts cleanly
+        setBatchOpen(false);
+        await new Promise((r) => setTimeout(r, 150));
+        setBatchIndex(nextIndex);
+        setBatchOpen(true);
+      }
+    } catch (e: any) {
+      toast({
+        title: "Batch download failed",
+        description: e?.message || "Could not generate PDFs",
+        variant: "destructive",
+      });
+      finishBatch();
+    }
+  };
+
+  const finishBatch = async () => {
+    setBatchOpen(false);
+    if (zipRef.current && batchProgress.done > 0) {
+      try {
+        const blob = await zipRef.current.generateAsync({ type: "blob" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        const className = classes?.find((c) => c.id === selectedClass)?.name || "class";
+        a.href = url;
+        a.download = `Reports_${className.replace(/\s+/g, "_")}_${selectedPeriod}.zip`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+        toast({
+          title: "Reports ready",
+          description: `Downloaded ${batchProgress.done} report${batchProgress.done > 1 ? "s" : ""} as ZIP.`,
+        });
+      } catch (e: any) {
+        toast({ title: "ZIP failed", description: e?.message, variant: "destructive" });
+      }
+    }
+    zipRef.current = null;
+  };
+
+  const cancelBatch = () => {
+    cancelRef.current = true;
+    setBatchOpen(false);
+    zipRef.current = null;
+    toast({ title: "Cancelled", description: "Batch download cancelled." });
   };
 
   const getPeriodDisplayName = (period: string) => {
-    switch(period) {
+    switch (period) {
       case "yearly": return "Final Year";
       case "semester1": return "Semester 1";
       case "semester2": return "Semester 2";
@@ -50,6 +207,8 @@ const Reports = () => {
       default: return period;
     }
   };
+
+  const currentBatchStudent = students?.[batchIndex];
 
   return (
     <AppShell activeTab="reports">
@@ -101,13 +260,13 @@ const Reports = () => {
             </SelectContent>
           </Select>
 
-          <Button 
-            className="gap-2" 
-            disabled={!selectedClass || !students || students.length === 0}
-            onClick={handleGenerateAll}
+          <Button
+            className="gap-2"
+            disabled={!selectedClass || !students || students.length === 0 || batchOpen}
+            onClick={handleDownloadAllClick}
           >
-            <FileText className="h-4 w-4" />
-            Generate All Reports
+            <Download className="h-4 w-4" />
+            Download All Reports
           </Button>
         </div>
 
@@ -163,9 +322,9 @@ const Reports = () => {
                           <p className="text-xl font-bold text-primary">Active</p>
                         </div>
                         <div className="flex gap-2">
-                          <Button 
-                            variant="outline" 
-                            size="sm" 
+                          <Button
+                            variant="outline"
+                            size="sm"
                             className="gap-2"
                             onClick={() => handleViewReport(student.id)}
                           >
@@ -186,6 +345,7 @@ const Reports = () => {
           </Card>
         )}
 
+        {/* Single-student view dialog */}
         <StudentReportDialog
           open={dialogOpen}
           onOpenChange={setDialogOpen}
@@ -193,6 +353,82 @@ const Reports = () => {
           period={selectedPeriod}
           className={classes?.find(c => c.id === selectedClass)?.name || ""}
         />
+
+        {/* Color/Grey choice dialog */}
+        <AlertDialog open={modeDialogOpen} onOpenChange={setModeDialogOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Download all reports</AlertDialogTitle>
+              <AlertDialogDescription>
+                Choose how you want the reports rendered. All {students?.length || 0} report
+                {(students?.length || 0) > 1 ? "s" : ""} will be packaged as a ZIP file.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <RadioGroup
+              value={chosenMode}
+              onValueChange={(v) => setChosenMode(v as "color" | "grey")}
+              className="gap-3 py-2"
+            >
+              <div className="flex items-start gap-3 p-3 border rounded-lg">
+                <RadioGroupItem value="color" id="mode-color" className="mt-1" />
+                <Label htmlFor="mode-color" className="flex-1 cursor-pointer">
+                  <div className="font-semibold">Color mode</div>
+                  <div className="text-xs text-muted-foreground">
+                    Standard report card with full color (navy & gold accents).
+                  </div>
+                </Label>
+              </div>
+              <div className="flex items-start gap-3 p-3 border rounded-lg">
+                <RadioGroupItem value="grey" id="mode-grey" className="mt-1" />
+                <Label htmlFor="mode-grey" className="flex-1 cursor-pointer">
+                  <div className="font-semibold">Grey mode</div>
+                  <div className="text-xs text-muted-foreground">
+                    Ink-saving version — blue tones replaced with light grey.
+                  </div>
+                </Label>
+              </div>
+            </RadioGroup>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction onClick={startBatch}>
+                <Download className="h-4 w-4 mr-2" />
+                Start Download
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+
+        {/* Batch processing dialog — mounts the report for the current student */}
+        {batchOpen && currentBatchStudent && (
+          <StudentReportDialog
+            open={batchOpen}
+            onOpenChange={(o) => { if (!o) cancelBatch(); }}
+            studentId={currentBatchStudent.id}
+            period={selectedPeriod}
+            className={classes?.find(c => c.id === selectedClass)?.name || ""}
+            forceGreyMode={chosenMode === "grey"}
+            onReportReady={handleReportReady}
+          />
+        )}
+
+        {/* Progress overlay */}
+        {batchOpen && (
+          <div className="fixed bottom-6 right-6 z-[100] bg-background border rounded-lg shadow-lg p-4 min-w-[260px]">
+            <div className="text-sm font-semibold mb-1">Generating reports</div>
+            <div className="text-xs text-muted-foreground mb-2">
+              {batchProgress.done} of {batchProgress.total} — {currentBatchStudent?.full_name}
+            </div>
+            <div className="h-2 bg-muted rounded overflow-hidden">
+              <div
+                className="h-full bg-primary transition-all"
+                style={{ width: `${(batchProgress.done / Math.max(batchProgress.total, 1)) * 100}%` }}
+              />
+            </div>
+            <Button size="sm" variant="outline" className="mt-3 w-full" onClick={cancelBatch}>
+              Cancel
+            </Button>
+          </div>
+        )}
       </div>
     </AppShell>
   );
