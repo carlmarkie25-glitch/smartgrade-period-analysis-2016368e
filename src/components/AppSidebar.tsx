@@ -129,9 +129,9 @@ const AppSidebar = () => {
                   )} />
                 )}
               </CollapsibleTrigger>
-              <CollapsibleContent>
+              <CollapsibleContent className="overflow-hidden data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down">
                 <SidebarGroupContent>
-                  <SidebarMenu className="pl-4">
+                  <SidebarMenu className="pl-3">
                     {academicsItems.map(renderMenuItem)}
                   </SidebarMenu>
                 </SidebarGroupContent>
