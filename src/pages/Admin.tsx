@@ -1,13 +1,14 @@
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useUserManagement } from "@/hooks/useUserManagement";
-import { UserPlus, Bell, ScrollText } from "lucide-react";
+import { UserPlus, Bell, ScrollText, Palette } from "lucide-react";
 import { TeacherAssignmentDialog } from "@/components/TeacherAssignmentDialog";
 import { SponsorAssignmentDialog } from "@/components/SponsorAssignmentDialog";
 import { UserRoleManagement } from "@/components/UserRoleManagement";
 import AppShell from "@/components/AppShell";
 import { SendNotificationDialog } from "@/components/SendNotificationDialog";
 import { ReportCardSettingsTab } from "@/components/ReportCardSettingsTab";
+import { SettingsTab } from "@/components/SettingsTab";
 
 const Admin = () => {
   const { users, usersLoading, assignRole, removeRole } = useUserManagement();
@@ -53,7 +54,7 @@ const Admin = () => {
 
         <div className="neu-card p-6">
           <Tabs defaultValue="users" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-3">
+            <TabsList className="grid w-full grid-cols-4">
               <TabsTrigger value="users">
               <UserPlus className="h-4 w-4 mr-2" />
               Users
@@ -65,6 +66,10 @@ const Admin = () => {
             <TabsTrigger value="report-card">
               <ScrollText className="h-4 w-4 mr-2" />
               Report Card
+            </TabsTrigger>
+            <TabsTrigger value="theme">
+              <Palette className="h-4 w-4 mr-2" />
+              Theme
             </TabsTrigger>
             </TabsList>
 
@@ -93,6 +98,10 @@ const Admin = () => {
 
             <TabsContent value="report-card">
               <ReportCardSettingsTab />
+            </TabsContent>
+
+            <TabsContent value="theme">
+              <SettingsTab />
             </TabsContent>
           </Tabs>
         </div>
