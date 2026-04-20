@@ -450,7 +450,15 @@ export const ReportCardSettingsTab = () => {
         </CardContent>
       </Card>
 
-      <div className="flex justify-end">
+      <div className="flex items-center justify-between">
+        <Button
+          variant="outline"
+          onClick={handleResetColors}
+          className="gap-2"
+          type="button"
+        >
+          <RotateCcw className="h-4 w-4" /> Reset colors to default
+        </Button>
         <Button onClick={handleSave} disabled={save.isPending || uploading} className="gap-2">
           {(save.isPending || uploading) && <Loader2 className="h-4 w-4 animate-spin" />}
           <Save className="h-4 w-4" /> Save report card settings
