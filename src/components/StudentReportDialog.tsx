@@ -324,6 +324,9 @@ export const StudentReportDialog = ({
   // Styles — when greyMode is on, swap blue tones for light grey; gold → white in grey mode
   const navy = greyMode ? '#9aa0a6' : '#1a2a6e';
   const gold = greyMode ? '#ffffff' : '#c8a84b';
+  // Text color to use ON the gold background. In grey mode the gold becomes white,
+  // so white text would disappear — use black for legibility.
+  const goldText = greyMode ? '#000000' : '#ffffff';
   const lightBlue = greyMode ? '#bfc4ca' : '#2a5298';
   const headerBlue = greyMode ? '#a8aeb4' : '#2a3a8e';
 
