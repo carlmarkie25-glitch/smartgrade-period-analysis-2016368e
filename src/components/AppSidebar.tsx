@@ -113,18 +113,18 @@ const AppSidebar = () => {
           <SidebarGroup>
             <Collapsible open={isCollapsed ? false : academicsOpen} onOpenChange={setAcademicsOpen}>
               <CollapsibleTrigger className={cn(
-                "flex items-center justify-between w-full mx-2 px-3 py-2.5 rounded-lg transition-all duration-200",
+                "flex items-center justify-between w-full mx-3 my-0.5 px-4 h-11 rounded-full transition-all duration-300",
                 isAcademicsActive
-                  ? "text-sidebar-foreground font-medium"
-                  : "text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-foreground"
+                  ? "text-sidebar-foreground font-semibold"
+                  : "text-sidebar-foreground/90 hover:bg-white/15 hover:text-sidebar-foreground"
               )}>
                 <div className="flex items-center gap-3">
                   <ClipboardList className="h-5 w-5" />
-                  {!isCollapsed && <span>Academics</span>}
+                  {!isCollapsed && <span className="text-sm">Academics</span>}
                 </div>
                 {!isCollapsed && (
                   <ChevronDown className={cn(
-                    "h-4 w-4 transition-transform duration-200",
+                    "h-4 w-4 transition-transform duration-300",
                     academicsOpen ? "rotate-180" : ""
                   )} />
                 )}
