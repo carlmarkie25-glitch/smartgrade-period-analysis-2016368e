@@ -493,89 +493,120 @@ export const ClassManagementTab = () => {
             ))}
           </div>
         ) : (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Class Name</TableHead>
-                <TableHead>Department</TableHead>
-                <TableHead>Academic Year</TableHead>
-                <TableHead>Sponsor</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {classes?.map((cls) => (
-                <TableRow key={cls.id}>
-                  <TableCell className="font-medium">{cls.name}</TableCell>
-                  <TableCell>
-                    {cls.departments?.name}
-                  </TableCell>
-                  <TableCell>{cls.academic_years?.year_name}</TableCell>
-                  <TableCell>
-                    <Select
-                      value={cls.teacher_id || "none"}
-                      onValueChange={(value) => handleAssignSponsor(cls.id, value === "none" ? null : value)}
-                    >
-                      <SelectTrigger className="w-[180px]">
-                        <SelectValue placeholder="Assign sponsor" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="none">No Sponsor</SelectItem>
-                        {teachers?.map((teacher) => (
-                          <SelectItem key={teacher.user_id} value={teacher.user_id}>
-                            {teacher.full_name}
-                          </SelectItem>
+          <div className="space-y-6">
+            <p className="text-xs text-muted-foreground">
+              Drag the handle <GripVertical className="inline h-3 w-3" /> to reorder classes within a department.
+              Departments themselves are reordered in the Departments page.
+            </p>
+            {groupedByDept.map((group) => (
+              <div key={group.id}>
+                <h3 className="text-sm font-semibold text-foreground mb-2 px-2">{group.name}</h3>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="w-10"></TableHead>
+                      <TableHead>Class Name</TableHead>
+                      <TableHead>Academic Year</TableHead>
+                      <TableHead>Sponsor</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <DndContext
+                    sensors={sensors}
+                    collisionDetection={closestCenter}
+                    onDragEnd={(e) => handleDragEnd(group.id, e)}
+                  >
+                    <SortableContext items={group.items.map((c) => c.id)} strategy={verticalListSortingStrategy}>
+                      <TableBody>
+                        {group.items.map((cls) => (
+                          <SortableClassRow key={cls.id} id={cls.id}>
+                            {({ attributes, listeners }) => (
+                              <>
+                                <TableCell className="w-10">
+                                  <button
+                                    type="button"
+                                    className="cursor-grab active:cursor-grabbing text-muted-foreground hover:text-foreground touch-none"
+                                    {...attributes}
+                                    {...listeners}
+                                    aria-label="Drag to reorder"
+                                  >
+                                    <GripVertical className="h-4 w-4" />
+                                  </button>
+                                </TableCell>
+                                <TableCell className="font-medium">{cls.name}</TableCell>
+                                <TableCell>{cls.academic_years?.year_name}</TableCell>
+                                <TableCell>
+                                  <Select
+                                    value={cls.teacher_id || "none"}
+                                    onValueChange={(value) => handleAssignSponsor(cls.id, value === "none" ? null : value)}
+                                  >
+                                    <SelectTrigger className="w-[180px]">
+                                      <SelectValue placeholder="Assign sponsor" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      <SelectItem value="none">No Sponsor</SelectItem>
+                                      {teachers?.map((teacher) => (
+                                        <SelectItem key={teacher.user_id} value={teacher.user_id}>
+                                          {teacher.full_name}
+                                        </SelectItem>
+                                      ))}
+                                    </SelectContent>
+                                  </Select>
+                                  {cls.teacher_id && (
+                                    <Badge variant="secondary" className="mt-1 gap-1">
+                                      <UserCheck className="h-3 w-3" />
+                                      {teachers?.find((t) => t.user_id === cls.teacher_id)?.full_name || "Assigned"}
+                                    </Badge>
+                                  )}
+                                </TableCell>
+                                <TableCell className="text-right">
+                                  <div className="flex justify-end gap-2">
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      onClick={() => {
+                                        setSelectedClassId(cls.id);
+                                        setIsSubjectsDialogOpen(true);
+                                      }}
+                                    >
+                                      <BookOpen className="h-4 w-4" />
+                                    </Button>
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      onClick={() => {
+                                        setEditingClass({
+                                          id: cls.id,
+                                          name: cls.name,
+                                          department_id: cls.department_id,
+                                          academic_year_id: cls.academic_year_id,
+                                          grading_mode: ((cls as any).grading_mode === "letters" ? "letters" : "numbers"),
+                                        });
+                                        setIsEditDialogOpen(true);
+                                      }}
+                                    >
+                                      <Pencil className="h-4 w-4" />
+                                    </Button>
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      onClick={() => handleDeleteClass(cls.id)}
+                                    >
+                                      <Trash2 className="h-4 w-4" />
+                                    </Button>
+                                  </div>
+                                </TableCell>
+                              </>
+                            )}
+                          </SortableClassRow>
                         ))}
-                      </SelectContent>
-                    </Select>
-                    {cls.teacher_id && (
-                      <Badge variant="secondary" className="mt-1 gap-1">
-                        <UserCheck className="h-3 w-3" />
-                        {teachers?.find(t => t.user_id === cls.teacher_id)?.full_name || "Assigned"}
-                      </Badge>
-                    )}
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex justify-end gap-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => {
-                          setSelectedClassId(cls.id);
-                          setIsSubjectsDialogOpen(true);
-                        }}
-                      >
-                        <BookOpen className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => {
-                          setEditingClass({
-                            id: cls.id,
-                            name: cls.name,
-                            department_id: cls.department_id,
-                            academic_year_id: cls.academic_year_id,
-                            grading_mode: ((cls as any).grading_mode === "letters" ? "letters" : "numbers"),
-                          });
-                          setIsEditDialogOpen(true);
-                        }}
-                      >
-                        <Pencil className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleDeleteClass(cls.id)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+                      </TableBody>
+                    </SortableContext>
+                  </DndContext>
+                </Table>
+              </div>
+            ))}
+          </div>
         )}
       </CardContent>
 
