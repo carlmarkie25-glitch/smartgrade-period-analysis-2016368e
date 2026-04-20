@@ -880,10 +880,10 @@ export const StudentReportDialog = ({
                   }}>
                     <div style={{ fontSize: '10px', color: '#aab', letterSpacing: '1px', marginBottom: 4 }}>GENERAL AVERAGE</div>
                     <div style={{ fontSize: '36px', fontWeight: 700, color: gold }}>
-                      {generalAvg !== null ? `${generalAvg}%` : '--'}
+                      {generalAvg !== null ? (isKg ? (scoreToLetter(generalAvg, 100) ?? '—') : `${generalAvg}%`) : '--'}
                     </div>
                     <div style={{ fontSize: '12px', color: gold }}>
-                      {generalAvg !== null ? `Grade: ${letterGrade} — ${gradeLabel}` : ''}
+                      {generalAvg !== null && !isKg ? `Grade: ${letterGrade} — ${gradeLabel}` : ''}
                     </div>
                   </div>
                 </div>
