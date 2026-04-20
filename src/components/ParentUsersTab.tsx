@@ -13,11 +13,31 @@ import { ParentChildAssignmentDialog } from "./ParentChildAssignmentDialog";
 import { CreateParentDialog } from "./CreateParentDialog";
 
 export const ParentUsersTab = () => {
-  const { users, usersLoading, assignRole, removeRole } = useUserManagement();
+  const { users, usersLoading, assignRole } = useUserManagement();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [assignmentParent, setAssignmentParent] = useState<any>(null);
   const [createOpen, setCreateOpen] = useState(false);
+  const [removingId, setRemovingId] = useState<string | null>(null);
+
+  const handleRemoveParent = async (parentUserId: string, name: string) => {
+    if (!confirm(`Remove parent "${name}"? This will permanently delete their account and unlink all children.`)) return;
+    setRemovingId(parentUserId);
+    try {
+      const { data, error } = await supabase.functions.invoke("delete-parent-account", {
+        body: { parent_user_id: parentUserId },
+      });
+      if (error) throw error;
+      if ((data as any)?.error) throw new Error((data as any).error);
+      toast({ title: "Parent removed" });
+      queryClient.invalidateQueries({ queryKey: ["all-users"] });
+      queryClient.invalidateQueries({ queryKey: ["all-parent-assignments-with-students"] });
+    } catch (err: any) {
+      toast({ title: "Error", description: err.message, variant: "destructive" });
+    } finally {
+      setRemovingId(null);
+    }
+  };
 
   const parentUsers = users?.filter(
     (u) => u.user_roles.some((r: any) => r.role === "parent")
@@ -164,12 +184,11 @@ export const ParentUsersTab = () => {
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() =>
-                              removeRole.mutate({ userId: user.user_id, role: "parent" })
-                            }
+                            disabled={removingId === user.user_id}
+                            onClick={() => handleRemoveParent(user.user_id, user.full_name)}
                           >
                             <Unlink className="h-4 w-4 mr-1" />
-                            Remove Role
+                            {removingId === user.user_id ? "Removing..." : "Remove Parent"}
                           </Button>
                         </div>
                       </TableCell>
