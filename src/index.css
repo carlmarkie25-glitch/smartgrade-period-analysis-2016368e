@@ -179,6 +179,35 @@ All colors MUST be HSL.
   background: var(--sidebar-background);
 }
 
+/* Sidebar "gulf" notch effect for active item.
+   Two pseudo-elements above & below the active pill create concave
+   curves so the pill appears to bleed out of the sidebar into the page. */
+.sidebar-notch-active {
+  position: relative;
+}
+.sidebar-notch-active::before,
+.sidebar-notch-active::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  width: 24px;
+  height: 24px;
+  background: hsl(var(--background));
+  pointer-events: none;
+  z-index: 10;
+  transition: all 300ms ease;
+}
+.sidebar-notch-active::before {
+  top: -20px;
+  -webkit-mask-image: radial-gradient(circle at 0 0, transparent 24px, black 24px);
+          mask-image: radial-gradient(circle at 0 0, transparent 24px, black 24px);
+}
+.sidebar-notch-active::after {
+  bottom: -20px;
+  -webkit-mask-image: radial-gradient(circle at 0 100%, transparent 24px, black 24px);
+          mask-image: radial-gradient(circle at 0 100%, transparent 24px, black 24px);
+}
+
 /* Neumorphic utility classes */
 .neu-card {
   background: hsl(var(--neu-bg));
