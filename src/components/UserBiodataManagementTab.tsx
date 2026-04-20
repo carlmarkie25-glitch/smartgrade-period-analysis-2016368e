@@ -31,6 +31,7 @@ interface UserBiodata {
   student_id?: string | null;
   classes?: { name: string } | null;
   departments?: { name: string } | null;
+  religion?: string | null;
 }
 
 export const UserBiodataManagementTab = () => {
@@ -46,7 +47,7 @@ export const UserBiodataManagementTab = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("students")
-        .select("id, user_id, full_name, photo_url, gender, student_id, phone_number")
+        .select("id, user_id, full_name, photo_url, gender, student_id, phone_number, date_of_birth, religion, nationality, county, country, address, father_name, mother_name, emergency_contact_name, emergency_contact_phone, classes(name)")
         .order("full_name");
 
       if (error) throw error;
@@ -57,18 +58,20 @@ export const UserBiodataManagementTab = () => {
         full_name: s.full_name || "Unknown",
         email: "",
         phone_number: s.phone_number ?? null,
-        date_of_birth: null,
+        date_of_birth: s.date_of_birth ?? null,
         gender: s.gender ?? null,
         photo_url: s.photo_url ?? null,
-        nationality: null,
-        county: null,
-        country: null,
-        address: null,
-        father_name: null,
-        mother_name: null,
-        emergency_contact_name: null,
-        emergency_contact_phone: null,
+        nationality: s.nationality ?? null,
+        county: s.county ?? null,
+        country: s.country ?? null,
+        address: s.address ?? null,
+        father_name: s.father_name ?? null,
+        mother_name: s.mother_name ?? null,
+        emergency_contact_name: s.emergency_contact_name ?? null,
+        emergency_contact_phone: s.emergency_contact_phone ?? null,
         student_id: s.student_id ?? null,
+        classes: s.classes ?? null,
+        religion: s.religion ?? null,
       }));
 
       return allUsers;
@@ -100,15 +103,6 @@ export const UserBiodataManagementTab = () => {
   };
 
   const handlePrint = () => {
-    if (!printRef.current) {
-      toast({
-        title: "Error",
-        description: "Unable to print biodata list",
-        variant: "destructive",
-      });
-      return;
-    }
-
     const printWindow = window.open("", "_blank");
     if (!printWindow) {
       toast({
@@ -119,52 +113,54 @@ export const UserBiodataManagementTab = () => {
       return;
     }
 
-    const printContent = printRef.current.innerHTML;
+    const rows = filteredUsers.map((user) => `
+      <tr>
+        <td>${user.full_name}</td>
+        <td>${user.student_id || "N/A"}</td>
+        <td>${user.gender || "N/A"}</td>
+        <td>${user.classes?.name || "N/A"}</td>
+        <td>${user.date_of_birth || "N/A"}</td>
+        <td>${user.religion || "N/A"}</td>
+        <td>${user.country || "N/A"}</td>
+        <td>${user.address || "N/A"}</td>
+        <td>${user.father_name || "N/A"}</td>
+        <td>${user.mother_name || "N/A"}</td>
+      </tr>
+    `).join("");
+
     printWindow.document.write(`
       <html>
         <head>
-          <title>User Biodata Report</title>
+          <title>Student Biodata Report</title>
           <style>
-            body {
-              font-family: Arial, sans-serif;
-              margin: 20px;
-              color: #333;
-            }
-            h1 {
-              text-align: center;
-              color: #1f2937;
-              margin-bottom: 30px;
-            }
-            table {
-              width: 100%;
-              border-collapse: collapse;
-              margin-bottom: 20px;
-            }
-            th {
-              background-color: #f3f4f6;
-              border: 1px solid #d1d5db;
-              padding: 12px;
-              text-align: left;
-              font-weight: 600;
-            }
-            td {
-              border: 1px solid #d1d5db;
-              padding: 10px;
-            }
-            tr:nth-child(even) {
-              background-color: #f9fafb;
-            }
-            .print-timestamp {
-              text-align: center;
-              color: #6b7280;
-              font-size: 12px;
-              margin-top: 20px;
-            }
+            body { font-family: Arial, sans-serif; margin: 20px; color: #333; }
+            h1 { text-align: center; color: #1f2937; margin-bottom: 30px; }
+            table { width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 11px; }
+            th { background-color: #f3f4f6; border: 1px solid #d1d5db; padding: 8px; text-align: left; font-weight: 600; }
+            td { border: 1px solid #d1d5db; padding: 6px 8px; }
+            tr:nth-child(even) { background-color: #f9fafb; }
+            .print-timestamp { text-align: center; color: #6b7280; font-size: 12px; margin-top: 20px; }
           </style>
         </head>
         <body>
-          <h1>User Biodata Report</h1>
-          ${printContent}
+          <h1>Student Biodata Report</h1>
+          <table>
+            <thead>
+              <tr>
+                <th>Full Name</th>
+                <th>Student ID</th>
+                <th>Gender</th>
+                <th>Class</th>
+                <th>Date of Birth</th>
+                <th>Religion</th>
+                <th>Country</th>
+                <th>Address</th>
+                <th>Father Name</th>
+                <th>Mother Name</th>
+              </tr>
+            </thead>
+            <tbody>${rows}</tbody>
+          </table>
           <div class="print-timestamp">
             <p>Generated on ${new Date().toLocaleString()}</p>
           </div>
@@ -172,9 +168,7 @@ export const UserBiodataManagementTab = () => {
       </html>
     `);
     printWindow.document.close();
-    setTimeout(() => {
-      printWindow.print();
-    }, 250);
+    setTimeout(() => { printWindow.print(); }, 250);
   };
 
   const handleDownloadCSV = () => {
