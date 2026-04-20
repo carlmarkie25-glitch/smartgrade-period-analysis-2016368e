@@ -11,9 +11,15 @@ import { useSchool } from "@/contexts/SchoolContext";
 import {
   DEFAULT_REPORT_CARD_SETTINGS,
   ReportCardSettings,
+  DepartmentReportColors,
   useReportCardSettings,
   useSaveReportCardSettings,
+  useDepartmentReportColors,
+  useSaveDepartmentReportColors,
+  useDeleteDepartmentReportColors,
 } from "@/hooks/useReportCardSettings";
+import { useQuery } from "@tanstack/react-query";
+import { Trash2 } from "lucide-react";
 
 export const ReportCardSettingsTab = () => {
   const { school } = useSchool();
