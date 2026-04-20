@@ -869,15 +869,15 @@ export const StudentReportDialog = ({
 
                   const Box = ({ checked }: { checked: boolean }) => (
                     <span style={{
-                      display: 'inline-block', width: 11, height: 11, border: '1px solid #333',
-                      marginRight: 6, verticalAlign: 'middle', textAlign: 'center', lineHeight: '9px',
-                      fontSize: 10, fontWeight: 700, background: '#fff',
+                      display: 'inline-block', width: 14, height: 14, border: '1px solid #333',
+                      marginRight: 6, verticalAlign: 'middle', textAlign: 'center', lineHeight: '12px',
+                      fontSize: 12, fontWeight: 700, background: '#fff',
                     }}>{checked ? '✓' : ''}</span>
                   );
 
                   const rowStyle: React.CSSProperties = {
-                    display: 'flex', alignItems: 'center', gap: 4, padding: '3px 0',
-                    fontSize: '11px', cursor: editing ? 'pointer' : 'default',
+                    display: 'flex', alignItems: 'center', gap: 4, padding: '4px 0',
+                    fontSize: '12px', cursor: editing ? 'pointer' : 'default',
                   };
 
                   const onPick = (key: string) => () => {
@@ -887,11 +887,11 @@ export const StudentReportDialog = ({
 
                   return (
                     <>
-                      <div style={{ background: navy, color: '#fff', padding: '5px 10px', fontSize: '10px', fontWeight: 700, letterSpacing: '1px' }}>
+                      <div style={{ background: navy, color: '#fff', padding: '8px 12px', fontSize: '12px', fontWeight: 700, letterSpacing: '1px' }}>
                         PROMOTION STATEMENT
                       </div>
-                      <div style={{ padding: '10px 14px', borderTop: '0.5px solid #ccc' }}>
-                        <p style={{ margin: '0 0 8px', fontSize: '11px' }}>
+                      <div style={{ padding: '12px 16px', borderTop: '0.5px solid #ccc' }}>
+                        <p style={{ margin: '0 0 10px', fontSize: '12px' }}>
                           This is to certify that <strong>{studentName}</strong>:
                         </p>
                         <div style={{ paddingLeft: 8 }}>
@@ -903,7 +903,7 @@ export const StudentReportDialog = ({
                             <Box checked={status === 'probation'} />
                             <span><strong>B.</strong> Promoted on probation to <strong>{nextClassName}</strong></span>
                           </div>
-                          <div style={{ paddingLeft: 22, paddingTop: 2, paddingBottom: 4, display: 'flex', alignItems: 'center', gap: 6, fontSize: '11px' }}>
+                          <div style={{ paddingLeft: 22, paddingTop: 4, paddingBottom: 6, display: 'flex', alignItems: 'center', gap: 6, fontSize: '12px' }}>
                             <span style={{ fontStyle: 'italic', color: '#555' }}>Condition:</span>
                             <div style={{ flex: 1 }}>
                               <EditableField
@@ -911,7 +911,7 @@ export const StudentReportDialog = ({
                                 onChange={setField('promotion_condition')}
                                 editable={editing && status === 'probation'}
                                 placeholder={status === 'probation' ? 'Subject(s) / condition...' : '—'}
-                                minHeight={22}
+                                minHeight={28}
                               />
                             </div>
                           </div>
@@ -930,28 +930,28 @@ export const StudentReportDialog = ({
                 })()}
 
                 {/* ── SEMESTER AVERAGES ── */}
-                <div style={{ background: navy, color: '#fff', padding: '5px 10px', fontSize: '10px', fontWeight: 700, letterSpacing: '1px' }}>
+                <div style={{ background: navy, color: '#fff', padding: '8px 12px', fontSize: '12px', fontWeight: 700, letterSpacing: '1px' }}>
                   SEMESTER AVERAGES
                 </div>
                 <div style={{ display: 'flex' }}>
-                  <div style={{ flex: 1, padding: '10px 14px', borderRight: '0.5px solid #ccc' }}>
-                    <table style={{ width: '100%', fontSize: '11px', borderCollapse: 'collapse' }}>
+                  <div style={{ flex: 1, padding: '12px 16px', borderRight: '0.5px solid #ccc' }}>
+                    <table style={{ width: '100%', fontSize: '12px', borderCollapse: 'collapse' }}>
                       <tbody>
                         <tr>
-                          <td style={{ padding: '3px 0' }}>Semester 1 Average</td>
-                          <td style={{ padding: '3px 0', textAlign: 'right', fontWeight: 700 }}>
+                          <td style={{ padding: '4px 0' }}>Semester 1 Average</td>
+                          <td style={{ padding: '4px 0', textAlign: 'right', fontWeight: 700 }}>
                             {s1Avg !== null ? (isKg ? (scoreToLetter(s1Avg, 100) ?? '') : `${s1Avg}%`) : ''}
                           </td>
                         </tr>
                         <tr>
-                          <td style={{ padding: '3px 0' }}>Semester 2 Average</td>
-                          <td style={{ padding: '3px 0', textAlign: 'right', fontWeight: 700 }}>
+                          <td style={{ padding: '4px 0' }}>Semester 2 Average</td>
+                          <td style={{ padding: '4px 0', textAlign: 'right', fontWeight: 700 }}>
                             {s2Avg !== null ? (isKg ? (scoreToLetter(s2Avg, 100) ?? '') : `${s2Avg}%`) : ''}
                           </td>
                         </tr>
                         <tr>
-                          <td style={{ padding: '3px 0' }}>Class Position</td>
-                          <td style={{ padding: '3px 0', textAlign: 'right', fontWeight: 700 }}>
+                          <td style={{ padding: '4px 0' }}>Class Position</td>
+                          <td style={{ padding: '4px 0', textAlign: 'right', fontWeight: 700 }}>
                             {report.hasIncomplete ? '--' : (() => {
                               if (isSemester) {
                                 const rank = report.yearlyTotal?.class_rank;
@@ -966,7 +966,7 @@ export const StudentReportDialog = ({
                           </td>
                         </tr>
                         <tr>
-                          <td colSpan={2} style={{ padding: '6px 0 0', fontSize: '10px', color: '#666', lineHeight: 1.6 }}>
+                          <td colSpan={2} style={{ padding: '8px 0 0', fontSize: '11px', color: '#666', lineHeight: 1.6 }}>
                             {isKg ? (
                               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px 10px' }}>
                                 {KG_SCALE.map((t) => (
@@ -1100,10 +1100,10 @@ export const StudentReportDialog = ({
 
 // Shared cell styles
 const thBase: React.CSSProperties = {
-  border: '0.5px solid #ccc', textAlign: 'center', padding: '4px 2px',
-  fontSize: '10px', fontWeight: 600, background: '#2a3a8e', color: '#fff',
+  border: '0.5px solid #ccc', textAlign: 'center', padding: '6px 4px',
+  fontSize: '11px', fontWeight: 600, background: '#2a3a8e', color: '#fff',
 };
 
 const tdBase: React.CSSProperties = {
-  border: '0.5px solid #ccc', textAlign: 'center', padding: '4px 2px', fontSize: '11px',
+  border: '0.5px solid #ccc', textAlign: 'center', padding: '6px 4px', fontSize: '12px',
 };
