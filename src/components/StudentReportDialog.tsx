@@ -49,7 +49,7 @@ const EditableField = ({
   plain?: boolean;
 }) => {
   const baseStyle: React.CSSProperties = {
-    fontSize: '11px',
+    fontSize: '13px',
     color: '#222',
     border: plain ? 'none' : '0.5px solid #ddd',
     padding: plain ? '0' : '4px 6px',
@@ -467,46 +467,46 @@ export const StudentReportDialog = ({
                         <h1 style={{ fontSize: '18px', fontWeight: 700, color: '#fff', margin: 0 }}>
                           {headerTitle.toUpperCase()}
                         </h1>
-                        {rcSettings.header_subtitle && (
-                          <p style={{ fontSize: '10px', color: gold, margin: '2px 0 0', fontStyle: 'italic' }}>
-                            {rcSettings.header_subtitle}
-                          </p>
-                        )}
-                        {headerAddress && (
-                          <p style={{ fontSize: '11px', color: '#ccd', margin: 0 }}>
-                            {headerAddress}{headerContact ? ` | ${headerContact}` : ''}
-                          </p>
-                        )}
-                        {headerWebsite && (
-                          <p style={{ fontSize: '11px', color: '#ccd', margin: 0 }}>{headerWebsite}</p>
-                        )}
+                         {rcSettings.header_subtitle && (
+                           <p style={{ fontSize: '12px', color: gold, margin: '2px 0 0', fontStyle: 'italic' }}>
+                             {rcSettings.header_subtitle}
+                           </p>
+                         )}
+                         {headerAddress && (
+                           <p style={{ fontSize: '12px', color: '#ccd', margin: 0 }}>
+                             {headerAddress}{headerContact ? ` | ${headerContact}` : ''}
+                           </p>
+                         )}
+                         {headerWebsite && (
+                           <p style={{ fontSize: '12px', color: '#ccd', margin: 0 }}>{headerWebsite}</p>
+                         )}
                       </div>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                        <div style={{
-                          background: gold, color: '#fff', textAlign: 'center', padding: '4px 10px',
-                          fontSize: '10px', fontWeight: 700, borderRadius: '3px', minWidth: '80px'
-                        }}>
-                          <small style={{ display: 'block', fontSize: '8px', fontWeight: 400, opacity: 0.85, letterSpacing: '0.5px' }}>REPORT TYPE</small>
-                          {getDepartmentLabel().toUpperCase()}
-                        </div>
-                        <div style={{
-                          background: gold, color: '#fff', textAlign: 'center', padding: '4px 10px',
-                          fontSize: '10px', fontWeight: 700, borderRadius: '3px', minWidth: '80px'
-                        }}>
-                          <small style={{ display: 'block', fontSize: '8px', fontWeight: 400, opacity: 0.85, letterSpacing: '0.5px' }}>SEMESTER</small>
-                          {getSemesterLabel()}
-                        </div>
+                         <div style={{
+                           background: gold, color: '#fff', textAlign: 'center', padding: '4px 10px',
+                           fontSize: '11px', fontWeight: 700, borderRadius: '3px', minWidth: '80px'
+                         }}>
+                           <small style={{ display: 'block', fontSize: '9px', fontWeight: 400, opacity: 0.85, letterSpacing: '0.5px' }}>REPORT TYPE</small>
+                           {getDepartmentLabel().toUpperCase()}
+                         </div>
+                         <div style={{
+                           background: gold, color: '#fff', textAlign: 'center', padding: '4px 10px',
+                           fontSize: '11px', fontWeight: 700, borderRadius: '3px', minWidth: '80px'
+                         }}>
+                           <small style={{ display: 'block', fontSize: '9px', fontWeight: 400, opacity: 0.85, letterSpacing: '0.5px' }}>SEMESTER</small>
+                           {getSemesterLabel()}
+                         </div>
                       </div>
                     </div>
                   );
                 })()}
 
                 {/* ── TITLE BAR ── */}
-                <div style={{ background: navy, textAlign: 'center', padding: '8px', borderTop: `2px solid ${gold}` }}>
-                  <h2 style={{ color: '#fff', fontSize: '14px', letterSpacing: '2px', fontWeight: 700, margin: 0 }}>
+                <div style={{ background: navy, textAlign: 'center', padding: '10px', borderTop: `2px solid ${gold}` }}>
+                  <h2 style={{ color: '#fff', fontSize: '16px', letterSpacing: '2px', fontWeight: 700, margin: 0 }}>
                     ACADEMIC REPORT CARD
                   </h2>
-                  <p style={{ color: gold, fontSize: '10px', margin: 0 }}>
+                  <p style={{ color: gold, fontSize: '12px', margin: 0 }}>
                     {report.student.classes?.academic_years?.year_name || '--'} School Year
                   </p>
                 </div>
@@ -524,32 +524,32 @@ export const StudentReportDialog = ({
                     ];
                   })().map(([label, val], i) => (
                     <div key={i} style={{
-                      display: 'flex', alignItems: 'center', gap: '8px', padding: '5px 10px',
+                      display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 12px',
                       borderBottom: '0.5px solid #e5e5e5',
                       borderRight: i % 2 === 0 ? '0.5px solid #ccc' : 'none',
                     }}>
-                      <span style={{ fontSize: '9px', fontWeight: 700, color: '#666', textTransform: 'uppercase', minWidth: '90px' }}>
+                      <span style={{ fontSize: '11px', fontWeight: 700, color: '#444', textTransform: 'uppercase', minWidth: '100px' }}>
                         {label}
                       </span>
-                      <span style={{ fontSize: '11px', color: '#111' }}>{val}</span>
+                      <span style={{ fontSize: '13px', color: '#111', fontWeight: 500 }}>{val}</span>
                     </div>
                   ))}
                 </div>
 
                 {/* ── INCOMPLETE NOTICE ── */}
                 {report.hasIncomplete && (
-                  <div style={{ margin: '8px 10px', padding: '6px 10px', background: '#fff3cd', color: '#856404', fontSize: '10px', fontWeight: 600, border: '1px solid #ffeaa7', borderRadius: '3px' }}>
+                  <div style={{ margin: '10px 12px', padding: '8px 12px', background: '#fff3cd', color: '#856404', fontSize: '12px', fontWeight: 600, border: '1px solid #ffeaa7', borderRadius: '3px' }}>
                     ⚠️ This student has incomplete grades (marked as "I"). Averages and rankings cannot be calculated until all grades are complete.
                   </div>
                 )}
 
                 {/* ── SECTION: GRADES ── */}
-                <div style={{ background: navy, color: '#fff', padding: '5px 10px', fontSize: '10px', fontWeight: 700, letterSpacing: '1px' }}>
+                <div style={{ background: navy, color: '#fff', padding: '8px 12px', fontSize: '12px', fontWeight: 700, letterSpacing: '1px' }}>
                   ACADEMIC PERFORMANCE — GRADES BY PERIOD
                 </div>
 
                 {/* ── GRADES TABLE ── */}
-                <table style={{ width: '100%', borderCollapse: 'collapse', tableLayout: 'fixed', fontSize: '11px' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse', tableLayout: 'fixed', fontSize: '12px' }}>
                   <colgroup>
                     <col style={{ width: 130 }} />
                     {isSemester && isYearly ? (
