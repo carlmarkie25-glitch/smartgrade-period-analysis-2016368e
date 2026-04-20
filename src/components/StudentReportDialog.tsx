@@ -17,7 +17,7 @@ import {
   useSaveReportInputs,
 } from "@/hooks/useReportInputs";
 import { toast } from "@/hooks/use-toast";
-import { isKindergartenClass, KG_SCALE } from "@/lib/kindergarten";
+import { isKindergartenClass, KG_SCALE, scoreToLetter } from "@/lib/kindergarten";
 import { useSchool } from "@/contexts/SchoolContext";
 import {
   DEFAULT_REPORT_CARD_SETTINGS,
@@ -241,7 +241,24 @@ export const StudentReportDialog = ({
           const isSemester = report.isSemesterReport;
           const isKg = isKindergartenClass(report.student.classes);
           // KG/Nursery/ABC classes use the SAME standard report layout as all other
-          // classes — only the grading legend at the bottom shows the KG letter scale.
+          // classes — only the grading legend at the bottom shows the KG letter scale,
+          // and numeric scores are rendered as letter grades (A+, A, B+, …).
+
+          // Wrap a numeric score for display: shows letter for KG, raw number otherwise.
+          const kgWrap = (v: any, max: number = 100): any => {
+            if (!isKg) return v;
+            if (v === null || v === undefined || v === '--' || v === 'I') return v;
+            const n = typeof v === 'number' ? v : Number(v);
+            if (!Number.isFinite(n)) return v;
+            return scoreToLetter(n, max) ?? '—';
+          };
+          // Wrap displayScore output (handles 'I' / '--' passthrough)
+          const kgDisp = (score: number | null | undefined, noGrades?: boolean, max: number = 100): string => {
+            const base = displayScore(score, noGrades);
+            if (!isKg) return base;
+            if (base === '--' || base === 'I') return base;
+            return scoreToLetter(score as number, max) ?? '—';
+          };
 
           // Unified averaging — these match the "Average" row of the grades table
           // so the General Average always equals the row totals shown above.
@@ -548,29 +565,29 @@ export const StudentReportDialog = ({
                           {isSemester && isYearly ? (
                             <>
                               {['p1','p2','p3'].map(p => (
-                                <td key={p} style={{ ...tdBase, ...scoreColorStyle(subject.periods?.[p]?.score) }}>
-                                  {displayScore(subject.periods?.[p]?.score, subject.periods?.[p]?.noGrades)}
+                                <td key={p} style={{ ...tdBase, ...(isKg ? {} : scoreColorStyle(subject.periods?.[p]?.score)) }}>
+                                  {kgDisp(subject.periods?.[p]?.score, subject.periods?.[p]?.noGrades, subject.periods?.[p]?.max)}
                                 </td>
                               ))}
                               <td style={{ ...tdBase, background: lightBlue, color: '#fff', fontWeight: 600 }}>
-                                {displayScore(subject.periods?.exam_s1?.score, subject.periods?.exam_s1?.noGrades)}
+                                {kgDisp(subject.periods?.exam_s1?.score, subject.periods?.exam_s1?.noGrades, subject.periods?.exam_s1?.max)}
                               </td>
                               <td style={{ ...tdBase, background: '#1a5276', color: '#fff', fontWeight: 700 }}>
-                                {s1avg !== null ? s1avg : '--'}
+                                {s1avg !== null ? kgWrap(s1avg) : '--'}
                               </td>
                               {['p4','p5','p6'].map(p => (
-                                <td key={p} style={{ ...tdBase, ...scoreColorStyle(subject.periods?.[p]?.score) }}>
-                                  {displayScore(subject.periods?.[p]?.score, subject.periods?.[p]?.noGrades)}
+                                <td key={p} style={{ ...tdBase, ...(isKg ? {} : scoreColorStyle(subject.periods?.[p]?.score)) }}>
+                                  {kgDisp(subject.periods?.[p]?.score, subject.periods?.[p]?.noGrades, subject.periods?.[p]?.max)}
                                 </td>
                               ))}
                               <td style={{ ...tdBase, background: lightBlue, color: '#fff', fontWeight: 600 }}>
-                                {displayScore(subject.periods?.exam_s2?.score, subject.periods?.exam_s2?.noGrades)}
+                                {kgDisp(subject.periods?.exam_s2?.score, subject.periods?.exam_s2?.noGrades, subject.periods?.exam_s2?.max)}
                               </td>
                               <td style={{ ...tdBase, background: '#1a5276', color: '#fff', fontWeight: 700 }}>
-                                {s2avg !== null ? s2avg : '--'}
+                                {s2avg !== null ? kgWrap(s2avg) : '--'}
                               </td>
                               <td style={{ ...tdBase, background: gold, color: '#fff', fontWeight: 700 }}>
-                                {yavg !== null ? yavg : '--'}
+                                {yavg !== null ? kgWrap(yavg) : '--'}
                               </td>
                             </>
                           ) : isSemester ? (
@@ -580,22 +597,22 @@ export const StudentReportDialog = ({
                                 return (
                                   <td key={p} style={{
                                     ...tdBase,
-                                    ...(isExam ? { background: lightBlue, color: '#fff', fontWeight: 600 } : scoreColorStyle(subject.periods?.[p]?.score))
+                                    ...(isExam ? { background: lightBlue, color: '#fff', fontWeight: 600 } : (isKg ? {} : scoreColorStyle(subject.periods?.[p]?.score)))
                                   }}>
-                                    {displayScore(subject.periods?.[p]?.score, subject.periods?.[p]?.noGrades)}
+                                    {kgDisp(subject.periods?.[p]?.score, subject.periods?.[p]?.noGrades, subject.periods?.[p]?.max)}
                                   </td>
                                 );
                               })}
                               <td style={{ ...tdBase, background: '#1a5276', color: '#fff', fontWeight: 700 }}>
                                 {(() => {
                                   const avg = computeSubjectSemAvg(subject, isSem1 ? ['p1','p2','p3'] : ['p4','p5','p6']);
-                                  return avg !== null ? avg : '--';
+                                  return avg !== null ? kgWrap(avg) : '--';
                                 })()}
                               </td>
                             </>
                           ) : (
                             <td style={{ ...tdBase, fontWeight: 700, color: subject.noGrades ? '#999' : subject.hasIncomplete ? '#721c24' : '#111' }}>
-                              {subject.noGrades ? '--' : subject.hasIncomplete ? 'I' : subject.total}
+                              {subject.noGrades ? '--' : subject.hasIncomplete ? 'I' : kgWrap(subject.total, subject.max)}
                             </td>
                           )}
                         </tr>
@@ -630,13 +647,13 @@ export const StudentReportDialog = ({
                             return (
                               <>
                                 <td style={{ ...avgStyle, textAlign: 'left', paddingLeft: 8 }}>Average</td>
-                                {['p1','p2','p3'].map(p => <td key={p} style={avgStyle}>{computeColumnAvg(subjects, p)}</td>)}
-                                <td style={{ ...avgStyle, background: lightBlue, color: '#fff' }}>{computeColumnAvg(subjects, 'exam_s1')}</td>
-                                <td style={{ ...avgStyle, background: '#1a5276', color: '#fff' }}>{s1Avg ?? '--'}</td>
-                                {['p4','p5','p6'].map(p => <td key={p} style={avgStyle}>{computeColumnAvg(subjects, p)}</td>)}
-                                <td style={{ ...avgStyle, background: lightBlue, color: '#fff' }}>{computeColumnAvg(subjects, 'exam_s2')}</td>
-                                <td style={{ ...avgStyle, background: '#1a5276', color: '#fff' }}>{s2Avg ?? '--'}</td>
-                                <td style={{ ...avgStyle, background: gold, color: '#fff' }}>{generalAvg ?? '--'}</td>
+                                {['p1','p2','p3'].map(p => <td key={p} style={avgStyle}>{kgWrap(computeColumnAvg(subjects, p))}</td>)}
+                                <td style={{ ...avgStyle, background: lightBlue, color: '#fff' }}>{kgWrap(computeColumnAvg(subjects, 'exam_s1'))}</td>
+                                <td style={{ ...avgStyle, background: '#1a5276', color: '#fff' }}>{s1Avg !== null && s1Avg !== undefined ? kgWrap(s1Avg) : '--'}</td>
+                                {['p4','p5','p6'].map(p => <td key={p} style={avgStyle}>{kgWrap(computeColumnAvg(subjects, p))}</td>)}
+                                <td style={{ ...avgStyle, background: lightBlue, color: '#fff' }}>{kgWrap(computeColumnAvg(subjects, 'exam_s2'))}</td>
+                                <td style={{ ...avgStyle, background: '#1a5276', color: '#fff' }}>{s2Avg !== null && s2Avg !== undefined ? kgWrap(s2Avg) : '--'}</td>
+                                <td style={{ ...avgStyle, background: gold, color: '#fff' }}>{generalAvg !== null && generalAvg !== undefined ? kgWrap(generalAvg) : '--'}</td>
                               </>
                             );
                           })()}
@@ -672,11 +689,11 @@ export const StudentReportDialog = ({
                               const isExam = p.startsWith('exam');
                               return (
                                 <td key={p} style={isExam ? { ...avgStyle, background: lightBlue, color: '#fff' } : avgStyle}>
-                                  {computeColumnAvg(subjects, p)}
+                                  {kgWrap(computeColumnAvg(subjects, p))}
                                 </td>
                               );
                             })}
-                            <td style={{ ...avgStyle, background: '#1a5276', color: '#fff' }}>{semAvg ?? '--'}</td>
+                            <td style={{ ...avgStyle, background: '#1a5276', color: '#fff' }}>{semAvg !== null && semAvg !== undefined ? kgWrap(semAvg) : '--'}</td>
                           </tr>
                         </>
                       );
@@ -692,7 +709,7 @@ export const StudentReportDialog = ({
                       // Do not compute average if any subject is incomplete — must settle I's first
                       const avgDisplay = anyIncomplete
                         ? 'I'
-                        : (validSubjects.length > 0 ? Math.round(totalSum / validSubjects.length) : '--');
+                        : (validSubjects.length > 0 ? kgWrap(Math.round(totalSum / validSubjects.length)) : '--');
                       return (
                         <>
                           <tr>
@@ -863,10 +880,10 @@ export const StudentReportDialog = ({
                   }}>
                     <div style={{ fontSize: '10px', color: '#aab', letterSpacing: '1px', marginBottom: 4 }}>GENERAL AVERAGE</div>
                     <div style={{ fontSize: '36px', fontWeight: 700, color: gold }}>
-                      {generalAvg !== null ? `${generalAvg}%` : '--'}
+                      {generalAvg !== null ? (isKg ? (scoreToLetter(generalAvg, 100) ?? '—') : `${generalAvg}%`) : '--'}
                     </div>
                     <div style={{ fontSize: '12px', color: gold }}>
-                      {generalAvg !== null ? `Grade: ${letterGrade} — ${gradeLabel}` : ''}
+                      {generalAvg !== null && !isKg ? `Grade: ${letterGrade} — ${gradeLabel}` : ''}
                     </div>
                   </div>
                 </div>
