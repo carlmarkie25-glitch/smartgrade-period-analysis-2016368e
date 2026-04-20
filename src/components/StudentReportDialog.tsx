@@ -128,8 +128,9 @@ const scoreColorStyle = (score: number | null | undefined): React.CSSProperties 
   if (score === null || score === undefined) return { color: '#999' };
   if (score >= 90) return { color: '#155724', fontWeight: 700 };
   if (score >= 75) return { color: '#1a3a6e', fontWeight: 600 };
-  if (score >= 60) return { color: '#856404' };
-  return { color: '#721c24' };
+  // 60–69 is failing-range under the no-D scale → red
+  if (score >= 70) return { color: '#856404' };
+  return { color: '#721c24', fontWeight: 700 };
 };
 
 export const StudentReportDialog = ({
