@@ -352,6 +352,15 @@ export const StudentUsersTab = () => {
           </Dialog>
         </CardHeader>
         <CardContent>
+          <div className="relative mb-4">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search by name, student ID, class, department, or phone..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10"
+            />
+          </div>
           <Table>
             <TableHeader>
               <TableRow>
@@ -364,7 +373,13 @@ export const StudentUsersTab = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {students?.map((student) => (
+              {filteredStudents.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
+                    {searchTerm ? `No students found matching "${searchTerm}"` : "No students found"}
+                  </TableCell>
+                </TableRow>
+              ) : filteredStudents.map((student) => (
                 <TableRow key={student.id}>
                   <TableCell>
                     <div className="flex items-center gap-3">
