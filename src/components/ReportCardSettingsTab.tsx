@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Loader2, Upload, Save } from "lucide-react";
+import { Loader2, Upload, Save, RotateCcw } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useSchool } from "@/contexts/SchoolContext";
@@ -69,6 +69,21 @@ export const ReportCardSettingsTab = () => {
       toast({ title: "Save failed", description: e.message, variant: "destructive" });
     } finally {
       setUploading(false);
+    }
+  };
+
+  const handleResetColors = () => {
+    if (window.confirm("Reset all report card colors to system defaults? This will affect all departments using school defaults.")) {
+      setForm((prev) => ({
+        ...prev,
+        header_bg_color: DEFAULT_REPORT_CARD_SETTINGS.header_bg_color,
+        accent_color: DEFAULT_REPORT_CARD_SETTINGS.accent_color,
+        secondary_bg_color: DEFAULT_REPORT_CARD_SETTINGS.secondary_bg_color,
+        header_chip_color: DEFAULT_REPORT_CARD_SETTINGS.header_chip_color,
+        general_average_text_color: DEFAULT_REPORT_CARD_SETTINGS.general_average_text_color,
+        header_meta_text_color: DEFAULT_REPORT_CARD_SETTINGS.header_meta_text_color,
+      }));
+      toast({ title: "Colors reset", description: "All colors reverted to system defaults. Click Save to apply." });
     }
   };
 
@@ -435,7 +450,15 @@ export const ReportCardSettingsTab = () => {
         </CardContent>
       </Card>
 
-      <div className="flex justify-end">
+      <div className="flex items-center justify-between">
+        <Button
+          variant="outline"
+          onClick={handleResetColors}
+          className="gap-2"
+          type="button"
+        >
+          <RotateCcw className="h-4 w-4" /> Reset colors to default
+        </Button>
         <Button onClick={handleSave} disabled={save.isPending || uploading} className="gap-2">
           {(save.isPending || uploading) && <Loader2 className="h-4 w-4 animate-spin" />}
           <Save className="h-4 w-4" /> Save report card settings
