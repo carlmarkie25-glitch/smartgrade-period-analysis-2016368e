@@ -661,7 +661,7 @@ export const StudentReportDialog = ({
 
                       return (
                         <tr key={idx}>
-                          <td style={{ ...tdBase, textAlign: 'left', paddingLeft: 8, background: '#f9f9fc', color: '#111' }}>
+                          <td style={{ ...tdBase, textAlign: 'left', paddingLeft: 8, background: '#f9f9fc', color: '#111', fontWeight: 700, fontSize: '13px' }}>
                             {subject.name}
                           </td>
                           {isSemester && isYearly ? (
