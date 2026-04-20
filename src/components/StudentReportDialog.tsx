@@ -568,14 +568,14 @@ export const StudentReportDialog = ({
                     ];
                   })().map(([label, val], i) => (
                     <div key={i} style={{
-                      display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 12px',
+                      display: 'flex', alignItems: 'center', gap: '8px', padding: '4px 12px',
                       borderBottom: '0.5px solid #e5e5e5',
                       borderRight: i % 2 === 0 ? '0.5px solid #ccc' : 'none',
                     }}>
-                      <span style={{ fontSize: '11px', fontWeight: 700, color: '#444', textTransform: 'uppercase', minWidth: '100px' }}>
+                      <span style={{ fontSize: '10px', fontWeight: 700, color: '#444', textTransform: 'uppercase', minWidth: '100px' }}>
                         {label}
                       </span>
-                      <span style={{ fontSize: '13px', color: '#111', fontWeight: 500 }}>{val}</span>
+                      <span style={{ fontSize: '12px', color: '#111', fontWeight: 600 }}>{val}</span>
                     </div>
                   ))}
                 </div>
