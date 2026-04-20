@@ -40,71 +40,36 @@ export const UserBiodataManagementTab = () => {
   const printRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
-  // Fetch list view in parallel — only the columns shown in the table
+  // Fetch only students for the biodata tab
   const { data: users = [], isLoading, error: queryError } = useQuery({
-    queryKey: ["all-users-biodata-list"],
+    queryKey: ["students-biodata-list"],
     queryFn: async () => {
-      const [studentsRes, profilesRes] = await Promise.all([
-        supabase
-          .from("students")
-          .select("id, user_id, full_name, photo_url, gender, student_id, email, phone_number")
-          .order("full_name"),
-        supabase
-          .from("profiles")
-          .select("id, full_name, email")
-          .order("full_name"),
-      ]);
+      const { data, error } = await supabase
+        .from("students")
+        .select("id, user_id, full_name, photo_url, gender, student_id, phone_number")
+        .order("full_name");
 
-      const allUsers: UserBiodata[] = [];
+      if (error) throw error;
 
-      if (studentsRes.data) {
-        for (const s of studentsRes.data as any[]) {
-          allUsers.push({
-            id: s.id,
-            user_id: s.user_id,
-            full_name: s.full_name || "Unknown",
-            email: s.email || "",
-            phone_number: s.phone_number ?? null,
-            date_of_birth: null,
-            gender: s.gender ?? null,
-            photo_url: s.photo_url ?? null,
-            nationality: null,
-            county: null,
-            country: null,
-            address: null,
-            father_name: null,
-            mother_name: null,
-            emergency_contact_name: null,
-            emergency_contact_phone: null,
-            student_id: s.student_id ?? null,
-          });
-        }
-      }
-
-      if (profilesRes.data) {
-        const studentUserIds = new Set(allUsers.map((s) => s.user_id));
-        for (const p of profilesRes.data as any[]) {
-          if (studentUserIds.has(p.id)) continue;
-          allUsers.push({
-            id: p.id,
-            user_id: p.id,
-            full_name: p.full_name || "Unknown",
-            email: p.email || "",
-            phone_number: null,
-            date_of_birth: null,
-            gender: null,
-            photo_url: null,
-            nationality: null,
-            county: null,
-            country: null,
-            address: null,
-            father_name: null,
-            mother_name: null,
-            emergency_contact_name: null,
-            emergency_contact_phone: null,
-          });
-        }
-      }
+      const allUsers: UserBiodata[] = (data || []).map((s: any) => ({
+        id: s.id,
+        user_id: s.user_id,
+        full_name: s.full_name || "Unknown",
+        email: "",
+        phone_number: s.phone_number ?? null,
+        date_of_birth: null,
+        gender: s.gender ?? null,
+        photo_url: s.photo_url ?? null,
+        nationality: null,
+        county: null,
+        country: null,
+        address: null,
+        father_name: null,
+        mother_name: null,
+        emergency_contact_name: null,
+        emergency_contact_phone: null,
+        student_id: s.student_id ?? null,
+      }));
 
       return allUsers;
     },
