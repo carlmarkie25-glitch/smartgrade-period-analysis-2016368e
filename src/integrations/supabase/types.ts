@@ -2132,6 +2132,7 @@ export type Database = {
         Row: {
           code: string
           created_at: string
+          department_id: string | null
           description: string | null
           id: string
           name: string
@@ -2140,6 +2141,7 @@ export type Database = {
         Insert: {
           code: string
           created_at?: string
+          department_id?: string | null
           description?: string | null
           id?: string
           name: string
@@ -2148,12 +2150,20 @@ export type Database = {
         Update: {
           code?: string
           created_at?: string
+          department_id?: string | null
           description?: string | null
           id?: string
           name?: string
           school_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "subjects_department_id_fkey"
+            columns: ["department_id"]
+            isOneToOne: false
+            referencedRelation: "departments"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "subjects_school_id_fkey"
             columns: ["school_id"]

@@ -1,0 +1,2 @@
+ALTER TABLE public.subjects ADD COLUMN IF NOT EXISTS department_id UUID REFERENCES public.departments(id) ON DELETE SET NULL;
+CREATE INDEX IF NOT EXISTS idx_subjects_department_id ON public.subjects(department_id);
