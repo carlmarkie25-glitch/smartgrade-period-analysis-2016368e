@@ -361,6 +361,16 @@ export const ClassManagementTab = () => {
     if (!selectedClassId || !selectedSubjectId) return;
 
     try {
+      const exists = classSubjects?.some((cs: any) => cs.subject_id === selectedSubjectId);
+      if (exists) {
+        toast({
+          title: "Subject already exists",
+          description: "This subject is already assigned to this class.",
+          variant: "destructive",
+        });
+        return;
+      }
+
       const { error } = await supabase.from("class_subjects").insert({
         class_id: selectedClassId,
         subject_id: selectedSubjectId,
