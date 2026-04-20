@@ -410,11 +410,8 @@ export const StudentReportDialog = ({
             <div>
               {/* ===== ACTION BUTTONS (screen only) ===== */}
               <div className="flex gap-2 justify-center py-3 print:hidden flex-wrap" style={{ background: '#e8eaf0' }}>
-                <Button onClick={handlePrint} size="sm" className="gap-2" style={{ background: navy, color: '#fff' }}>
-                  <Printer className="h-4 w-4" /> Print / Save as PDF
-                </Button>
-                <Button onClick={handlePrint} size="sm" className="gap-2" style={{ background: gold, color: '#fff' }}>
-                  <Download className="h-4 w-4" /> Download PDF
+                <Button onClick={handleDownloadPdf} size="sm" className="gap-2" disabled={downloading} style={{ background: navy, color: '#fff' }}>
+                  <Download className="h-4 w-4" /> {downloading ? 'Generating PDF...' : 'Download PDF'}
                 </Button>
                 {canEdit && !editing && (
                   <Button onClick={() => setEditing(true)} size="sm" variant="outline" className="gap-2">
