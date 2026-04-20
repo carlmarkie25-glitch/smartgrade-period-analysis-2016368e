@@ -1142,13 +1142,13 @@ export const StudentReportDialog = ({
   );
 };
 
-// Shared cell styles
+// Shared cell styles — compact to fit on a single A4 page
 const thBase: React.CSSProperties = {
-  border: '0.5px solid #ccc', textAlign: 'center', padding: '7px 4px',
-  fontSize: '12px', fontWeight: 700, background: '#2a3a8e', color: '#fff',
+  border: '0.5px solid #ccc', textAlign: 'center', padding: '4px 3px',
+  fontSize: '11px', fontWeight: 700, background: '#2a3a8e', color: '#fff',
 };
 
 const tdBase: React.CSSProperties = {
-  border: '0.5px solid #ccc', textAlign: 'center', padding: '7px 4px', fontSize: '13px',
+  border: '0.5px solid #ccc', textAlign: 'center', padding: '4px 3px', fontSize: '12px',
   fontWeight: 700, color: '#111',
 };
