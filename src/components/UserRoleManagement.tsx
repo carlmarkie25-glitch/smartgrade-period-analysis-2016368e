@@ -141,7 +141,6 @@ export const UserRoleManagement = ({
     return <Card><CardContent className="p-6"><p className="text-muted-foreground">No users found. Create accounts via the Auth page first.</p></CardContent></Card>;
 
   const teachers = users.filter((u) => u.user_roles?.some((ur: any) => ur.role === "teacher"));
-  const students = users.filter((u) => u.user_roles?.some((ur: any) => ur.role === "student"));
   const admins = users.filter((u) => u.user_roles?.some((ur: any) => ur.role === "admin") && !u.user_roles?.some((ur: any) => ur.role === "teacher"));
   const unassigned = users.filter((u) => !u.user_roles || u.user_roles.length === 0);
 
@@ -153,7 +152,6 @@ export const UserRoleManagement = ({
       </CardHeader>
       <CardContent className="space-y-4">
         <RoleGroup title="Teachers" icon={Users} users={teachers} defaultOpen={true} assignRole={assignRole} removeRole={removeRole} onOpenTeacherAssignment={onOpenTeacherAssignment} onOpenSponsorAssignment={onOpenSponsorAssignment} />
-        <RoleGroup title="Students" icon={GraduationCap} users={students} defaultOpen={false} assignRole={assignRole} removeRole={removeRole} onOpenTeacherAssignment={onOpenTeacherAssignment} onOpenSponsorAssignment={onOpenSponsorAssignment} />
         <RoleGroup title="Admins" icon={Settings2} users={admins} defaultOpen={false} assignRole={assignRole} removeRole={removeRole} onOpenTeacherAssignment={onOpenTeacherAssignment} onOpenSponsorAssignment={onOpenSponsorAssignment} />
         {unassigned.length > 0 && (
           <RoleGroup title="Unassigned" icon={UserPlus} users={unassigned} defaultOpen={true} assignRole={assignRole} removeRole={removeRole} onOpenTeacherAssignment={onOpenTeacherAssignment} onOpenSponsorAssignment={onOpenSponsorAssignment} />
