@@ -241,7 +241,24 @@ export const StudentReportDialog = ({
           const isSemester = report.isSemesterReport;
           const isKg = isKindergartenClass(report.student.classes);
           // KG/Nursery/ABC classes use the SAME standard report layout as all other
-          // classes — only the grading legend at the bottom shows the KG letter scale.
+          // classes — only the grading legend at the bottom shows the KG letter scale,
+          // and numeric scores are rendered as letter grades (A+, A, B+, …).
+
+          // Wrap a numeric score for display: shows letter for KG, raw number otherwise.
+          const kgWrap = (v: any, max: number = 100): any => {
+            if (!isKg) return v;
+            if (v === null || v === undefined || v === '--' || v === 'I') return v;
+            const n = typeof v === 'number' ? v : Number(v);
+            if (!Number.isFinite(n)) return v;
+            return scoreToLetter(n, max) ?? '—';
+          };
+          // Wrap displayScore output (handles 'I' / '--' passthrough)
+          const kgDisp = (score: number | null | undefined, noGrades?: boolean, max: number = 100): string => {
+            const base = displayScore(score, noGrades);
+            if (!isKg) return base;
+            if (base === '--' || base === 'I') return base;
+            return scoreToLetter(score as number, max) ?? '—';
+          };
 
           // Unified averaging — these match the "Average" row of the grades table
           // so the General Average always equals the row totals shown above.
