@@ -795,35 +795,73 @@ export const StudentReportDialog = ({
                   </div>
                 </div>
 
-                {/* ── PROMOTION STATUS (yearly only) ── */}
+                {/* ── PROMOTION STATEMENT (yearly only) ── */}
                 {isYearly && (() => {
-                  const grade = generalAvg;
-                  const passed = grade !== null && grade >= rcSettings.pass_mark && !report.hasIncomplete;
-                  const className = report.student.classes?.name || 'next class';
-                  const nextClassMatch = className.match(/(\d+)/);
-                  const nextLabel = nextClassMatch
-                    ? className.replace(nextClassMatch[1], String(parseInt(nextClassMatch[1], 10) + 1))
-                    : 'Next Class';
+                  const currentClassName = report.student.classes?.name || 'current class';
+                  const nextClassMatch = currentClassName.match(/(\d+)/);
+                  const nextClassName = nextClassMatch
+                    ? currentClassName.replace(nextClassMatch[1], String(parseInt(nextClassMatch[1], 10) + 1))
+                    : 'the next class';
+                  const studentName = report.student.full_name || '________________';
+                  const status = inputs.promotion_status || '';
+                  const setStatus = (v: string) => setInputs((prev) => ({ ...prev, promotion_status: v }));
+
+                  const Box = ({ checked }: { checked: boolean }) => (
+                    <span style={{
+                      display: 'inline-block', width: 11, height: 11, border: '1px solid #333',
+                      marginRight: 6, verticalAlign: 'middle', textAlign: 'center', lineHeight: '9px',
+                      fontSize: 10, fontWeight: 700, background: '#fff',
+                    }}>{checked ? '✓' : ''}</span>
+                  );
+
+                  const rowStyle: React.CSSProperties = {
+                    display: 'flex', alignItems: 'center', gap: 4, padding: '3px 0',
+                    fontSize: '11px', cursor: editing ? 'pointer' : 'default',
+                  };
+
+                  const onPick = (key: string) => () => {
+                    if (!editing) return;
+                    setStatus(status === key ? '' : key);
+                  };
+
                   return (
                     <>
                       <div style={{ background: navy, color: '#fff', padding: '5px 10px', fontSize: '10px', fontWeight: 700, letterSpacing: '1px' }}>
-                        PROMOTION STATUS
+                        PROMOTION STATEMENT
                       </div>
                       <div style={{ padding: '10px 14px', borderTop: '0.5px solid #ccc' }}>
-                        <div style={{
-                          padding: '8px 12px',
-                          borderRadius: 4,
-                          border: `1px solid ${passed ? '#16a34a' : '#dc2626'}`,
-                          background: passed ? '#e8f5e8' : '#fde8e8',
-                          color: passed ? '#15803d' : '#991b1b',
-                          fontWeight: 700,
-                          fontSize: '12px',
-                        }}>
-                          {report.hasIncomplete
-                            ? '⚠ Promotion pending — incomplete grades on record'
-                            : passed
-                              ? `✓ Promoted to ${nextLabel}`
-                              : `✗ Not promoted — must repeat ${className}`}
+                        <p style={{ margin: '0 0 8px', fontSize: '11px' }}>
+                          This is to certify that <strong>{studentName}</strong>:
+                        </p>
+                        <div style={{ paddingLeft: 8 }}>
+                          <div style={rowStyle} onClick={onPick('promoted')}>
+                            <Box checked={status === 'promoted'} />
+                            <span><strong>A.</strong> Promoted to <strong>{nextClassName}</strong></span>
+                          </div>
+                          <div style={rowStyle} onClick={onPick('probation')}>
+                            <Box checked={status === 'probation'} />
+                            <span><strong>B.</strong> Promoted on probation to <strong>{nextClassName}</strong></span>
+                          </div>
+                          <div style={{ paddingLeft: 22, paddingTop: 2, paddingBottom: 4, display: 'flex', alignItems: 'center', gap: 6, fontSize: '11px' }}>
+                            <span style={{ fontStyle: 'italic', color: '#555' }}>Condition:</span>
+                            <div style={{ flex: 1 }}>
+                              <EditableField
+                                value={inputs.promotion_condition || ''}
+                                onChange={setField('promotion_condition')}
+                                editable={editing && status === 'probation'}
+                                placeholder={status === 'probation' ? 'Subject(s) / condition...' : '—'}
+                                minHeight={22}
+                              />
+                            </div>
+                          </div>
+                          <div style={rowStyle} onClick={onPick('retained')}>
+                            <Box checked={status === 'retained'} />
+                            <span><strong>C.</strong> Retained in <strong>{currentClassName}</strong></span>
+                          </div>
+                          <div style={rowStyle} onClick={onPick('never_return')}>
+                            <Box checked={status === 'never_return'} />
+                            <span><strong>D.</strong> Never to return</span>
+                          </div>
                         </div>
                       </div>
                     </>
