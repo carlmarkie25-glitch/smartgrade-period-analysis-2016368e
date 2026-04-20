@@ -354,6 +354,9 @@ export const StudentReportDialog = ({
   const goldText = greyMode ? '#000000' : '#ffffff';
   const lightBlue = greyMode ? '#bfc4ca' : colors.secondary_bg_color;
   const headerBlue = greyMode ? '#a8aeb4' : colors.header_bg_color;
+  // Darker semester-average column shade. In color mode reuse the header bg
+  // (always darker than secondary); in grey mode keep a mid-grey.
+  const darkSecondary = greyMode ? '#7a8087' : colors.header_bg_color;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
