@@ -686,9 +686,9 @@ export const UserBiodataManagementTab = () => {
             </p>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsDownloadOpen(false)}>Cancel</Button>
-            <Button onClick={handleDownloadBiodata} className="gap-2">
-              <Download className="h-4 w-4" /> Download
+            <Button variant="outline" onClick={() => setIsDownloadOpen(false)} disabled={isDownloading}>Cancel</Button>
+            <Button onClick={handleDownloadBiodata} className="gap-2" disabled={isDownloading}>
+              <Download className="h-4 w-4" /> {isDownloading ? "Generating ZIP..." : "Download ZIP"}
             </Button>
           </DialogFooter>
         </DialogContent>
