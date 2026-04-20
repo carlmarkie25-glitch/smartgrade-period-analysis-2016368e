@@ -60,6 +60,25 @@ Deno.serve(async (req) => {
       .eq("user_id", user.id)
       .maybeSingle();
 
+    // Clean up any orphaned profile rows with this email that have no matching auth user
+    // (can happen if a parent was previously partially-created or only had role removed)
+    const { data: existingProfiles } = await supabaseAdmin
+      .from("profiles")
+      .select("id, user_id")
+      .eq("email", email);
+
+    if (existingProfiles && existingProfiles.length > 0) {
+      for (const p of existingProfiles) {
+        const { data: existingAuth } = await supabaseAdmin.auth.admin.getUserById(p.user_id);
+        if (!existingAuth?.user) {
+          // Orphaned: remove dependent rows then the profile
+          await supabaseAdmin.from("user_roles").delete().eq("user_id", p.user_id);
+          await supabaseAdmin.from("parent_student_assignments").delete().eq("parent_user_id", p.user_id);
+          await supabaseAdmin.from("profiles").delete().eq("id", p.id);
+        }
+      }
+    }
+
     const { data: created, error: createErr } = await supabaseAdmin.auth.admin.createUser({
       email,
       password,
@@ -76,13 +95,14 @@ Deno.serve(async (req) => {
 
     const newUserId = created.user.id;
 
-    const { error: profileErr } = await supabaseAdmin.from("profiles").insert({
+    // Upsert profile (in case a profile row already exists from a prior attempt)
+    const { error: profileErr } = await supabaseAdmin.from("profiles").upsert({
       id: newUserId,
       user_id: newUserId,
       full_name,
       email,
       school_id: callerProfile?.school_id ?? null,
-    });
+    }, { onConflict: "user_id" });
     if (profileErr) {
       await supabaseAdmin.auth.admin.deleteUser(newUserId);
       return new Response(JSON.stringify({ error: profileErr.message }), {
