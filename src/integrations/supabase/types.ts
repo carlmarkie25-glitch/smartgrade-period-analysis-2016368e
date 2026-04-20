@@ -2128,6 +2128,52 @@ export type Database = {
           },
         ]
       }
+      subject_departments: {
+        Row: {
+          created_at: string
+          department_id: string
+          id: string
+          school_id: string | null
+          subject_id: string
+        }
+        Insert: {
+          created_at?: string
+          department_id: string
+          id?: string
+          school_id?: string | null
+          subject_id: string
+        }
+        Update: {
+          created_at?: string
+          department_id?: string
+          id?: string
+          school_id?: string | null
+          subject_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subject_departments_department_id_fkey"
+            columns: ["department_id"]
+            isOneToOne: false
+            referencedRelation: "departments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subject_departments_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subject_departments_subject_id_fkey"
+            columns: ["subject_id"]
+            isOneToOne: false
+            referencedRelation: "subjects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       subjects: {
         Row: {
           code: string
