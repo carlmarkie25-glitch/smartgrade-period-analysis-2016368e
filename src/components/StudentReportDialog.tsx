@@ -111,6 +111,12 @@ interface StudentReportDialogProps {
   studentId: string;
   period: string;
   className?: string;
+  /** When provided, forces grey mode on/off and hides the toggle. Used by batch download. */
+  forceGreyMode?: boolean;
+  /** Hides the dialog chrome but still mounts the report — used for off-screen batch capture. */
+  hidden?: boolean;
+  /** Called once the report-content element is rendered and ready to capture. */
+  onReportReady?: (studentName: string) => void;
 }
 
 const isIncompleteScore = (score: number | null | undefined): boolean => {
