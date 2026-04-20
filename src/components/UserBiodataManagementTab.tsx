@@ -317,11 +317,8 @@ export const UserBiodataManagementTab = () => {
                   <TableRow>
                     <TableHead>Photo</TableHead>
                     <TableHead>Full Name</TableHead>
-                    <TableHead>Email</TableHead>
                     <TableHead>Student ID</TableHead>
-                    <TableHead>Phone</TableHead>
                     <TableHead>Gender</TableHead>
-                    <TableHead>Date of Birth</TableHead>
                     <TableHead>Actions</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -338,19 +335,10 @@ export const UserBiodataManagementTab = () => {
                             <Skeleton className="h-4 w-32" />
                           </TableCell>
                           <TableCell>
-                            <Skeleton className="h-4 w-40" />
-                          </TableCell>
-                          <TableCell>
                             <Skeleton className="h-4 w-24" />
-                          </TableCell>
-                          <TableCell>
-                            <Skeleton className="h-4 w-32" />
                           </TableCell>
                           <TableCell>
                             <Skeleton className="h-4 w-16" />
-                          </TableCell>
-                          <TableCell>
-                            <Skeleton className="h-4 w-24" />
                           </TableCell>
                           <TableCell>
                             <Skeleton className="h-8 w-16" />
@@ -359,7 +347,7 @@ export const UserBiodataManagementTab = () => {
                       ))
                   ) : users.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
+                      <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
                         <div className="space-y-2">
                           <p>No users found in the system</p>
                           <p className="text-xs">Please ensure students have been created in the system</p>
@@ -368,7 +356,7 @@ export const UserBiodataManagementTab = () => {
                     </TableRow>
                   ) : filteredUsers.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
+                      <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
                         <div className="space-y-2">
                           <p>No users found matching "{searchTerm}"</p>
                           <p className="text-xs">Try a different search term</p>
@@ -385,11 +373,8 @@ export const UserBiodataManagementTab = () => {
                           </Avatar>
                         </TableCell>
                         <TableCell className="font-medium">{user.full_name}</TableCell>
-                        <TableCell>{user.email}</TableCell>
                         <TableCell>{user.student_id || "N/A"}</TableCell>
-                        <TableCell>{user.phone_number || "N/A"}</TableCell>
                         <TableCell>{user.gender || "N/A"}</TableCell>
-                        <TableCell>{user.date_of_birth || "N/A"}</TableCell>
                         <TableCell>
                           <Button
                             variant="outline"
