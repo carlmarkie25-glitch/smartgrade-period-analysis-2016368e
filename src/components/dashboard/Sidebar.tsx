@@ -256,7 +256,7 @@ export const Sidebar = ({ activeTab, onTabChange, collapsed = false, onToggle }:
       </div>
 
       {/* Nav Items */}
-      <div className="flex-1 flex flex-col gap-1.5 overflow-y-auto overflow-x-visible">
+      <div className="flex-1 flex flex-col gap-1.5 overflow-y-auto" style={{ overflowX: "clip" }}>
         {topItems.filter((item) => canAccess(item.roles)).map((item) => renderItem(item))}
 
         {renderGroup(academicsGroup, academicsOpen, setAcademicsOpen, isAcademicsActive)}
