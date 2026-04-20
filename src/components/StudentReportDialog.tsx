@@ -24,6 +24,8 @@ import {
   gradeFromSettings,
   kgLabelFromSettings,
   useReportCardSettings,
+  useDepartmentReportColors,
+  resolveReportColors,
 } from "@/hooks/useReportCardSettings";
 
 const RATING_OPTIONS = ["Excellent", "Very Good", "Good", "Fair", "Needs Improvement"];
@@ -156,6 +158,7 @@ export const StudentReportDialog = ({
   const saveMutation = useSaveReportInputs(studentId, period);
   const { school } = useSchool();
   const { data: rcSettingsData } = useReportCardSettings();
+  const { data: deptColorsData } = useDepartmentReportColors();
   const rcSettings = rcSettingsData ?? DEFAULT_REPORT_CARD_SETTINGS;
 
   const [editing, setEditing] = useState(false);
@@ -340,14 +343,20 @@ export const StudentReportDialog = ({
     return Math.round(avgs.reduce((a, b) => a + b, 0) / avgs.length);
   };
 
-  // Styles — when greyMode is on, swap blue tones for light grey; gold → white in grey mode
-  const navy = greyMode ? '#9aa0a6' : '#1a2a6e';
-  const gold = greyMode ? '#ffffff' : '#c8a84b';
-  // Text color to use ON the gold background. In grey mode the gold becomes white,
+  // Resolve report card colors: department override → school default → built-in fallback.
+  // In grey mode all blue/navy tones become light grey; the accent (gold) becomes pure white.
+  const departmentId = (report as any)?.student?.classes?.departments?.id ?? null;
+  const colors = resolveReportColors(rcSettings, deptColorsData, departmentId);
+  const navy = greyMode ? '#9aa0a6' : colors.header_bg_color;
+  const gold = greyMode ? '#ffffff' : colors.accent_color;
+  // Text color to use ON the accent background. In grey mode the accent becomes white,
   // so white text would disappear — use black for legibility.
   const goldText = greyMode ? '#000000' : '#ffffff';
-  const lightBlue = greyMode ? '#bfc4ca' : '#2a5298';
-  const headerBlue = greyMode ? '#a8aeb4' : '#2a3a8e';
+  const lightBlue = greyMode ? '#bfc4ca' : colors.secondary_bg_color;
+  const headerBlue = greyMode ? '#a8aeb4' : colors.header_bg_color;
+  // Darker semester-average column shade. In color mode reuse the header bg
+  // (always darker than secondary); in grey mode keep a mid-grey.
+  const darkSecondary = greyMode ? '#7a8087' : colors.header_bg_color;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

@@ -553,6 +553,54 @@ export type Database = {
           },
         ]
       }
+      department_report_colors: {
+        Row: {
+          accent_color: string | null
+          created_at: string
+          department_id: string
+          header_bg_color: string | null
+          id: string
+          school_id: string
+          secondary_bg_color: string | null
+          updated_at: string
+        }
+        Insert: {
+          accent_color?: string | null
+          created_at?: string
+          department_id: string
+          header_bg_color?: string | null
+          id?: string
+          school_id: string
+          secondary_bg_color?: string | null
+          updated_at?: string
+        }
+        Update: {
+          accent_color?: string | null
+          created_at?: string
+          department_id?: string
+          header_bg_color?: string | null
+          id?: string
+          school_id?: string
+          secondary_bg_color?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "department_report_colors_department_id_fkey"
+            columns: ["department_id"]
+            isOneToOne: false
+            referencedRelation: "departments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "department_report_colors_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       departments: {
         Row: {
           created_at: string
@@ -1101,6 +1149,7 @@ export type Database = {
       }
       report_card_settings: {
         Row: {
+          accent_color: string
           admin_signature_url: string | null
           administrator_role_label: string
           administrator_subtitle: string | null
@@ -1120,6 +1169,7 @@ export type Database = {
           grade_d_min: number
           grade_f_label: string
           header_address: string | null
+          header_bg_color: string
           header_contact: string | null
           header_subtitle: string | null
           header_title: string | null
@@ -1137,9 +1187,11 @@ export type Database = {
           pass_mark: number
           school_id: string
           seal_url: string | null
+          secondary_bg_color: string
           updated_at: string
         }
         Insert: {
+          accent_color?: string
           admin_signature_url?: string | null
           administrator_role_label?: string
           administrator_subtitle?: string | null
@@ -1159,6 +1211,7 @@ export type Database = {
           grade_d_min?: number
           grade_f_label?: string
           header_address?: string | null
+          header_bg_color?: string
           header_contact?: string | null
           header_subtitle?: string | null
           header_title?: string | null
@@ -1176,9 +1229,11 @@ export type Database = {
           pass_mark?: number
           school_id: string
           seal_url?: string | null
+          secondary_bg_color?: string
           updated_at?: string
         }
         Update: {
+          accent_color?: string
           admin_signature_url?: string | null
           administrator_role_label?: string
           administrator_subtitle?: string | null
@@ -1198,6 +1253,7 @@ export type Database = {
           grade_d_min?: number
           grade_f_label?: string
           header_address?: string | null
+          header_bg_color?: string
           header_contact?: string | null
           header_subtitle?: string | null
           header_title?: string | null
@@ -1215,6 +1271,7 @@ export type Database = {
           pass_mark?: number
           school_id?: string
           seal_url?: string | null
+          secondary_bg_color?: string
           updated_at?: string
         }
         Relationships: [

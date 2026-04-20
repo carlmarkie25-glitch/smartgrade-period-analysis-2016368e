@@ -11,9 +11,15 @@ import { useSchool } from "@/contexts/SchoolContext";
 import {
   DEFAULT_REPORT_CARD_SETTINGS,
   ReportCardSettings,
+  DepartmentReportColors,
   useReportCardSettings,
   useSaveReportCardSettings,
+  useDepartmentReportColors,
+  useSaveDepartmentReportColors,
+  useDeleteDepartmentReportColors,
 } from "@/hooks/useReportCardSettings";
+import { useQuery } from "@tanstack/react-query";
+import { Trash2 } from "lucide-react";
 
 export const ReportCardSettingsTab = () => {
   const { school } = useSchool();
@@ -151,6 +157,44 @@ export const ReportCardSettingsTab = () => {
           </div>
         </CardContent>
       </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Report Card Colors</CardTitle>
+          <CardDescription>
+            Pick colors that match your school brand. Each department can override these
+            below — useful when Kindergarten, Primary, and High School should each have
+            their own look.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <ColorRow
+            label="Header background"
+            help="Top banner, section bars, and the General Average box."
+            value={form.header_bg_color}
+            onChange={(v) => set("header_bg_color", v)}
+          />
+          <ColorRow
+            label="Accent (highlight)"
+            help="Year-end column, period & semester chips, and the General Average number."
+            value={form.accent_color}
+            onChange={(v) => set("accent_color", v)}
+          />
+          <ColorRow
+            label="Secondary (exam columns)"
+            help="Background of the exam columns inside the grades table."
+            value={form.secondary_bg_color}
+            onChange={(v) => set("secondary_bg_color", v)}
+          />
+          <ReportColorPreview
+            header={form.header_bg_color}
+            accent={form.accent_color}
+            secondary={form.secondary_bg_color}
+          />
+        </CardContent>
+      </Card>
+
+      <DepartmentColorsCard schoolDefaults={form} />
 
       <Card>
         <CardHeader>
@@ -377,6 +421,220 @@ export const ReportCardSettingsTab = () => {
           {(save.isPending || uploading) && <Loader2 className="h-4 w-4 animate-spin" />}
           <Save className="h-4 w-4" /> Save report card settings
         </Button>
+      </div>
+    </div>
+  );
+};
+
+// ============================================================================
+// Color picker row
+// ============================================================================
+const ColorRow = ({
+  label,
+  help,
+  value,
+  onChange,
+}: {
+  label: string;
+  help?: string;
+  value: string;
+  onChange: (v: string) => void;
+}) => (
+  <div className="grid grid-cols-1 md:grid-cols-[180px_1fr] gap-3 items-center">
+    <Label className="md:text-right">{label}</Label>
+    <div className="flex items-center gap-3 flex-wrap">
+      <input
+        type="color"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="h-10 w-14 rounded border cursor-pointer bg-transparent p-0"
+      />
+      <Input
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder="#1a2a6e"
+        className="font-mono w-32"
+      />
+      {help && <span className="text-xs text-muted-foreground">{help}</span>}
+    </div>
+  </div>
+);
+
+// ============================================================================
+// Live preview swatch
+// ============================================================================
+const ReportColorPreview = ({
+  header,
+  accent,
+  secondary,
+}: {
+  header: string;
+  accent: string;
+  secondary: string;
+}) => (
+  <div className="rounded-md border overflow-hidden">
+    <div style={{ background: header, color: "#fff", padding: "10px 14px", fontSize: 12, fontWeight: 700, letterSpacing: 1 }}>
+      REPORT CARD HEADER
+    </div>
+    <div className="flex items-stretch text-xs">
+      <div style={{ background: secondary, color: "#fff", padding: "10px 14px", fontWeight: 600, flex: 1, textAlign: "center" }}>
+        EXAM COLUMN
+      </div>
+      <div style={{ background: accent, color: "#fff", padding: "10px 14px", fontWeight: 700, flex: 1, textAlign: "center" }}>
+        YEAR AVERAGE
+      </div>
+    </div>
+  </div>
+);
+
+// ============================================================================
+// Per-department color overrides
+// ============================================================================
+const DepartmentColorsCard = ({
+  schoolDefaults,
+}: {
+  schoolDefaults: ReportCardSettings;
+}) => {
+  const { school } = useSchool();
+  const { data: depts = [] } = useQuery({
+    queryKey: ["departments-for-colors", school?.id],
+    enabled: !!school?.id,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("departments")
+        .select("id, name")
+        .eq("school_id", school!.id)
+        .order("name");
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+  const { data: overrides = [] } = useDepartmentReportColors();
+  const saveOverride = useSaveDepartmentReportColors();
+  const deleteOverride = useDeleteDepartmentReportColors();
+  const { toast } = useToast();
+
+  const findOverride = (deptId: string): DepartmentReportColors | undefined =>
+    overrides.find((o) => o.department_id === deptId);
+
+  const handleSave = async (deptId: string, patch: Partial<DepartmentReportColors>) => {
+    const existing = findOverride(deptId);
+    const next: DepartmentReportColors = {
+      department_id: deptId,
+      header_bg_color: existing?.header_bg_color ?? schoolDefaults.header_bg_color,
+      accent_color: existing?.accent_color ?? schoolDefaults.accent_color,
+      secondary_bg_color: existing?.secondary_bg_color ?? schoolDefaults.secondary_bg_color,
+      ...patch,
+    };
+    try {
+      await saveOverride.mutateAsync(next);
+    } catch (e: any) {
+      toast({ title: "Save failed", description: e.message, variant: "destructive" });
+    }
+  };
+
+  const handleReset = async (deptId: string) => {
+    try {
+      await deleteOverride.mutateAsync(deptId);
+      toast({ title: "Reset", description: "Department now uses school colors." });
+    } catch (e: any) {
+      toast({ title: "Reset failed", description: e.message, variant: "destructive" });
+    }
+  };
+
+  if (!depts.length) return null;
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Per-Department Colors</CardTitle>
+        <CardDescription>
+          Override report card colors for a specific department. Leave a department alone
+          to keep using your school-wide colors above.
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-5">
+        {depts.map((d: any) => {
+          const ov = findOverride(d.id);
+          const header = ov?.header_bg_color ?? schoolDefaults.header_bg_color;
+          const accent = ov?.accent_color ?? schoolDefaults.accent_color;
+          const secondary = ov?.secondary_bg_color ?? schoolDefaults.secondary_bg_color;
+          const isCustom = !!ov;
+          return (
+            <div key={d.id} className="border rounded-md p-4 space-y-3">
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="font-semibold">{d.name}</div>
+                  <div className="text-xs text-muted-foreground">
+                    {isCustom ? "Custom colors" : "Using school defaults"}
+                  </div>
+                </div>
+                {isCustom && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="gap-2 text-destructive"
+                    onClick={() => handleReset(d.id)}
+                    disabled={deleteOverride.isPending}
+                  >
+                    <Trash2 className="h-4 w-4" /> Reset
+                  </Button>
+                )}
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                <DeptColorField
+                  label="Header"
+                  value={header}
+                  onCommit={(v) => handleSave(d.id, { header_bg_color: v })}
+                />
+                <DeptColorField
+                  label="Accent"
+                  value={accent}
+                  onCommit={(v) => handleSave(d.id, { accent_color: v })}
+                />
+                <DeptColorField
+                  label="Secondary"
+                  value={secondary}
+                  onCommit={(v) => handleSave(d.id, { secondary_bg_color: v })}
+                />
+              </div>
+              <ReportColorPreview header={header} accent={accent} secondary={secondary} />
+            </div>
+          );
+        })}
+      </CardContent>
+    </Card>
+  );
+};
+
+const DeptColorField = ({
+  label,
+  value,
+  onCommit,
+}: {
+  label: string;
+  value: string;
+  onCommit: (v: string) => void;
+}) => {
+  const [local, setLocal] = useState(value);
+  useEffect(() => setLocal(value), [value]);
+  return (
+    <div className="space-y-1">
+      <Label className="text-xs">{label}</Label>
+      <div className="flex items-center gap-2">
+        <input
+          type="color"
+          value={local}
+          onChange={(e) => setLocal(e.target.value)}
+          onBlur={(e) => e.target.value !== value && onCommit(e.target.value)}
+          className="h-9 w-12 rounded border cursor-pointer bg-transparent p-0"
+        />
+        <Input
+          value={local}
+          onChange={(e) => setLocal(e.target.value)}
+          onBlur={() => local !== value && /^#[0-9a-fA-F]{6}$/.test(local) && onCommit(local)}
+          className="font-mono text-xs"
+        />
       </div>
     </div>
   );
