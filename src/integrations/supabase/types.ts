@@ -560,6 +560,7 @@ export type Database = {
           department_id: string
           general_average_text_color: string | null
           header_bg_color: string | null
+          header_chip_color: string | null
           header_meta_text_color: string | null
           id: string
           school_id: string
@@ -572,6 +573,7 @@ export type Database = {
           department_id: string
           general_average_text_color?: string | null
           header_bg_color?: string | null
+          header_chip_color?: string | null
           header_meta_text_color?: string | null
           id?: string
           school_id: string
@@ -584,6 +586,7 @@ export type Database = {
           department_id?: string
           general_average_text_color?: string | null
           header_bg_color?: string | null
+          header_chip_color?: string | null
           header_meta_text_color?: string | null
           id?: string
           school_id?: string
@@ -1177,6 +1180,7 @@ export type Database = {
           grade_f_label: string
           header_address: string | null
           header_bg_color: string
+          header_chip_color: string
           header_contact: string | null
           header_meta_text_color: string
           header_subtitle: string | null
@@ -1221,6 +1225,7 @@ export type Database = {
           grade_f_label?: string
           header_address?: string | null
           header_bg_color?: string
+          header_chip_color?: string
           header_contact?: string | null
           header_meta_text_color?: string
           header_subtitle?: string | null
@@ -1265,6 +1270,7 @@ export type Database = {
           grade_f_label?: string
           header_address?: string | null
           header_bg_color?: string
+          header_chip_color?: string
           header_contact?: string | null
           header_meta_text_color?: string
           header_subtitle?: string | null
