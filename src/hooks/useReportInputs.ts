@@ -58,6 +58,35 @@ export const useSaveReportInputs = (studentId: string, period: string) => {
 };
 
 export const useCanEditReportInputs = (studentId: string) => {
+  const { user } = useAuth();
   const { isAdmin, isTeacher } = useUserRoles();
-  return !!(isAdmin || isTeacher) && !!studentId;
+
+  const { data: isSponsor } = useQuery({
+    queryKey: ["is-sponsor-of-student", user?.id, studentId],
+    queryFn: async () => {
+      if (!user?.id || !studentId) return false;
+      // Get the student's class
+      const { data: student, error: sErr } = await supabase
+        .from("students")
+        .select("class_id")
+        .eq("id", studentId)
+        .maybeSingle();
+      if (sErr || !student?.class_id) return false;
+      // Check if current user is sponsor of that class
+      const { data: assignment, error: aErr } = await supabase
+        .from("sponsor_class_assignments")
+        .select("id")
+        .eq("user_id", user.id)
+        .eq("class_id", student.class_id)
+        .maybeSingle();
+      if (aErr) return false;
+      return !!assignment;
+    },
+    enabled: !!user?.id && !!studentId && !isAdmin,
+  });
+
+  if (!studentId) return false;
+  if (isAdmin) return true;
+  if (isTeacher && isSponsor) return true;
+  return false;
 };
