@@ -7,6 +7,7 @@ import { X, GraduationCap, UserPlus, Eye, Pencil, Trash2, UserMinus } from "luci
 import { MarkDepartedDialog } from "./MarkDepartedDialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Switch } from "@/components/ui/switch";
 import { useUserManagement } from "@/hooks/useUserManagement";
 import { useStudents } from "@/hooks/useStudents";
 import { useClasses } from "@/hooks/useClasses";
@@ -134,6 +135,17 @@ export const StudentUsersTab = () => {
       });
       if (error) throw error;
       if (data.error) throw new Error(data.error);
+
+      // Send notification about new student
+      const className = selectedClass?.name || "a class";
+      await supabase.from("notifications" as any).insert({
+        title: "New Student Added",
+        message: `${newStudent.full_name} has been added to ${className}.`,
+        type: "student_added",
+        target_role: "all",
+        created_by: (await supabase.auth.getUser()).data.user?.id,
+      } as any);
+
       toast({ title: "Success", description: "Student account created successfully" });
       queryClient.invalidateQueries({ queryKey: ["students"] });
       setIsAddDialogOpen(false);
@@ -230,6 +242,24 @@ export const StudentUsersTab = () => {
     }
   };
 
+  const handleToggleActive = async (id: string, next: boolean) => {
+    try {
+      const { error } = await (supabase as any)
+        .from("students")
+        .update({ is_active: next })
+        .eq("id", id);
+      if (error) throw error;
+      toast({
+        title: next ? "Student activated" : "Student deactivated",
+        description: next ? "Counted in your billable seats." : "Excluded from billable seats.",
+      });
+      queryClient.invalidateQueries({ queryKey: ["students"] });
+      queryClient.invalidateQueries({ queryKey: ["billable-seats"] });
+    } catch (error: any) {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    }
+  };
+
   const handleDeleteStudent = async (id: string) => {
     if (!confirm("Are you sure you want to delete this student?")) return;
     try {
@@ -312,6 +342,7 @@ export const StudentUsersTab = () => {
                 <TableHead>Student ID</TableHead>
                 <TableHead>Class</TableHead>
                 <TableHead>Department</TableHead>
+                <TableHead>Active</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -332,6 +363,17 @@ export const StudentUsersTab = () => {
                   <TableCell>{student.student_id}</TableCell>
                   <TableCell>{student.classes?.name}</TableCell>
                   <TableCell>{student.departments?.name}</TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-2">
+                      <Switch
+                        checked={(student as any).is_active !== false}
+                        onCheckedChange={(checked) => handleToggleActive(student.id, checked)}
+                      />
+                      <span className="text-xs text-muted-foreground">
+                        {(student as any).is_active !== false ? "Active" : "Inactive"}
+                      </span>
+                    </div>
+                  </TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-2">
                       <Button variant="outline" size="sm" onClick={() => handleViewBiodata(student)} title="View Biodata">
