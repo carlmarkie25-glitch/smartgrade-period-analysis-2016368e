@@ -181,13 +181,16 @@ All colors MUST be HSL.
 
 /* Sidebar "gulf" notch effect for active item.
    Two pseudo-elements above & below the active pill create concave
-   curves so the pill appears to bleed out of the sidebar into the page. */
+   curves so the pill appears to bleed out of the sidebar into the page.
+   Technique: a square element with a rounded corner facing the pill,
+   filled with the page background via a large box-shadow that "paints"
+   the cut-out shape. */
 .sidebar-notch-active {
   position: relative;
   overflow: visible !important;
 }
-.sidebar-notch-active > a,
-.sidebar-notch-active > button {
+.sidebar-notch-active > button,
+.sidebar-notch-active > a {
   overflow: visible !important;
 }
 .sidebar-notch-active::before,
@@ -195,27 +198,21 @@ All colors MUST be HSL.
   content: "";
   position: absolute;
   right: 0;
-  width: 20px;
-  height: 20px;
-  background: hsl(var(--background));
+  width: 18px;
+  height: 18px;
+  background: transparent;
   pointer-events: none;
-  z-index: 10;
+  z-index: 15;
 }
 .sidebar-notch-active::before {
-  top: -16px;
-  border-bottom-right-radius: 20px;
-  box-shadow: 6px 6px 0 0 hsl(var(--background));
-  -webkit-mask: radial-gradient(circle 20px at 0 0, transparent 0 20px, black 21px);
-          mask: radial-gradient(circle 20px at 0 0, transparent 0 20px, black 21px);
+  top: -18px;
+  border-bottom-right-radius: 18px;
+  box-shadow: 0 9px 0 0 hsl(var(--background));
 }
 .sidebar-notch-active::after {
-  bottom: -16px;
-  -webkit-mask: radial-gradient(circle 20px at 0 100%, transparent 0 20px, black 21px);
-          mask: radial-gradient(circle 20px at 0 100%, transparent 0 20px, black 21px);
-}
-/* Allow sidebar content to overflow horizontally so active pill can bleed */
-[data-sidebar="content"] {
-  overflow-x: visible !important;
+  bottom: -18px;
+  border-top-right-radius: 18px;
+  box-shadow: 0 -9px 0 0 hsl(var(--background));
 }
 
 /* Neumorphic utility classes */
