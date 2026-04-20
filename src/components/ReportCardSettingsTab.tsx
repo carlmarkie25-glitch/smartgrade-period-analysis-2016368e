@@ -196,6 +196,39 @@ export const ReportCardSettingsTab = () => {
 
       <Card>
         <CardHeader>
+          <CardTitle>Kindergarten Grading Labels</CardTitle>
+          <CardDescription>
+            Labels shown in the General Average box of Nursery / ABC / Kindergarten report cards.
+            The letter scale (A+ 95–100, A 90–94, B+ 85–89, B 80–84, C+ 75–79, C 70–74, D 65–69, F 60–64)
+            is fixed by the Liberian system — only the standing message is customizable.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {([
+              ["kg_a_plus_label", "A+ label (95–100)"],
+              ["kg_a_label",      "A label (90–94)"],
+              ["kg_b_plus_label", "B+ label (85–89)"],
+              ["kg_b_label",      "B label (80–84)"],
+              ["kg_c_plus_label", "C+ label (75–79)"],
+              ["kg_c_label",      "C label (70–74)"],
+              ["kg_d_label",      "D label (65–69)"],
+              ["kg_f_label",      "F label (60–64)"],
+            ] as const).map(([key, label]) => (
+              <div key={key} className="space-y-2">
+                <Label>{label}</Label>
+                <Input
+                  value={(form[key] as string) ?? ""}
+                  onChange={(e) => set(key, e.target.value as any)}
+                />
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
           <CardTitle>Default Signatories & Footer</CardTitle>
           <CardDescription>Pre-filled on every report card; teachers can still edit per student.</CardDescription>
         </CardHeader>
