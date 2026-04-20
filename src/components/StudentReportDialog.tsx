@@ -648,7 +648,7 @@ export const StudentReportDialog = ({
                     ) : (
                       <tr>
                         <th style={{ ...thBase, background: navy, textAlign: 'left', paddingLeft: 8 }}>Subject</th>
-                        <th style={{ ...thBase, background: '#2a3a8e' }}>Score</th>
+                        <th style={{ ...thBase, background: headerBlue }}>Score</th>
                       </tr>
                     )}
                   </thead>
