@@ -13,6 +13,8 @@ export interface ReportInputs {
   can_improve_in?: string | null;
   administrator_name?: string | null;
   class_teacher_name?: string | null;
+  promotion_status?: string | null;
+  promotion_condition?: string | null;
 }
 
 export const useReportInputs = (studentId: string, period: string) => {
