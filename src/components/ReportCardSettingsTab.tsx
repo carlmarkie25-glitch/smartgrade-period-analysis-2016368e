@@ -153,7 +153,7 @@ export const ReportCardSettingsTab = () => {
               ["grade_a_min", "A min %"],
               ["grade_b_min", "B min %"],
               ["grade_c_min", "C min %"],
-              ["grade_d_min", "D min %"],
+              ["grade_d_min", "F min %"],
               ["pass_mark", "Pass mark %"],
             ] as const).map(([key, label]) => (
               <div key={key} className="space-y-2">
