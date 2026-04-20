@@ -282,7 +282,7 @@ export const StudentReportDialog = ({
   };
 
   const getDepartmentLabel = () => {
-    return "Report Card";
+    return period === 'yearly' ? "Report Card" : "Grade Sheet";
   };
 
   // Compute subject semester average
