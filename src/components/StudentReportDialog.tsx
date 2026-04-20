@@ -322,9 +322,10 @@ export const StudentReportDialog = ({
   };
 
   // Styles
-  const navy = '#1a2a6e';
+  // Styles — when greyMode is on, swap blue tones for light grey (gold/other accents stay)
+  const navy = greyMode ? '#9aa0a6' : '#1a2a6e';
   const gold = '#c8a84b';
-  const lightBlue = '#2a5298';
+  const lightBlue = greyMode ? '#bfc4ca' : '#2a5298';
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
