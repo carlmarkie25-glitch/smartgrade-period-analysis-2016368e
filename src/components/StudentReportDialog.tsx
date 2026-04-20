@@ -550,7 +550,7 @@ export const StudentReportDialog = ({
                 {/* ── TITLE BAR ── */}
                 <div style={{ background: navy, textAlign: 'center', padding: '10px', borderTop: `2px solid ${gold}` }}>
                   <h2 style={{ color: '#fff', fontSize: '16px', letterSpacing: '2px', fontWeight: 700, margin: 0 }}>
-                    ACADEMIC REPORT CARD
+                    ACADEMIC {getDepartmentLabel().toUpperCase()}
                   </h2>
                   <p style={{ color: gold, fontSize: '12px', margin: 0 }}>
                     {report.student.classes?.academic_years?.year_name || '--'} School Year
