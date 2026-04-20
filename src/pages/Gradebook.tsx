@@ -366,9 +366,7 @@ const Gradebook = () => {
                                   </TableCell>
                                 );
                               })}
-                              {/* (no per-assessment letter grade — letters only apply to the total) */}
-                              {/* placeholder removed below */}
-                              {false && null}
+                              {/* No per-assessment letter grade — KG letters apply only to the total */}
                               <TableCell className="text-center font-bold">
                                 {isTotalIncomplete ? (
                                   <span className="text-orange-500">I</span>
