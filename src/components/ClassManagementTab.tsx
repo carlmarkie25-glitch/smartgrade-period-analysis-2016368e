@@ -611,7 +611,7 @@ export const ClassManagementTab = () => {
       </CardContent>
 
       <Dialog open={isSubjectsDialogOpen} onOpenChange={setIsSubjectsDialogOpen}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Manage Class Subjects</DialogTitle>
           </DialogHeader>
