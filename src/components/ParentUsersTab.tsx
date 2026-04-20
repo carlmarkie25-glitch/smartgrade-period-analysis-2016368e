@@ -184,12 +184,11 @@ export const ParentUsersTab = () => {
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() =>
-                              removeRole.mutate({ userId: user.user_id, role: "parent" })
-                            }
+                            disabled={removingId === user.user_id}
+                            onClick={() => handleRemoveParent(user.user_id, user.full_name)}
                           >
                             <Unlink className="h-4 w-4 mr-1" />
-                            Remove Role
+                            {removingId === user.user_id ? "Removing..." : "Remove Parent"}
                           </Button>
                         </div>
                       </TableCell>
