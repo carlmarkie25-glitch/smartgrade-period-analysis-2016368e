@@ -500,10 +500,6 @@ export const UserBiodataManagementTab = () => {
             <Printer className="h-4 w-4" />
             Print
           </Button>
-          <Button variant="outline" onClick={handleDownloadCSV} className="gap-2">
-            <Download className="h-4 w-4" />
-            Export CSV
-          </Button>
           <Button onClick={() => setIsDownloadOpen(true)} className="gap-2">
             <Download className="h-4 w-4" />
             Download Biodata
@@ -682,7 +678,7 @@ export const UserBiodataManagementTab = () => {
             )}
 
             <p className="text-xs text-muted-foreground">
-              {getDownloadSubset().length} student record(s) will be exported as CSV.
+              {getDownloadSubset().length} student biodata form(s) will be packaged into a ZIP of PDFs.
             </p>
           </div>
           <DialogFooter>
