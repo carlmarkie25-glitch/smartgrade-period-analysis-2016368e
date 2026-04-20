@@ -791,7 +791,7 @@ export const StudentReportDialog = ({
                 </table>
 
                 {/* ── CONDUCT ── */}
-                <div style={{ background: navy, color: '#fff', padding: '5px 10px', fontSize: '10px', fontWeight: 700, letterSpacing: '1px' }}>
+                <div style={{ background: navy, color: '#fff', padding: '8px 12px', fontSize: '12px', fontWeight: 700, letterSpacing: '1px' }}>
                   CONDUCT & CHARACTER ASSESSMENT
                 </div>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', borderTop: '0.5px solid #ccc' }}>
@@ -801,14 +801,14 @@ export const StudentReportDialog = ({
                     ['Participation', 'participation'],
                     ['Homework', 'homework'],
                   ] as const).map(([label, key], i) => (
-                    <div key={key} style={{ padding: '6px 10px', borderRight: i < 3 ? '0.5px solid #ccc' : 'none' }}>
-                      <label style={{ fontSize: '9px', color: '#888', textTransform: 'uppercase', fontWeight: 700, display: 'block', marginBottom: 3 }}>{label}</label>
+                    <div key={key} style={{ padding: '10px 12px', borderRight: i < 3 ? '0.5px solid #ccc' : 'none' }}>
+                      <label style={{ fontSize: '11px', color: '#444', textTransform: 'uppercase', fontWeight: 700, display: 'block', marginBottom: 4 }}>{label}</label>
                       <EditableField
                         value={(inputs[key] as string) || ''}
                         onChange={setField(key)}
                         editable={editing}
                         options={RATING_OPTIONS}
-                        minHeight={22}
+                        minHeight={28}
                       />
                     </div>
                   ))}
