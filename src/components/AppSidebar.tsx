@@ -89,16 +89,16 @@ const AppSidebar = () => {
 
   return (
     <Sidebar className="border-r-0 bg-sidebar">
-      <SidebarHeader className="bg-sidebar p-4">
+      <SidebarHeader className="bg-transparent p-4">
         <Link to="/dashboard" className="flex items-center gap-3">
-          <img src={logo} alt="Logo" className="h-16 w-16 rounded-lg object-contain" />
+          <img src={logo} alt="Logo" className="h-14 w-14 rounded-xl object-contain shadow-md" />
         </Link>
       </SidebarHeader>
 
-      <SidebarContent className="bg-sidebar">
+      <SidebarContent className="bg-transparent">
         {/* Main Menu */}
         <SidebarGroup>
-          <SidebarGroupLabel className="text-sidebar-foreground/50 text-xs uppercase tracking-wider px-4">
+          <SidebarGroupLabel className="text-sidebar-foreground/70 text-xs uppercase tracking-wider px-6">
             {!isCollapsed && "Main Menu"}
           </SidebarGroupLabel>
           <SidebarGroupContent>
