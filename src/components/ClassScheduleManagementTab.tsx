@@ -49,7 +49,7 @@ export const ClassScheduleManagementTab = () => {
   const { data: departments } = useQuery({
     queryKey: ["departments-for-schedule"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("departments").select("id,name").order("name");
+      const { data, error } = await supabase.from("departments").select("id,name,display_order").order("display_order").order("name");
       if (error) throw error;
       return data;
     },

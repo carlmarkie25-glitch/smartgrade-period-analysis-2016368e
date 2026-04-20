@@ -43,6 +43,7 @@ export const ClassManagementTab = () => {
       const { data, error } = await supabase
         .from("departments")
         .select("*")
+        .order("display_order")
         .order("name");
       if (error) throw error;
       return data;
