@@ -71,17 +71,16 @@ const AppSidebar = () => {
       <SidebarMenuItem key={item.path}>
         <SidebarMenuButton
           asChild
-          isActive={active}
           className={cn(
-            "mx-2 rounded-lg transition-all duration-200",
+            "mx-3 my-0.5 rounded-full transition-all duration-300 h-11",
             active
-              ? "bg-sidebar-primary text-sidebar-primary-foreground font-medium"
-              : "text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-foreground"
+              ? "bg-sidebar-primary text-sidebar-primary-foreground font-semibold shadow-md hover:bg-sidebar-primary hover:text-sidebar-primary-foreground"
+              : "text-sidebar-foreground/90 hover:bg-white/15 hover:text-sidebar-foreground"
           )}
         >
-          <Link to={item.path} className="flex items-center gap-3 px-3 py-2.5">
-            <Icon className="h-5 w-5" />
-            {!isCollapsed && <span>{item.label}</span>}
+          <Link to={item.path} className="flex items-center gap-3 px-4">
+            <Icon className="h-5 w-5 shrink-0" />
+            {!isCollapsed && <span className="text-sm">{item.label}</span>}
           </Link>
         </SidebarMenuButton>
       </SidebarMenuItem>
@@ -90,16 +89,16 @@ const AppSidebar = () => {
 
   return (
     <Sidebar className="border-r-0 bg-sidebar">
-      <SidebarHeader className="bg-sidebar p-4">
+      <SidebarHeader className="bg-transparent p-4">
         <Link to="/dashboard" className="flex items-center gap-3">
-          <img src={logo} alt="Logo" className="h-16 w-16 rounded-lg object-contain" />
+          <img src={logo} alt="Logo" className="h-14 w-14 rounded-xl object-contain shadow-md" />
         </Link>
       </SidebarHeader>
 
-      <SidebarContent className="bg-sidebar">
+      <SidebarContent className="bg-transparent">
         {/* Main Menu */}
         <SidebarGroup>
-          <SidebarGroupLabel className="text-sidebar-foreground/50 text-xs uppercase tracking-wider px-4">
+          <SidebarGroupLabel className="text-sidebar-foreground/70 text-xs uppercase tracking-wider px-6">
             {!isCollapsed && "Main Menu"}
           </SidebarGroupLabel>
           <SidebarGroupContent>
@@ -114,25 +113,25 @@ const AppSidebar = () => {
           <SidebarGroup>
             <Collapsible open={isCollapsed ? false : academicsOpen} onOpenChange={setAcademicsOpen}>
               <CollapsibleTrigger className={cn(
-                "flex items-center justify-between w-full mx-2 px-3 py-2.5 rounded-lg transition-all duration-200",
+                "flex items-center justify-between w-full mx-3 my-0.5 px-4 h-11 rounded-full transition-all duration-300",
                 isAcademicsActive
-                  ? "text-sidebar-foreground font-medium"
-                  : "text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-foreground"
+                  ? "text-sidebar-foreground font-semibold"
+                  : "text-sidebar-foreground/90 hover:bg-white/15 hover:text-sidebar-foreground"
               )}>
                 <div className="flex items-center gap-3">
                   <ClipboardList className="h-5 w-5" />
-                  {!isCollapsed && <span>Academics</span>}
+                  {!isCollapsed && <span className="text-sm">Academics</span>}
                 </div>
                 {!isCollapsed && (
                   <ChevronDown className={cn(
-                    "h-4 w-4 transition-transform duration-200",
+                    "h-4 w-4 transition-transform duration-300",
                     academicsOpen ? "rotate-180" : ""
                   )} />
                 )}
               </CollapsibleTrigger>
-              <CollapsibleContent>
+              <CollapsibleContent className="overflow-hidden data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down">
                 <SidebarGroupContent>
-                  <SidebarMenu className="pl-4">
+                  <SidebarMenu className="pl-3">
                     {academicsItems.map(renderMenuItem)}
                   </SidebarMenu>
                 </SidebarGroupContent>
@@ -146,25 +145,25 @@ const AppSidebar = () => {
           <SidebarGroup>
             <Collapsible open={isCollapsed ? false : adminOpen} onOpenChange={setAdminOpen}>
               <CollapsibleTrigger className={cn(
-                "flex items-center justify-between w-full mx-2 px-3 py-2.5 rounded-lg transition-all duration-200",
+                "flex items-center justify-between w-full mx-3 my-0.5 px-4 h-11 rounded-full transition-all duration-300",
                 isAdminActive
-                  ? "text-sidebar-foreground font-medium"
-                  : "text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-foreground"
+                  ? "text-sidebar-foreground font-semibold"
+                  : "text-sidebar-foreground/90 hover:bg-white/15 hover:text-sidebar-foreground"
               )}>
                 <div className="flex items-center gap-3">
                   <Settings className="h-5 w-5" />
-                  {!isCollapsed && <span>Administration</span>}
+                  {!isCollapsed && <span className="text-sm">Administration</span>}
                 </div>
                 {!isCollapsed && (
                   <ChevronDown className={cn(
-                    "h-4 w-4 transition-transform duration-200",
+                    "h-4 w-4 transition-transform duration-300",
                     adminOpen ? "rotate-180" : ""
                   )} />
                 )}
               </CollapsibleTrigger>
-              <CollapsibleContent>
+              <CollapsibleContent className="overflow-hidden data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down">
                 <SidebarGroupContent>
-                  <SidebarMenu className="pl-4">
+                  <SidebarMenu className="pl-3">
                     {adminItems.map(renderMenuItem)}
                   </SidebarMenu>
                 </SidebarGroupContent>
@@ -174,20 +173,20 @@ const AppSidebar = () => {
         )}
       </SidebarContent>
 
-      <SidebarFooter className="bg-sidebar p-4 space-y-2">
-        <div className="flex items-center justify-between px-3 py-2.5 rounded-lg bg-sidebar-accent/50">
+      <SidebarFooter className="bg-transparent p-4 space-y-2">
+        <div className="flex items-center justify-between px-3 py-2 rounded-full bg-white/15">
           {!isCollapsed && <span className="text-sm font-medium text-sidebar-foreground">Theme</span>}
           <ThemeToggle />
         </div>
         <button
           onClick={signOut}
           className={cn(
-            "flex items-center gap-3 w-full px-3 py-2.5 rounded-lg",
-            "text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-foreground",
-            "transition-all duration-200"
+            "flex items-center justify-center gap-2 w-full px-4 py-2.5 rounded-full",
+            "bg-white/20 text-sidebar-foreground hover:bg-white/30",
+            "transition-all duration-300 shadow-sm font-medium text-sm"
           )}
         >
-          <LogOut className="h-5 w-5" />
+          <LogOut className="h-4 w-4" />
           {!isCollapsed && <span>Sign Out</span>}
         </button>
       </SidebarFooter>
