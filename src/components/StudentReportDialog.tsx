@@ -641,7 +641,7 @@ export const StudentReportDialog = ({
                       <tr>
                         <th style={{ ...thBase, background: navy, textAlign: 'left', paddingLeft: 8 }}>Subject</th>
                         {(isSem1 ? ['P1','P2','P3','S.EXAM'] : ['P4','P5','P6','S.EXAM']).map(h => (
-                          <th key={h} style={{ ...thBase, background: h === 'S.EXAM' ? lightBlue : '#2a3a8e' }}>{h}</th>
+                          <th key={h} style={{ ...thBase, background: h === 'S.EXAM' ? lightBlue : headerBlue }}>{h}</th>
                         ))}
                         <th style={{ ...thBase, background: '#1a5276', fontWeight: 700 }}>S.AVG</th>
                       </tr>
