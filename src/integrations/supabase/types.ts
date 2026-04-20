@@ -1120,6 +1120,14 @@ export type Database = {
           header_title: string | null
           header_website: string | null
           id: string
+          kg_a_label: string
+          kg_a_plus_label: string
+          kg_b_label: string
+          kg_b_plus_label: string
+          kg_c_label: string
+          kg_c_plus_label: string
+          kg_d_label: string
+          kg_f_label: string
           logo_url: string | null
           pass_mark: number
           school_id: string
@@ -1145,6 +1153,14 @@ export type Database = {
           header_title?: string | null
           header_website?: string | null
           id?: string
+          kg_a_label?: string
+          kg_a_plus_label?: string
+          kg_b_label?: string
+          kg_b_plus_label?: string
+          kg_c_label?: string
+          kg_c_plus_label?: string
+          kg_d_label?: string
+          kg_f_label?: string
           logo_url?: string | null
           pass_mark?: number
           school_id: string
@@ -1170,6 +1186,14 @@ export type Database = {
           header_title?: string | null
           header_website?: string | null
           id?: string
+          kg_a_label?: string
+          kg_a_plus_label?: string
+          kg_b_label?: string
+          kg_b_plus_label?: string
+          kg_c_label?: string
+          kg_c_plus_label?: string
+          kg_d_label?: string
+          kg_f_label?: string
           logo_url?: string | null
           pass_mark?: number
           school_id?: string

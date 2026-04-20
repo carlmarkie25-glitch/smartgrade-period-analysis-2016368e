@@ -21,6 +21,15 @@ export interface ReportCardSettings {
   grade_c_label: string;
   grade_d_label: string;
   grade_f_label: string;
+  // Kindergarten (letter-grade) standing labels
+  kg_a_plus_label: string;
+  kg_a_label: string;
+  kg_b_plus_label: string;
+  kg_b_label: string;
+  kg_c_plus_label: string;
+  kg_c_label: string;
+  kg_d_label: string;
+  kg_f_label: string;
   default_administrator_name: string | null;
   default_class_teacher_name: string | null;
   footer_note: string | null;
@@ -43,6 +52,14 @@ export const DEFAULT_REPORT_CARD_SETTINGS: ReportCardSettings = {
   grade_c_label: "Good Standing",
   grade_d_label: "Satisfactory",
   grade_f_label: "Needs Improvement",
+  kg_a_plus_label: "Outstanding",
+  kg_a_label: "Excellent",
+  kg_b_plus_label: "Very Good",
+  kg_b_label: "Good",
+  kg_c_plus_label: "Above Average",
+  kg_c_label: "Average",
+  kg_d_label: "Below Average",
+  kg_f_label: "Failing",
   default_administrator_name: null,
   default_class_teacher_name: null,
   footer_note: null,
@@ -96,4 +113,22 @@ export const gradeFromSettings = (
   if (pct >= s.grade_c_min) return { letter: "C", label: s.grade_c_label };
   if (pct >= s.grade_d_min) return { letter: "D", label: s.grade_d_label };
   return { letter: "F", label: s.grade_f_label };
+};
+
+/** Standing label for the Kindergarten letter scale, sourced from admin settings. */
+export const kgLabelFromSettings = (
+  letter: string | null | undefined,
+  s: ReportCardSettings,
+): string => {
+  switch (letter) {
+    case "A+": return s.kg_a_plus_label;
+    case "A":  return s.kg_a_label;
+    case "B+": return s.kg_b_plus_label;
+    case "B":  return s.kg_b_label;
+    case "C+": return s.kg_c_plus_label;
+    case "C":  return s.kg_c_label;
+    case "D":  return s.kg_d_label;
+    case "F":  return s.kg_f_label;
+    default:   return "";
+  }
 };

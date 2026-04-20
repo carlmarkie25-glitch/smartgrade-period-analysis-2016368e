@@ -22,6 +22,7 @@ import { useSchool } from "@/contexts/SchoolContext";
 import {
   DEFAULT_REPORT_CARD_SETTINGS,
   gradeFromSettings,
+  kgLabelFromSettings,
   useReportCardSettings,
 } from "@/hooks/useReportCardSettings";
 
@@ -885,7 +886,15 @@ export const StudentReportDialog = ({
                       {generalAvg !== null ? (isKg ? (scoreToLetter(generalAvg, 100) ?? '—') : `${generalAvg}%`) : '--'}
                     </div>
                     <div style={{ fontSize: '12px', color: gold }}>
-                      {generalAvg !== null && !isKg ? `Grade: ${letterGrade} — ${gradeLabel}` : ''}
+                      {generalAvg !== null
+                        ? (isKg
+                            ? (() => {
+                                const kgL = scoreToLetter(generalAvg, 100);
+                                const kgLabel = kgLabelFromSettings(kgL, rcSettings);
+                                return kgL ? `Grade: ${kgL}${kgLabel ? ` — ${kgLabel}` : ''}` : '';
+                              })()
+                            : `Grade: ${letterGrade} — ${gradeLabel}`)
+                        : ''}
                     </div>
                   </div>
                 </div>
