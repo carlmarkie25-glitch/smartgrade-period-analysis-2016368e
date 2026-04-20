@@ -496,6 +496,7 @@ export type Database = {
           academic_year_id: string
           created_at: string
           department_id: string
+          display_order: number
           grading_mode: string
           id: string
           name: string
@@ -506,6 +507,7 @@ export type Database = {
           academic_year_id: string
           created_at?: string
           department_id: string
+          display_order?: number
           grading_mode?: string
           id?: string
           name: string
@@ -516,6 +518,7 @@ export type Database = {
           academic_year_id?: string
           created_at?: string
           department_id?: string
+          display_order?: number
           grading_mode?: string
           id?: string
           name?: string
@@ -614,6 +617,7 @@ export type Database = {
         Row: {
           created_at: string
           description: string | null
+          display_order: number
           id: string
           name: string
           school_id: string | null
@@ -621,6 +625,7 @@ export type Database = {
         Insert: {
           created_at?: string
           description?: string | null
+          display_order?: number
           id?: string
           name: string
           school_id?: string | null
@@ -628,6 +633,7 @@ export type Database = {
         Update: {
           created_at?: string
           description?: string | null
+          display_order?: number
           id?: string
           name?: string
           school_id?: string | null
