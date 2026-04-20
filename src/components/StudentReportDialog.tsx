@@ -623,7 +623,17 @@ export const StudentReportDialog = ({
                               </td>
                             </>
                           ) : (
-                            <td style={{ ...tdBase, fontWeight: 700, color: subject.noGrades ? '#999' : subject.hasIncomplete ? '#721c24' : '#111' }}>
+                            <td
+                              style={{
+                                ...tdBase,
+                                fontWeight: 700,
+                                ...(subject.noGrades
+                                  ? { color: '#999' }
+                                  : subject.hasIncomplete
+                                    ? { color: '#721c24' }
+                                    : scoreColorStyle(subject.total))
+                              }}
+                            >
                               {subject.noGrades ? '--' : subject.hasIncomplete ? 'I' : kgWrap(subject.total, subject.max)}
                             </td>
                           )}
