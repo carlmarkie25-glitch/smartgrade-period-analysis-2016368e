@@ -621,8 +621,8 @@ export const StudentReportDialog = ({
                       );
                     })}
 
-                    {/* Aggregate / Average rows */}
-                    {isSemester && isYearly && (
+                    {/* Aggregate / Average rows — hidden for KG (letter grades only) */}
+                    {!isKg && isSemester && isYearly && (
                       <>
                         <tr>
                           {(() => {
