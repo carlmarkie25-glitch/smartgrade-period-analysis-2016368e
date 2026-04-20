@@ -709,7 +709,7 @@ export const StudentReportDialog = ({
                       // Do not compute average if any subject is incomplete — must settle I's first
                       const avgDisplay = anyIncomplete
                         ? 'I'
-                        : (validSubjects.length > 0 ? Math.round(totalSum / validSubjects.length) : '--');
+                        : (validSubjects.length > 0 ? kgWrap(Math.round(totalSum / validSubjects.length)) : '--');
                       return (
                         <>
                           <tr>
