@@ -101,7 +101,7 @@ export const ClassScheduleTimetable = () => {
   const { data: departments, isLoading: deptLoading } = useQuery({
     queryKey: ["departments-for-timetable", userDeptIds],
     queryFn: async () => {
-      let query = supabase.from("departments").select("id,name").order("name");
+      let query = supabase.from("departments").select("id,name,display_order").order("display_order").order("name");
       if (userDeptIds && userDeptIds.length > 0) {
         query = query.in("id", userDeptIds);
       }

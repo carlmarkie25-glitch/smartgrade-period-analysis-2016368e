@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,9 +10,38 @@ import { useClasses } from "@/hooks/useClasses";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Pencil, Trash2, Plus, BookOpen, UserCheck } from "lucide-react";
+import { Pencil, Trash2, Plus, BookOpen, UserCheck, GripVertical } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
+import {
+  DndContext,
+  closestCenter,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  arrayMove,
+  SortableContext,
+  useSortable,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+
+const SortableClassRow = ({ id, children }: { id: string; children: (handleProps: any) => React.ReactNode }) => {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id });
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  };
+  return (
+    <TableRow ref={setNodeRef} style={style}>
+      {children({ attributes, listeners })}
+    </TableRow>
+  );
+};
 
 export const ClassManagementTab = () => {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
@@ -36,6 +65,68 @@ export const ClassManagementTab = () => {
   const { data: classes, isLoading } = useClasses();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
+
+  // Local order state mirrors `classes` so drag reorder feels instant
+  const [orderedClasses, setOrderedClasses] = useState<any[]>([]);
+  useEffect(() => {
+    if (classes) setOrderedClasses(classes as any[]);
+  }, [classes]);
+
+  // Group classes by department for grouped rendering
+  const groupedByDept = useMemo(() => {
+    const groups = new Map<string, { name: string; order: number; items: any[] }>();
+    for (const c of orderedClasses) {
+      const id = c.department_id;
+      const name = c.departments?.name ?? "—";
+      const order = c.departments?.display_order ?? 9999;
+      if (!groups.has(id)) groups.set(id, { name, order, items: [] });
+      groups.get(id)!.items.push(c);
+    }
+    return [...groups.entries()]
+      .map(([id, g]) => ({ id, ...g }))
+      .sort((a, b) => a.order - b.order || a.name.localeCompare(b.name));
+  }, [orderedClasses]);
+
+  const handleDragEnd = async (deptId: string, event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+    const group = groupedByDept.find((g) => g.id === deptId);
+    if (!group) return;
+    const oldIndex = group.items.findIndex((c) => c.id === active.id);
+    const newIndex = group.items.findIndex((c) => c.id === over.id);
+    if (oldIndex === -1 || newIndex === -1) return;
+    const reordered = arrayMove(group.items, oldIndex, newIndex);
+
+    // Rebuild orderedClasses with the new in-department order
+    const next = orderedClasses.map((c) => c);
+    const otherIds = next.filter((c) => c.department_id !== deptId);
+    const merged = [...otherIds, ...reordered].sort((a, b) => {
+      const da = a.departments?.display_order ?? 9999;
+      const db = b.departments?.display_order ?? 9999;
+      if (da !== db) return da - db;
+      return 0;
+    });
+    // Place reordered group items in their new positions
+    const finalList: any[] = [];
+    for (const g of groupedByDept) {
+      if (g.id === deptId) finalList.push(...reordered);
+      else finalList.push(...g.items);
+    }
+    setOrderedClasses(finalList);
+
+    try {
+      await Promise.all(
+        reordered.map((c, i) =>
+          supabase.from("classes").update({ display_order: (i + 1) * 10 }).eq("id", c.id),
+        ),
+      );
+      queryClient.invalidateQueries({ queryKey: ["classes"] });
+      toast({ title: "Order saved", description: `Updated class order in ${group.name}.` });
+    } catch (error: any) {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    }
+  };
 
   const { data: departments } = useQuery({
     queryKey: ["departments"],
@@ -43,6 +134,7 @@ export const ClassManagementTab = () => {
       const { data, error } = await supabase
         .from("departments")
         .select("*")
+        .order("display_order")
         .order("name");
       if (error) throw error;
       return data;
@@ -401,89 +493,120 @@ export const ClassManagementTab = () => {
             ))}
           </div>
         ) : (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Class Name</TableHead>
-                <TableHead>Department</TableHead>
-                <TableHead>Academic Year</TableHead>
-                <TableHead>Sponsor</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {classes?.map((cls) => (
-                <TableRow key={cls.id}>
-                  <TableCell className="font-medium">{cls.name}</TableCell>
-                  <TableCell>
-                    {cls.departments?.name}
-                  </TableCell>
-                  <TableCell>{cls.academic_years?.year_name}</TableCell>
-                  <TableCell>
-                    <Select
-                      value={cls.teacher_id || "none"}
-                      onValueChange={(value) => handleAssignSponsor(cls.id, value === "none" ? null : value)}
-                    >
-                      <SelectTrigger className="w-[180px]">
-                        <SelectValue placeholder="Assign sponsor" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="none">No Sponsor</SelectItem>
-                        {teachers?.map((teacher) => (
-                          <SelectItem key={teacher.user_id} value={teacher.user_id}>
-                            {teacher.full_name}
-                          </SelectItem>
+          <div className="space-y-6">
+            <p className="text-xs text-muted-foreground">
+              Drag the handle <GripVertical className="inline h-3 w-3" /> to reorder classes within a department.
+              Departments themselves are reordered in the Departments page.
+            </p>
+            {groupedByDept.map((group) => (
+              <div key={group.id}>
+                <h3 className="text-sm font-semibold text-foreground mb-2 px-2">{group.name}</h3>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="w-10"></TableHead>
+                      <TableHead>Class Name</TableHead>
+                      <TableHead>Academic Year</TableHead>
+                      <TableHead>Sponsor</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <DndContext
+                    sensors={sensors}
+                    collisionDetection={closestCenter}
+                    onDragEnd={(e) => handleDragEnd(group.id, e)}
+                  >
+                    <SortableContext items={group.items.map((c) => c.id)} strategy={verticalListSortingStrategy}>
+                      <TableBody>
+                        {group.items.map((cls) => (
+                          <SortableClassRow key={cls.id} id={cls.id}>
+                            {({ attributes, listeners }) => (
+                              <>
+                                <TableCell className="w-10">
+                                  <button
+                                    type="button"
+                                    className="cursor-grab active:cursor-grabbing text-muted-foreground hover:text-foreground touch-none"
+                                    {...attributes}
+                                    {...listeners}
+                                    aria-label="Drag to reorder"
+                                  >
+                                    <GripVertical className="h-4 w-4" />
+                                  </button>
+                                </TableCell>
+                                <TableCell className="font-medium">{cls.name}</TableCell>
+                                <TableCell>{cls.academic_years?.year_name}</TableCell>
+                                <TableCell>
+                                  <Select
+                                    value={cls.teacher_id || "none"}
+                                    onValueChange={(value) => handleAssignSponsor(cls.id, value === "none" ? null : value)}
+                                  >
+                                    <SelectTrigger className="w-[180px]">
+                                      <SelectValue placeholder="Assign sponsor" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      <SelectItem value="none">No Sponsor</SelectItem>
+                                      {teachers?.map((teacher) => (
+                                        <SelectItem key={teacher.user_id} value={teacher.user_id}>
+                                          {teacher.full_name}
+                                        </SelectItem>
+                                      ))}
+                                    </SelectContent>
+                                  </Select>
+                                  {cls.teacher_id && (
+                                    <Badge variant="secondary" className="mt-1 gap-1">
+                                      <UserCheck className="h-3 w-3" />
+                                      {teachers?.find((t) => t.user_id === cls.teacher_id)?.full_name || "Assigned"}
+                                    </Badge>
+                                  )}
+                                </TableCell>
+                                <TableCell className="text-right">
+                                  <div className="flex justify-end gap-2">
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      onClick={() => {
+                                        setSelectedClassId(cls.id);
+                                        setIsSubjectsDialogOpen(true);
+                                      }}
+                                    >
+                                      <BookOpen className="h-4 w-4" />
+                                    </Button>
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      onClick={() => {
+                                        setEditingClass({
+                                          id: cls.id,
+                                          name: cls.name,
+                                          department_id: cls.department_id,
+                                          academic_year_id: cls.academic_year_id,
+                                          grading_mode: ((cls as any).grading_mode === "letters" ? "letters" : "numbers"),
+                                        });
+                                        setIsEditDialogOpen(true);
+                                      }}
+                                    >
+                                      <Pencil className="h-4 w-4" />
+                                    </Button>
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      onClick={() => handleDeleteClass(cls.id)}
+                                    >
+                                      <Trash2 className="h-4 w-4" />
+                                    </Button>
+                                  </div>
+                                </TableCell>
+                              </>
+                            )}
+                          </SortableClassRow>
                         ))}
-                      </SelectContent>
-                    </Select>
-                    {cls.teacher_id && (
-                      <Badge variant="secondary" className="mt-1 gap-1">
-                        <UserCheck className="h-3 w-3" />
-                        {teachers?.find(t => t.user_id === cls.teacher_id)?.full_name || "Assigned"}
-                      </Badge>
-                    )}
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex justify-end gap-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => {
-                          setSelectedClassId(cls.id);
-                          setIsSubjectsDialogOpen(true);
-                        }}
-                      >
-                        <BookOpen className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => {
-                          setEditingClass({
-                            id: cls.id,
-                            name: cls.name,
-                            department_id: cls.department_id,
-                            academic_year_id: cls.academic_year_id,
-                            grading_mode: ((cls as any).grading_mode === "letters" ? "letters" : "numbers"),
-                          });
-                          setIsEditDialogOpen(true);
-                        }}
-                      >
-                        <Pencil className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleDeleteClass(cls.id)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+                      </TableBody>
+                    </SortableContext>
+                  </DndContext>
+                </Table>
+              </div>
+            ))}
+          </div>
         )}
       </CardContent>
 
