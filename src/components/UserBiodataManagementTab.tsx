@@ -112,11 +112,25 @@ export const UserBiodataManagementTab = () => {
   const { data: schoolHeader } = useQuery({
     queryKey: ["biodata-school-header"],
     queryFn: async () => {
-      const { data } = await supabase
-        .from("report_card_settings")
-        .select("header_title, header_subtitle, header_address, header_contact, header_website, logo_url, header_bg_color, accent_color")
-        .maybeSingle();
-      return data;
+      const [{ data: rcs }, { data: school }] = await Promise.all([
+        supabase
+          .from("report_card_settings")
+          .select("header_title, header_subtitle, header_address, header_contact, header_website, logo_url")
+          .maybeSingle(),
+        supabase
+          .from("schools")
+          .select("name, address, phone, email, website, logo_url")
+          .limit(1)
+          .maybeSingle(),
+      ]);
+      return {
+        name: school?.name || rcs?.header_title || "",
+        subtitle: rcs?.header_subtitle || "",
+        address: rcs?.header_address || school?.address || "",
+        contact: rcs?.header_contact || school?.phone || school?.email || "",
+        website: rcs?.header_website || school?.website || "",
+        logo_url: rcs?.logo_url || school?.logo_url || "",
+      };
     },
     staleTime: 1000 * 60 * 5,
   });
