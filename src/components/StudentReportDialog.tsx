@@ -566,13 +566,15 @@ export const StudentReportDialog = ({
                            </p>
                          )}
                          {headerAddress && (
-                           <p style={{ fontSize: '12px', color: '#ccd', margin: 0 }}>
-                             {headerAddress}{headerContact ? ` | ${headerContact}` : ''}
-                           </p>
-                         )}
-                         {headerWebsite && (
-                           <p style={{ fontSize: '12px', color: '#ccd', margin: 0 }}>{headerWebsite}</p>
-                         )}
+                            <p style={{ fontSize: '12px', color: '#ccd', margin: 0 }}>
+                              {headerAddress}
+                            </p>
+                          )}
+                          {(headerContact || headerWebsite) && (
+                            <p style={{ fontSize: '12px', color: '#ccd', margin: 0 }}>
+                              {headerContact}{headerContact && headerWebsite ? ' | ' : ''}{headerWebsite}
+                            </p>
+                          )}
                       </div>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                          <div style={{
