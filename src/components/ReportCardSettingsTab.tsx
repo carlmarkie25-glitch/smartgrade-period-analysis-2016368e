@@ -486,10 +486,12 @@ const ReportColorPreview = ({
   header,
   accent,
   secondary,
+  chipBg,
 }: {
   header: string;
   accent: string;
   secondary: string;
+  chipBg?: string;
 }) => (
   <div className="rounded-md border overflow-hidden">
     <div style={{ background: header, color: "#fff", padding: "10px 14px", fontSize: 12, fontWeight: 700, letterSpacing: 1 }}>
@@ -503,6 +505,12 @@ const ReportColorPreview = ({
         YEAR AVERAGE
       </div>
     </div>
+    {chipBg && (
+      <div className="flex gap-2 p-2" style={{ background: '#f8f9fa' }}>
+        <div style={{ background: chipBg, color: '#000', padding: '4px 10px', fontSize: 10, fontWeight: 700, borderRadius: 3 }}>REPORT TYPE</div>
+        <div style={{ background: chipBg, color: '#000', padding: '4px 10px', fontSize: 10, fontWeight: 700, borderRadius: 3 }}>SEMESTER</div>
+      </div>
+    )}
   </div>
 );
 
