@@ -1,13 +1,11 @@
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useUserManagement } from "@/hooks/useUserManagement";
-import { UserPlus, FileText, Palette, Bell, ScrollText } from "lucide-react";
-import { UserBiodataManagementTab } from "@/components/UserBiodataManagementTab";
+import { UserPlus, Bell, ScrollText } from "lucide-react";
 import { TeacherAssignmentDialog } from "@/components/TeacherAssignmentDialog";
 import { SponsorAssignmentDialog } from "@/components/SponsorAssignmentDialog";
 import { UserRoleManagement } from "@/components/UserRoleManagement";
 import AppShell from "@/components/AppShell";
-import { SettingsTab } from "@/components/SettingsTab";
 import { SendNotificationDialog } from "@/components/SendNotificationDialog";
 import { ReportCardSettingsTab } from "@/components/ReportCardSettingsTab";
 
@@ -50,19 +48,15 @@ const Admin = () => {
       <div className="py-4">
         <div className="mb-8">
           <h1 className="text-4xl font-bold text-foreground mb-2">Settings</h1>
-          <p className="text-muted-foreground">Manage users, biodata, and system settings</p>
+          <p className="text-muted-foreground">Manage users and system settings</p>
         </div>
 
         <div className="neu-card p-6">
           <Tabs defaultValue="users" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-5">
+            <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="users">
               <UserPlus className="h-4 w-4 mr-2" />
               Users
-            </TabsTrigger>
-            <TabsTrigger value="biodata">
-              <FileText className="h-4 w-4 mr-2" />
-              Biodata
             </TabsTrigger>
             <TabsTrigger value="notifications">
               <Bell className="h-4 w-4 mr-2" />
@@ -72,47 +66,35 @@ const Admin = () => {
               <ScrollText className="h-4 w-4 mr-2" />
               Report Card
             </TabsTrigger>
-            <TabsTrigger value="theme">
-              <Palette className="h-4 w-4 mr-2" />
-              Theme
-            </TabsTrigger>
-          </TabsList>
+            </TabsList>
 
-          <TabsContent value="users">
-            <UserRoleManagement
-              users={users}
-              usersLoading={usersLoading}
-              assignRole={assignRole}
-              removeRole={removeRole}
-              onOpenTeacherAssignment={handleOpenTeacherAssignment}
-              onOpenSponsorAssignment={handleOpenSponsorAssignment}
-            />
-          </TabsContent>
+            <TabsContent value="users">
+              <UserRoleManagement
+                users={users}
+                usersLoading={usersLoading}
+                assignRole={assignRole}
+                removeRole={removeRole}
+                onOpenTeacherAssignment={handleOpenTeacherAssignment}
+                onOpenSponsorAssignment={handleOpenSponsorAssignment}
+              />
+            </TabsContent>
 
-          <TabsContent value="biodata">
-            <UserBiodataManagementTab />
-          </TabsContent>
-
-          <TabsContent value="notifications">
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="text-lg font-semibold text-foreground">Send Notifications</h3>
-                  <p className="text-sm text-muted-foreground">Send announcements to teachers, students, parents, or everyone</p>
+            <TabsContent value="notifications">
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="text-lg font-semibold text-foreground">Send Notifications</h3>
+                    <p className="text-sm text-muted-foreground">Send announcements to teachers, students, parents, or everyone</p>
+                  </div>
+                  <SendNotificationDialog />
                 </div>
-                <SendNotificationDialog />
               </div>
-            </div>
-          </TabsContent>
+            </TabsContent>
 
-          <TabsContent value="report-card">
-            <ReportCardSettingsTab />
-          </TabsContent>
-
-          <TabsContent value="theme">
-            <SettingsTab />
-          </TabsContent>
-        </Tabs>
+            <TabsContent value="report-card">
+              <ReportCardSettingsTab />
+            </TabsContent>
+          </Tabs>
         </div>
       </div>
 
