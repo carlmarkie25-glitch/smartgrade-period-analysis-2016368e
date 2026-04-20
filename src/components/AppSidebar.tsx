@@ -68,22 +68,17 @@ const AppSidebar = () => {
     const Icon = item.icon;
     const active = isActive(item.path);
     return (
-      <SidebarMenuItem
-        key={item.path}
-        className={cn("relative", active && !isCollapsed && "sidebar-notch-active")}
-      >
+      <SidebarMenuItem key={item.path}>
         <SidebarMenuButton
           asChild
           className={cn(
-            "my-1 h-11 transition-all duration-300 relative",
-            active && !isCollapsed
-              ? "ml-3 mr-0 pl-4 pr-4 rounded-l-full bg-background text-primary font-semibold shadow-[0_4px_14px_-2px_rgba(0,0,0,0.15)] hover:bg-background hover:text-primary z-20"
-              : active && isCollapsed
-              ? "mx-3 px-4 rounded-full bg-background text-primary font-semibold shadow-md hover:bg-background hover:text-primary"
-              : "mx-3 px-4 rounded-full text-sidebar-foreground/90 hover:bg-white/15 hover:text-sidebar-foreground"
+            "mx-3 my-0.5 rounded-full transition-all duration-300 h-11",
+            active
+              ? "bg-sidebar-primary text-sidebar-primary-foreground font-semibold shadow-md hover:bg-sidebar-primary hover:text-sidebar-primary-foreground"
+              : "text-sidebar-foreground/90 hover:bg-white/15 hover:text-sidebar-foreground"
           )}
         >
-          <Link to={item.path} className="flex items-center gap-3">
+          <Link to={item.path} className="flex items-center gap-3 px-4">
             <Icon className="h-5 w-5 shrink-0" />
             {!isCollapsed && <span className="text-sm">{item.label}</span>}
           </Link>

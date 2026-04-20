@@ -179,41 +179,6 @@ All colors MUST be HSL.
   background: var(--sidebar-background);
 }
 
-/* Sidebar "gulf" notch: concave curves above & below the active pill,
-   making it appear to bleed out of the sidebar into the page.
-   Implementation: two pseudo-elements, each a 20x20 square painted in
-   the page-bg color, with a quarter-circle "bite" cut out via mask
-   (radial-gradient). The remaining shape is a concave curve. */
-.sidebar-notch-active {
-  position: relative;
-  overflow: visible !important;
-}
-.sidebar-notch-active > button,
-.sidebar-notch-active > a {
-  overflow: visible !important;
-}
-.sidebar-notch-active::before,
-.sidebar-notch-active::after {
-  content: "";
-  position: absolute;
-  right: -32px;
-  width: 24px;
-  height: 24px;
-  background-color: transparent;
-  pointer-events: none;
-  z-index: 15;
-}
-.sidebar-notch-active::before {
-  top: -24px;
-  border-bottom-right-radius: 24px;
-  box-shadow: 12px 12px 0 0 hsl(var(--background));
-}
-.sidebar-notch-active::after {
-  bottom: -24px;
-  border-top-right-radius: 24px;
-  box-shadow: 12px -12px 0 0 hsl(var(--background));
-}
-
 /* Neumorphic utility classes */
 .neu-card {
   background: hsl(var(--neu-bg));

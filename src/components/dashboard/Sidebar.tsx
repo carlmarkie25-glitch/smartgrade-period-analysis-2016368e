@@ -138,31 +138,24 @@ export const Sidebar = ({ activeTab, onTabChange, collapsed = false, onToggle }:
     const Icon = item.icon;
     const active = isActiveItem(item);
     return (
-      <div
+      <button
         key={item.id}
-        className={`relative ${active && !collapsed ? "sidebar-notch-active" : ""}`}
-        style={active && !collapsed ? { marginRight: "-32px" } : undefined}
+        onClick={() => handleClick(item)}
+        title={item.label}
+        className={`flex items-center gap-3 w-full px-3 py-2.5 rounded-xl transition-all duration-300 group ${
+          active
+            ? "bg-white/20 text-white shadow-lg"
+            : "text-[hsl(170,30%,70%)] hover:text-white hover:bg-white/10"
+        }`}
       >
-        <button
-          onClick={() => handleClick(item)}
-          title={item.label}
-          className={`flex items-center gap-3 w-full px-4 py-2.5 transition-all duration-300 group relative ${
-            active && !collapsed
-              ? "bg-background text-primary font-semibold shadow-[0_4px_14px_-2px_rgba(0,0,0,0.15)] rounded-l-[28px] z-20"
-              : active && collapsed
-              ? "bg-background text-primary font-semibold rounded-full"
-              : "text-[hsl(170,30%,70%)] hover:text-white hover:bg-white/10 rounded-xl"
-          }`}
-        >
-          <Icon size={20} className="flex-shrink-0" />
-          {!collapsed && <span className="text-sm font-medium truncate">{item.label}</span>}
-          {collapsed && (
-            <div className="absolute left-full ml-2 px-2 py-1 bg-[hsl(170,30%,20%)]/90 text-white text-[10px] rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
-              {item.label}
-            </div>
-          )}
-        </button>
-      </div>
+        <Icon size={20} className="flex-shrink-0" />
+        {!collapsed && <span className="text-sm font-medium truncate">{item.label}</span>}
+        {collapsed && (
+          <div className="absolute left-full ml-2 px-2 py-1 bg-[hsl(170,30%,20%)]/90 text-white text-[10px] rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
+            {item.label}
+          </div>
+        )}
+      </button>
     );
   };
 
@@ -257,7 +250,7 @@ export const Sidebar = ({ activeTab, onTabChange, collapsed = false, onToggle }:
       </div>
 
       {/* Nav Items */}
-      <div className="flex-1 flex flex-col gap-1.5 overflow-y-auto overflow-x-hidden">
+      <div className="flex-1 flex flex-col gap-1.5 overflow-hidden">
         {topItems.filter((item) => canAccess(item.roles)).map((item) => renderItem(item))}
 
         {renderGroup(academicsGroup, academicsOpen, setAcademicsOpen, isAcademicsActive)}
