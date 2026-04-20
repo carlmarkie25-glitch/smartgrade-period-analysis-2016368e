@@ -237,19 +237,15 @@ export const StudentReportDialog = ({
       const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
       const pageW = pdf.internal.pageSize.getWidth();
       const pageH = pdf.internal.pageSize.getHeight();
-      const imgW = pageW;
-      const imgH = (canvas.height * imgW) / canvas.width;
 
-      let heightLeft = imgH;
-      let position = 0;
-      pdf.addImage(imgData, 'PNG', 0, position, imgW, imgH);
-      heightLeft -= pageH;
-      while (heightLeft > 0) {
-        position -= pageH;
-        pdf.addPage();
-        pdf.addImage(imgData, 'PNG', 0, position, imgW, imgH);
-        heightLeft -= pageH;
-      }
+      // Fit the entire report onto a SINGLE A4 page by scaling proportionally.
+      const ratio = Math.min(pageW / canvas.width, pageH / canvas.height);
+      const imgW = canvas.width * ratio;
+      const imgH = canvas.height * ratio;
+      // Center horizontally; align to top vertically.
+      const x = (pageW - imgW) / 2;
+      const y = 0;
+      pdf.addImage(imgData, 'PNG', x, y, imgW, imgH);
 
       const studentName = (report?.student?.full_name || 'student').replace(/\s+/g, '_');
       pdf.save(`Report_${studentName}_${period}.pdf`);
