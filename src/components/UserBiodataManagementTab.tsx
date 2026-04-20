@@ -5,13 +5,17 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery } from "@tanstack/react-query";
 import { Search, Printer, Eye, Download } from "lucide-react";
 import { StudentBiodataDialog } from "./StudentBiodataDialog";
 
-interface UserBiodata {
+interface StudentBiodata {
   id: string;
   user_id: string;
   full_name: string;
@@ -29,6 +33,8 @@ interface UserBiodata {
   emergency_contact_name: string | null;
   emergency_contact_phone: string | null;
   student_id?: string | null;
+  class_id?: string | null;
+  department_id?: string | null;
   classes?: { name: string } | null;
   departments?: { name: string } | null;
   religion?: string | null;
@@ -36,8 +42,12 @@ interface UserBiodata {
 
 export const UserBiodataManagementTab = () => {
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedUser, setSelectedUser] = useState<UserBiodata | null>(null);
+  const [selectedUser, setSelectedUser] = useState<StudentBiodata | null>(null);
   const [isBiodataDialogOpen, setIsBiodataDialogOpen] = useState(false);
+  const [isDownloadOpen, setIsDownloadOpen] = useState(false);
+  const [downloadScope, setDownloadScope] = useState<"all" | "class" | "department">("all");
+  const [downloadClassId, setDownloadClassId] = useState<string>("");
+  const [downloadDeptId, setDownloadDeptId] = useState<string>("");
   const printRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
@@ -47,12 +57,12 @@ export const UserBiodataManagementTab = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("students")
-        .select("id, user_id, full_name, photo_url, gender, student_id, phone_number, date_of_birth, religion, nationality, county, country, address, father_name, mother_name, emergency_contact_name, emergency_contact_phone, classes(name)")
+        .select("id, user_id, full_name, photo_url, gender, student_id, phone_number, date_of_birth, religion, nationality, county, country, address, father_name, mother_name, emergency_contact_name, emergency_contact_phone, class_id, department_id, classes(name), departments(name)")
         .order("full_name");
 
       if (error) throw error;
 
-      const allUsers: UserBiodata[] = (data || []).map((s: any) => ({
+      const allUsers: StudentBiodata[] = (data || []).map((s: any) => ({
         id: s.id,
         user_id: s.user_id,
         full_name: s.full_name || "Unknown",
@@ -70,11 +80,34 @@ export const UserBiodataManagementTab = () => {
         emergency_contact_name: s.emergency_contact_name ?? null,
         emergency_contact_phone: s.emergency_contact_phone ?? null,
         student_id: s.student_id ?? null,
+        class_id: s.class_id ?? null,
+        department_id: s.department_id ?? null,
         classes: s.classes ?? null,
+        departments: s.departments ?? null,
         religion: s.religion ?? null,
       }));
 
       return allUsers;
+    },
+    staleTime: 1000 * 60 * 5,
+  });
+
+  const { data: classes = [] } = useQuery({
+    queryKey: ["biodata-classes-list"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("classes").select("id, name").order("name");
+      if (error) throw error;
+      return data || [];
+    },
+    staleTime: 1000 * 60 * 5,
+  });
+
+  const { data: departments = [] } = useQuery({
+    queryKey: ["biodata-departments-list"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("departments").select("id, name").order("name");
+      if (error) throw error;
+      return data || [];
     },
     staleTime: 1000 * 60 * 5,
   });
@@ -97,9 +130,74 @@ export const UserBiodataManagementTab = () => {
     });
   }, [users, searchTerm]);
 
-  const handleViewBiodata = (user: UserBiodata) => {
-    setSelectedUser(user as any);
+  const handleViewBiodata = (user: StudentBiodata) => {
+    setSelectedUser(user);
     setIsBiodataDialogOpen(true);
+  };
+
+  const getDownloadSubset = () => {
+    if (downloadScope === "class" && downloadClassId) {
+      return users.filter((u) => u.class_id === downloadClassId);
+    }
+    if (downloadScope === "department" && downloadDeptId) {
+      return users.filter((u) => u.department_id === downloadDeptId);
+    }
+    return users;
+  };
+
+  const handleDownloadBiodata = () => {
+    if (downloadScope === "class" && !downloadClassId) {
+      toast({ title: "Select a class", variant: "destructive" });
+      return;
+    }
+    if (downloadScope === "department" && !downloadDeptId) {
+      toast({ title: "Select a department", variant: "destructive" });
+      return;
+    }
+
+    const subset = getDownloadSubset();
+    if (subset.length === 0) {
+      toast({ title: "No students to export", variant: "destructive" });
+      return;
+    }
+
+    const headers = [
+      "Full Name", "Student ID", "Gender", "Class", "Department",
+      "Date of Birth", "Religion", "Nationality", "Country", "County",
+      "Address", "Phone", "Father Name", "Mother Name",
+      "Emergency Contact", "Emergency Phone",
+    ];
+
+    const rows = subset.map((u) => [
+      u.full_name, u.student_id || "N/A", u.gender || "N/A",
+      u.classes?.name || "N/A", u.departments?.name || "N/A",
+      u.date_of_birth || "N/A", u.religion || "N/A",
+      u.nationality || "N/A", u.country || "N/A", u.county || "N/A",
+      u.address || "N/A", u.phone_number || "N/A",
+      u.father_name || "N/A", u.mother_name || "N/A",
+      u.emergency_contact_name || "N/A", u.emergency_contact_phone || "N/A",
+    ]);
+
+    const csv = [
+      headers.join(","),
+      ...rows.map((r) => r.map((c) => `"${(c ?? "").toString().replace(/"/g, '""')}"`).join(",")),
+    ].join("\n");
+
+    const scopeLabel =
+      downloadScope === "all" ? "all" :
+      downloadScope === "class" ? `class-${classes.find((c: any) => c.id === downloadClassId)?.name || "class"}` :
+      `dept-${departments.find((d: any) => d.id === downloadDeptId)?.name || "dept"}`;
+
+    const blob = new Blob([csv], { type: "text/csv" });
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `students_biodata_${scopeLabel}_${new Date().toISOString().split("T")[0]}.csv`.replace(/\s+/g, "_");
+    link.click();
+    window.URL.revokeObjectURL(url);
+
+    toast({ title: "Success", description: `Exported ${subset.length} student biodata record(s)` });
+    setIsDownloadOpen(false);
   };
 
   const handlePrint = () => {
@@ -224,14 +322,14 @@ export const UserBiodataManagementTab = () => {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>User Biodata Management</CardTitle>
+        <CardTitle>Student Biodata Management</CardTitle>
         <div className="mt-4 flex gap-2 items-end">
           <div className="flex-1">
-            <label className="text-sm font-medium text-foreground">Search Users</label>
+            <label className="text-sm font-medium text-foreground">Search Students</label>
             <div className="relative mt-2">
               <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="Search by name, email, phone, or student ID..."
+                placeholder="Search by name, phone, or student ID..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10"
@@ -245,6 +343,10 @@ export const UserBiodataManagementTab = () => {
           <Button variant="outline" onClick={handleDownloadCSV} className="gap-2">
             <Download className="h-4 w-4" />
             Export CSV
+          </Button>
+          <Button onClick={() => setIsDownloadOpen(true)} className="gap-2">
+            <Download className="h-4 w-4" />
+            Download Biodata
           </Button>
         </div>
       </CardHeader>
