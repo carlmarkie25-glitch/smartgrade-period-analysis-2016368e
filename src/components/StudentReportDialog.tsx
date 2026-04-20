@@ -460,6 +460,15 @@ export const StudentReportDialog = ({
                 <Button onClick={handleDownloadPdf} size="sm" className="gap-2" disabled={downloading} style={{ background: navy, color: '#fff' }}>
                   <Download className="h-4 w-4" /> {downloading ? 'Generating PDF...' : 'Download PDF'}
                 </Button>
+                <Button
+                  onClick={() => setGreyMode((g) => !g)}
+                  size="sm"
+                  variant="outline"
+                  className="gap-2"
+                  title="Toggle between color and grey mode"
+                >
+                  {greyMode ? 'Color Mode' : 'Grey Mode'}
+                </Button>
                 {canEdit && !editing && (
                   <Button onClick={() => setEditing(true)} size="sm" variant="outline" className="gap-2">
                     <Pencil className="h-4 w-4" /> Edit Teacher Inputs
