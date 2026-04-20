@@ -153,7 +153,7 @@ export const ReportCardSettingsTab = () => {
               ["grade_a_min", "A min %"],
               ["grade_b_min", "B min %"],
               ["grade_c_min", "C min %"],
-              ["grade_d_min", "F"],
+              ["grade_d_min", "F min %"],
               ["pass_mark", "Pass mark %"],
             ] as const).map(([key, label]) => (
               <div key={key} className="space-y-2">
@@ -169,12 +169,11 @@ export const ReportCardSettingsTab = () => {
             ))}
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             {([
               ["grade_a_label", "A label"],
               ["grade_b_label", "B label"],
               ["grade_c_label", "C label"],
-              ["grade_d_label", "D label"],
               ["grade_f_label", "F label"],
             ] as const).map(([key, label]) => (
               <div key={key} className="space-y-2">
@@ -188,8 +187,8 @@ export const ReportCardSettingsTab = () => {
           </div>
 
           <p className="text-xs text-muted-foreground">
-            Tip: thresholds must be in descending order (A &gt; B &gt; C &gt; D). Pass mark is the minimum
-            average required to be promoted at year end.
+            Tip: thresholds must be in descending order (A &gt; B &gt; C). Anything below the F threshold
+            is a failing grade. Pass mark is the minimum average required to be promoted at year end.
           </p>
         </CardContent>
       </Card>
