@@ -184,28 +184,38 @@ All colors MUST be HSL.
    curves so the pill appears to bleed out of the sidebar into the page. */
 .sidebar-notch-active {
   position: relative;
+  overflow: visible !important;
+}
+.sidebar-notch-active > a,
+.sidebar-notch-active > button {
+  overflow: visible !important;
 }
 .sidebar-notch-active::before,
 .sidebar-notch-active::after {
   content: "";
   position: absolute;
   right: 0;
-  width: 24px;
-  height: 24px;
+  width: 20px;
+  height: 20px;
   background: hsl(var(--background));
   pointer-events: none;
   z-index: 10;
-  transition: all 300ms ease;
 }
 .sidebar-notch-active::before {
-  top: -20px;
-  -webkit-mask-image: radial-gradient(circle at 0 0, transparent 24px, black 24px);
-          mask-image: radial-gradient(circle at 0 0, transparent 24px, black 24px);
+  top: -16px;
+  border-bottom-right-radius: 20px;
+  box-shadow: 6px 6px 0 0 hsl(var(--background));
+  -webkit-mask: radial-gradient(circle 20px at 0 0, transparent 0 20px, black 21px);
+          mask: radial-gradient(circle 20px at 0 0, transparent 0 20px, black 21px);
 }
 .sidebar-notch-active::after {
-  bottom: -20px;
-  -webkit-mask-image: radial-gradient(circle at 0 100%, transparent 24px, black 24px);
-          mask-image: radial-gradient(circle at 0 100%, transparent 24px, black 24px);
+  bottom: -16px;
+  -webkit-mask: radial-gradient(circle 20px at 0 100%, transparent 0 20px, black 21px);
+          mask: radial-gradient(circle 20px at 0 100%, transparent 0 20px, black 21px);
+}
+/* Allow sidebar content to overflow horizontally so active pill can bleed */
+[data-sidebar="content"] {
+  overflow-x: visible !important;
 }
 
 /* Neumorphic utility classes */
