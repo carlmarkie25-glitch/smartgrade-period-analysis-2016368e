@@ -169,14 +169,22 @@ export const StudentReportDialog = ({
   const getSemesterLabel = () => {
     switch (period) {
       case "yearly": return "1 & 2";
-      case "semester1": return "1";
-      case "semester2": return "2";
-      default: return period.replace("p", "P").replace("exam_s", "Exam S");
+      case "semester1": return "1 (P1, P2, P3, Exam)";
+      case "semester2": return "2 (P4, P5, P6, Exam)";
+      case "p1": return "1 (Period 1)";
+      case "p2": return "1 (Period 2)";
+      case "p3": return "1 (Period 3)";
+      case "exam_s1": return "1 (Exam)";
+      case "p4": return "2 (Period 4)";
+      case "p5": return "2 (Period 5)";
+      case "p6": return "2 (Period 6)";
+      case "exam_s2": return "2 (Exam)";
+      default: return period;
     }
   };
 
   const getDepartmentLabel = () => {
-    return className || "PRIMARY";
+    return "Report Card";
   };
 
   // Compute subject semester average
