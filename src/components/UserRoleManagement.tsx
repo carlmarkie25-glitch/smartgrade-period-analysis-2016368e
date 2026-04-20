@@ -2,7 +2,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { X, Settings2, ChevronDown, GraduationCap, Users, UserPlus, Shield } from "lucide-react";
+import { X, Settings2, ChevronDown, Users, UserPlus, Shield } from "lucide-react";
 import { useState } from "react";
 
 interface UserRoleManagementProps {
