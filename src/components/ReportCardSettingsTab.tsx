@@ -160,6 +160,44 @@ export const ReportCardSettingsTab = () => {
 
       <Card>
         <CardHeader>
+          <CardTitle>Report Card Colors</CardTitle>
+          <CardDescription>
+            Pick colors that match your school brand. Each department can override these
+            below — useful when Kindergarten, Primary, and High School should each have
+            their own look.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <ColorRow
+            label="Header background"
+            help="Top banner, section bars, and the General Average box."
+            value={form.header_bg_color}
+            onChange={(v) => set("header_bg_color", v)}
+          />
+          <ColorRow
+            label="Accent (highlight)"
+            help="Year-end column, period & semester chips, and the General Average number."
+            value={form.accent_color}
+            onChange={(v) => set("accent_color", v)}
+          />
+          <ColorRow
+            label="Secondary (exam columns)"
+            help="Background of the exam columns inside the grades table."
+            value={form.secondary_bg_color}
+            onChange={(v) => set("secondary_bg_color", v)}
+          />
+          <ReportColorPreview
+            header={form.header_bg_color}
+            accent={form.accent_color}
+            secondary={form.secondary_bg_color}
+          />
+        </CardContent>
+      </Card>
+
+      <DepartmentColorsCard schoolDefaults={form} />
+
+      <Card>
+        <CardHeader>
           <CardTitle>Grading Standards</CardTitle>
           <CardDescription>
             Used to compute letter grades, the standing label (Excellent / Good / etc.), and pass/fail promotion.
