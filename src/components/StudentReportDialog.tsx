@@ -129,17 +129,15 @@ const displayScore = (score: number | null | undefined, noGrades?: boolean): str
   return String(score);
 };
 
-/** Score color class */
+/** Score color class - Black for all passing grades, bright red for 60-69 */
 const scoreColorStyle = (score: number | null | undefined): React.CSSProperties => {
   if (score === null || score === undefined) return { color: '#999' };
   const n = typeof score === 'number' ? score : Number(score);
   if (!Number.isFinite(n)) return { color: '#999' };
-  if (n >= 90) return { color: '#155724', fontWeight: 700 };
-  if (n >= 75) return { color: '#1a3a6e', fontWeight: 600 };
-  // 70–74 amber
-  if (n >= 70) return { color: '#856404', fontWeight: 600 };
-  // 60–69 (and anything below) → red, since D tier was removed
-  return { color: '#c0392b', fontWeight: 700 };
+  // 60-69 is the only range that gets red (bright/shiny red)
+  if (n >= 60 && n < 70) return { color: '#ff0000', fontWeight: 700 };
+  // Everything else (70-100) is black
+  return { color: '#000000', fontWeight: 700 };
 };
 
 export const StudentReportDialog = ({
