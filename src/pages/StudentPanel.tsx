@@ -11,7 +11,7 @@ const StudentPanel = () => {
       <div className="py-4">
         <div className="mb-6">
           <h1 className="text-2xl font-bold text-gray-900 mb-1">Student Management</h1>
-          <p className="text-sm text-gray-500">Manage student users, biodata, enrollment, and classes</p>
+          <p className="text-sm text-gray-500">Manage students, biodata, enrollment, and classes</p>
         </div>
 
         <div className="neu-card p-4">
