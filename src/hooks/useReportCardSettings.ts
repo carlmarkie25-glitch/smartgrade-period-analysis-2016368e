@@ -123,7 +123,7 @@ export const gradeFromSettings = (
   if (pct >= s.grade_a_min) return { letter: "A", label: s.grade_a_label };
   if (pct >= s.grade_b_min) return { letter: "B", label: s.grade_b_label };
   if (pct >= s.grade_c_min) return { letter: "C", label: s.grade_c_label };
-  if (pct >= s.grade_d_min) return { letter: "D", label: s.grade_d_label };
+  // D tier removed by design — anything below C is F (e.g., 67 → F).
   return { letter: "F", label: s.grade_f_label };
 };
 
