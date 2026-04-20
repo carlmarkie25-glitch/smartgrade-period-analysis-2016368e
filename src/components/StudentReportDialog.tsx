@@ -702,7 +702,7 @@ export const StudentReportDialog = ({
                     })()}
 
                     {/* Aggregate / Average — single period view */}
-                    {!isSemester && subjects.length > 0 && (() => {
+                    {!isKg && !isSemester && subjects.length > 0 && (() => {
                       const aggStyle: React.CSSProperties = { ...tdBase, background: '#e8f0e8', fontWeight: 700, color: '#1a5226' };
                       const avgStyle: React.CSSProperties = { ...tdBase, background: '#fff3cd', fontWeight: 700, color: '#7d5a00' };
                       const anyIncomplete = subjects.some((s: any) => s.noGrades || s.hasIncomplete);
