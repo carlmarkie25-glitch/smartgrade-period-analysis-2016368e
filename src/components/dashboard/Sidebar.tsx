@@ -138,15 +138,18 @@ export const Sidebar = ({ activeTab, onTabChange, collapsed = false, onToggle }:
     const Icon = item.icon;
     const active = isActiveItem(item);
     return (
-      <div key={item.id} className={`relative ${active && !collapsed ? "sidebar-notch-active" : ""}`}>
+      <div
+        key={item.id}
+        className={`relative ${active && !collapsed ? "sidebar-notch-active -mr-3" : ""}`}
+      >
         <button
           onClick={() => handleClick(item)}
           title={item.label}
           className={`flex items-center gap-3 w-full px-4 py-2.5 transition-all duration-300 group relative ${
             active && !collapsed
-              ? "bg-background text-primary font-semibold shadow-[0_4px_14px_-2px_rgba(0,0,0,0.15)] rounded-l-full ml-3 z-20"
+              ? "bg-background text-primary font-semibold shadow-[0_4px_14px_-2px_rgba(0,0,0,0.15)] rounded-l-full z-20"
               : active && collapsed
-              ? "bg-background text-primary font-semibold rounded-full mx-1"
+              ? "bg-background text-primary font-semibold rounded-full"
               : "text-[hsl(170,30%,70%)] hover:text-white hover:bg-white/10 rounded-xl"
           }`}
         >
