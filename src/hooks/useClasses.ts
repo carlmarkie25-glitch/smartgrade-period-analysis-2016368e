@@ -59,13 +59,12 @@ export const useClasses = (filterMode: "teaching" | "sponsor" = "teaching") => {
       if (isAdmin) {
         const { data, error } = await query;
         if (error) throw error;
-        return data;
+        return sortClasses(data || []);
       }
 
       // If user is not admin
       if (user?.id) {
         if (filterMode === "sponsor") {
-          // For reports: show classes where user is a sponsor
           const { data: sponsorData, error: sponsorError } = await supabase
             .from("sponsor_class_assignments")
             .select("class_id")
@@ -81,9 +80,8 @@ export const useClasses = (filterMode: "teaching" | "sponsor" = "teaching") => {
 
           const { data, error } = await query.in("id", classIds);
           if (error) throw error;
-          return data;
+          return sortClasses(data || []);
         } else {
-          // For gradebook/teaching: show classes where user teaches (via class_subjects)
           const { data: teachingClasses, error: teachError } = await supabase
             .from("class_subjects")
             .select("class_id")
@@ -96,7 +94,7 @@ export const useClasses = (filterMode: "teaching" | "sponsor" = "teaching") => {
 
           const { data, error } = await query.in("id", classIds);
           if (error) throw error;
-          return data;
+          return sortClasses(data || []);
         }
       }
 
