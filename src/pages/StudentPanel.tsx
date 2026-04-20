@@ -1,6 +1,5 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Users, FileText, GraduationCap, Receipt } from "lucide-react";
-import { StudentManagementTab } from "@/components/StudentManagementTab";
+import { Users, FileText, Receipt } from "lucide-react";
 import { UserBiodataManagementTab } from "@/components/UserBiodataManagementTab";
 import { StudentUsersTab } from "@/components/StudentUsersTab";
 import StudentPaymentReceipts from "@/components/StudentPaymentReceipts";
@@ -17,15 +16,12 @@ const StudentPanel = () => {
 
         <div className="neu-card p-4">
           <Tabs defaultValue="users" className="space-y-4">
-            <TabsList className="grid w-full grid-cols-4 bg-[hsl(210,80%,96%)] rounded-xl p-1">
+            <TabsList className="grid w-full grid-cols-3 bg-[hsl(210,80%,96%)] rounded-xl p-1">
               <TabsTrigger value="users" className="rounded-lg text-xs data-[state=active]:bg-white data-[state=active]:shadow-sm">
-                <Users className="h-3.5 w-3.5 mr-1.5" />Users
+                <Users className="h-3.5 w-3.5 mr-1.5" />Students
               </TabsTrigger>
               <TabsTrigger value="biodata" className="rounded-lg text-xs data-[state=active]:bg-white data-[state=active]:shadow-sm">
                 <FileText className="h-3.5 w-3.5 mr-1.5" />Biodata
-              </TabsTrigger>
-              <TabsTrigger value="students" className="rounded-lg text-xs data-[state=active]:bg-white data-[state=active]:shadow-sm">
-                <GraduationCap className="h-3.5 w-3.5 mr-1.5" />Students
               </TabsTrigger>
               <TabsTrigger value="payments" className="rounded-lg text-xs data-[state=active]:bg-white data-[state=active]:shadow-sm">
                 <Receipt className="h-3.5 w-3.5 mr-1.5" />Payments
@@ -34,7 +30,6 @@ const StudentPanel = () => {
 
             <TabsContent value="users"><StudentUsersTab /></TabsContent>
             <TabsContent value="biodata"><UserBiodataManagementTab /></TabsContent>
-            <TabsContent value="students"><StudentManagementTab /></TabsContent>
             <TabsContent value="payments"><StudentPaymentReceipts /></TabsContent>
           </Tabs>
         </div>
