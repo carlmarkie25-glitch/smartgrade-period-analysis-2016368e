@@ -6,7 +6,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -17,10 +18,10 @@ type SubjectForm = {
   name: string;
   code: string;
   description: string;
-  department_id: string | null;
+  department_ids: string[];
 };
 
-const EMPTY_FORM: SubjectForm = { name: "", code: "", description: "", department_id: null };
+const EMPTY_FORM: SubjectForm = { name: "", code: "", description: "", department_ids: [] };
 
 export const SubjectManagementTab = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -44,21 +45,24 @@ export const SubjectManagementTab = () => {
   });
 
   const { data: subjects, isLoading } = useQuery({
-    queryKey: ["subjects-with-dept"],
+    queryKey: ["subjects-with-depts"],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("subjects")
-        .select("*, departments(id, name, display_order)")
+        .select("*, subject_departments(department_id, departments(id, name, display_order))")
         .order("name");
       if (error) throw error;
-      // Sort by department display_order, then dept name, then subject name
+      // Sort by lowest department display_order across the subject's departments
       return [...(data ?? [])].sort((a: any, b: any) => {
-        const da = a.departments?.display_order ?? 9999;
-        const db = b.departments?.display_order ?? 9999;
+        const minOrder = (s: any) => {
+          const orders = (s.subject_departments ?? [])
+            .map((sd: any) => sd.departments?.display_order)
+            .filter((n: any) => typeof n === "number");
+          return orders.length ? Math.min(...orders) : 9999;
+        };
+        const da = minOrder(a);
+        const db = minOrder(b);
         if (da !== db) return da - db;
-        const dna = a.departments?.name ?? "zzz";
-        const dnb = b.departments?.name ?? "zzz";
-        if (dna !== dnb) return dna.localeCompare(dnb);
         return a.name.localeCompare(b.name, undefined, { numeric: true });
       });
     },
@@ -76,9 +80,18 @@ export const SubjectManagementTab = () => {
       name: subject.name ?? "",
       code: subject.code ?? "",
       description: subject.description ?? "",
-      department_id: subject.department_id ?? null,
+      department_ids: (subject.subject_departments ?? []).map((sd: any) => sd.department_id),
     });
     setIsDialogOpen(true);
+  };
+
+  const toggleDept = (id: string, checked: boolean) => {
+    setForm((prev) => ({
+      ...prev,
+      department_ids: checked
+        ? Array.from(new Set([...prev.department_ids, id]))
+        : prev.department_ids.filter((d) => d !== id),
+    }));
   };
 
   const handleSave = async () => {
@@ -87,24 +100,48 @@ export const SubjectManagementTab = () => {
       return;
     }
     try {
-      const payload = {
+      const payload: any = {
         name: form.name.trim(),
         code: form.code.trim(),
         description: form.description.trim() || null,
-        department_id: form.department_id || null,
+        // Keep legacy single column in sync with the first selected dept (best-effort)
+        department_id: form.department_ids[0] ?? null,
       };
 
-      const { error } = editingId
-        ? await supabase.from("subjects").update(payload).eq("id", editingId)
-        : await supabase.from("subjects").insert(payload);
-      if (error) throw error;
+      let subjectId = editingId;
+      if (editingId) {
+        const { error } = await supabase.from("subjects").update(payload).eq("id", editingId);
+        if (error) throw error;
+      } else {
+        const { data, error } = await supabase.from("subjects").insert(payload).select("id").single();
+        if (error) throw error;
+        subjectId = data.id;
+      }
+
+      // Replace department links
+      if (subjectId) {
+        const { error: delErr } = await supabase
+          .from("subject_departments")
+          .delete()
+          .eq("subject_id", subjectId);
+        if (delErr) throw delErr;
+
+        if (form.department_ids.length > 0) {
+          const rows = form.department_ids.map((department_id) => ({
+            subject_id: subjectId!,
+            department_id,
+          }));
+          const { error: insErr } = await supabase.from("subject_departments").insert(rows);
+          if (insErr) throw insErr;
+        }
+      }
 
       toast({
         title: "Success",
         description: editingId ? "Subject updated successfully" : "Subject added successfully",
       });
 
-      queryClient.invalidateQueries({ queryKey: ["subjects-with-dept"] });
+      queryClient.invalidateQueries({ queryKey: ["subjects-with-depts"] });
       queryClient.invalidateQueries({ queryKey: ["subjects"] });
       setIsDialogOpen(false);
       setEditingId(null);
@@ -122,7 +159,7 @@ export const SubjectManagementTab = () => {
       if (error) throw error;
 
       toast({ title: "Success", description: "Subject deleted successfully" });
-      queryClient.invalidateQueries({ queryKey: ["subjects-with-dept"] });
+      queryClient.invalidateQueries({ queryKey: ["subjects-with-depts"] });
       queryClient.invalidateQueries({ queryKey: ["subjects"] });
     } catch (error: any) {
       toast({ title: "Error", description: error.message, variant: "destructive" });
@@ -173,23 +210,28 @@ export const SubjectManagementTab = () => {
                 />
               </div>
               <div>
-                <Label htmlFor="department">Department</Label>
-                <Select
-                  value={form.department_id ?? "none"}
-                  onValueChange={(v) => setForm({ ...form, department_id: v === "none" ? null : v })}
-                >
-                  <SelectTrigger id="department">
-                    <SelectValue placeholder="Select a department" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none">No department</SelectItem>
-                    {departments?.map((d: any) => (
-                      <SelectItem key={d.id} value={d.id}>
-                        {d.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <Label>Departments</Label>
+                <p className="text-xs text-muted-foreground mb-2">
+                  Select one or more departments this subject belongs to.
+                </p>
+                <div className="max-h-48 overflow-y-auto rounded-md border p-3 space-y-2">
+                  {departments?.length ? (
+                    departments.map((d: any) => (
+                      <label
+                        key={d.id}
+                        className="flex items-center gap-2 cursor-pointer text-sm"
+                      >
+                        <Checkbox
+                          checked={form.department_ids.includes(d.id)}
+                          onCheckedChange={(checked) => toggleDept(d.id, checked === true)}
+                        />
+                        <span>{d.name}</span>
+                      </label>
+                    ))
+                  ) : (
+                    <p className="text-sm text-muted-foreground">No departments available</p>
+                  )}
+                </div>
               </div>
               <div>
                 <Label htmlFor="description">Description (Optional)</Label>
@@ -221,38 +263,58 @@ export const SubjectManagementTab = () => {
               <TableRow>
                 <TableHead>Subject Name</TableHead>
                 <TableHead>Code</TableHead>
-                <TableHead>Department</TableHead>
+                <TableHead>Departments</TableHead>
                 <TableHead>Description</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {subjects?.map((subject: any) => (
-                <TableRow key={subject.id}>
-                  <TableCell className="font-medium">{subject.name}</TableCell>
-                  <TableCell>{subject.code}</TableCell>
-                  <TableCell className="text-muted-foreground">
-                    {subject.departments?.name ?? <span className="italic">Unassigned</span>}
-                  </TableCell>
-                  <TableCell className="text-muted-foreground">
-                    {subject.description || "No description"}
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex justify-end gap-2">
-                      <Button variant="outline" size="sm" onClick={() => openEdit(subject)}>
-                        <Pencil className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleDeleteSubject(subject.id)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
+              {subjects?.map((subject: any) => {
+                const depts = (subject.subject_departments ?? [])
+                  .map((sd: any) => sd.departments)
+                  .filter(Boolean)
+                  .sort(
+                    (a: any, b: any) =>
+                      (a.display_order ?? 9999) - (b.display_order ?? 9999) ||
+                      a.name.localeCompare(b.name),
+                  );
+                return (
+                  <TableRow key={subject.id}>
+                    <TableCell className="font-medium">{subject.name}</TableCell>
+                    <TableCell>{subject.code}</TableCell>
+                    <TableCell>
+                      {depts.length ? (
+                        <div className="flex flex-wrap gap-1">
+                          {depts.map((d: any) => (
+                            <Badge key={d.id} variant="secondary">
+                              {d.name}
+                            </Badge>
+                          ))}
+                        </div>
+                      ) : (
+                        <span className="text-muted-foreground italic">Unassigned</span>
+                      )}
+                    </TableCell>
+                    <TableCell className="text-muted-foreground">
+                      {subject.description || "No description"}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex justify-end gap-2">
+                        <Button variant="outline" size="sm" onClick={() => openEdit(subject)}>
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleDeleteSubject(subject.id)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
             </TableBody>
           </Table>
         )}
