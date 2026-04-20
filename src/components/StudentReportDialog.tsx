@@ -24,6 +24,8 @@ import {
   gradeFromSettings,
   kgLabelFromSettings,
   useReportCardSettings,
+  useDepartmentReportColors,
+  resolveReportColors,
 } from "@/hooks/useReportCardSettings";
 
 const RATING_OPTIONS = ["Excellent", "Very Good", "Good", "Fair", "Needs Improvement"];
@@ -156,6 +158,7 @@ export const StudentReportDialog = ({
   const saveMutation = useSaveReportInputs(studentId, period);
   const { school } = useSchool();
   const { data: rcSettingsData } = useReportCardSettings();
+  const { data: deptColorsData } = useDepartmentReportColors();
   const rcSettings = rcSettingsData ?? DEFAULT_REPORT_CARD_SETTINGS;
 
   const [editing, setEditing] = useState(false);
