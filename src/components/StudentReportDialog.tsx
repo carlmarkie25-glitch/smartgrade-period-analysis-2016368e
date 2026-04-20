@@ -173,6 +173,7 @@ export const StudentReportDialog = ({
   };
 
   const [downloading, setDownloading] = useState(false);
+  const [greyMode, setGreyMode] = useState(false);
 
   const handleDownloadPdf = async () => {
     const el = document.getElementById('report-content');
