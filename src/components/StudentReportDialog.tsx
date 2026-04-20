@@ -401,25 +401,16 @@ export const StudentReportDialog = ({
                   const headerAddress = rcSettings.header_address || school?.address || '';
                   const headerContact = rcSettings.header_contact || [school?.phone, school?.email].filter(Boolean).join(' • ');
                   const headerWebsite = rcSettings.header_website || school?.website || '';
-                  const logo = rcSettings.logo_url || school?.logo_url || null;
-                  return (
-                    <div style={{ background: navy, color: '#fff', display: 'flex', alignItems: 'center', padding: '10px 14px', gap: '14px' }}>
-                      {logo ? (
-                        <img
-                          src={logo}
-                          alt="School logo"
-                          style={{ width: 52, height: 52, borderRadius: '50%', objectFit: 'cover', border: `2px solid ${gold}`, background: '#fff', flexShrink: 0 }}
-                        />
-                      ) : (
-                        <div style={{
-                          width: 52, height: 52, borderRadius: '50%', background: '#fff',
-                          display: 'flex', alignItems: 'center', justifyContent: 'center',
-                          fontWeight: 700, fontSize: '9px', color: navy, textAlign: 'center', lineHeight: 1.2,
-                          border: `2px solid ${gold}`, flexShrink: 0,
-                        }}>
-                          SCHOOL<br />LOGO
-                        </div>
-                      )}
+                   const logo = rcSettings.admin_signature_url || rcSettings.logo_url || school?.logo_url || null;
+                   return (
+                     <div style={{ background: navy, color: '#fff', display: 'flex', alignItems: 'center', padding: '10px 14px', gap: '14px' }}>
+                       {logo && (
+                         <img
+                           src={logo}
+                           alt="School logo"
+                           style={{ width: 56, height: 56, objectFit: 'contain', flexShrink: 0, background: 'transparent' }}
+                         />
+                       )}
                       <div style={{ flex: 1 }}>
                         <h1 style={{ fontSize: '18px', fontWeight: 700, color: '#fff', margin: 0 }}>
                           {headerTitle.toUpperCase()}
