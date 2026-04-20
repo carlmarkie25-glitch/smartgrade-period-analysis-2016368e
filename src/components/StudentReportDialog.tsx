@@ -990,13 +990,13 @@ export const StudentReportDialog = ({
                   <div style={{
                     width: 200, background: navy, color: '#fff',
                     display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-                    padding: 14, textAlign: 'center',
+                    padding: 16, textAlign: 'center',
                   }}>
-                    <div style={{ fontSize: '10px', color: '#aab', letterSpacing: '1px', marginBottom: 4 }}>GENERAL AVERAGE</div>
+                    <div style={{ fontSize: '11px', color: '#aab', letterSpacing: '1px', marginBottom: 6 }}>GENERAL AVERAGE</div>
                     <div style={{ fontSize: '56px', fontWeight: 800, color: gold, lineHeight: 1 }}>
                       {generalAvg !== null ? (isKg ? (scoreToLetter(generalAvg, 100) ?? '—') : `${generalAvg}%`) : '--'}
                     </div>
-                    <div style={{ fontSize: '12px', color: gold }}>
+                    <div style={{ fontSize: '13px', color: gold, marginTop: 4 }}>
                       {generalAvg !== null
                         ? (isKg
                             ? (() => {
@@ -1011,9 +1011,9 @@ export const StudentReportDialog = ({
                 </div>
 
                 {/* ── SIGNATURES ── */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', padding: '10px 14px', borderTop: '1px solid #ccc', gap: 16 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', padding: '14px 18px', borderTop: '1px solid #ccc', gap: 16 }}>
                   {/* Administrator (left) — admin signature image acts as watermark behind name */}
-                  <div style={{ textAlign: 'center', fontSize: '10px', color: '#333', flex: 1, position: 'relative' }}>
+                  <div style={{ textAlign: 'center', fontSize: '11px', color: '#333', flex: 1, position: 'relative' }}>
                     {rcSettings.admin_signature_url && (
                       <img
                         src={rcSettings.admin_signature_url}
@@ -1031,21 +1031,21 @@ export const StudentReportDialog = ({
                         }}
                       />
                     )}
-                    <div style={{ borderBottom: '1px solid #333', width: 160, margin: '40px auto 4px', minHeight: 16, position: 'relative' }}>
+                    <div style={{ borderBottom: '1px solid #333', width: 160, margin: '40px auto 4px', minHeight: 18, position: 'relative' }}>
                       <EditableField
                         value={inputs.administrator_name || rcSettings.default_administrator_name || ''}
                         onChange={setField('administrator_name')}
                         editable={editing}
                         placeholder="Name"
-                        minHeight={16}
+                        minHeight={18}
                         plain
                       />
                     </div>
-                    <div style={{ fontWeight: 700, fontSize: '11px', textTransform: 'uppercase' }}>
+                    <div style={{ fontWeight: 700, fontSize: '12px', textTransform: 'uppercase' }}>
                       {rcSettings.administrator_role_label || 'Administrator'}
                     </div>
                     {rcSettings.administrator_subtitle && (
-                      <div style={{ color: '#888' }}>{rcSettings.administrator_subtitle}</div>
+                      <div style={{ color: '#666', fontSize: '10px' }}>{rcSettings.administrator_subtitle}</div>
                     )}
                   </div>
 
@@ -1061,28 +1061,28 @@ export const StudentReportDialog = ({
                   )}
 
                   {/* Class Teacher (right) */}
-                  <div style={{ textAlign: 'center', fontSize: '10px', color: '#333', flex: 1 }}>
-                    <div style={{ borderBottom: '1px solid #333', width: 160, margin: '40px auto 4px', minHeight: 16 }}>
+                  <div style={{ textAlign: 'center', fontSize: '11px', color: '#333', flex: 1 }}>
+                    <div style={{ borderBottom: '1px solid #333', width: 160, margin: '40px auto 4px', minHeight: 18 }}>
                       <EditableField
                         value={inputs.class_teacher_name || (report as any).classTeacherName || rcSettings.default_class_teacher_name || ''}
                         onChange={setField('class_teacher_name')}
                         editable={editing}
                         placeholder="Name"
-                        minHeight={16}
+                        minHeight={18}
                         plain
                       />
                     </div>
-                    <div style={{ fontWeight: 700, fontSize: '11px', textTransform: 'uppercase' }}>
+                    <div style={{ fontWeight: 700, fontSize: '12px', textTransform: 'uppercase' }}>
                       {rcSettings.class_teacher_role_label || 'Class Teacher'}
                     </div>
                     {rcSettings.class_teacher_subtitle && (
-                      <div style={{ color: '#888' }}>{rcSettings.class_teacher_subtitle}</div>
+                      <div style={{ color: '#666', fontSize: '10px' }}>{rcSettings.class_teacher_subtitle}</div>
                     )}
                   </div>
                 </div>
 
                 {/* ── FOOTER ── */}
-                <div style={{ background: navy, color: '#fff', textAlign: 'center', fontSize: '9px', padding: '4px' }}>
+                <div style={{ background: navy, color: '#fff', textAlign: 'center', fontSize: '10px', padding: '6px' }}>
                   {rcSettings.footer_note || 'Generated by SmartGrade School Management System | Confidential — For Student & Family Use Only'}
                 </div>
               </div>
