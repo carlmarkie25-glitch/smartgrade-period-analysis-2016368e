@@ -148,6 +148,9 @@ export const StudentReportDialog = ({
   studentId,
   period,
   className,
+  forceGreyMode,
+  hidden,
+  onReportReady,
 }: StudentReportDialogProps) => {
   const { data: report, isLoading } = useStudentReport(studentId, period);
   const { data: savedInputs } = useReportInputs(studentId, period);
@@ -179,7 +182,19 @@ export const StudentReportDialog = ({
   };
 
   const [downloading, setDownloading] = useState(false);
-  const [greyMode, setGreyMode] = useState(false);
+  const [greyModeState, setGreyModeState] = useState(false);
+  const greyMode = forceGreyMode !== undefined ? forceGreyMode : greyModeState;
+  const setGreyMode = setGreyModeState;
+
+  // Notify parent when report content is mounted & data is loaded (for batch capture)
+  useEffect(() => {
+    if (!open || isLoading || !report) return;
+    const t = setTimeout(() => {
+      onReportReady?.(report.student?.full_name || 'student');
+    }, 100);
+    return () => clearTimeout(t);
+  }, [open, isLoading, report, onReportReady]);
+
 
   const handleDownloadPdf = async () => {
     const el = document.getElementById('report-content');
