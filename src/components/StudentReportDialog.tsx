@@ -317,9 +317,15 @@ export const StudentReportDialog = ({
             return computeColumnAvg(subjects, k);
           };
 
-          // Semester averages include the exam (4 columns averaged equally) — only over available periods
-          const s1Avg = avgOf([colAvg('p1'), colAvg('p2'), colAvg('p3'), colAvg('exam_s1')]);
-          const s2Avg = avgOf([colAvg('p4'), colAvg('p5'), colAvg('p6'), colAvg('exam_s2')]);
+          // Semester averages include the exam (4 columns averaged equally).
+          // Require ALL 4 columns (3 periods + exam) to be present — otherwise null.
+          // A semester average is only valid once every period AND the exam are computed.
+          const semAvgStrict = (vals: (number | null)[]): number | null => {
+            if (vals.some(v => v === null || v === undefined)) return null;
+            return avgOf(vals);
+          };
+          const s1Avg = semAvgStrict([colAvg('p1'), colAvg('p2'), colAvg('p3'), colAvg('exam_s1')]);
+          const s2Avg = semAvgStrict([colAvg('p4'), colAvg('p5'), colAvg('p6'), colAvg('exam_s2')]);
 
           let generalAvg: number | null;
           if (isYearly) {
