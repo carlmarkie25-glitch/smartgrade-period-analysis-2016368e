@@ -880,14 +880,18 @@ export const StudentReportDialog = ({
                   <div style={{ flex: 1, padding: '10px 14px', borderRight: '0.5px solid #ccc' }}>
                     <table style={{ width: '100%', fontSize: '11px', borderCollapse: 'collapse' }}>
                       <tbody>
-                        <tr>
-                          <td style={{ padding: '3px 0' }}>Semester 1 Average</td>
-                          <td style={{ padding: '3px 0', textAlign: 'right', fontWeight: 700 }}>{s1Avg !== null ? (isKg ? (scoreToLetter(s1Avg, 100) ?? '--') : `${s1Avg}%`) : '--'}</td>
-                        </tr>
-                        <tr>
-                          <td style={{ padding: '3px 0' }}>Semester 2 Average</td>
-                          <td style={{ padding: '3px 0', textAlign: 'right', fontWeight: 700 }}>{s2Avg !== null ? (isKg ? (scoreToLetter(s2Avg, 100) ?? '--') : `${s2Avg}%`) : '--'}</td>
-                        </tr>
+                        {s1Avg !== null && (
+                          <tr>
+                            <td style={{ padding: '3px 0' }}>Semester 1 Average</td>
+                            <td style={{ padding: '3px 0', textAlign: 'right', fontWeight: 700 }}>{isKg ? (scoreToLetter(s1Avg, 100) ?? '--') : `${s1Avg}%`}</td>
+                          </tr>
+                        )}
+                        {s2Avg !== null && (
+                          <tr>
+                            <td style={{ padding: '3px 0' }}>Semester 2 Average</td>
+                            <td style={{ padding: '3px 0', textAlign: 'right', fontWeight: 700 }}>{isKg ? (scoreToLetter(s2Avg, 100) ?? '--') : `${s2Avg}%`}</td>
+                          </tr>
+                        )}
                         <tr>
                           <td style={{ padding: '3px 0' }}>Class Position</td>
                           <td style={{ padding: '3px 0', textAlign: 'right', fontWeight: 700 }}>
