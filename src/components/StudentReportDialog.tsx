@@ -905,10 +905,22 @@ export const StudentReportDialog = ({
                           </td>
                         </tr>
                         <tr>
-                          <td colSpan={2} style={{ padding: '3px 0', fontSize: '10px', color: '#666' }}>
-                            {isKg
-                              ? KG_SCALE.map((t) => `${t.letter} = ${t.min}–${t.max}`).join('  |  ')
-                              : <>A = {rcSettings.grade_a_min}–100 &nbsp;|&nbsp; B = {rcSettings.grade_b_min}–{rcSettings.grade_a_min - 1} &nbsp;|&nbsp; C = {rcSettings.grade_c_min}–{rcSettings.grade_b_min - 1} &nbsp;|&nbsp; F = 0–{rcSettings.grade_c_min - 1} &nbsp;|&nbsp; Pass: {rcSettings.pass_mark}%</>}
+                          <td colSpan={2} style={{ padding: '6px 0 0', fontSize: '10px', color: '#666', lineHeight: 1.6 }}>
+                            {isKg ? (
+                              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px 10px' }}>
+                                {KG_SCALE.map((t) => (
+                                  <span key={t.letter} style={{ whiteSpace: 'nowrap' }}>{t.letter} = {t.min}–{t.max}</span>
+                                ))}
+                              </div>
+                            ) : (
+                              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px 10px' }}>
+                                <span style={{ whiteSpace: 'nowrap' }}>A = {rcSettings.grade_a_min}–100</span>
+                                <span style={{ whiteSpace: 'nowrap' }}>B = {rcSettings.grade_b_min}–{rcSettings.grade_a_min - 1}</span>
+                                <span style={{ whiteSpace: 'nowrap' }}>C = {rcSettings.grade_c_min}–{rcSettings.grade_b_min - 1}</span>
+                                <span style={{ whiteSpace: 'nowrap' }}>F = 0–{rcSettings.grade_c_min - 1}</span>
+                                <span style={{ whiteSpace: 'nowrap' }}>Pass: {rcSettings.pass_mark}%</span>
+                              </div>
+                            )}
                           </td>
                         </tr>
                       </tbody>
