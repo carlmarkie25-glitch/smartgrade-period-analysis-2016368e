@@ -22,6 +22,7 @@ import { useSchool } from "@/contexts/SchoolContext";
 import {
   DEFAULT_REPORT_CARD_SETTINGS,
   gradeFromSettings,
+  kgLabelFromSettings,
   useReportCardSettings,
 } from "@/hooks/useReportCardSettings";
 
