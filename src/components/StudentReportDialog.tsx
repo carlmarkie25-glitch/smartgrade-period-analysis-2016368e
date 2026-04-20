@@ -870,7 +870,7 @@ export const StudentReportDialog = ({
                           <td colSpan={2} style={{ padding: '3px 0', fontSize: '10px', color: '#666' }}>
                             {isKg
                               ? KG_SCALE.map((t) => `${t.letter} = ${t.min}–${t.max}`).join('  |  ')
-                              : <>A = {rcSettings.grade_a_min}–100 &nbsp;|&nbsp; B = {rcSettings.grade_b_min}–{rcSettings.grade_a_min - 1} &nbsp;|&nbsp; C = {rcSettings.grade_c_min}–{rcSettings.grade_b_min - 1} &nbsp;|&nbsp; D = {rcSettings.grade_d_min}–{rcSettings.grade_c_min - 1} &nbsp;|&nbsp; Pass: {rcSettings.pass_mark}%</>}
+                              : <>A = {rcSettings.grade_a_min}–100 &nbsp;|&nbsp; B = {rcSettings.grade_b_min}–{rcSettings.grade_a_min - 1} &nbsp;|&nbsp; C = {rcSettings.grade_c_min}–{rcSettings.grade_b_min - 1} &nbsp;|&nbsp; F = 0–{rcSettings.grade_c_min - 1} &nbsp;|&nbsp; Pass: {rcSettings.pass_mark}%</>}
                           </td>
                         </tr>
                       </tbody>
