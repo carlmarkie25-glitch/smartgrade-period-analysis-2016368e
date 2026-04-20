@@ -354,7 +354,7 @@ export const UserBiodataManagementTab = () => {
       <CardContent>
         <div className="space-y-4">
           {queryError && (
-            <div className="p-4 bg-red-50 border border-red-200 rounded-lg text-red-800">
+            <div className="p-4 bg-destructive/10 border border-destructive/20 rounded-lg text-destructive">
               Error loading biodata: {(queryError as any)?.message || "Unknown error"}
             </div>
           )}
@@ -398,7 +398,7 @@ export const UserBiodataManagementTab = () => {
                     <TableRow>
                       <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
                         <div className="space-y-2">
-                          <p>No users found in the system</p>
+                          <p>No students found in the system</p>
                           <p className="text-xs">Please ensure students have been created in the system</p>
                         </div>
                       </TableCell>
@@ -407,7 +407,7 @@ export const UserBiodataManagementTab = () => {
                     <TableRow>
                       <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
                         <div className="space-y-2">
-                          <p>No users found matching "{searchTerm}"</p>
+                          <p>No students found matching "{searchTerm}"</p>
                           <p className="text-xs">Try a different search term</p>
                         </div>
                       </TableCell>
