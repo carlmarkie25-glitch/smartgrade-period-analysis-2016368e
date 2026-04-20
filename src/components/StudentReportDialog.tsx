@@ -17,7 +17,7 @@ import {
   useSaveReportInputs,
 } from "@/hooks/useReportInputs";
 import { toast } from "@/hooks/use-toast";
-import { isKindergartenClass, KG_SCALE } from "@/lib/kindergarten";
+import { isKindergartenClass, KG_SCALE, scoreToLetter } from "@/lib/kindergarten";
 import { useSchool } from "@/contexts/SchoolContext";
 import {
   DEFAULT_REPORT_CARD_SETTINGS,
