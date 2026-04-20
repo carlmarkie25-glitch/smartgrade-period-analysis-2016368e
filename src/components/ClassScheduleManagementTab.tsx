@@ -58,7 +58,7 @@ export const ClassScheduleManagementTab = () => {
   const { data: classes } = useQuery({
     queryKey: ["classes", selectedDepartment],
     queryFn: async () => {
-      let query = supabase.from("classes").select("id,name,department_id").order("name");
+      let query = supabase.from("classes").select("id,name,department_id,display_order").order("display_order").order("name");
       if (selectedDepartment) {
         query = query.eq("department_id", selectedDepartment);
       }
