@@ -33,6 +33,12 @@ export interface ReportCardSettings {
   default_administrator_name: string | null;
   default_class_teacher_name: string | null;
   footer_note: string | null;
+  seal_url: string | null;
+  admin_signature_url: string | null;
+  administrator_role_label: string;
+  administrator_subtitle: string | null;
+  class_teacher_role_label: string;
+  class_teacher_subtitle: string | null;
 }
 
 export const DEFAULT_REPORT_CARD_SETTINGS: ReportCardSettings = {
@@ -63,6 +69,12 @@ export const DEFAULT_REPORT_CARD_SETTINGS: ReportCardSettings = {
   default_administrator_name: null,
   default_class_teacher_name: null,
   footer_note: null,
+  seal_url: null,
+  admin_signature_url: null,
+  administrator_role_label: "Administrator",
+  administrator_subtitle: null,
+  class_teacher_role_label: "Class Teacher",
+  class_teacher_subtitle: null,
 };
 
 export const useReportCardSettings = () => {
