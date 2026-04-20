@@ -25,13 +25,21 @@ interface StudentBiodata {
   gender: string | null;
   photo_url: string | null;
   nationality: string | null;
+  ethnicity: string | null;
   county: string | null;
   country: string | null;
   address: string | null;
+  disability: string | null;
+  health_issues: string | null;
   father_name: string | null;
+  father_contact: string | null;
   mother_name: string | null;
+  mother_contact: string | null;
   emergency_contact_name: string | null;
   emergency_contact_phone: string | null;
+  emergency_contact_relationship: string | null;
+  previous_school: string | null;
+  previous_class: string | null;
   student_id?: string | null;
   class_id?: string | null;
   department_id?: string | null;
@@ -45,6 +53,7 @@ export const UserBiodataManagementTab = () => {
   const [selectedUser, setSelectedUser] = useState<StudentBiodata | null>(null);
   const [isBiodataDialogOpen, setIsBiodataDialogOpen] = useState(false);
   const [isDownloadOpen, setIsDownloadOpen] = useState(false);
+  const [isDownloading, setIsDownloading] = useState(false);
   const [downloadScope, setDownloadScope] = useState<"all" | "class" | "department">("all");
   const [downloadClassId, setDownloadClassId] = useState<string>("");
   const [downloadDeptId, setDownloadDeptId] = useState<string>("");
@@ -57,7 +66,7 @@ export const UserBiodataManagementTab = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("students")
-        .select("id, user_id, full_name, photo_url, gender, student_id, phone_number, date_of_birth, religion, nationality, county, country, address, father_name, mother_name, emergency_contact_name, emergency_contact_phone, class_id, department_id, classes(name), departments(name)")
+        .select("id, user_id, full_name, photo_url, gender, student_id, phone_number, date_of_birth, religion, nationality, ethnicity, county, country, address, disability, health_issues, father_name, father_contact, mother_name, mother_contact, emergency_contact_name, emergency_contact_phone, emergency_contact_relationship, previous_school, previous_class, class_id, department_id, classes(name), departments(name)")
         .order("full_name");
 
       if (error) throw error;
@@ -72,13 +81,21 @@ export const UserBiodataManagementTab = () => {
         gender: s.gender ?? null,
         photo_url: s.photo_url ?? null,
         nationality: s.nationality ?? null,
+        ethnicity: s.ethnicity ?? null,
         county: s.county ?? null,
         country: s.country ?? null,
         address: s.address ?? null,
+        disability: s.disability ?? null,
+        health_issues: s.health_issues ?? null,
         father_name: s.father_name ?? null,
+        father_contact: s.father_contact ?? null,
         mother_name: s.mother_name ?? null,
+        mother_contact: s.mother_contact ?? null,
         emergency_contact_name: s.emergency_contact_name ?? null,
         emergency_contact_phone: s.emergency_contact_phone ?? null,
+        emergency_contact_relationship: s.emergency_contact_relationship ?? null,
+        previous_school: s.previous_school ?? null,
+        previous_class: s.previous_class ?? null,
         student_id: s.student_id ?? null,
         class_id: s.class_id ?? null,
         department_id: s.department_id ?? null,
@@ -88,6 +105,18 @@ export const UserBiodataManagementTab = () => {
       }));
 
       return allUsers;
+    },
+    staleTime: 1000 * 60 * 5,
+  });
+
+  const { data: schoolHeader } = useQuery({
+    queryKey: ["biodata-school-header"],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("report_card_settings")
+        .select("header_title, header_subtitle, header_address, header_contact, header_website, logo_url, header_bg_color, accent_color")
+        .maybeSingle();
+      return data;
     },
     staleTime: 1000 * 60 * 5,
   });
@@ -145,7 +174,109 @@ export const UserBiodataManagementTab = () => {
     return users;
   };
 
-  const handleDownloadBiodata = () => {
+  const buildBiodataFormHtml = (u: StudentBiodata) => {
+    const row = (label: string, value: any) => `
+      <tr>
+        <td style="padding:7px 10px;font-weight:600;background:#f3f4f6;border:1px solid #e5e7eb;width:38%;font-size:11.5px;">${label}</td>
+        <td style="padding:7px 10px;border:1px solid #e5e7eb;font-size:11.5px;">${value || "—"}</td>
+      </tr>`;
+
+    const photo = u.photo_url
+      ? `<img src="${u.photo_url}" crossorigin="anonymous" style="width:120px;height:140px;object-fit:cover;border:2px solid ${schoolHeader?.header_bg_color || "#1a2a6e"};border-radius:6px;" />`
+      : `<div style="width:120px;height:140px;border:2px dashed #9ca3af;border-radius:6px;display:flex;align-items:center;justify-content:center;color:#9ca3af;font-size:11px;">No Photo</div>`;
+
+    const headerBg = schoolHeader?.header_bg_color || "#1a2a6e";
+    const accent = schoolHeader?.accent_color || "#c8a84b";
+    const logo = schoolHeader?.logo_url
+      ? `<img src="${schoolHeader.logo_url}" crossorigin="anonymous" style="width:70px;height:70px;object-fit:contain;background:#fff;border-radius:6px;padding:4px;" />`
+      : "";
+
+    const contactBits = [schoolHeader?.header_contact, schoolHeader?.header_website].filter(Boolean).join(" • ");
+
+    return `
+      <div style="font-family: Arial, sans-serif; padding:0; width:794px; box-sizing:border-box; color:#111827; background:#fff;">
+        <!-- School Header -->
+        <div style="background:${headerBg};color:#fff;padding:18px 24px;display:flex;align-items:center;gap:18px;">
+          ${logo}
+          <div style="flex:1;text-align:center;">
+            <h1 style="margin:0;font-size:22px;letter-spacing:0.5px;">${schoolHeader?.header_title || "School Name"}</h1>
+            ${schoolHeader?.header_subtitle ? `<p style="margin:3px 0 0;font-size:12px;color:${accent};">${schoolHeader.header_subtitle}</p>` : ""}
+            ${schoolHeader?.header_address ? `<p style="margin:4px 0 0;font-size:11px;">${schoolHeader.header_address}</p>` : ""}
+            ${contactBits ? `<p style="margin:2px 0 0;font-size:11px;">${contactBits}</p>` : ""}
+          </div>
+          <div style="width:70px;"></div>
+        </div>
+
+        <div style="background:${accent};height:4px;"></div>
+
+        <div style="padding:20px 28px;">
+          <div style="text-align:center;margin-bottom:14px;">
+            <h2 style="margin:0;font-size:16px;color:${headerBg};text-transform:uppercase;letter-spacing:1.5px;">Student Biodata Form</h2>
+            <p style="margin:3px 0 0;font-size:10.5px;color:#6b7280;">Generated on ${new Date().toLocaleDateString()}</p>
+          </div>
+
+          <!-- Identity row -->
+          <div style="display:flex;gap:18px;margin-bottom:16px;align-items:flex-start;">
+            <div>${photo}</div>
+            <div style="flex:1;">
+              <table style="width:100%;border-collapse:collapse;">
+                ${row("Full Name", u.full_name)}
+                ${row("Student ID", u.student_id)}
+                ${row("Class", u.classes?.name)}
+                ${row("Department", u.departments?.name)}
+              </table>
+            </div>
+          </div>
+
+          <h3 style="font-size:12.5px;color:${headerBg};border-bottom:2px solid ${accent};padding-bottom:3px;margin:14px 0 6px;">Personal Information</h3>
+          <table style="width:100%;border-collapse:collapse;">
+            ${row("Gender", u.gender)}
+            ${row("Date of Birth", u.date_of_birth)}
+            ${row("Religion", u.religion)}
+            ${row("Nationality", u.nationality)}
+            ${row("Ethnicity", u.ethnicity)}
+            ${row("Country", u.country)}
+            ${row("County / State", u.county)}
+            ${row("Home Address", u.address)}
+            ${row("Phone Number", u.phone_number)}
+          </table>
+
+          <h3 style="font-size:12.5px;color:${headerBg};border-bottom:2px solid ${accent};padding-bottom:3px;margin:14px 0 6px;">Health Information</h3>
+          <table style="width:100%;border-collapse:collapse;">
+            ${row("Disability", u.disability)}
+            ${row("Health Issues / Allergies", u.health_issues)}
+          </table>
+
+          <h3 style="font-size:12.5px;color:${headerBg};border-bottom:2px solid ${accent};padding-bottom:3px;margin:14px 0 6px;">Family Information</h3>
+          <table style="width:100%;border-collapse:collapse;">
+            ${row("Father's Name", u.father_name)}
+            ${row("Father's Contact", u.father_contact)}
+            ${row("Mother's Name", u.mother_name)}
+            ${row("Mother's Contact", u.mother_contact)}
+          </table>
+
+          <h3 style="font-size:12.5px;color:${headerBg};border-bottom:2px solid ${accent};padding-bottom:3px;margin:14px 0 6px;">Emergency Contact</h3>
+          <table style="width:100%;border-collapse:collapse;">
+            ${row("Contact Name", u.emergency_contact_name)}
+            ${row("Contact Phone", u.emergency_contact_phone)}
+            ${row("Relationship", u.emergency_contact_relationship)}
+          </table>
+
+          <h3 style="font-size:12.5px;color:${headerBg};border-bottom:2px solid ${accent};padding-bottom:3px;margin:14px 0 6px;">Previous Education</h3>
+          <table style="width:100%;border-collapse:collapse;">
+            ${row("Previous School", u.previous_school)}
+            ${row("Previous Class", u.previous_class)}
+          </table>
+
+          <div style="margin-top:28px;display:flex;justify-content:space-between;font-size:11px;color:#374151;">
+            <div style="border-top:1px solid #9ca3af;padding-top:4px;width:42%;text-align:center;">Parent / Guardian Signature</div>
+            <div style="border-top:1px solid #9ca3af;padding-top:4px;width:42%;text-align:center;">Administrator Signature</div>
+          </div>
+        </div>
+      </div>`;
+  };
+
+  const handleDownloadBiodata = async () => {
     if (downloadScope === "class" && !downloadClassId) {
       toast({ title: "Select a class", variant: "destructive" });
       return;
@@ -161,43 +292,72 @@ export const UserBiodataManagementTab = () => {
       return;
     }
 
-    const headers = [
-      "Full Name", "Student ID", "Gender", "Class", "Department",
-      "Date of Birth", "Religion", "Nationality", "Country", "County",
-      "Address", "Phone", "Father Name", "Mother Name",
-      "Emergency Contact", "Emergency Phone",
-    ];
+    setIsDownloading(true);
+    try {
+      const [{ default: JSZip }, { default: html2canvas }, { default: jsPDF }] = await Promise.all([
+        import("jszip"),
+        import("html2canvas"),
+        import("jspdf"),
+      ]);
 
-    const rows = subset.map((u) => [
-      u.full_name, u.student_id || "N/A", u.gender || "N/A",
-      u.classes?.name || "N/A", u.departments?.name || "N/A",
-      u.date_of_birth || "N/A", u.religion || "N/A",
-      u.nationality || "N/A", u.country || "N/A", u.county || "N/A",
-      u.address || "N/A", u.phone_number || "N/A",
-      u.father_name || "N/A", u.mother_name || "N/A",
-      u.emergency_contact_name || "N/A", u.emergency_contact_phone || "N/A",
-    ]);
+      const zip = new JSZip();
+      const container = document.createElement("div");
+      container.style.position = "fixed";
+      container.style.left = "-10000px";
+      container.style.top = "0";
+      document.body.appendChild(container);
 
-    const csv = [
-      headers.join(","),
-      ...rows.map((r) => r.map((c) => `"${(c ?? "").toString().replace(/"/g, '""')}"`).join(",")),
-    ].join("\n");
+      for (let i = 0; i < subset.length; i++) {
+        const u = subset[i];
+        container.innerHTML = buildBiodataFormHtml(u);
+        const formEl = container.firstElementChild as HTMLElement;
+        // Wait for all images
+        const imgs = Array.from(formEl.querySelectorAll("img"));
+        await Promise.all(
+          imgs.map(
+            (img) =>
+              new Promise<void>((res) => {
+                if (img.complete) return res();
+                img.onload = () => res();
+                img.onerror = () => res();
+              })
+          )
+        );
+        const canvas = await html2canvas(formEl, { scale: 2, useCORS: true, backgroundColor: "#ffffff" });
+        const imgData = canvas.toDataURL("image/jpeg", 0.92);
+        const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
+        const pdfWidth = pdf.internal.pageSize.getWidth();
+        const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+        pdf.addImage(imgData, "JPEG", 0, 0, pdfWidth, pdfHeight);
+        const safeName = (u.full_name || "student").replace(/[^a-z0-9]+/gi, "_");
+        const fileName = `${safeName}_${u.student_id || u.id.slice(0, 6)}.pdf`;
+        zip.file(fileName, pdf.output("blob"));
+      }
 
-    const scopeLabel =
-      downloadScope === "all" ? "all" :
-      downloadScope === "class" ? `class-${classes.find((c: any) => c.id === downloadClassId)?.name || "class"}` :
-      `dept-${departments.find((d: any) => d.id === downloadDeptId)?.name || "dept"}`;
+      document.body.removeChild(container);
 
-    const blob = new Blob([csv], { type: "text/csv" });
-    const url = window.URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = `students_biodata_${scopeLabel}_${new Date().toISOString().split("T")[0]}.csv`.replace(/\s+/g, "_");
-    link.click();
-    window.URL.revokeObjectURL(url);
+      const scopeLabel =
+        downloadScope === "all"
+          ? "all"
+          : downloadScope === "class"
+          ? `class-${classes.find((c: any) => c.id === downloadClassId)?.name || "class"}`
+          : `dept-${departments.find((d: any) => d.id === downloadDeptId)?.name || "dept"}`;
 
-    toast({ title: "Success", description: `Exported ${subset.length} student biodata record(s)` });
-    setIsDownloadOpen(false);
+      const zipBlob = await zip.generateAsync({ type: "blob" });
+      const url = window.URL.createObjectURL(zipBlob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `student_biodata_forms_${scopeLabel}_${new Date().toISOString().split("T")[0]}.zip`.replace(/\s+/g, "_");
+      link.click();
+      window.URL.revokeObjectURL(url);
+
+      toast({ title: "Success", description: `Downloaded ${subset.length} biodata form(s) as ZIP` });
+      setIsDownloadOpen(false);
+    } catch (err: any) {
+      toast({ title: "Download failed", description: err?.message || "Unknown error", variant: "destructive" });
+    } finally {
+      setIsDownloading(false);
+    }
   };
 
   const handlePrint = () => {
@@ -526,9 +686,9 @@ export const UserBiodataManagementTab = () => {
             </p>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsDownloadOpen(false)}>Cancel</Button>
-            <Button onClick={handleDownloadBiodata} className="gap-2">
-              <Download className="h-4 w-4" /> Download
+            <Button variant="outline" onClick={() => setIsDownloadOpen(false)} disabled={isDownloading}>Cancel</Button>
+            <Button onClick={handleDownloadBiodata} className="gap-2" disabled={isDownloading}>
+              <Download className="h-4 w-4" /> {isDownloading ? "Generating ZIP..." : "Download ZIP"}
             </Button>
           </DialogFooter>
         </DialogContent>
