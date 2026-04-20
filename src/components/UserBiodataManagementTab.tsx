@@ -446,9 +446,9 @@ export const UserBiodataManagementTab = () => {
           {!isLoading && (
             <div className="text-sm text-muted-foreground">
               {searchTerm ? (
-                <p>Showing {filteredUsers.length} of {users.length} users matching "{searchTerm}"</p>
+                <p>Showing {filteredUsers.length} of {users.length} students matching "{searchTerm}"</p>
               ) : (
-                <p>Total users: {users.length}</p>
+                <p>Total students: {users.length}</p>
               )}
             </div>
           )}
@@ -460,6 +460,79 @@ export const UserBiodataManagementTab = () => {
         open={isBiodataDialogOpen}
         onOpenChange={setIsBiodataDialogOpen}
       />
+
+      <Dialog open={isDownloadOpen} onOpenChange={setIsDownloadOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Download Student Biodata</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div>
+              <Label className="text-sm font-medium">Choose scope</Label>
+              <RadioGroup
+                value={downloadScope}
+                onValueChange={(v) => setDownloadScope(v as any)}
+                className="mt-2 space-y-2"
+              >
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="all" id="scope-all" />
+                  <Label htmlFor="scope-all" className="font-normal cursor-pointer">All students</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="class" id="scope-class" />
+                  <Label htmlFor="scope-class" className="font-normal cursor-pointer">By class</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="department" id="scope-dept" />
+                  <Label htmlFor="scope-dept" className="font-normal cursor-pointer">By department</Label>
+                </div>
+              </RadioGroup>
+            </div>
+
+            {downloadScope === "class" && (
+              <div>
+                <Label className="text-sm font-medium">Select class</Label>
+                <Select value={downloadClassId} onValueChange={setDownloadClassId}>
+                  <SelectTrigger className="mt-2">
+                    <SelectValue placeholder="Choose a class..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {classes.map((c: any) => (
+                      <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+
+            {downloadScope === "department" && (
+              <div>
+                <Label className="text-sm font-medium">Select department</Label>
+                <Select value={downloadDeptId} onValueChange={setDownloadDeptId}>
+                  <SelectTrigger className="mt-2">
+                    <SelectValue placeholder="Choose a department..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {departments.map((d: any) => (
+                      <SelectItem key={d.id} value={d.id}>{d.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+
+            <p className="text-xs text-muted-foreground">
+              {getDownloadSubset().length} student record(s) will be exported as CSV.
+            </p>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsDownloadOpen(false)}>Cancel</Button>
+            <Button onClick={handleDownloadBiodata} className="gap-2">
+              <Download className="h-4 w-4" /> Download
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 };
