@@ -1101,6 +1101,11 @@ export type Database = {
       }
       report_card_settings: {
         Row: {
+          admin_signature_url: string | null
+          administrator_role_label: string
+          administrator_subtitle: string | null
+          class_teacher_role_label: string
+          class_teacher_subtitle: string | null
           created_at: string
           default_administrator_name: string | null
           default_class_teacher_name: string | null
@@ -1131,9 +1136,15 @@ export type Database = {
           logo_url: string | null
           pass_mark: number
           school_id: string
+          seal_url: string | null
           updated_at: string
         }
         Insert: {
+          admin_signature_url?: string | null
+          administrator_role_label?: string
+          administrator_subtitle?: string | null
+          class_teacher_role_label?: string
+          class_teacher_subtitle?: string | null
           created_at?: string
           default_administrator_name?: string | null
           default_class_teacher_name?: string | null
@@ -1164,9 +1175,15 @@ export type Database = {
           logo_url?: string | null
           pass_mark?: number
           school_id: string
+          seal_url?: string | null
           updated_at?: string
         }
         Update: {
+          admin_signature_url?: string | null
+          administrator_role_label?: string
+          administrator_subtitle?: string | null
+          class_teacher_role_label?: string
+          class_teacher_subtitle?: string | null
           created_at?: string
           default_administrator_name?: string | null
           default_class_teacher_name?: string | null
@@ -1197,6 +1214,7 @@ export type Database = {
           logo_url?: string | null
           pass_mark?: number
           school_id?: string
+          seal_url?: string | null
           updated_at?: string
         }
         Relationships: [

@@ -23,6 +23,8 @@ export const ReportCardSettingsTab = () => {
 
   const [form, setForm] = useState<ReportCardSettings>(DEFAULT_REPORT_CARD_SETTINGS);
   const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [sealFile, setSealFile] = useState<File | null>(null);
+  const [signatureFile, setSignatureFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
@@ -32,21 +34,31 @@ export const ReportCardSettingsTab = () => {
   const set = <K extends keyof ReportCardSettings>(k: K, v: ReportCardSettings[K]) =>
     setForm((p) => ({ ...p, [k]: v }));
 
+  const uploadAsset = async (file: File, prefix: string): Promise<string> => {
+    const path = `${school!.id}/${prefix}-${Date.now()}-${file.name}`;
+    const { error: upErr } = await supabase.storage
+      .from("school-assets")
+      .upload(path, file, { upsert: true });
+    if (upErr) throw upErr;
+    return supabase.storage.from("school-assets").getPublicUrl(path).data.publicUrl;
+  };
+
   const handleSave = async () => {
     try {
       let logo_url = form.logo_url;
-      if (logoFile && school?.id) {
+      let seal_url = form.seal_url;
+      let admin_signature_url = form.admin_signature_url;
+      if ((logoFile || sealFile || signatureFile) && school?.id) {
         setUploading(true);
-        const path = `${school.id}/report-logo-${Date.now()}-${logoFile.name}`;
-        const { error: upErr } = await supabase.storage
-          .from("school-assets")
-          .upload(path, logoFile, { upsert: true });
-        if (upErr) throw upErr;
-        logo_url = supabase.storage.from("school-assets").getPublicUrl(path).data.publicUrl;
+        if (logoFile) logo_url = await uploadAsset(logoFile, "report-logo");
+        if (sealFile) seal_url = await uploadAsset(sealFile, "report-seal");
+        if (signatureFile) admin_signature_url = await uploadAsset(signatureFile, "admin-signature");
       }
-      await save.mutateAsync({ ...form, logo_url });
+      await save.mutateAsync({ ...form, logo_url, seal_url, admin_signature_url });
       toast({ title: "Saved", description: "Report card settings updated." });
       setLogoFile(null);
+      setSealFile(null);
+      setSignatureFile(null);
     } catch (e: any) {
       toast({ title: "Save failed", description: e.message, variant: "destructive" });
     } finally {
@@ -229,10 +241,110 @@ export const ReportCardSettingsTab = () => {
       <Card>
         <CardHeader>
           <CardTitle>Default Signatories & Footer</CardTitle>
-          <CardDescription>Pre-filled on every report card; teachers can still edit per student.</CardDescription>
+          <CardDescription>
+            Pre-filled on every report card; teachers can still edit per student.
+            The administrator signature image is shown as a faint watermark behind the
+            administrator name on the left signature line only.
+          </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-6">
+          {/* Official school seal */}
+          <div className="space-y-2">
+            <Label>Official school seal</Label>
+            <div className="flex items-center gap-4">
+              {(sealFile || form.seal_url) ? (
+                <img
+                  src={sealFile ? URL.createObjectURL(sealFile) : form.seal_url!}
+                  alt="seal"
+                  className="h-16 w-16 rounded object-contain border bg-white"
+                />
+              ) : (
+                <div className="h-16 w-16 rounded border flex items-center justify-center text-xs text-muted-foreground">
+                  No seal
+                </div>
+              )}
+              <label className="cursor-pointer">
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => setSealFile(e.target.files?.[0] ?? null)}
+                />
+                <span className="inline-flex items-center gap-2 px-3 py-2 border rounded-md text-sm hover:bg-accent">
+                  <Upload className="h-4 w-4" /> {sealFile ? sealFile.name : "Choose seal image"}
+                </span>
+              </label>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Shown between the two signature lines. Leave empty to hide it.
+            </p>
+          </div>
+
+          {/* Administrator signature image */}
+          <div className="space-y-2">
+            <Label>Administrator signature (watermark)</Label>
+            <div className="flex items-center gap-4">
+              {(signatureFile || form.admin_signature_url) ? (
+                <img
+                  src={signatureFile ? URL.createObjectURL(signatureFile) : form.admin_signature_url!}
+                  alt="signature"
+                  className="h-16 w-32 rounded object-contain border bg-white"
+                />
+              ) : (
+                <div className="h-16 w-32 rounded border flex items-center justify-center text-xs text-muted-foreground">
+                  No signature
+                </div>
+              )}
+              <label className="cursor-pointer">
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => setSignatureFile(e.target.files?.[0] ?? null)}
+                />
+                <span className="inline-flex items-center gap-2 px-3 py-2 border rounded-md text-sm hover:bg-accent">
+                  <Upload className="h-4 w-4" /> {signatureFile ? signatureFile.name : "Choose signature image"}
+                </span>
+              </label>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Appears faintly behind the administrator (left) signature line. PNG with transparent background works best.
+            </p>
+          </div>
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label>Administrator role label</Label>
+              <Input
+                value={form.administrator_role_label ?? ""}
+                placeholder="e.g. Principal, Administrator"
+                onChange={(e) => set("administrator_role_label", e.target.value || "Administrator")}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Administrator subtitle (optional)</Label>
+              <Input
+                value={form.administrator_subtitle ?? ""}
+                placeholder="e.g. School Sponsor"
+                onChange={(e) => set("administrator_subtitle", e.target.value || null)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Class teacher role label</Label>
+              <Input
+                value={form.class_teacher_role_label ?? ""}
+                placeholder="e.g. Class Teacher, Homeroom Teacher"
+                onChange={(e) => set("class_teacher_role_label", e.target.value || "Class Teacher")}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Class teacher subtitle (optional)</Label>
+              <Input
+                value={form.class_teacher_subtitle ?? ""}
+                placeholder="e.g. Teacher Signature"
+                onChange={(e) => set("class_teacher_subtitle", e.target.value || null)}
+              />
+            </div>
             <div className="space-y-2">
               <Label>Default administrator name</Label>
               <Input

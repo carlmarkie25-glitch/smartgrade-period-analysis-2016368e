@@ -36,6 +36,7 @@ const EditableField = ({
   placeholder,
   options,
   minHeight,
+  plain,
 }: {
   value: string;
   onChange: (v: string) => void;
@@ -44,20 +45,23 @@ const EditableField = ({
   placeholder?: string;
   options?: string[];
   minHeight?: number;
+  /** Render with no border / no background — used for signature lines. */
+  plain?: boolean;
 }) => {
   const baseStyle: React.CSSProperties = {
     fontSize: '11px',
     color: '#222',
-    border: '0.5px solid #ddd',
-    padding: '4px 6px',
-    borderRadius: 3,
-    background: editable ? '#fff' : '#fafafa',
+    border: plain ? 'none' : '0.5px solid #ddd',
+    padding: plain ? '0' : '4px 6px',
+    borderRadius: plain ? 0 : 3,
+    background: plain ? 'transparent' : (editable ? '#fff' : '#fafafa'),
     margin: 0,
     minHeight: minHeight ?? 30,
     width: '100%',
     fontFamily: 'inherit',
     outline: 'none',
     resize: multiline ? 'vertical' : 'none',
+    textAlign: plain ? 'center' : undefined,
   };
   if (!editable) {
     return (
@@ -954,44 +958,73 @@ export const StudentReportDialog = ({
                 </div>
 
                 {/* ── SIGNATURES ── */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', padding: '10px 14px', borderTop: '1px solid #ccc' }}>
-                  <div style={{ textAlign: 'center', fontSize: '10px', color: '#333', minWidth: 140 }}>
-                    <div style={{ borderBottom: '1px solid #333', width: 120, margin: '18px auto 4px', minHeight: 16 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', padding: '10px 14px', borderTop: '1px solid #ccc', gap: 16 }}>
+                  {/* Administrator (left) — admin signature image acts as watermark behind name */}
+                  <div style={{ textAlign: 'center', fontSize: '10px', color: '#333', flex: 1, position: 'relative' }}>
+                    {rcSettings.admin_signature_url && (
+                      <img
+                        src={rcSettings.admin_signature_url}
+                        alt=""
+                        style={{
+                          position: 'absolute',
+                          left: '50%',
+                          bottom: 18,
+                          transform: 'translateX(-50%)',
+                          maxWidth: 140,
+                          maxHeight: 60,
+                          opacity: 0.35,
+                          pointerEvents: 'none',
+                          objectFit: 'contain',
+                        }}
+                      />
+                    )}
+                    <div style={{ borderBottom: '1px solid #333', width: 160, margin: '40px auto 4px', minHeight: 16, position: 'relative' }}>
                       <EditableField
                         value={inputs.administrator_name || rcSettings.default_administrator_name || ''}
                         onChange={setField('administrator_name')}
                         editable={editing}
                         placeholder="Name"
                         minHeight={16}
+                        plain
                       />
                     </div>
-                    <div style={{ fontWeight: 700, fontSize: '11px', textTransform: 'uppercase' }}>Administrator</div>
-                    <div style={{ color: '#888' }}>School Sponsor</div>
+                    <div style={{ fontWeight: 700, fontSize: '11px', textTransform: 'uppercase' }}>
+                      {rcSettings.administrator_role_label || 'Administrator'}
+                    </div>
+                    {rcSettings.administrator_subtitle && (
+                      <div style={{ color: '#888' }}>{rcSettings.administrator_subtitle}</div>
+                    )}
                   </div>
-                  <div style={{
-                    width: 50, height: 50, borderRadius: '50%', border: `2px solid ${gold}`,
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    fontSize: '8px', color: gold, textAlign: 'center', fontWeight: 700, lineHeight: 1.2,
-                  }}>
-                    OFFICIAL<br />SCHOOL<br />SEAL
-                  </div>
-                  <div style={{ textAlign: 'center', fontSize: '10px', color: '#333', minWidth: 140 }}>
-                    <div style={{ borderBottom: '1px solid #333', width: 120, margin: '18px auto 4px', minHeight: 16 }}>
+
+                  {/* Official school seal (center) — only shown when uploaded */}
+                  {rcSettings.seal_url && (
+                    <div style={{ flexShrink: 0 }}>
+                      <img
+                        src={rcSettings.seal_url}
+                        alt="Official school seal"
+                        style={{ width: 72, height: 72, objectFit: 'contain' }}
+                      />
+                    </div>
+                  )}
+
+                  {/* Class Teacher (right) */}
+                  <div style={{ textAlign: 'center', fontSize: '10px', color: '#333', flex: 1 }}>
+                    <div style={{ borderBottom: '1px solid #333', width: 160, margin: '40px auto 4px', minHeight: 16 }}>
                       <EditableField
                         value={inputs.class_teacher_name || (report as any).classTeacherName || rcSettings.default_class_teacher_name || ''}
                         onChange={setField('class_teacher_name')}
                         editable={editing}
                         placeholder="Name"
                         minHeight={16}
+                        plain
                       />
                     </div>
-                    <div style={{ fontWeight: 700, fontSize: '11px', textTransform: 'uppercase' }}>Class Teacher</div>
-                    <div style={{ color: '#888' }}>Teacher Signature</div>
-                  </div>
-                  <div style={{ textAlign: 'center', fontSize: '10px', color: '#333' }}>
-                    <div style={{ borderBottom: '1px solid #333', width: 80, margin: '18px auto 4px' }} />
-                    <div style={{ fontWeight: 700, fontSize: '11px', textTransform: 'uppercase' }}>Parent / Guardian</div>
-                    <div style={{ color: '#888' }}>Acknowledgement</div>
+                    <div style={{ fontWeight: 700, fontSize: '11px', textTransform: 'uppercase' }}>
+                      {rcSettings.class_teacher_role_label || 'Class Teacher'}
+                    </div>
+                    {rcSettings.class_teacher_subtitle && (
+                      <div style={{ color: '#888' }}>{rcSettings.class_teacher_subtitle}</div>
+                    )}
                   </div>
                 </div>
 
