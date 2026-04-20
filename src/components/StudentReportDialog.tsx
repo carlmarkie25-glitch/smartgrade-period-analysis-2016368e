@@ -357,6 +357,9 @@ export const StudentReportDialog = ({
   // Darker semester-average column shade. In color mode reuse the header bg
   // (always darker than secondary); in grey mode keep a mid-grey.
   const darkSecondary = greyMode ? '#7a8087' : colors.header_bg_color;
+  // Admin-configurable text colors. In grey mode fall back to white/black for legibility.
+  const generalAvgText = greyMode ? '#ffffff' : colors.general_average_text_color;
+  const headerMetaText = greyMode ? '#000000' : colors.header_meta_text_color;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -587,14 +590,14 @@ export const StudentReportDialog = ({
                       </div>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                          <div style={{
-                           background: gold, color: goldText, textAlign: 'center', padding: '4px 10px',
+                           background: gold, color: headerMetaText, textAlign: 'center', padding: '4px 10px',
                            fontSize: '11px', fontWeight: 700, borderRadius: '3px', minWidth: '80px'
                          }}>
                            <small style={{ display: 'block', fontSize: '9px', fontWeight: 400, opacity: 0.85, letterSpacing: '0.5px' }}>REPORT TYPE</small>
                            {getDepartmentLabel().toUpperCase()}
                          </div>
                          <div style={{
-                           background: gold, color: goldText, textAlign: 'center', padding: '4px 10px',
+                           background: gold, color: headerMetaText, textAlign: 'center', padding: '4px 10px',
                            fontSize: '11px', fontWeight: 700, borderRadius: '3px', minWidth: '80px'
                          }}>
                            <small style={{ display: 'block', fontSize: '9px', fontWeight: 400, opacity: 0.85, letterSpacing: '0.5px' }}>SEMESTER</small>
@@ -1097,10 +1100,10 @@ export const StudentReportDialog = ({
                     padding: 10, textAlign: 'center',
                   }}>
                     <div style={{ fontSize: '10px', color: '#aab', letterSpacing: '1px', marginBottom: 4 }}>GENERAL AVERAGE</div>
-                    <div style={{ fontSize: '40px', fontWeight: 800, color: gold, lineHeight: 1 }}>
+                    <div style={{ fontSize: '40px', fontWeight: 800, color: generalAvgText, lineHeight: 1 }}>
                       {generalAvg !== null ? (isKg ? (scoreToLetter(generalAvg, 100) ?? '—') : `${generalAvg}%`) : '--'}
                     </div>
-                    <div style={{ fontSize: '11px', color: gold, marginTop: 3 }}>
+                    <div style={{ fontSize: '11px', color: generalAvgText, marginTop: 3 }}>
                       {generalAvg !== null
                         ? (isKg
                             ? (() => {

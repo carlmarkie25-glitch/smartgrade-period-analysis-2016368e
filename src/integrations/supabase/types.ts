@@ -558,7 +558,9 @@ export type Database = {
           accent_color: string | null
           created_at: string
           department_id: string
+          general_average_text_color: string | null
           header_bg_color: string | null
+          header_meta_text_color: string | null
           id: string
           school_id: string
           secondary_bg_color: string | null
@@ -568,7 +570,9 @@ export type Database = {
           accent_color?: string | null
           created_at?: string
           department_id: string
+          general_average_text_color?: string | null
           header_bg_color?: string | null
+          header_meta_text_color?: string | null
           id?: string
           school_id: string
           secondary_bg_color?: string | null
@@ -578,7 +582,9 @@ export type Database = {
           accent_color?: string | null
           created_at?: string
           department_id?: string
+          general_average_text_color?: string | null
           header_bg_color?: string | null
+          header_meta_text_color?: string | null
           id?: string
           school_id?: string
           secondary_bg_color?: string | null
@@ -1159,6 +1165,7 @@ export type Database = {
           default_administrator_name: string | null
           default_class_teacher_name: string | null
           footer_note: string | null
+          general_average_text_color: string
           grade_a_label: string
           grade_a_min: number
           grade_b_label: string
@@ -1171,6 +1178,7 @@ export type Database = {
           header_address: string | null
           header_bg_color: string
           header_contact: string | null
+          header_meta_text_color: string
           header_subtitle: string | null
           header_title: string | null
           header_website: string | null
@@ -1201,6 +1209,7 @@ export type Database = {
           default_administrator_name?: string | null
           default_class_teacher_name?: string | null
           footer_note?: string | null
+          general_average_text_color?: string
           grade_a_label?: string
           grade_a_min?: number
           grade_b_label?: string
@@ -1213,6 +1222,7 @@ export type Database = {
           header_address?: string | null
           header_bg_color?: string
           header_contact?: string | null
+          header_meta_text_color?: string
           header_subtitle?: string | null
           header_title?: string | null
           header_website?: string | null
@@ -1243,6 +1253,7 @@ export type Database = {
           default_administrator_name?: string | null
           default_class_teacher_name?: string | null
           footer_note?: string | null
+          general_average_text_color?: string
           grade_a_label?: string
           grade_a_min?: number
           grade_b_label?: string
@@ -1255,6 +1266,7 @@ export type Database = {
           header_address?: string | null
           header_bg_color?: string
           header_contact?: string | null
+          header_meta_text_color?: string
           header_subtitle?: string | null
           header_title?: string | null
           header_website?: string | null

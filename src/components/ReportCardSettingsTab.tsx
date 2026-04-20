@@ -186,6 +186,18 @@ export const ReportCardSettingsTab = () => {
             value={form.secondary_bg_color}
             onChange={(v) => set("secondary_bg_color", v)}
           />
+          <ColorRow
+            label="General Average text"
+            help="Text color of the big number and grade label inside the General Average box."
+            value={form.general_average_text_color}
+            onChange={(v) => set("general_average_text_color", v)}
+          />
+          <ColorRow
+            label="Header chips text"
+            help="Text color for the REPORT TYPE and SEMESTER chips in the top-right of the header."
+            value={form.header_meta_text_color}
+            onChange={(v) => set("header_meta_text_color", v)}
+          />
           <ReportColorPreview
             header={form.header_bg_color}
             accent={form.accent_color}
@@ -524,6 +536,10 @@ const DepartmentColorsCard = ({
       header_bg_color: existing?.header_bg_color ?? schoolDefaults.header_bg_color,
       accent_color: existing?.accent_color ?? schoolDefaults.accent_color,
       secondary_bg_color: existing?.secondary_bg_color ?? schoolDefaults.secondary_bg_color,
+      general_average_text_color:
+        existing?.general_average_text_color ?? schoolDefaults.general_average_text_color,
+      header_meta_text_color:
+        existing?.header_meta_text_color ?? schoolDefaults.header_meta_text_color,
       ...patch,
     };
     try {
@@ -559,6 +575,10 @@ const DepartmentColorsCard = ({
           const header = ov?.header_bg_color ?? schoolDefaults.header_bg_color;
           const accent = ov?.accent_color ?? schoolDefaults.accent_color;
           const secondary = ov?.secondary_bg_color ?? schoolDefaults.secondary_bg_color;
+          const genAvgText =
+            ov?.general_average_text_color ?? schoolDefaults.general_average_text_color;
+          const metaText =
+            ov?.header_meta_text_color ?? schoolDefaults.header_meta_text_color;
           const isCustom = !!ov;
           return (
             <div key={d.id} className="border rounded-md p-4 space-y-3">
@@ -596,6 +616,16 @@ const DepartmentColorsCard = ({
                   label="Secondary"
                   value={secondary}
                   onCommit={(v) => handleSave(d.id, { secondary_bg_color: v })}
+                />
+                <DeptColorField
+                  label="General Average text"
+                  value={genAvgText}
+                  onCommit={(v) => handleSave(d.id, { general_average_text_color: v })}
+                />
+                <DeptColorField
+                  label="Header chips text"
+                  value={metaText}
+                  onCommit={(v) => handleSave(d.id, { header_meta_text_color: v })}
                 />
               </div>
               <ReportColorPreview header={header} accent={accent} secondary={secondary} />
