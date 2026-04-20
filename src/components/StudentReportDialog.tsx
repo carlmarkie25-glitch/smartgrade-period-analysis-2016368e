@@ -172,7 +172,52 @@ export const StudentReportDialog = ({
     }
   };
 
-  const handlePrint = () => window.print();
+  const [downloading, setDownloading] = useState(false);
+
+  const handleDownloadPdf = async () => {
+    const el = document.getElementById('report-content');
+    if (!el) {
+      toast({ title: 'Error', description: 'Report not ready', variant: 'destructive' });
+      return;
+    }
+    try {
+      setDownloading(true);
+      const [{ default: html2canvas }, { default: jsPDF }] = await Promise.all([
+        import('html2canvas'),
+        import('jspdf'),
+      ]);
+      const canvas = await html2canvas(el, {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: '#ffffff',
+      });
+      const imgData = canvas.toDataURL('image/jpeg', 0.95);
+      const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+      const pageW = pdf.internal.pageSize.getWidth();
+      const pageH = pdf.internal.pageSize.getHeight();
+      const imgW = pageW;
+      const imgH = (canvas.height * imgW) / canvas.width;
+
+      let heightLeft = imgH;
+      let position = 0;
+      pdf.addImage(imgData, 'JPEG', 0, position, imgW, imgH);
+      heightLeft -= pageH;
+      while (heightLeft > 0) {
+        position = heightLeft - imgH;
+        pdf.addPage();
+        pdf.addImage(imgData, 'JPEG', 0, position, imgW, imgH);
+        heightLeft -= pageH;
+      }
+
+      const studentName = (report?.student?.full_name || 'student').replace(/\s+/g, '_');
+      pdf.save(`Report_${studentName}_${period}.pdf`);
+      toast({ title: 'Downloaded', description: 'Report PDF saved.' });
+    } catch (e: any) {
+      toast({ title: 'Download failed', description: e?.message || 'Could not generate PDF', variant: 'destructive' });
+    } finally {
+      setDownloading(false);
+    }
+  };
 
   const getSemesterLabel = () => {
     switch (period) {
@@ -365,11 +410,8 @@ export const StudentReportDialog = ({
             <div>
               {/* ===== ACTION BUTTONS (screen only) ===== */}
               <div className="flex gap-2 justify-center py-3 print:hidden flex-wrap" style={{ background: '#e8eaf0' }}>
-                <Button onClick={handlePrint} size="sm" className="gap-2" style={{ background: navy, color: '#fff' }}>
-                  <Printer className="h-4 w-4" /> Print / Save as PDF
-                </Button>
-                <Button onClick={handlePrint} size="sm" className="gap-2" style={{ background: gold, color: '#fff' }}>
-                  <Download className="h-4 w-4" /> Download PDF
+                <Button onClick={handleDownloadPdf} size="sm" className="gap-2" disabled={downloading} style={{ background: navy, color: '#fff' }}>
+                  <Download className="h-4 w-4" /> {downloading ? 'Generating PDF...' : 'Download PDF'}
                 </Button>
                 {canEdit && !editing && (
                   <Button onClick={() => setEditing(true)} size="sm" variant="outline" className="gap-2">
