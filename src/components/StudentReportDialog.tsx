@@ -1075,7 +1075,7 @@ export const StudentReportDialog = ({
                         }}
                       />
                     )}
-                    <div style={{ borderBottom: '1px solid #333', width: 160, margin: '40px auto 4px', minHeight: 18, position: 'relative' }}>
+                    <div style={{ borderBottom: '1px solid #333', width: 160, margin: '20px auto 2px', minHeight: 18, position: 'relative' }}>
                       <EditableField
                         value={inputs.administrator_name || rcSettings.default_administrator_name || ''}
                         onChange={setField('administrator_name')}
