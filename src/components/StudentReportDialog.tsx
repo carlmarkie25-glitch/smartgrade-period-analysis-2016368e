@@ -1055,7 +1055,7 @@ export const StudentReportDialog = ({
                 </div>
 
                 {/* ── SIGNATURES ── */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', padding: '14px 18px', borderTop: '1px solid #ccc', gap: 16 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', padding: '8px 16px', borderTop: '1px solid #ccc', gap: 16 }}>
                   {/* Administrator (left) — admin signature image acts as watermark behind name */}
                   <div style={{ textAlign: 'center', fontSize: '11px', color: '#333', flex: 1, position: 'relative' }}>
                     {rcSettings.admin_signature_url && (
