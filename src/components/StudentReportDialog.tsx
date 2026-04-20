@@ -814,8 +814,8 @@ export const StudentReportDialog = ({
                   </div>
                 </div>
 
-                {/* ── PROMOTION STATEMENT ── */}
-                {(() => {
+                {/* ── PROMOTION STATEMENT (only on final yearly report card) ── */}
+                {isYearly && (() => {
                   const currentClassName = report.student.classes?.name || 'current class';
                   const nextClassMatch = currentClassName.match(/(\d+)/);
                   const nextClassName = nextClassMatch
