@@ -845,14 +845,14 @@ export const StudentReportDialog = ({
                     ['Participation', 'participation'],
                     ['Homework', 'homework'],
                   ] as const).map(([label, key], i) => (
-                    <div key={key} style={{ padding: '10px 12px', borderRight: i < 3 ? '0.5px solid #ccc' : 'none' }}>
-                      <label style={{ fontSize: '11px', color: '#444', textTransform: 'uppercase', fontWeight: 700, display: 'block', marginBottom: 4 }}>{label}</label>
+                    <div key={key} style={{ padding: '5px 10px', borderRight: i < 3 ? '0.5px solid #ccc' : 'none' }}>
+                      <label style={{ fontSize: '10px', color: '#444', textTransform: 'uppercase', fontWeight: 700, display: 'block', marginBottom: 2 }}>{label}</label>
                       <EditableField
                         value={(inputs[key] as string) || ''}
                         onChange={setField(key)}
                         editable={editing}
                         options={RATING_OPTIONS}
-                        minHeight={28}
+                        minHeight={22}
                       />
                     </div>
                   ))}
