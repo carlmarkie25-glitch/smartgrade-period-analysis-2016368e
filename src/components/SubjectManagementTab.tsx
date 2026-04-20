@@ -222,7 +222,7 @@ export const SubjectManagementTab = () => {
                         className="flex items-center gap-2 cursor-pointer text-sm"
                       >
                         <Checkbox
-                          checked={form.department_ids.includes(d.id)}
+                          checked={(form.department_ids ?? []).includes(d.id)}
                           onCheckedChange={(checked) => toggleDept(d.id, checked === true)}
                         />
                         <span>{d.name}</span>
