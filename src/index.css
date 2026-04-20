@@ -179,33 +179,39 @@ All colors MUST be HSL.
   background: var(--sidebar-background);
 }
 
-/* Sidebar "gulf" notch effect for active item.
-   Two pseudo-elements above & below the active pill create concave
-   curves so the pill appears to bleed out of the sidebar into the page. */
+/* Sidebar "gulf" notch: concave curves above & below the active pill,
+   making it appear to bleed out of the sidebar into the page.
+   Implementation: two pseudo-elements, each a 20x20 square painted in
+   the page-bg color, with a quarter-circle "bite" cut out via mask
+   (radial-gradient). The remaining shape is a concave curve. */
 .sidebar-notch-active {
   position: relative;
+  overflow: visible !important;
+}
+.sidebar-notch-active > button,
+.sidebar-notch-active > a {
+  overflow: visible !important;
 }
 .sidebar-notch-active::before,
 .sidebar-notch-active::after {
   content: "";
   position: absolute;
   right: 0;
-  width: 24px;
-  height: 24px;
-  background: hsl(var(--background));
+  width: 22px;
+  height: 22px;
   pointer-events: none;
-  z-index: 10;
-  transition: all 300ms ease;
+  z-index: 15;
+  background-color: hsl(var(--background));
 }
 .sidebar-notch-active::before {
-  top: -20px;
-  -webkit-mask-image: radial-gradient(circle at 0 0, transparent 24px, black 24px);
-          mask-image: radial-gradient(circle at 0 0, transparent 24px, black 24px);
+  top: -22px;
+  -webkit-mask-image: radial-gradient(circle 22px at 0% 0%, transparent 0 22px, #000 22.5px);
+          mask-image: radial-gradient(circle 22px at 0% 0%, transparent 0 22px, #000 22.5px);
 }
 .sidebar-notch-active::after {
-  bottom: -20px;
-  -webkit-mask-image: radial-gradient(circle at 0 100%, transparent 24px, black 24px);
-          mask-image: radial-gradient(circle at 0 100%, transparent 24px, black 24px);
+  bottom: -22px;
+  -webkit-mask-image: radial-gradient(circle 22px at 0% 100%, transparent 0 22px, #000 22.5px);
+          mask-image: radial-gradient(circle 22px at 0% 100%, transparent 0 22px, #000 22.5px);
 }
 
 /* Neumorphic utility classes */
