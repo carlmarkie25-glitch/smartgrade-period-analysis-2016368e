@@ -978,24 +978,24 @@ export const StudentReportDialog = ({
                   SEMESTER AVERAGES
                 </div>
                 <div style={{ display: 'flex' }}>
-                  <div style={{ flex: 1, padding: '12px 16px', borderRight: '0.5px solid #ccc' }}>
-                    <table style={{ width: '100%', fontSize: '12px', borderCollapse: 'collapse' }}>
+                  <div style={{ flex: 1, padding: '6px 12px', borderRight: '0.5px solid #ccc' }}>
+                    <table style={{ width: '100%', fontSize: '11px', borderCollapse: 'collapse' }}>
                       <tbody>
                         <tr>
-                          <td style={{ padding: '4px 0' }}>Semester 1 Average</td>
-                          <td style={{ padding: '4px 0', textAlign: 'right', fontWeight: 700 }}>
+                          <td style={{ padding: '2px 0' }}>Semester 1 Average</td>
+                          <td style={{ padding: '2px 0', textAlign: 'right', fontWeight: 700 }}>
                             {s1Avg !== null ? (isKg ? (scoreToLetter(s1Avg, 100) ?? '') : `${s1Avg}%`) : ''}
                           </td>
                         </tr>
                         <tr>
-                          <td style={{ padding: '4px 0' }}>Semester 2 Average</td>
-                          <td style={{ padding: '4px 0', textAlign: 'right', fontWeight: 700 }}>
+                          <td style={{ padding: '2px 0' }}>Semester 2 Average</td>
+                          <td style={{ padding: '2px 0', textAlign: 'right', fontWeight: 700 }}>
                             {s2Avg !== null ? (isKg ? (scoreToLetter(s2Avg, 100) ?? '') : `${s2Avg}%`) : ''}
                           </td>
                         </tr>
                         <tr>
-                          <td style={{ padding: '4px 0' }}>Class Position</td>
-                          <td style={{ padding: '4px 0', textAlign: 'right', fontWeight: 700 }}>
+                          <td style={{ padding: '2px 0' }}>Class Position</td>
+                          <td style={{ padding: '2px 0', textAlign: 'right', fontWeight: 700 }}>
                             {report.hasIncomplete ? '--' : (() => {
                               if (isSemester) {
                                 const rank = report.yearlyTotal?.class_rank;
@@ -1010,15 +1010,15 @@ export const StudentReportDialog = ({
                           </td>
                         </tr>
                         <tr>
-                          <td colSpan={2} style={{ padding: '8px 0 0', fontSize: '11px', color: '#666', lineHeight: 1.6 }}>
+                          <td colSpan={2} style={{ padding: '4px 0 0', fontSize: '10px', color: '#666', lineHeight: 1.5 }}>
                             {isKg ? (
-                              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px 10px' }}>
+                              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '2px 8px' }}>
                                 {KG_SCALE.map((t) => (
                                   <span key={t.letter} style={{ whiteSpace: 'nowrap' }}>{t.letter} = {t.min}–{t.max}</span>
                                 ))}
                               </div>
                             ) : (
-                              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px 10px' }}>
+                              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '2px 8px' }}>
                                 <span style={{ whiteSpace: 'nowrap' }}>A = {rcSettings.grade_a_min}–100</span>
                                 <span style={{ whiteSpace: 'nowrap' }}>B = {rcSettings.grade_b_min}–{rcSettings.grade_a_min - 1}</span>
                                 <span style={{ whiteSpace: 'nowrap' }}>C = {rcSettings.grade_c_min}–{rcSettings.grade_b_min - 1}</span>
@@ -1032,15 +1032,15 @@ export const StudentReportDialog = ({
                     </table>
                   </div>
                   <div style={{
-                    width: 200, background: navy, color: '#fff',
+                    width: 180, background: navy, color: '#fff',
                     display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-                    padding: 16, textAlign: 'center',
+                    padding: 10, textAlign: 'center',
                   }}>
-                    <div style={{ fontSize: '11px', color: '#aab', letterSpacing: '1px', marginBottom: 6 }}>GENERAL AVERAGE</div>
-                    <div style={{ fontSize: '56px', fontWeight: 800, color: gold, lineHeight: 1 }}>
+                    <div style={{ fontSize: '10px', color: '#aab', letterSpacing: '1px', marginBottom: 4 }}>GENERAL AVERAGE</div>
+                    <div style={{ fontSize: '40px', fontWeight: 800, color: gold, lineHeight: 1 }}>
                       {generalAvg !== null ? (isKg ? (scoreToLetter(generalAvg, 100) ?? '—') : `${generalAvg}%`) : '--'}
                     </div>
-                    <div style={{ fontSize: '13px', color: gold, marginTop: 4 }}>
+                    <div style={{ fontSize: '11px', color: gold, marginTop: 3 }}>
                       {generalAvg !== null
                         ? (isKg
                             ? (() => {
