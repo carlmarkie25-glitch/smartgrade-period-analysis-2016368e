@@ -191,45 +191,40 @@ export const UserBiodataManagementTab = () => {
   const buildBiodataFormHtml = (u: StudentBiodata) => {
     const row = (label: string, value: any) => `
       <tr>
-        <td style="padding:7px 10px;font-weight:600;background:#f3f4f6;border:1px solid #e5e7eb;width:38%;font-size:11.5px;">${label}</td>
-        <td style="padding:7px 10px;border:1px solid #e5e7eb;font-size:11.5px;">${value || "—"}</td>
+        <td style="padding:7px 10px;font-weight:600;background:#ffffff;border:1px solid #000;width:38%;font-size:11.5px;color:#000;">${label}</td>
+        <td style="padding:7px 10px;border:1px solid #000;font-size:11.5px;color:#000;">${value || "—"}</td>
       </tr>`;
 
     const photo = u.photo_url
-      ? `<img src="${u.photo_url}" crossorigin="anonymous" style="width:120px;height:140px;object-fit:cover;border:2px solid ${schoolHeader?.header_bg_color || "#1a2a6e"};border-radius:6px;" />`
-      : `<div style="width:120px;height:140px;border:2px dashed #9ca3af;border-radius:6px;display:flex;align-items:center;justify-content:center;color:#9ca3af;font-size:11px;">No Photo</div>`;
+      ? `<img src="${u.photo_url}" crossorigin="anonymous" style="width:120px;height:140px;object-fit:cover;border:2px solid #000;border-radius:6px;" />`
+      : `<div style="width:120px;height:140px;border:2px dashed #000;border-radius:6px;display:flex;align-items:center;justify-content:center;color:#000;font-size:11px;">No Photo</div>`;
 
-    const headerBg = schoolHeader?.header_bg_color || "#1a2a6e";
-    const accent = schoolHeader?.accent_color || "#c8a84b";
     const logo = schoolHeader?.logo_url
       ? `<img src="${schoolHeader.logo_url}" crossorigin="anonymous" style="width:70px;height:70px;object-fit:contain;background:#fff;border-radius:6px;padding:4px;" />`
       : "";
 
-    const contactBits = [schoolHeader?.header_contact, schoolHeader?.header_website].filter(Boolean).join(" • ");
+    const contactBits = [schoolHeader?.contact, schoolHeader?.website].filter(Boolean).join(" • ");
 
     return `
-      <div style="font-family: Arial, sans-serif; padding:0; width:794px; box-sizing:border-box; color:#111827; background:#fff;">
-        <!-- School Header -->
-        <div style="background:${headerBg};color:#fff;padding:18px 24px;display:flex;align-items:center;gap:18px;">
+      <div style="font-family: Arial, sans-serif; padding:0; width:794px; box-sizing:border-box; color:#000; background:#fff;">
+        <!-- School Header (no colors) -->
+        <div style="background:#fff;color:#000;padding:18px 24px;display:flex;align-items:center;gap:18px;border-bottom:2px solid #000;">
           ${logo}
           <div style="flex:1;text-align:center;">
-            <h1 style="margin:0;font-size:22px;letter-spacing:0.5px;">${schoolHeader?.header_title || "School Name"}</h1>
-            ${schoolHeader?.header_subtitle ? `<p style="margin:3px 0 0;font-size:12px;color:${accent};">${schoolHeader.header_subtitle}</p>` : ""}
-            ${schoolHeader?.header_address ? `<p style="margin:4px 0 0;font-size:11px;">${schoolHeader.header_address}</p>` : ""}
-            ${contactBits ? `<p style="margin:2px 0 0;font-size:11px;">${contactBits}</p>` : ""}
+            <h1 style="margin:0;font-size:22px;letter-spacing:0.5px;color:#000;">${schoolHeader?.name || ""}</h1>
+            ${schoolHeader?.subtitle ? `<p style="margin:3px 0 0;font-size:12px;color:#000;">${schoolHeader.subtitle}</p>` : ""}
+            ${schoolHeader?.address ? `<p style="margin:4px 0 0;font-size:11px;color:#000;">${schoolHeader.address}</p>` : ""}
+            ${contactBits ? `<p style="margin:2px 0 0;font-size:11px;color:#000;">${contactBits}</p>` : ""}
           </div>
           <div style="width:70px;"></div>
         </div>
 
-        <div style="background:${accent};height:4px;"></div>
-
         <div style="padding:20px 28px;">
           <div style="text-align:center;margin-bottom:14px;">
-            <h2 style="margin:0;font-size:16px;color:${headerBg};text-transform:uppercase;letter-spacing:1.5px;">Student Biodata Form</h2>
-            <p style="margin:3px 0 0;font-size:10.5px;color:#6b7280;">Generated on ${new Date().toLocaleDateString()}</p>
+            <h2 style="margin:0;font-size:16px;color:#000;text-transform:uppercase;letter-spacing:1.5px;">Student Biodata Form</h2>
+            <p style="margin:3px 0 0;font-size:10.5px;color:#000;">Generated on ${new Date().toLocaleDateString()}</p>
           </div>
 
-          <!-- Identity row -->
           <div style="display:flex;gap:18px;margin-bottom:16px;align-items:flex-start;">
             <div>${photo}</div>
             <div style="flex:1;">
@@ -242,7 +237,7 @@ export const UserBiodataManagementTab = () => {
             </div>
           </div>
 
-          <h3 style="font-size:12.5px;color:${headerBg};border-bottom:2px solid ${accent};padding-bottom:3px;margin:14px 0 6px;">Personal Information</h3>
+          <h3 style="font-size:12.5px;color:#000;border-bottom:2px solid #000;padding-bottom:3px;margin:14px 0 6px;">Personal Information</h3>
           <table style="width:100%;border-collapse:collapse;">
             ${row("Gender", u.gender)}
             ${row("Date of Birth", u.date_of_birth)}
@@ -255,13 +250,13 @@ export const UserBiodataManagementTab = () => {
             ${row("Phone Number", u.phone_number)}
           </table>
 
-          <h3 style="font-size:12.5px;color:${headerBg};border-bottom:2px solid ${accent};padding-bottom:3px;margin:14px 0 6px;">Health Information</h3>
+          <h3 style="font-size:12.5px;color:#000;border-bottom:2px solid #000;padding-bottom:3px;margin:14px 0 6px;">Health Information</h3>
           <table style="width:100%;border-collapse:collapse;">
             ${row("Disability", u.disability)}
             ${row("Health Issues / Allergies", u.health_issues)}
           </table>
 
-          <h3 style="font-size:12.5px;color:${headerBg};border-bottom:2px solid ${accent};padding-bottom:3px;margin:14px 0 6px;">Family Information</h3>
+          <h3 style="font-size:12.5px;color:#000;border-bottom:2px solid #000;padding-bottom:3px;margin:14px 0 6px;">Family Information</h3>
           <table style="width:100%;border-collapse:collapse;">
             ${row("Father's Name", u.father_name)}
             ${row("Father's Contact", u.father_contact)}
@@ -269,22 +264,22 @@ export const UserBiodataManagementTab = () => {
             ${row("Mother's Contact", u.mother_contact)}
           </table>
 
-          <h3 style="font-size:12.5px;color:${headerBg};border-bottom:2px solid ${accent};padding-bottom:3px;margin:14px 0 6px;">Emergency Contact</h3>
+          <h3 style="font-size:12.5px;color:#000;border-bottom:2px solid #000;padding-bottom:3px;margin:14px 0 6px;">Emergency Contact</h3>
           <table style="width:100%;border-collapse:collapse;">
             ${row("Contact Name", u.emergency_contact_name)}
             ${row("Contact Phone", u.emergency_contact_phone)}
             ${row("Relationship", u.emergency_contact_relationship)}
           </table>
 
-          <h3 style="font-size:12.5px;color:${headerBg};border-bottom:2px solid ${accent};padding-bottom:3px;margin:14px 0 6px;">Previous Education</h3>
+          <h3 style="font-size:12.5px;color:#000;border-bottom:2px solid #000;padding-bottom:3px;margin:14px 0 6px;">Previous Education</h3>
           <table style="width:100%;border-collapse:collapse;">
             ${row("Previous School", u.previous_school)}
             ${row("Previous Class", u.previous_class)}
           </table>
 
-          <div style="margin-top:28px;display:flex;justify-content:space-between;font-size:11px;color:#374151;">
-            <div style="border-top:1px solid #9ca3af;padding-top:4px;width:42%;text-align:center;">Parent / Guardian Signature</div>
-            <div style="border-top:1px solid #9ca3af;padding-top:4px;width:42%;text-align:center;">Administrator Signature</div>
+          <div style="margin-top:28px;display:flex;justify-content:space-between;font-size:11px;color:#000;">
+            <div style="border-top:1px solid #000;padding-top:4px;width:42%;text-align:center;">Parent / Guardian Signature</div>
+            <div style="border-top:1px solid #000;padding-top:4px;width:42%;text-align:center;">Administrator Signature</div>
           </div>
         </div>
       </div>`;
