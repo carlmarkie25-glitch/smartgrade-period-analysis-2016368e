@@ -46,7 +46,7 @@ export const UserBiodataManagementTab = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("students")
-        .select("id, user_id, full_name, photo_url, gender, student_id, phone_number")
+        .select("id, user_id, full_name, photo_url, gender, student_id, phone_number, date_of_birth, religion, nationality, county, country, address, father_name, mother_name, emergency_contact_name, emergency_contact_phone, classes(name)")
         .order("full_name");
 
       if (error) throw error;
@@ -57,18 +57,20 @@ export const UserBiodataManagementTab = () => {
         full_name: s.full_name || "Unknown",
         email: "",
         phone_number: s.phone_number ?? null,
-        date_of_birth: null,
+        date_of_birth: s.date_of_birth ?? null,
         gender: s.gender ?? null,
         photo_url: s.photo_url ?? null,
-        nationality: null,
-        county: null,
-        country: null,
-        address: null,
-        father_name: null,
-        mother_name: null,
-        emergency_contact_name: null,
-        emergency_contact_phone: null,
+        nationality: s.nationality ?? null,
+        county: s.county ?? null,
+        country: s.country ?? null,
+        address: s.address ?? null,
+        father_name: s.father_name ?? null,
+        mother_name: s.mother_name ?? null,
+        emergency_contact_name: s.emergency_contact_name ?? null,
+        emergency_contact_phone: s.emergency_contact_phone ?? null,
         student_id: s.student_id ?? null,
+        classes: s.classes ?? null,
+        religion: s.religion ?? null,
       }));
 
       return allUsers;
