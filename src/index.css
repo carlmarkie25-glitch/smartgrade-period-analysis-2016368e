@@ -180,11 +180,9 @@ All colors MUST be HSL.
 }
 
 /* Sidebar "gulf" notch effect for active item.
-   Two pseudo-elements above & below the active pill create concave
-   curves so the pill appears to bleed out of the sidebar into the page.
-   Technique: a square element with a rounded corner facing the pill,
-   filled with the page background via a large box-shadow that "paints"
-   the cut-out shape. */
+   Uses inline SVG backgrounds on ::before and ::after to create
+   concave quarter-circle cutouts that match the page background,
+   making the active pill appear to bleed out of the sidebar. */
 .sidebar-notch-active {
   position: relative;
   overflow: visible !important;
@@ -198,21 +196,21 @@ All colors MUST be HSL.
   content: "";
   position: absolute;
   right: 0;
-  width: 18px;
-  height: 18px;
-  background: transparent;
+  width: 20px;
+  height: 20px;
   pointer-events: none;
   z-index: 15;
+  background-color: hsl(var(--background));
 }
 .sidebar-notch-active::before {
-  top: -18px;
-  border-bottom-right-radius: 18px;
-  box-shadow: 0 9px 0 0 hsl(var(--background));
+  top: -20px;
+  -webkit-mask: radial-gradient(circle at top left, transparent 20px, black 20px);
+          mask: radial-gradient(circle at top left, transparent 20px, black 20px);
 }
 .sidebar-notch-active::after {
-  bottom: -18px;
-  border-top-right-radius: 18px;
-  box-shadow: 0 -9px 0 0 hsl(var(--background));
+  bottom: -20px;
+  -webkit-mask: radial-gradient(circle at bottom left, transparent 20px, black 20px);
+          mask: radial-gradient(circle at bottom left, transparent 20px, black 20px);
 }
 
 /* Neumorphic utility classes */
