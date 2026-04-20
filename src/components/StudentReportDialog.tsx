@@ -557,14 +557,14 @@ export const StudentReportDialog = ({
                       </div>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                          <div style={{
-                           background: gold, color: '#fff', textAlign: 'center', padding: '4px 10px',
+                           background: gold, color: goldText, textAlign: 'center', padding: '4px 10px',
                            fontSize: '11px', fontWeight: 700, borderRadius: '3px', minWidth: '80px'
                          }}>
                            <small style={{ display: 'block', fontSize: '9px', fontWeight: 400, opacity: 0.85, letterSpacing: '0.5px' }}>REPORT TYPE</small>
                            {getDepartmentLabel().toUpperCase()}
                          </div>
                          <div style={{
-                           background: gold, color: '#fff', textAlign: 'center', padding: '4px 10px',
+                           background: gold, color: goldText, textAlign: 'center', padding: '4px 10px',
                            fontSize: '11px', fontWeight: 700, borderRadius: '3px', minWidth: '80px'
                          }}>
                            <small style={{ display: 'block', fontSize: '9px', fontWeight: 400, opacity: 0.85, letterSpacing: '0.5px' }}>SEMESTER</small>
@@ -653,7 +653,7 @@ export const StudentReportDialog = ({
                           <th rowSpan={2} style={{ ...thBase, background: navy, textAlign: 'left', paddingLeft: 8 }}>Subject</th>
                           <th colSpan={5} style={{ ...thBase, background: lightBlue }}>Semester 1</th>
                           <th colSpan={5} style={{ ...thBase, background: lightBlue }}>Semester 2</th>
-                          <th rowSpan={2} style={{ ...thBase, background: gold, color: '#fff', fontWeight: 700 }}>Y.AVG</th>
+                          <th rowSpan={2} style={{ ...thBase, background: gold, color: goldText, fontWeight: 700 }}>Y.AVG</th>
                         </tr>
                         <tr>
                           <th style={thBase}>P1</th><th style={thBase}>P2</th><th style={thBase}>P3</th>
@@ -714,7 +714,7 @@ export const StudentReportDialog = ({
                               <td style={{ ...tdBase, background: '#1a5276', color: '#fff', fontWeight: 700 }}>
                                 {s2avg !== null ? kgWrap(s2avg) : '--'}
                               </td>
-                              <td style={{ ...tdBase, background: gold, color: '#fff', fontWeight: 700 }}>
+                              <td style={{ ...tdBase, background: gold, color: goldText, fontWeight: 700 }}>
                                 {yavg !== null ? kgWrap(yavg) : '--'}
                               </td>
                             </>
@@ -774,7 +774,7 @@ export const StudentReportDialog = ({
                                 {['p4','p5','p6'].map(p => <td key={p} style={aggStyle}>{computeColumnSum(subjects, p)}</td>)}
                                 <td style={{ ...aggStyle, background: lightBlue, color: '#fff' }}>{computeColumnSum(subjects, 'exam_s2')}</td>
                                 <td style={{ ...aggStyle, background: '#1a5276', color: '#fff' }}>{s2Sum}</td>
-                                <td style={{ ...aggStyle, background: gold, color: '#fff' }}>{s1Sum + s2Sum}</td>
+                                <td style={{ ...aggStyle, background: gold, color: goldText }}>{s1Sum + s2Sum}</td>
                               </>
                             );
                           })()}
@@ -791,7 +791,7 @@ export const StudentReportDialog = ({
                                 {['p4','p5','p6'].map(p => <td key={p} style={avgStyle}>{kgWrap(computeColumnAvg(subjects, p))}</td>)}
                                 <td style={{ ...avgStyle, background: lightBlue, color: '#fff' }}>{kgWrap(computeColumnAvg(subjects, 'exam_s2'))}</td>
                                 <td style={{ ...avgStyle, background: '#1a5276', color: '#fff' }}>{s2Avg !== null && s2Avg !== undefined ? kgWrap(s2Avg) : '--'}</td>
-                                <td style={{ ...avgStyle, background: gold, color: '#fff' }}>{generalAvg !== null && generalAvg !== undefined ? kgWrap(generalAvg) : '--'}</td>
+                                <td style={{ ...avgStyle, background: gold, color: goldText }}>{generalAvg !== null && generalAvg !== undefined ? kgWrap(generalAvg) : '--'}</td>
                               </>
                             );
                           })()}
