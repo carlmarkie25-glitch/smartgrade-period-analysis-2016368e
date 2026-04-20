@@ -31,6 +31,7 @@ interface UserBiodata {
   student_id?: string | null;
   classes?: { name: string } | null;
   departments?: { name: string } | null;
+  religion?: string | null;
 }
 
 export const UserBiodataManagementTab = () => {
