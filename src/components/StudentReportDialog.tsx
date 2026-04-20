@@ -245,19 +245,21 @@ export const StudentReportDialog = ({
           // and numeric scores are rendered as letter grades (A+, A, B+, …).
 
           // Wrap a numeric score for display: shows letter for KG, raw number otherwise.
-          const kgWrap = (v: any, max: number = 100): any => {
+          // Scores in `report` are ALREADY normalized to 0–100, so we always treat
+          // max as 100 when converting to a KG letter (ignore the raw assessment max).
+          const kgWrap = (v: any, _max: number = 100): any => {
             if (!isKg) return v;
             if (v === null || v === undefined || v === '--' || v === 'I') return v;
             const n = typeof v === 'number' ? v : Number(v);
             if (!Number.isFinite(n)) return v;
-            return scoreToLetter(n, max) ?? '—';
+            return scoreToLetter(n, 100) ?? '—';
           };
           // Wrap displayScore output (handles 'I' / '--' passthrough)
-          const kgDisp = (score: number | null | undefined, noGrades?: boolean, max: number = 100): string => {
+          const kgDisp = (score: number | null | undefined, noGrades?: boolean, _max: number = 100): string => {
             const base = displayScore(score, noGrades);
             if (!isKg) return base;
             if (base === '--' || base === 'I') return base;
-            return scoreToLetter(score as number, max) ?? '—';
+            return scoreToLetter(score as number, 100) ?? '—';
           };
 
           // Unified averaging — these match the "Average" row of the grades table
