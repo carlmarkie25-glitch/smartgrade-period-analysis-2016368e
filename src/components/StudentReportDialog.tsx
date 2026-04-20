@@ -173,6 +173,7 @@ export const StudentReportDialog = ({
   };
 
   const [downloading, setDownloading] = useState(false);
+  const [greyMode, setGreyMode] = useState(false);
 
   const handleDownloadPdf = async () => {
     const el = document.getElementById('report-content');
@@ -281,7 +282,7 @@ export const StudentReportDialog = ({
   };
 
   const getDepartmentLabel = () => {
-    return "Report Card";
+    return period === 'yearly' ? "Report Card" : "Grade Sheet";
   };
 
   // Compute subject semester average
@@ -321,9 +322,11 @@ export const StudentReportDialog = ({
   };
 
   // Styles
-  const navy = '#1a2a6e';
+  // Styles — when greyMode is on, swap blue tones for light grey (gold/other accents stay)
+  const navy = greyMode ? '#9aa0a6' : '#1a2a6e';
   const gold = '#c8a84b';
-  const lightBlue = '#2a5298';
+  const lightBlue = greyMode ? '#bfc4ca' : '#2a5298';
+  const headerBlue = greyMode ? '#a8aeb4' : '#2a3a8e';
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -457,6 +460,15 @@ export const StudentReportDialog = ({
                 <Button onClick={handleDownloadPdf} size="sm" className="gap-2" disabled={downloading} style={{ background: navy, color: '#fff' }}>
                   <Download className="h-4 w-4" /> {downloading ? 'Generating PDF...' : 'Download PDF'}
                 </Button>
+                <Button
+                  onClick={() => setGreyMode((g) => !g)}
+                  size="sm"
+                  variant="outline"
+                  className="gap-2"
+                  title="Toggle between color and grey mode"
+                >
+                  {greyMode ? 'Color Mode' : 'Grey Mode'}
+                </Button>
                 {canEdit && !editing && (
                   <Button onClick={() => setEditing(true)} size="sm" variant="outline" className="gap-2">
                     <Pencil className="h-4 w-4" /> Edit Teacher Inputs
@@ -548,7 +560,7 @@ export const StudentReportDialog = ({
                 {/* ── TITLE BAR ── */}
                 <div style={{ background: navy, textAlign: 'center', padding: '10px', borderTop: `2px solid ${gold}` }}>
                   <h2 style={{ color: '#fff', fontSize: '16px', letterSpacing: '2px', fontWeight: 700, margin: 0 }}>
-                    ACADEMIC REPORT CARD
+                    ACADEMIC {getDepartmentLabel().toUpperCase()}
                   </h2>
                   <p style={{ color: gold, fontSize: '12px', margin: 0 }}>
                     {report.student.classes?.academic_years?.year_name || '--'} School Year
@@ -638,14 +650,14 @@ export const StudentReportDialog = ({
                       <tr>
                         <th style={{ ...thBase, background: navy, textAlign: 'left', paddingLeft: 8 }}>Subject</th>
                         {(isSem1 ? ['P1','P2','P3','S.EXAM'] : ['P4','P5','P6','S.EXAM']).map(h => (
-                          <th key={h} style={{ ...thBase, background: h === 'S.EXAM' ? lightBlue : '#2a3a8e' }}>{h}</th>
+                          <th key={h} style={{ ...thBase, background: h === 'S.EXAM' ? lightBlue : headerBlue }}>{h}</th>
                         ))}
                         <th style={{ ...thBase, background: '#1a5276', fontWeight: 700 }}>S.AVG</th>
                       </tr>
                     ) : (
                       <tr>
                         <th style={{ ...thBase, background: navy, textAlign: 'left', paddingLeft: 8 }}>Subject</th>
-                        <th style={{ ...thBase, background: '#2a3a8e' }}>Score</th>
+                        <th style={{ ...thBase, background: headerBlue }}>Score</th>
                       </tr>
                     )}
                   </thead>
