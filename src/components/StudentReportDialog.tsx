@@ -565,29 +565,29 @@ export const StudentReportDialog = ({
                           {isSemester && isYearly ? (
                             <>
                               {['p1','p2','p3'].map(p => (
-                                <td key={p} style={{ ...tdBase, ...scoreColorStyle(subject.periods?.[p]?.score) }}>
-                                  {displayScore(subject.periods?.[p]?.score, subject.periods?.[p]?.noGrades)}
+                                <td key={p} style={{ ...tdBase, ...(isKg ? {} : scoreColorStyle(subject.periods?.[p]?.score)) }}>
+                                  {kgDisp(subject.periods?.[p]?.score, subject.periods?.[p]?.noGrades, subject.periods?.[p]?.max)}
                                 </td>
                               ))}
                               <td style={{ ...tdBase, background: lightBlue, color: '#fff', fontWeight: 600 }}>
-                                {displayScore(subject.periods?.exam_s1?.score, subject.periods?.exam_s1?.noGrades)}
+                                {kgDisp(subject.periods?.exam_s1?.score, subject.periods?.exam_s1?.noGrades, subject.periods?.exam_s1?.max)}
                               </td>
                               <td style={{ ...tdBase, background: '#1a5276', color: '#fff', fontWeight: 700 }}>
-                                {s1avg !== null ? s1avg : '--'}
+                                {s1avg !== null ? kgWrap(s1avg) : '--'}
                               </td>
                               {['p4','p5','p6'].map(p => (
-                                <td key={p} style={{ ...tdBase, ...scoreColorStyle(subject.periods?.[p]?.score) }}>
-                                  {displayScore(subject.periods?.[p]?.score, subject.periods?.[p]?.noGrades)}
+                                <td key={p} style={{ ...tdBase, ...(isKg ? {} : scoreColorStyle(subject.periods?.[p]?.score)) }}>
+                                  {kgDisp(subject.periods?.[p]?.score, subject.periods?.[p]?.noGrades, subject.periods?.[p]?.max)}
                                 </td>
                               ))}
                               <td style={{ ...tdBase, background: lightBlue, color: '#fff', fontWeight: 600 }}>
-                                {displayScore(subject.periods?.exam_s2?.score, subject.periods?.exam_s2?.noGrades)}
+                                {kgDisp(subject.periods?.exam_s2?.score, subject.periods?.exam_s2?.noGrades, subject.periods?.exam_s2?.max)}
                               </td>
                               <td style={{ ...tdBase, background: '#1a5276', color: '#fff', fontWeight: 700 }}>
-                                {s2avg !== null ? s2avg : '--'}
+                                {s2avg !== null ? kgWrap(s2avg) : '--'}
                               </td>
                               <td style={{ ...tdBase, background: gold, color: '#fff', fontWeight: 700 }}>
-                                {yavg !== null ? yavg : '--'}
+                                {yavg !== null ? kgWrap(yavg) : '--'}
                               </td>
                             </>
                           ) : isSemester ? (
@@ -597,22 +597,22 @@ export const StudentReportDialog = ({
                                 return (
                                   <td key={p} style={{
                                     ...tdBase,
-                                    ...(isExam ? { background: lightBlue, color: '#fff', fontWeight: 600 } : scoreColorStyle(subject.periods?.[p]?.score))
+                                    ...(isExam ? { background: lightBlue, color: '#fff', fontWeight: 600 } : (isKg ? {} : scoreColorStyle(subject.periods?.[p]?.score)))
                                   }}>
-                                    {displayScore(subject.periods?.[p]?.score, subject.periods?.[p]?.noGrades)}
+                                    {kgDisp(subject.periods?.[p]?.score, subject.periods?.[p]?.noGrades, subject.periods?.[p]?.max)}
                                   </td>
                                 );
                               })}
                               <td style={{ ...tdBase, background: '#1a5276', color: '#fff', fontWeight: 700 }}>
                                 {(() => {
                                   const avg = computeSubjectSemAvg(subject, isSem1 ? ['p1','p2','p3'] : ['p4','p5','p6']);
-                                  return avg !== null ? avg : '--';
+                                  return avg !== null ? kgWrap(avg) : '--';
                                 })()}
                               </td>
                             </>
                           ) : (
                             <td style={{ ...tdBase, fontWeight: 700, color: subject.noGrades ? '#999' : subject.hasIncomplete ? '#721c24' : '#111' }}>
-                              {subject.noGrades ? '--' : subject.hasIncomplete ? 'I' : subject.total}
+                              {subject.noGrades ? '--' : subject.hasIncomplete ? 'I' : kgWrap(subject.total, subject.max)}
                             </td>
                           )}
                         </tr>
