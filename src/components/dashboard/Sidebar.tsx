@@ -31,7 +31,7 @@ type MenuGroup = {
 export const Sidebar = ({ activeTab, onTabChange, collapsed = false, onToggle }: SidebarProps) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { isAdmin, isTeacher, isLoading: rolesLoading } = useUserRoles();
+  const { isAdmin, isTeacher, isVpi, isRegistrar, isLoading: rolesLoading } = useUserRoles();
   const { signOut } = useAuth();
 
   const topItems: MenuItem[] = [
@@ -139,7 +139,29 @@ export const Sidebar = ({ activeTab, onTabChange, collapsed = false, onToggle }:
     if (rolesLoading) return roles.includes("all");
     if (roles.includes("all")) return true;
     if (roles.includes("admin") && isAdmin) return true;
-    if (roles.includes("teacher") && (isTeacher || isAdmin)) return true;
+    if (roles.includes("teacher") && (isTeacher || isAdmin || isVpi)) return true;
+    // VPI sees everything in academics (anything teachers/admins see in the academics group)
+    if (isVpi && roles.some((r) => r === "admin" || r === "teacher")) return true;
+    // Registrar sees finance items (marked with admin role on finance group)
+    if (isRegistrar && roles.includes("admin")) {
+      // Only allow if this access check is happening for a finance item — handled at group level below
+      return false;
+    }
+    return false;
+  };
+
+  // Group-level access: VPI gets academics; Registrar gets finance
+  const groupAccess = (groupId: string, roles: string[]) => {
+    if (canAccess(roles)) return true;
+    if (isVpi && (groupId === "academics" || groupId === "users")) return true;
+    if (isRegistrar && groupId === "finance") return true;
+    return false;
+  };
+
+  const childAccess = (groupId: string, roles: string[]) => {
+    if (canAccess(roles)) return true;
+    if (isVpi && (groupId === "academics" || groupId === "users")) return true;
+    if (isRegistrar && groupId === "finance") return true;
     return false;
   };
 
