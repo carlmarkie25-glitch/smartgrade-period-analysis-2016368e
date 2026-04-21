@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -15,9 +15,10 @@ import {
   XCircle,
   AlertCircle,
 } from "lucide-react";
-import { useStudentPeriodTotals, useStudentBilling } from "@/hooks/usePortalData";
+import { useStudentPeriodTotals, useStudentBilling, useStudentEnrollmentYears } from "@/hooks/usePortalData";
 import { useStudentAttendanceSummary } from "@/hooks/useAttendance";
 import { StudentReportDialog } from "@/components/StudentReportDialog";
+import AcademicYearSelector from "@/components/AcademicYearSelector";
 import { format } from "date-fns";
 
 interface StudentPortalViewProps {
@@ -44,10 +45,24 @@ const periodLabel = (p: string) => {
 const StudentPortalView = ({ student }: StudentPortalViewProps) => {
   const [reportOpen, setReportOpen] = useState(false);
   const [reportPeriod, setReportPeriod] = useState<string>("semester1");
+  const [selectedYearId, setSelectedYearId] = useState<string | undefined>(undefined);
 
-  const { data: totals, isLoading: totalsLoading } = useStudentPeriodTotals(student.id);
+  // Years this student has been enrolled in (history table).
+  const { data: enrollmentYears } = useStudentEnrollmentYears(student.id);
+
+  // Default the year selector to the current academic year (or the most recent enrollment).
+  useEffect(() => {
+    if (selectedYearId || !enrollmentYears || enrollmentYears.length === 0) return;
+    const current = enrollmentYears.find((e: any) => e.academic_years?.is_current);
+    setSelectedYearId((current ?? enrollmentYears[0]).academic_year_id);
+  }, [enrollmentYears, selectedYearId]);
+
+  const allowedYearIds = (enrollmentYears ?? []).map((e: any) => e.academic_year_id);
+  const selectedEnrollment = (enrollmentYears ?? []).find((e: any) => e.academic_year_id === selectedYearId);
+
+  const { data: totals, isLoading: totalsLoading } = useStudentPeriodTotals(student.id, selectedYearId);
   const { data: attendance, isLoading: attLoading } = useStudentAttendanceSummary(student.id);
-  const { data: bills, isLoading: billsLoading } = useStudentBilling(student.id);
+  const { data: bills, isLoading: billsLoading } = useStudentBilling(student.id, selectedYearId);
 
   const currentBill = bills?.find((b: any) => b.academic_years?.is_current) ?? bills?.[0];
   const totalDue = currentBill?.grand_total ?? 0;
