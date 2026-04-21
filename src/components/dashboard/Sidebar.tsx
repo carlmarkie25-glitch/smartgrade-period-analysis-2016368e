@@ -220,7 +220,7 @@ export const Sidebar = ({ activeTab, onTabChange, collapsed = false, onToggle }:
   };
 
   const renderGroup = (group: MenuGroup, isOpen: boolean, setOpen: (v: boolean) => void, isGroupActive: boolean) => {
-    if (!canAccess(group.roles)) return null;
+    if (!groupAccess(group.id, group.roles)) return null;
     const GroupIcon = group.icon;
     return (
       <div className="w-full" key={group.id}>
@@ -260,7 +260,7 @@ export const Sidebar = ({ activeTab, onTabChange, collapsed = false, onToggle }:
         {isOpen && (
           <div className={`flex flex-col gap-0.5 mt-1 py-1 rounded-xl bg-white/5 ${collapsed ? "px-1" : "px-2 ml-2"}`}>
             {group.children
-              .filter((item) => canAccess(item.roles))
+              .filter((item) => childAccess(group.id, item.roles))
               .map((item) => renderGroupItem(item))}
           </div>
         )}
