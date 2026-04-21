@@ -159,14 +159,24 @@ const GradesRelease = () => {
             )}
 
             {scope === "subject" && (
-              <Select value={subjectId} onValueChange={setSubjectId}>
-                <SelectTrigger><SelectValue placeholder="Select subject" /></SelectTrigger>
-                <SelectContent>
-                  {allSubjects?.map((s: any) => (
-                    <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <>
+                <Select value={classId} onValueChange={(v) => { setClassId(v); setSubjectId(""); }}>
+                  <SelectTrigger><SelectValue placeholder="Select class first" /></SelectTrigger>
+                  <SelectContent>
+                    {classes?.map((c) => (
+                      <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Select value={subjectId} onValueChange={setSubjectId} disabled={!classId || availableSubjectsForClass.length === 0}>
+                  <SelectTrigger><SelectValue placeholder={classId ? "Select subject" : "Choose class first"} /></SelectTrigger>
+                  <SelectContent>
+                    {availableSubjectsForClass.map((s: any) => (
+                      <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </>
             )}
 
             <Select value={period} onValueChange={setPeriod}>
