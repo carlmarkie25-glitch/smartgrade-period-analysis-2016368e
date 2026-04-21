@@ -120,6 +120,7 @@ const GradesRelease = () => {
                 <SelectItem value="all">All classes</SelectItem>
                 <SelectItem value="department">By department</SelectItem>
                 <SelectItem value="class">Specific class</SelectItem>
+                <SelectItem value="subject">Specific subject</SelectItem>
               </SelectContent>
             </Select>
 
@@ -140,6 +141,17 @@ const GradesRelease = () => {
                 <SelectContent>
                   {classes?.map((c) => (
                     <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
+
+            {scope === "subject" && (
+              <Select value={subjectId} onValueChange={setSubjectId}>
+                <SelectTrigger><SelectValue placeholder="Select subject" /></SelectTrigger>
+                <SelectContent>
+                  {allSubjects?.map((s: any) => (
+                    <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
