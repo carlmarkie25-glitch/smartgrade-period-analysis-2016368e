@@ -72,12 +72,24 @@ const GradesRelease = () => {
     return Array.from(seen, ([id, name]) => ({ id, name }));
   }, [classes]);
 
+  // Get subjects available for the selected class (for "subject" scope)
+  const availableSubjectsForClass = useMemo(() => {
+    if (!allCS || !classId) return [];
+    const subjectIds = new Set<string>();
+    (allCS as any[]).forEach((cs) => {
+      if (cs.class_id === classId && cs.subjects) {
+        subjectIds.add(cs.subject_id);
+      }
+    });
+    return (allSubjects ?? []).filter((s: any) => subjectIds.has(s.id));
+  }, [allCS, allSubjects, classId]);
+
   const filteredCS = useMemo(() => {
     if (!allCS) return [];
     return (allCS as any[]).filter((cs) => {
       if (scope === "class" && classId) return cs.class_id === classId;
       if (scope === "department" && departmentId) return cs.classes?.department_id === departmentId;
-      if (scope === "subject" && subjectId) return cs.subject_id === subjectId;
+      if (scope === "subject" && classId && subjectId) return cs.class_id === classId && cs.subject_id === subjectId;
       return true;
     });
   }, [allCS, scope, classId, departmentId, subjectId]);
@@ -147,14 +159,24 @@ const GradesRelease = () => {
             )}
 
             {scope === "subject" && (
-              <Select value={subjectId} onValueChange={setSubjectId}>
-                <SelectTrigger><SelectValue placeholder="Select subject" /></SelectTrigger>
-                <SelectContent>
-                  {allSubjects?.map((s: any) => (
-                    <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <>
+                <Select value={classId} onValueChange={(v) => { setClassId(v); setSubjectId(""); }}>
+                  <SelectTrigger><SelectValue placeholder="Select class first" /></SelectTrigger>
+                  <SelectContent>
+                    {classes?.map((c) => (
+                      <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Select value={subjectId} onValueChange={setSubjectId} disabled={!classId || availableSubjectsForClass.length === 0}>
+                  <SelectTrigger><SelectValue placeholder={classId ? "Select subject" : "Choose class first"} /></SelectTrigger>
+                  <SelectContent>
+                    {availableSubjectsForClass.map((s: any) => (
+                      <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </>
             )}
 
             <Select value={period} onValueChange={setPeriod}>
