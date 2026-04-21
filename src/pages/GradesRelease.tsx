@@ -10,6 +10,7 @@ import { useClasses, useClassSubjects } from "@/hooks/useClasses";
 import { useAllGradeLocks, useUpdateGradeLocks } from "@/hooks/useGradeLocks";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
+import { useToast } from "@/hooks/use-toast";
 
 const PERIODS: { value: string; label: string }[] = [
   { value: "p1", label: "Period 1" },
@@ -61,6 +62,7 @@ const GradesRelease = () => {
   const { data: allSubjects } = useAllSubjects();
   const { data: locks } = useAllGradeLocks();
   const updateMutation = useUpdateGradeLocks();
+  const { toast } = useToast();
 
   const departments = useMemo(() => {
     const seen = new Map<string, string>();
@@ -107,8 +109,31 @@ const GradesRelease = () => {
 
   const targets = filteredCS.map((cs: any) => ({ classSubjectId: cs.id, period }));
 
-  const apply = (changes: { is_locked?: boolean; is_released?: boolean }) =>
-    updateMutation.mutate({ targets, changes });
+  const apply = (changes: { is_locked?: boolean; is_released?: boolean }) => {
+    let finalTargets = targets;
+
+    // Releasing requires that grades have been submitted (locked) first
+    if (changes.is_released === true) {
+      finalTargets = targets.filter((t) => lockMap.get(`${t.classSubjectId}:${period}`)?.is_locked);
+      const skipped = targets.length - finalTargets.length;
+      if (finalTargets.length === 0) {
+        toast({
+          title: "Nothing to release",
+          description: "Grades must be submitted by teachers before they can be released.",
+          variant: "destructive",
+        });
+        return;
+      }
+      if (skipped > 0) {
+        toast({
+          title: `Skipped ${skipped} unsubmitted`,
+          description: `Releasing only ${finalTargets.length} submitted class subject(s).`,
+        });
+      }
+    }
+
+    updateMutation.mutate({ targets: finalTargets, changes });
+  };
 
   return (
     <AppShell activeTab="grades-release">
