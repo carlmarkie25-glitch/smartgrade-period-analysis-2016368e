@@ -143,20 +143,15 @@ const Gradebook = () => {
       "Total Score",
       "Total Max",
       "Percentage",
-      "Status",
     ];
 
     const rows = filteredStudents.map((student) => {
       const studentEditedGrades = editedGrades[student.id] || {};
-      const hasAnyMissing = assessmentTypes.some(
-        (at) => studentEditedGrades[at.id] === null || studentEditedGrades[at.id] === undefined
-      );
       const totalScore = assessmentTypes.reduce(
         (sum, at) => sum + (studentEditedGrades[at.id] ?? 0),
         0
       );
       const totalMax = assessmentTypes.reduce((sum, at) => sum + (at.max_points ?? 0), 0);
-      const incomplete = isAggregateIncomplete(totalScore, totalMax, hasAnyMissing);
       const percentage = totalMax > 0 ? Math.trunc((totalScore / totalMax) * 100) : "";
 
       return [
@@ -164,12 +159,11 @@ const Gradebook = () => {
         student.full_name ?? "",
         ...assessmentTypes.map((at) => {
           const v = studentEditedGrades[at.id];
-          return v === null || v === undefined ? "I" : v;
+          return v === null || v === undefined ? "" : v;
         }),
-        incomplete ? "I" : totalScore,
+        totalScore,
         totalMax,
-        incomplete ? "I" : percentage,
-        incomplete ? "Incomplete" : "Complete",
+        percentage,
       ].map(escape).join(",");
     });
 
