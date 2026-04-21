@@ -4,9 +4,11 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Download, Eye } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { useState, useRef } from "react";
+import { useState, useRef, useMemo, useEffect } from "react";
 import { useClasses } from "@/hooks/useClasses";
 import { useStudents } from "@/hooks/useStudents";
+import { useAcademicYears } from "@/hooks/useAcademicYears";
+import AcademicYearSelector from "@/components/AcademicYearSelector";
 import { Skeleton } from "@/components/ui/skeleton";
 import { StudentReportDialog } from "@/components/StudentReportDialog";
 import { useToast } from "@/hooks/use-toast";
@@ -218,7 +220,8 @@ const Reports = () => {
           <p className="text-muted-foreground text-sm">Generate and view student report cards</p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+          <AcademicYearSelector value={selectedYear} onChange={setSelectedYear} />
           <Select value={selectedClass} onValueChange={setSelectedClass}>
             <SelectTrigger>
               <SelectValue placeholder="Select Class" />
