@@ -462,7 +462,9 @@ const Gradebook = () => {
                               {/* No per-assessment letter grade — KG letters apply only to the total */}
                               <TableCell className="text-center font-bold">
                                 {isTotalIncomplete ? (
-                                  <span className="text-orange-500">I</span>
+                                  <span className="text-orange-500">
+                                    I {totalMax > 0 ? Math.trunc((totalScore / totalMax) * 100) : "-"}
+                                  </span>
                                 ) : (
                                   <span className="text-primary">
                                     {totalMax > 0 ? Math.trunc((totalScore / totalMax) * 100) : "-"}
