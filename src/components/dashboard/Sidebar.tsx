@@ -91,6 +91,17 @@ export const Sidebar = ({ activeTab, onTabChange, collapsed = false, onToggle }:
     ],
   };
 
+  const settingsGroup: MenuGroup = {
+    id: "settings",
+    icon: Settings,
+    label: "Settings",
+    roles: ["admin"],
+    children: [
+      { id: "admin-settings", icon: Settings, label: "Settings", path: "/admin", roles: ["admin"] },
+      { id: "billing", icon: CreditCard, label: "Billing", path: "/settings/billing", roles: ["admin"] },
+    ],
+  };
+
   const academicsChildIds = academicsGroup.children.map((c) => c.id);
   const isAcademicsActive = academicsChildIds.some(
     (id) => activeTab === id || academicsGroup.children.find((c) => c.id === id)?.path === location.pathname
