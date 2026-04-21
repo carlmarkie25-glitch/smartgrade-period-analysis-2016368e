@@ -1,4 +1,4 @@
-import { LayoutDashboard, Users, BookOpen, FileText, BarChart3, Settings, GraduationCap, CalendarDays, LogOut, UserCog, Calendar, Building, School, Layers, ChevronDown, PanelLeftClose, PanelLeft, UsersRound, Wallet, DollarSign, Receipt, TrendingUp, PieChart, CreditCard, Archive, RefreshCw, ArrowLeft } from "lucide-react";
+import { LayoutDashboard, Users, BookOpen, FileText, BarChart3, Settings, GraduationCap, CalendarDays, LogOut, UserCog, Calendar, Building, School, Layers, ChevronDown, PanelLeftClose, PanelLeft, UsersRound, Wallet, DollarSign, Receipt, TrendingUp, PieChart, CreditCard, Archive, RefreshCw, ArrowLeft, Lock } from "lucide-react";
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useUserRoles } from "@/hooks/useUserRoles";
@@ -46,6 +46,7 @@ export const Sidebar = ({ activeTab, onTabChange, collapsed = false, onToggle }:
     children: [
       { id: "gradebook", icon: BookOpen, label: "Gradebook", path: "/gradebook", roles: ["teacher", "admin"] },
       { id: "reports", icon: FileText, label: "Reports", path: "/reports", roles: ["teacher", "admin"] },
+      { id: "grades-release", icon: Lock, label: "Release Grades", path: "/grades-release", roles: ["admin"] },
       { id: "classes", icon: Building, label: "Classes", path: "/classes", roles: ["admin"] },
       { id: "subjects", icon: Layers, label: "Subjects", path: "/subjects", roles: ["admin"] },
       { id: "years", icon: School, label: "Years", path: "/academic-years", roles: ["admin"] },

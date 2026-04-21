@@ -26,6 +26,7 @@ const Dashboard = lazy(() => import("./pages/Dashboard"));
 const Schedule = lazy(() => import("./pages/Schedule"));
 const AcademicCalendar = lazy(() => import("./pages/AcademicCalendar"));
 const Gradebook = lazy(() => import("./pages/Gradebook"));
+const GradesRelease = lazy(() => import("./pages/GradesRelease"));
 const Reports = lazy(() => import("./pages/Reports"));
 const Analytics = lazy(() => import("./pages/Analytics"));
 const Admin = lazy(() => import("./pages/Admin"));
@@ -82,6 +83,7 @@ const App = () => (
             <Route path="/schedule" element={<ProtectedRoute><Schedule /></ProtectedRoute>} />
             <Route path="/academic-calendar" element={<ProtectedRoute><AcademicCalendar /></ProtectedRoute>} />
             <Route path="/gradebook" element={<TeacherRoute><Gradebook /></TeacherRoute>} />
+            <Route path="/grades-release" element={<AdminRoute><GradesRelease /></AdminRoute>} />
             <Route path="/reports" element={<TeacherRoute><Reports /></TeacherRoute>} />
             <Route path="/analytics" element={<TeacherRoute><Analytics /></TeacherRoute>} />
             <Route path="/attendance" element={<TeacherRoute><Attendance /></TeacherRoute>} />

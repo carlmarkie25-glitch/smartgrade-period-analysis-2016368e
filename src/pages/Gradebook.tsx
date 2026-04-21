@@ -4,14 +4,19 @@ import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
-import { Lock, Unlock, Save, Search } from "lucide-react";
+import { Lock, Unlock, Save, Search, Send } from "lucide-react";
 import { useState, useEffect, useMemo } from "react";
 import { useClasses, useClassSubjects } from "@/hooks/useClasses";
 import { useStudents } from "@/hooks/useStudents";
 import { useGrades, useAssessmentTypes, useSaveGrades } from "@/hooks/useGrades";
+import { useGradeLock, useSubmitGrades } from "@/hooks/useGradeLocks";
 import { Skeleton } from "@/components/ui/skeleton";
 import { isKindergartenClass, scoreToLetter, letterColorClass, KG_SCALE } from "@/lib/kindergarten";
 import { isAggregateIncomplete } from "@/lib/grading";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 const Gradebook = () => {
   const [selectedClass, setSelectedClass] = useState<string>("");
@@ -20,10 +25,14 @@ const Gradebook = () => {
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [isLocked, setIsLocked] = useState(true);
   const [editedGrades, setEditedGrades] = useState<Record<string, Record<string, number | null>>>({});
+  const [showSubmitConfirm, setShowSubmitConfirm] = useState(false);
 
   const { data: classes, isLoading: classesLoading } = useClasses();
   const { data: classSubjects, isLoading: subjectsLoading } = useClassSubjects(selectedClass);
   const { data: students, isLoading: studentsLoading } = useStudents(selectedClass);
+  const { data: gradeLock } = useGradeLock(selectedSubject, selectedPeriod);
+  const submitMutation = useSubmitGrades();
+  const isPeriodLocked = !!gradeLock?.is_locked;
   const selectedClassObj = classes?.find((c) => c.id === selectedClass);
   const isKg = isKindergartenClass(selectedClassObj);
   const departmentId = (selectedClassObj as any)?.department_id ?? (selectedClassObj as any)?.departments?.id;
@@ -133,19 +142,27 @@ const Gradebook = () => {
   return (
     <AppShell activeTab="gradebook">
       <div className="py-4">
-        <div className="neu-card p-6 mb-6 flex items-center justify-between">
+        <div className="neu-card p-6 mb-6 flex items-center justify-between flex-wrap gap-3">
           <div>
             <h1 className="text-3xl font-bold text-foreground mb-1">Gradebook</h1>
             <p className="text-muted-foreground text-sm">Enter and manage student grades</p>
           </div>
-          <Button 
-            variant={isLocked ? "outline" : "default"} 
-            className="gap-2"
-            onClick={() => setIsLocked(!isLocked)}
-          >
-            {isLocked ? <Lock className="h-4 w-4" /> : <Unlock className="h-4 w-4" />}
-            {isLocked ? "Locked" : "Unlocked"}
-          </Button>
+          <div className="flex items-center gap-2 flex-wrap">
+            {isPeriodLocked && (
+              <span className="inline-flex items-center gap-1 text-xs px-2 py-1 rounded-md bg-destructive/10 text-destructive">
+                <Lock className="h-3 w-3" /> Period locked by admin/submission
+              </span>
+            )}
+            <Button
+              variant={isLocked ? "outline" : "default"}
+              className="gap-2"
+              onClick={() => setIsLocked(!isLocked)}
+              disabled={isPeriodLocked}
+            >
+              {isLocked ? <Lock className="h-4 w-4" /> : <Unlock className="h-4 w-4" />}
+              {isLocked ? "Locked" : "Unlocked"}
+            </Button>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
@@ -330,7 +347,7 @@ const Gradebook = () => {
                                   currentValue <= 69;
                                 return (
                                   <TableCell key={at.id} className="text-center">
-                                    {isLocked ? (
+                                    {(isLocked || isPeriodLocked) ? (
                                       <span
                                         className={
                                           isIncomplete
@@ -391,17 +408,16 @@ const Gradebook = () => {
                   </div>
                     </>
                   )}
-                  <div className="mt-6 flex justify-end gap-4">
-                    <Button 
-                      variant="outline" 
+                  <div className="mt-6 flex justify-end gap-4 flex-wrap">
+                    <Button
+                      variant="outline"
                       onClick={() => {
-                        // Reset to original grades
                         if (grades && students && assessmentTypes) {
                           const initialGrades: Record<string, Record<string, number | null>> = {};
                           students.forEach(student => {
                             initialGrades[student.id] = {};
                             assessmentTypes.forEach(at => {
-                              const existingGrade = grades.find(g => 
+                              const existingGrade = grades.find(g =>
                                 g.student_id === student.id && g.assessment_type_id === at.id
                               );
                               if (existingGrade && existingGrade.score !== null && existingGrade.score !== undefined) {
@@ -414,19 +430,54 @@ const Gradebook = () => {
                           setEditedGrades(initialGrades);
                         }
                       }}
-                      disabled={isLocked}
+                      disabled={isLocked || isPeriodLocked}
                     >
                       Cancel
                     </Button>
-                    <Button 
+                    <Button
                       onClick={handleSaveGrades}
-                      disabled={isLocked || saveGradesMutation.isPending}
+                      disabled={isLocked || isPeriodLocked || saveGradesMutation.isPending}
                       className="gap-2"
                     >
                       <Save className="h-4 w-4" />
                       {saveGradesMutation.isPending ? "Saving..." : "Save Grades"}
                     </Button>
+                    <Button
+                      variant="default"
+                      onClick={() => setShowSubmitConfirm(true)}
+                      disabled={isPeriodLocked || submitMutation.isPending}
+                      className="gap-2"
+                    >
+                      <Send className="h-4 w-4" />
+                      {isPeriodLocked ? "Submitted" : "Submit Grades"}
+                    </Button>
                   </div>
+                  <AlertDialog open={showSubmitConfirm} onOpenChange={setShowSubmitConfirm}>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Submit grades for this period?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Once submitted, the grades for this class, subject, and period will be
+                          locked. You will not be able to edit them unless an admin unlocks the period.
+                          Make sure all grades are entered correctly.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction
+                          onClick={() => {
+                            submitMutation.mutate({
+                              classSubjectId: selectedSubject,
+                              period: selectedPeriod,
+                            });
+                            setShowSubmitConfirm(false);
+                          }}
+                        >
+                          Yes, submit
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
                 </>
               ) : (
                 <p className="text-center text-muted-foreground py-8">
