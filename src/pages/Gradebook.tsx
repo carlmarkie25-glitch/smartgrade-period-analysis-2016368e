@@ -347,7 +347,7 @@ const Gradebook = () => {
                                   currentValue <= 69;
                                 return (
                                   <TableCell key={at.id} className="text-center">
-                                    {isLocked ? (
+                                    {(isLocked || isPeriodLocked) ? (
                                       <span
                                         className={
                                           isIncomplete
@@ -408,17 +408,16 @@ const Gradebook = () => {
                   </div>
                     </>
                   )}
-                  <div className="mt-6 flex justify-end gap-4">
-                    <Button 
-                      variant="outline" 
+                  <div className="mt-6 flex justify-end gap-4 flex-wrap">
+                    <Button
+                      variant="outline"
                       onClick={() => {
-                        // Reset to original grades
                         if (grades && students && assessmentTypes) {
                           const initialGrades: Record<string, Record<string, number | null>> = {};
                           students.forEach(student => {
                             initialGrades[student.id] = {};
                             assessmentTypes.forEach(at => {
-                              const existingGrade = grades.find(g => 
+                              const existingGrade = grades.find(g =>
                                 g.student_id === student.id && g.assessment_type_id === at.id
                               );
                               if (existingGrade && existingGrade.score !== null && existingGrade.score !== undefined) {
@@ -431,19 +430,54 @@ const Gradebook = () => {
                           setEditedGrades(initialGrades);
                         }
                       }}
-                      disabled={isLocked}
+                      disabled={isLocked || isPeriodLocked}
                     >
                       Cancel
                     </Button>
-                    <Button 
+                    <Button
                       onClick={handleSaveGrades}
-                      disabled={isLocked || saveGradesMutation.isPending}
+                      disabled={isLocked || isPeriodLocked || saveGradesMutation.isPending}
                       className="gap-2"
                     >
                       <Save className="h-4 w-4" />
                       {saveGradesMutation.isPending ? "Saving..." : "Save Grades"}
                     </Button>
+                    <Button
+                      variant="default"
+                      onClick={() => setShowSubmitConfirm(true)}
+                      disabled={isPeriodLocked || submitMutation.isPending}
+                      className="gap-2"
+                    >
+                      <Send className="h-4 w-4" />
+                      {isPeriodLocked ? "Submitted" : "Submit Grades"}
+                    </Button>
                   </div>
+                  <AlertDialog open={showSubmitConfirm} onOpenChange={setShowSubmitConfirm}>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Submit grades for this period?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Once submitted, the grades for this class, subject, and period will be
+                          locked. You will not be able to edit them unless an admin unlocks the period.
+                          Make sure all grades are entered correctly.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction
+                          onClick={() => {
+                            submitMutation.mutate({
+                              classSubjectId: selectedSubject,
+                              period: selectedPeriod,
+                            });
+                            setShowSubmitConfirm(false);
+                          }}
+                        >
+                          Yes, submit
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
                 </>
               ) : (
                 <p className="text-center text-muted-foreground py-8">
