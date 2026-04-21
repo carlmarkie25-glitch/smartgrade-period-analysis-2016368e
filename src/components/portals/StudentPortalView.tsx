@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -15,9 +15,10 @@ import {
   XCircle,
   AlertCircle,
 } from "lucide-react";
-import { useStudentPeriodTotals, useStudentBilling } from "@/hooks/usePortalData";
+import { useStudentPeriodTotals, useStudentBilling, useStudentEnrollmentYears } from "@/hooks/usePortalData";
 import { useStudentAttendanceSummary } from "@/hooks/useAttendance";
 import { StudentReportDialog } from "@/components/StudentReportDialog";
+import AcademicYearSelector from "@/components/AcademicYearSelector";
 import { format } from "date-fns";
 
 interface StudentPortalViewProps {
@@ -44,10 +45,24 @@ const periodLabel = (p: string) => {
 const StudentPortalView = ({ student }: StudentPortalViewProps) => {
   const [reportOpen, setReportOpen] = useState(false);
   const [reportPeriod, setReportPeriod] = useState<string>("semester1");
+  const [selectedYearId, setSelectedYearId] = useState<string | undefined>(undefined);
 
-  const { data: totals, isLoading: totalsLoading } = useStudentPeriodTotals(student.id);
+  // Years this student has been enrolled in (history table).
+  const { data: enrollmentYears } = useStudentEnrollmentYears(student.id);
+
+  // Default the year selector to the current academic year (or the most recent enrollment).
+  useEffect(() => {
+    if (selectedYearId || !enrollmentYears || enrollmentYears.length === 0) return;
+    const current = enrollmentYears.find((e: any) => e.academic_years?.is_current);
+    setSelectedYearId((current ?? enrollmentYears[0]).academic_year_id);
+  }, [enrollmentYears, selectedYearId]);
+
+  const allowedYearIds = (enrollmentYears ?? []).map((e: any) => e.academic_year_id);
+  const selectedEnrollment = (enrollmentYears ?? []).find((e: any) => e.academic_year_id === selectedYearId);
+
+  const { data: totals, isLoading: totalsLoading } = useStudentPeriodTotals(student.id, selectedYearId);
   const { data: attendance, isLoading: attLoading } = useStudentAttendanceSummary(student.id);
-  const { data: bills, isLoading: billsLoading } = useStudentBilling(student.id);
+  const { data: bills, isLoading: billsLoading } = useStudentBilling(student.id, selectedYearId);
 
   const currentBill = bills?.find((b: any) => b.academic_years?.is_current) ?? bills?.[0];
   const totalDue = currentBill?.grand_total ?? 0;
@@ -75,7 +90,7 @@ const StudentPortalView = ({ student }: StudentPortalViewProps) => {
     <div className="space-y-6">
       {/* ===== HEADER ===== */}
       <Card className="border-primary/20 bg-gradient-to-br from-primary/5 to-transparent">
-        <CardContent className="p-6 flex items-center gap-4">
+        <CardContent className="p-6 flex flex-col sm:flex-row sm:items-center gap-4">
           <Avatar className="h-16 w-16 border-2 border-primary/20">
             <AvatarImage src={student.photo_url ?? undefined} />
             <AvatarFallback className="bg-primary/10 text-primary font-bold">{initials}</AvatarFallback>
@@ -85,17 +100,27 @@ const StudentPortalView = ({ student }: StudentPortalViewProps) => {
             <div className="flex flex-wrap items-center gap-2 mt-1">
               <Badge variant="secondary" className="text-xs">
                 <GraduationCap className="h-3 w-3 mr-1" />
-                {student.classes?.name ?? "No class"}
+                {selectedEnrollment?.classes?.name ?? student.classes?.name ?? "No class"}
               </Badge>
               {student.departments?.name && (
                 <Badge variant="outline" className="text-xs">{student.departments.name}</Badge>
               )}
-              {student.classes?.academic_years?.year_name && (
-                <Badge variant="outline" className="text-xs">{student.classes.academic_years.year_name}</Badge>
+              {selectedEnrollment?.status && selectedEnrollment.status !== "active" && (
+                <Badge variant="outline" className="text-xs capitalize">{selectedEnrollment.status}</Badge>
               )}
               <span className="text-xs text-muted-foreground">ID: {student.student_id}</span>
             </div>
           </div>
+          {allowedYearIds.length > 0 && (
+            <div className="w-full sm:w-56">
+              <AcademicYearSelector
+                value={selectedYearId}
+                onChange={setSelectedYearId}
+                allowedYearIds={allowedYearIds}
+                placeholder="Academic year"
+              />
+            </div>
+          )}
         </CardContent>
       </Card>
 

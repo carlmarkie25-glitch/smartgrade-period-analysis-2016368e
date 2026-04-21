@@ -4,9 +4,11 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Download, Eye } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { useState, useRef } from "react";
+import { useState, useRef, useMemo, useEffect } from "react";
 import { useClasses } from "@/hooks/useClasses";
 import { useStudents } from "@/hooks/useStudents";
+import { useAcademicYears } from "@/hooks/useAcademicYears";
+import AcademicYearSelector from "@/components/AcademicYearSelector";
 import { Skeleton } from "@/components/ui/skeleton";
 import { StudentReportDialog } from "@/components/StudentReportDialog";
 import { useToast } from "@/hooks/use-toast";
@@ -24,6 +26,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 
 const Reports = () => {
+  const [selectedYear, setSelectedYear] = useState<string>("");
   const [selectedClass, setSelectedClass] = useState<string>("");
   const [selectedPeriod, setSelectedPeriod] = useState<string>("p1");
   const [selectedStudent, setSelectedStudent] = useState<string>("");
@@ -38,7 +41,28 @@ const Reports = () => {
   const zipRef = useRef<any>(null);
   const cancelRef = useRef(false);
 
-  const { data: classes, isLoading: classesLoading } = useClasses("sponsor");
+  const { data: years } = useAcademicYears();
+  const { data: allClasses, isLoading: classesLoading } = useClasses("sponsor");
+
+  useEffect(() => {
+    if (!selectedYear && years && years.length > 0) {
+      const current = years.find((y) => y.is_current) ?? years[0];
+      setSelectedYear(current.id);
+    }
+  }, [years, selectedYear]);
+
+  const classes = useMemo(() => {
+    if (!allClasses) return [];
+    if (!selectedYear) return allClasses;
+    return allClasses.filter((c: any) => c.academic_year_id === selectedYear);
+  }, [allClasses, selectedYear]);
+
+  useEffect(() => {
+    if (selectedClass && !classes.find((c: any) => c.id === selectedClass)) {
+      setSelectedClass("");
+    }
+  }, [classes, selectedClass]);
+
   const { data: students, isLoading: studentsLoading } = useStudents(selectedClass);
   const { toast } = useToast();
 
@@ -218,7 +242,8 @@ const Reports = () => {
           <p className="text-muted-foreground text-sm">Generate and view student report cards</p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+          <AcademicYearSelector value={selectedYear} onChange={setSelectedYear} />
           <Select value={selectedClass} onValueChange={setSelectedClass}>
             <SelectTrigger>
               <SelectValue placeholder="Select Class" />

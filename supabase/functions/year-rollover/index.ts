@@ -243,13 +243,44 @@ Deno.serve(async (req) => {
       return json({ ok: true, dry_run: true, classes_to_create: classesToCreate.length, summary: countsOnly(summary), preview: summary });
     }
 
-    // 7. Apply: update students
-    // Promoted -> set class_id to new
+    // 7. Apply: close out the FROM-year enrollment for everyone, then move + create new enrollment
+    const nowIso = new Date().toISOString();
+
+    const closeOldEnrollment = async (studentId: string, status: string, avg: number | null, reason?: string) => {
+      // Ensure a row exists for the from-year (backfill should already handle this)
+      const studentRow = (students ?? []).find((s) => s.id === studentId);
+      if (!studentRow) return;
+      await admin.from("student_enrollments").upsert({
+        student_id: studentId,
+        class_id: studentRow.class_id,
+        academic_year_id: from_year_id,
+        school_id: schoolId,
+        status,
+        final_average: avg,
+        reason: reason ?? null,
+        ended_at: nowIso,
+      }, { onConflict: "student_id,academic_year_id" });
+    };
+
+    const createNewEnrollment = async (studentId: string, classId: string) => {
+      await admin.from("student_enrollments").upsert({
+        student_id: studentId,
+        class_id: classId,
+        academic_year_id: to_year_id,
+        school_id: schoolId,
+        status: "active",
+      }, { onConflict: "student_id,academic_year_id" });
+    };
+
+    // Promoted -> close old as 'promoted', set class_id to new, create new enrollment
     for (const p of summary.promoted) {
+      await closeOldEnrollment(p.id, "promoted", p.average);
       await admin.from("students").update({ class_id: p.to_class_id }).eq("id", p.id);
+      await createNewEnrollment(p.id, p.to_class_id);
     }
-    // Graduated -> mark_student_departed
+    // Graduated -> close old as 'graduated', mark departed
     for (const g of summary.graduated) {
+      await closeOldEnrollment(g.id, "graduated", g.average, `Graduated at end of ${fromYear.year_name}`);
       await admin.rpc("mark_student_departed", {
         p_student_id: g.id,
         p_status: "graduated",
@@ -257,10 +288,12 @@ Deno.serve(async (req) => {
         p_reason: `Graduated at end of ${fromYear.year_name}`,
       });
     }
-    // Retained -> move to new year clone of same class (only if a new clone exists)
+    // Retained -> close old as 'retained', move to new year clone, create new enrollment
     for (const r of summary.retained) {
+      await closeOldEnrollment(r.id, "retained", r.average);
       if (r.to_class_id) {
         await admin.from("students").update({ class_id: r.to_class_id }).eq("id", r.id);
+        await createNewEnrollment(r.id, r.to_class_id);
       }
     }
 
