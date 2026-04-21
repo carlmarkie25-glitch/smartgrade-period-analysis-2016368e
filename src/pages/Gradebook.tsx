@@ -142,19 +142,27 @@ const Gradebook = () => {
   return (
     <AppShell activeTab="gradebook">
       <div className="py-4">
-        <div className="neu-card p-6 mb-6 flex items-center justify-between">
+        <div className="neu-card p-6 mb-6 flex items-center justify-between flex-wrap gap-3">
           <div>
             <h1 className="text-3xl font-bold text-foreground mb-1">Gradebook</h1>
             <p className="text-muted-foreground text-sm">Enter and manage student grades</p>
           </div>
-          <Button 
-            variant={isLocked ? "outline" : "default"} 
-            className="gap-2"
-            onClick={() => setIsLocked(!isLocked)}
-          >
-            {isLocked ? <Lock className="h-4 w-4" /> : <Unlock className="h-4 w-4" />}
-            {isLocked ? "Locked" : "Unlocked"}
-          </Button>
+          <div className="flex items-center gap-2 flex-wrap">
+            {isPeriodLocked && (
+              <span className="inline-flex items-center gap-1 text-xs px-2 py-1 rounded-md bg-destructive/10 text-destructive">
+                <Lock className="h-3 w-3" /> Period locked by admin/submission
+              </span>
+            )}
+            <Button
+              variant={isLocked ? "outline" : "default"}
+              className="gap-2"
+              onClick={() => setIsLocked(!isLocked)}
+              disabled={isPeriodLocked}
+            >
+              {isLocked ? <Lock className="h-4 w-4" /> : <Unlock className="h-4 w-4" />}
+              {isLocked ? "Locked" : "Unlocked"}
+            </Button>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
