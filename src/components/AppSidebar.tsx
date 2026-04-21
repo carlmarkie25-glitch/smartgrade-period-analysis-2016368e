@@ -145,7 +145,7 @@ const AppSidebar = () => {
           <SidebarGroup>
             <Collapsible open={isCollapsed ? false : adminOpen} onOpenChange={setAdminOpen}>
               <CollapsibleTrigger className={cn(
-                "flex items-center justify-between w-full mx-3 my-0.5 px-4 h-11 rounded-full transition-all duration-300",
+                "flex items-center justify-between w-auto mx-2 my-0.5 px-4 h-11 rounded-full transition-all duration-300",
                 isAdminActive
                   ? "text-sidebar-foreground font-semibold"
                   : "text-sidebar-foreground/90 hover:bg-white/15 hover:text-sidebar-foreground"
