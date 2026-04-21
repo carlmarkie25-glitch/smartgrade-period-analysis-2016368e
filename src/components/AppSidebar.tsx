@@ -72,7 +72,7 @@ const AppSidebar = () => {
         <SidebarMenuButton
           asChild
           className={cn(
-            "mx-3 my-0.5 rounded-full transition-all duration-300 h-11",
+            "mx-2 my-0.5 rounded-full transition-all duration-300 h-11 w-auto",
             active
               ? "bg-sidebar-primary text-sidebar-primary-foreground font-semibold shadow-md hover:bg-sidebar-primary hover:text-sidebar-primary-foreground"
               : "text-sidebar-foreground/90 hover:bg-white/15 hover:text-sidebar-foreground"
