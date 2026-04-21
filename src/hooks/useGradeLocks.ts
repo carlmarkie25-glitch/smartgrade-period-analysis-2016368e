@@ -33,7 +33,7 @@ export const useGradeLock = (classSubjectId?: string, period?: string) => {
         .eq("period", period as PeriodType)
         .maybeSingle();
       if (error) throw error;
-      return data as GradeLock | null;
+      return data as unknown as GradeLock | null;
     },
     enabled: !!classSubjectId && !!period,
   });
@@ -48,7 +48,7 @@ export const useAllGradeLocks = () => {
         .from("grade_locks" as any)
         .select("*");
       if (error) throw error;
-      return (data ?? []) as GradeLock[];
+      return (data ?? []) as unknown as GradeLock[];
     },
   });
 };
