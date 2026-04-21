@@ -90,7 +90,7 @@ const StudentPortalView = ({ student }: StudentPortalViewProps) => {
     <div className="space-y-6">
       {/* ===== HEADER ===== */}
       <Card className="border-primary/20 bg-gradient-to-br from-primary/5 to-transparent">
-        <CardContent className="p-6 flex items-center gap-4">
+        <CardContent className="p-6 flex flex-col sm:flex-row sm:items-center gap-4">
           <Avatar className="h-16 w-16 border-2 border-primary/20">
             <AvatarImage src={student.photo_url ?? undefined} />
             <AvatarFallback className="bg-primary/10 text-primary font-bold">{initials}</AvatarFallback>
@@ -100,17 +100,27 @@ const StudentPortalView = ({ student }: StudentPortalViewProps) => {
             <div className="flex flex-wrap items-center gap-2 mt-1">
               <Badge variant="secondary" className="text-xs">
                 <GraduationCap className="h-3 w-3 mr-1" />
-                {student.classes?.name ?? "No class"}
+                {selectedEnrollment?.classes?.name ?? student.classes?.name ?? "No class"}
               </Badge>
               {student.departments?.name && (
                 <Badge variant="outline" className="text-xs">{student.departments.name}</Badge>
               )}
-              {student.classes?.academic_years?.year_name && (
-                <Badge variant="outline" className="text-xs">{student.classes.academic_years.year_name}</Badge>
+              {selectedEnrollment?.status && selectedEnrollment.status !== "active" && (
+                <Badge variant="outline" className="text-xs capitalize">{selectedEnrollment.status}</Badge>
               )}
               <span className="text-xs text-muted-foreground">ID: {student.student_id}</span>
             </div>
           </div>
+          {allowedYearIds.length > 0 && (
+            <div className="w-full sm:w-56">
+              <AcademicYearSelector
+                value={selectedYearId}
+                onChange={setSelectedYearId}
+                allowedYearIds={allowedYearIds}
+                placeholder="Academic year"
+              />
+            </div>
+          )}
         </CardContent>
       </Card>
 
