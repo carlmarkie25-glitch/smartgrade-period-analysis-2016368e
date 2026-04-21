@@ -89,6 +89,7 @@ const formatMoney = (n: number) =>
   n.toLocaleString("en-US", { style: "currency", currency: "USD", minimumFractionDigits: 2 });
 
 export default function Billing() {
+  const navigate = useNavigate();
   const { user } = useAuth();
   const { school } = useSchool();
   const { subscription, isActive, refetch } = useSubscription();
