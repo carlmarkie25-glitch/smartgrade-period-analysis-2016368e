@@ -4,14 +4,19 @@ import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
-import { Lock, Unlock, Save, Search } from "lucide-react";
+import { Lock, Unlock, Save, Search, Send } from "lucide-react";
 import { useState, useEffect, useMemo } from "react";
 import { useClasses, useClassSubjects } from "@/hooks/useClasses";
 import { useStudents } from "@/hooks/useStudents";
 import { useGrades, useAssessmentTypes, useSaveGrades } from "@/hooks/useGrades";
+import { useGradeLock, useSubmitGrades } from "@/hooks/useGradeLocks";
 import { Skeleton } from "@/components/ui/skeleton";
 import { isKindergartenClass, scoreToLetter, letterColorClass, KG_SCALE } from "@/lib/kindergarten";
 import { isAggregateIncomplete } from "@/lib/grading";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 const Gradebook = () => {
   const [selectedClass, setSelectedClass] = useState<string>("");
@@ -20,10 +25,14 @@ const Gradebook = () => {
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [isLocked, setIsLocked] = useState(true);
   const [editedGrades, setEditedGrades] = useState<Record<string, Record<string, number | null>>>({});
+  const [showSubmitConfirm, setShowSubmitConfirm] = useState(false);
 
   const { data: classes, isLoading: classesLoading } = useClasses();
   const { data: classSubjects, isLoading: subjectsLoading } = useClassSubjects(selectedClass);
   const { data: students, isLoading: studentsLoading } = useStudents(selectedClass);
+  const { data: gradeLock } = useGradeLock(selectedSubject, selectedPeriod);
+  const submitMutation = useSubmitGrades();
+  const isPeriodLocked = !!gradeLock?.is_locked;
   const selectedClassObj = classes?.find((c) => c.id === selectedClass);
   const isKg = isKindergartenClass(selectedClassObj);
   const departmentId = (selectedClassObj as any)?.department_id ?? (selectedClassObj as any)?.departments?.id;
