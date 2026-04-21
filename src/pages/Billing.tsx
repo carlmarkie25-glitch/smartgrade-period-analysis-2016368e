@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
-import { useSearchParams } from "react-router-dom";
-import { Check, Loader2, Sparkles, ExternalLink, AlertTriangle, Users } from "lucide-react";
-import MainLayout from "@/components/MainLayout";
+import { useSearchParams, useNavigate } from "react-router-dom";
+import { Check, Loader2, Sparkles, ExternalLink, AlertTriangle, Users, ArrowLeft } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
+import { TrialBanner } from "@/components/TrialBanner";
+import { SubscriptionGate } from "@/components/SubscriptionGate";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSchool } from "@/contexts/SchoolContext";
 import { useSubscription } from "@/hooks/useSubscription";
