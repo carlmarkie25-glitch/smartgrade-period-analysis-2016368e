@@ -122,10 +122,16 @@ export const Sidebar = ({ activeTab, onTabChange, collapsed = false, onToggle }:
     (id) => activeTab === id || adminGroup.children.find((c) => c.id === id)?.path === location.pathname
   );
 
+  const settingsChildIds = settingsGroup.children.map((c) => c.id);
+  const isSettingsActive = settingsChildIds.some(
+    (id) => activeTab === id || settingsGroup.children.find((c) => c.id === id)?.path === location.pathname
+  );
+
   const [academicsOpen, setAcademicsOpen] = useState(isAcademicsActive);
   const [usersOpen, setUsersOpen] = useState(isUsersActive);
   const [financeOpen, setFinanceOpen] = useState(isFinanceActive);
   const [adminOpen, setAdminOpen] = useState(isAdminActive);
+  const [settingsOpen, setSettingsOpen] = useState(isSettingsActive);
 
   const canAccess = (roles: string[]) => {
     if (rolesLoading) return roles.includes("all");
