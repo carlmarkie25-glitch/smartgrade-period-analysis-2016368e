@@ -95,7 +95,7 @@ const AppSidebar = () => {
         </Link>
       </SidebarHeader>
 
-      <SidebarContent className="bg-transparent">
+      <SidebarContent className="bg-transparent overflow-x-hidden [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:bg-white/20 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-track]:bg-transparent">
         {/* Main Menu */}
         <SidebarGroup>
           <SidebarGroupLabel className="text-sidebar-foreground/70 text-xs uppercase tracking-wider px-6">
