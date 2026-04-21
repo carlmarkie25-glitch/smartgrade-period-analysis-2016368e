@@ -98,6 +98,7 @@ export const Sidebar = ({ activeTab, onTabChange, collapsed = false, onToggle }:
     roles: ["admin"],
     children: [
       { id: "admin-settings", icon: Settings, label: "Settings", path: "/admin", roles: ["admin"] },
+      { id: "sync", icon: RefreshCw, label: "Sync", path: "/sync-status", roles: ["admin"] },
       { id: "billing", icon: CreditCard, label: "Billing", path: "/settings/billing", roles: ["admin"] },
     ],
   };
