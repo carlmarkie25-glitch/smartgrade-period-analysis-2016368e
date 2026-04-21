@@ -39,6 +39,7 @@ const ClassesPage = lazy(() => import("./pages/ClassesPage"));
 const SubjectsPage = lazy(() => import("./pages/SubjectsPage"));
 const DepartmentsPage = lazy(() => import("./pages/DepartmentsPage"));
 const AcademicYearsPage = lazy(() => import("./pages/AcademicYearsPage"));
+const YearRolloverPage = lazy(() => import("./pages/YearRolloverPage"));
 const FeeManagement = lazy(() => import("./pages/FeeManagement"));
 const Payments = lazy(() => import("./pages/Payments"));
 const Expenses = lazy(() => import("./pages/Expenses"));
@@ -93,6 +94,7 @@ const App = () => (
             <Route path="/subjects" element={<AcademicsRoute><SubjectsPage /></AcademicsRoute>} />
             <Route path="/departments" element={<AcademicsRoute><DepartmentsPage /></AcademicsRoute>} />
             <Route path="/academic-years" element={<AcademicsRoute><AcademicYearsPage /></AcademicsRoute>} />
+            <Route path="/year-rollover" element={<AdminRoute><YearRolloverPage /></AdminRoute>} />
             <Route path="/students" element={<AcademicsRoute><StudentPanel /></AcademicsRoute>} />
             <Route path="/teachers" element={<AdminRoute><TeacherPanel /></AdminRoute>} />
             <Route path="/parents" element={<AdminRoute><ParentPanel /></AdminRoute>} />
