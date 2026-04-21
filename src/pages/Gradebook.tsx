@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
-import { Lock, Unlock, Save, Search, Send } from "lucide-react";
+import { Lock, Unlock, Save, Search, Send, Download } from "lucide-react";
 import { useState, useEffect, useMemo } from "react";
 import { useClasses, useClassSubjects } from "@/hooks/useClasses";
 import { useStudents } from "@/hooks/useStudents";
@@ -108,6 +108,82 @@ const Gradebook = () => {
         [assessmentTypeId]: clampedValue,
       },
     }));
+  };
+
+  const handleDownloadCsv = () => {
+    if (!filteredStudents || filteredStudents.length === 0 || !assessmentTypes) return;
+
+    const className = classes?.find((c) => c.id === selectedClass)?.name ?? "class";
+    const subjectName =
+      classSubjects?.find((cs) => cs.id === selectedSubject)?.subjects?.name ?? "subject";
+    const periodLabel = (() => {
+      switch (selectedPeriod) {
+        case "p1": return "Period 1";
+        case "p2": return "Period 2";
+        case "p3": return "Period 3";
+        case "p4": return "Period 4";
+        case "p5": return "Period 5";
+        case "p6": return "Period 6";
+        case "exam_s1": return "Exam S1";
+        case "exam_s2": return "Exam S2";
+        default: return selectedPeriod;
+      }
+    })();
+
+    const escape = (val: unknown) => {
+      const s = val === null || val === undefined ? "" : String(val);
+      if (/[",\n]/.test(s)) return `"${s.replace(/"/g, '""')}"`;
+      return s;
+    };
+
+    const headers = [
+      "Student ID",
+      "Student Name",
+      ...assessmentTypes.map((at) => `${at.name} (${at.max_points})`),
+      "Total Score",
+      "Total Max",
+      "Percentage",
+      "Status",
+    ];
+
+    const rows = filteredStudents.map((student) => {
+      const studentEditedGrades = editedGrades[student.id] || {};
+      const hasAnyMissing = assessmentTypes.some(
+        (at) => studentEditedGrades[at.id] === null || studentEditedGrades[at.id] === undefined
+      );
+      const totalScore = assessmentTypes.reduce(
+        (sum, at) => sum + (studentEditedGrades[at.id] ?? 0),
+        0
+      );
+      const totalMax = assessmentTypes.reduce((sum, at) => sum + (at.max_points ?? 0), 0);
+      const incomplete = isAggregateIncomplete(totalScore, totalMax, hasAnyMissing);
+      const percentage = totalMax > 0 ? Math.trunc((totalScore / totalMax) * 100) : "";
+
+      return [
+        (student as any).student_id ?? "",
+        student.full_name ?? "",
+        ...assessmentTypes.map((at) => {
+          const v = studentEditedGrades[at.id];
+          return v === null || v === undefined ? "I" : v;
+        }),
+        incomplete ? "I" : totalScore,
+        totalMax,
+        incomplete ? "I" : percentage,
+        incomplete ? "Incomplete" : "Complete",
+      ].map(escape).join(",");
+    });
+
+    const csv = [headers.map(escape).join(","), ...rows].join("\n");
+    const blob = new Blob([`\uFEFF${csv}`], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    const safeName = `${className}_${subjectName}_${periodLabel}`.replace(/[^a-z0-9]+/gi, "_");
+    link.href = url;
+    link.download = `gradebook_${safeName}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
   };
 
   const handleSaveGrades = () => {
@@ -409,6 +485,15 @@ const Gradebook = () => {
                     </>
                   )}
                   <div className="mt-6 flex justify-end gap-4 flex-wrap">
+                    <Button
+                      variant="outline"
+                      onClick={handleDownloadCsv}
+                      disabled={!filteredStudents || filteredStudents.length === 0 || !assessmentTypes}
+                      className="gap-2"
+                    >
+                      <Download className="h-4 w-4" />
+                      Download CSV
+                    </Button>
                     <Button
                       variant="outline"
                       onClick={() => {
