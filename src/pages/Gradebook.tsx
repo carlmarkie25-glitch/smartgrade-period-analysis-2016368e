@@ -143,7 +143,6 @@ const Gradebook = () => {
       "Total Score",
       "Total Max",
       "Percentage",
-      "Status",
     ];
 
     const rows = filteredStudents.map((student) => {
