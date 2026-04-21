@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
-import { useSearchParams } from "react-router-dom";
-import { Check, Loader2, Sparkles, ExternalLink, AlertTriangle, Users } from "lucide-react";
-import MainLayout from "@/components/MainLayout";
+import { useSearchParams, useNavigate } from "react-router-dom";
+import { Check, Loader2, Sparkles, ExternalLink, AlertTriangle, Users, ArrowLeft } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
+import { TrialBanner } from "@/components/TrialBanner";
+import { SubscriptionGate } from "@/components/SubscriptionGate";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSchool } from "@/contexts/SchoolContext";
 import { useSubscription } from "@/hooks/useSubscription";
@@ -87,6 +89,7 @@ const formatMoney = (n: number) =>
   n.toLocaleString("en-US", { style: "currency", currency: "USD", minimumFractionDigits: 2 });
 
 export default function Billing() {
+  const navigate = useNavigate();
   const { user } = useAuth();
   const { school } = useSchool();
   const { subscription, isActive, refetch } = useSubscription();
@@ -202,7 +205,22 @@ export default function Billing() {
   };
 
   return (
-    <MainLayout>
+    <div className="min-h-screen flex flex-col bg-background">
+      <PaymentTestModeBanner />
+      <TrialBanner />
+      <header className="sticky top-0 z-40 flex h-14 items-center gap-3 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-4 lg:px-6">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => navigate("/dashboard")}
+          className="gap-2"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Back to dashboard
+        </Button>
+      </header>
+      <div className="flex-1 overflow-auto">
+        <SubscriptionGate>
       <div className="max-w-6xl mx-auto p-6 space-y-8">
         <div className="text-center space-y-2">
           <h1 className="text-3xl font-bold">Choose your plan</h1>
@@ -338,6 +356,8 @@ export default function Billing() {
           </Card>
         )}
       </div>
-    </MainLayout>
+        </SubscriptionGate>
+      </div>
+    </div>
   );
 }
