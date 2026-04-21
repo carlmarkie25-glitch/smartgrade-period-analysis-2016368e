@@ -26,6 +26,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 
 const Reports = () => {
+  const [selectedYear, setSelectedYear] = useState<string>("");
   const [selectedClass, setSelectedClass] = useState<string>("");
   const [selectedPeriod, setSelectedPeriod] = useState<string>("p1");
   const [selectedStudent, setSelectedStudent] = useState<string>("");
@@ -40,7 +41,28 @@ const Reports = () => {
   const zipRef = useRef<any>(null);
   const cancelRef = useRef(false);
 
-  const { data: classes, isLoading: classesLoading } = useClasses("sponsor");
+  const { data: years } = useAcademicYears();
+  const { data: allClasses, isLoading: classesLoading } = useClasses("sponsor");
+
+  useEffect(() => {
+    if (!selectedYear && years && years.length > 0) {
+      const current = years.find((y) => y.is_current) ?? years[0];
+      setSelectedYear(current.id);
+    }
+  }, [years, selectedYear]);
+
+  const classes = useMemo(() => {
+    if (!allClasses) return [];
+    if (!selectedYear) return allClasses;
+    return allClasses.filter((c: any) => c.academic_year_id === selectedYear);
+  }, [allClasses, selectedYear]);
+
+  useEffect(() => {
+    if (selectedClass && !classes.find((c: any) => c.id === selectedClass)) {
+      setSelectedClass("");
+    }
+  }, [classes, selectedClass]);
+
   const { data: students, isLoading: studentsLoading } = useStudents(selectedClass);
   const { toast } = useToast();
 
