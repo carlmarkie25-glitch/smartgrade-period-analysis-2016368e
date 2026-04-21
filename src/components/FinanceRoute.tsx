@@ -3,21 +3,19 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserRoles } from "@/hooks/useUserRoles";
 
-export const TeacherRoute = ({ children }: { children: React.ReactNode }) => {
+/** Access for Admin or Registrar. */
+export const FinanceRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading: authLoading } = useAuth();
-  const { isAdmin, isTeacher, isVpi, isLoading: rolesLoading } = useUserRoles();
+  const { isAdmin, isRegistrar, isLoading: rolesLoading } = useUserRoles();
   const navigate = useNavigate();
 
   const isLoading = authLoading || rolesLoading;
-  const hasAccess = isAdmin || isTeacher || isVpi;
+  const hasAccess = isAdmin || isRegistrar;
 
   useEffect(() => {
     if (!isLoading) {
-      if (!user) {
-        navigate("/auth");
-      } else if (!hasAccess) {
-        navigate("/dashboard");
-      }
+      if (!user) navigate("/auth");
+      else if (!hasAccess) navigate("/dashboard");
     }
   }, [user, hasAccess, isLoading, navigate]);
 

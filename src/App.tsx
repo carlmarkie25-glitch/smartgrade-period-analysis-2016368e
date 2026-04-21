@@ -10,6 +10,8 @@ import { ThemeProvider } from "@/contexts/ThemeContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { AdminRoute } from "@/components/AdminRoute";
 import { TeacherRoute } from "@/components/TeacherRoute";
+import { AcademicsRoute } from "@/components/AcademicsRoute";
+import { FinanceRoute } from "@/components/FinanceRoute";
 import { SuperAdminRoute } from "@/components/SuperAdminRoute";
 import { ImpersonationBanner } from "@/components/ImpersonationBanner";
 import { PWAInstallPrompt } from "@/components/PWAInstallPrompt";
@@ -83,22 +85,22 @@ const App = () => (
             <Route path="/schedule" element={<ProtectedRoute><Schedule /></ProtectedRoute>} />
             <Route path="/academic-calendar" element={<ProtectedRoute><AcademicCalendar /></ProtectedRoute>} />
             <Route path="/gradebook" element={<TeacherRoute><Gradebook /></TeacherRoute>} />
-            <Route path="/grades-release" element={<AdminRoute><GradesRelease /></AdminRoute>} />
-            <Route path="/reports" element={<TeacherRoute><Reports /></TeacherRoute>} />
-            <Route path="/analytics" element={<TeacherRoute><Analytics /></TeacherRoute>} />
-            <Route path="/attendance" element={<TeacherRoute><Attendance /></TeacherRoute>} />
-            <Route path="/classes" element={<AdminRoute><ClassesPage /></AdminRoute>} />
-            <Route path="/subjects" element={<AdminRoute><SubjectsPage /></AdminRoute>} />
-            <Route path="/departments" element={<AdminRoute><DepartmentsPage /></AdminRoute>} />
-            <Route path="/academic-years" element={<AdminRoute><AcademicYearsPage /></AdminRoute>} />
-            <Route path="/students" element={<AdminRoute><StudentPanel /></AdminRoute>} />
+            <Route path="/grades-release" element={<AcademicsRoute><GradesRelease /></AcademicsRoute>} />
+            <Route path="/reports" element={<AcademicsRoute><Reports /></AcademicsRoute>} />
+            <Route path="/analytics" element={<AcademicsRoute><Analytics /></AcademicsRoute>} />
+            <Route path="/attendance" element={<AcademicsRoute><Attendance /></AcademicsRoute>} />
+            <Route path="/classes" element={<AcademicsRoute><ClassesPage /></AcademicsRoute>} />
+            <Route path="/subjects" element={<AcademicsRoute><SubjectsPage /></AcademicsRoute>} />
+            <Route path="/departments" element={<AcademicsRoute><DepartmentsPage /></AcademicsRoute>} />
+            <Route path="/academic-years" element={<AcademicsRoute><AcademicYearsPage /></AcademicsRoute>} />
+            <Route path="/students" element={<AcademicsRoute><StudentPanel /></AcademicsRoute>} />
             <Route path="/teachers" element={<AdminRoute><TeacherPanel /></AdminRoute>} />
             <Route path="/parents" element={<AdminRoute><ParentPanel /></AdminRoute>} />
             <Route path="/admin" element={<AdminRoute><Admin /></AdminRoute>} />
-            <Route path="/fees" element={<AdminRoute><FeeManagement /></AdminRoute>} />
-            <Route path="/payments" element={<AdminRoute><Payments /></AdminRoute>} />
-            <Route path="/expenses" element={<AdminRoute><Expenses /></AdminRoute>} />
-            <Route path="/finance-reports" element={<AdminRoute><FinanceReports /></AdminRoute>} />
+            <Route path="/fees" element={<FinanceRoute><FeeManagement /></FinanceRoute>} />
+            <Route path="/payments" element={<FinanceRoute><Payments /></FinanceRoute>} />
+            <Route path="/expenses" element={<FinanceRoute><Expenses /></FinanceRoute>} />
+            <Route path="/finance-reports" element={<FinanceRoute><FinanceReports /></FinanceRoute>} />
             <Route path="/notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
             <Route path="/settings/school" element={<AdminRoute><SchoolSettings /></AdminRoute>} />
             <Route path="/settings/billing" element={<AdminRoute><Billing /></AdminRoute>} />

@@ -24,7 +24,7 @@ import { cn } from "@/lib/utils";
 const AppSidebar = () => {
   const location = useLocation();
   const { signOut } = useAuth();
-  const { isAdmin, isTeacher, isLoading: rolesLoading } = useUserRoles();
+  const { isAdmin, isTeacher, isVpi, isRegistrar, isLoading: rolesLoading } = useUserRoles();
   const { state } = useSidebar();
   const isCollapsed = state === "collapsed";
 
@@ -37,7 +37,7 @@ const AppSidebar = () => {
     if (rolesLoading) return roles.includes("all");
     if (roles.includes("all")) return true;
     if (roles.includes("admin") && isAdmin) return true;
-    if (roles.includes("teacher") && (isTeacher || isAdmin)) return true;
+    if (roles.includes("teacher") && (isTeacher || isAdmin || isVpi)) return true;
     return false;
   };
 
@@ -109,7 +109,7 @@ const AppSidebar = () => {
         </SidebarGroup>
 
         {/* Academics Group - Gradebook & Reports */}
-        {!rolesLoading && canAccess(["teacher", "admin"]) && (
+        {!rolesLoading && (canAccess(["teacher", "admin"]) || isVpi) && (
           <SidebarGroup>
             <Collapsible open={isCollapsed ? false : academicsOpen} onOpenChange={setAcademicsOpen}>
               <CollapsibleTrigger className={cn(
@@ -141,7 +141,7 @@ const AppSidebar = () => {
         )}
 
         {/* Administration */}
-        {!rolesLoading && (isAdmin || isTeacher) && (
+        {!rolesLoading && (isAdmin || isTeacher || isVpi || isRegistrar) && (
           <SidebarGroup>
             <Collapsible open={isCollapsed ? false : adminOpen} onOpenChange={setAdminOpen}>
               <CollapsibleTrigger className={cn(

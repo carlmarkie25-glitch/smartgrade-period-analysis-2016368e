@@ -2,7 +2,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { X, Settings2, ChevronDown, Users, UserPlus, Shield } from "lucide-react";
+import { X, Settings2, ChevronDown, Users, UserPlus, Shield, BookOpen, Wallet } from "lucide-react";
 import { useState } from "react";
 
 interface UserRoleManagementProps {
@@ -70,6 +70,8 @@ const UserCard = ({
           <SelectItem value="admin">Admin</SelectItem>
           <SelectItem value="teacher">Teacher</SelectItem>
           <SelectItem value="student">Student</SelectItem>
+          <SelectItem value="vpi">VPI (Academics)</SelectItem>
+          <SelectItem value="registrar">Registrar (Finance)</SelectItem>
         </SelectContent>
       </Select>
     </div>
@@ -141,6 +143,8 @@ export const UserRoleManagement = ({
     return <Card><CardContent className="p-6"><p className="text-muted-foreground">No users found. Create accounts via the Auth page first.</p></CardContent></Card>;
 
   const teachers = users.filter((u) => u.user_roles?.some((ur: any) => ur.role === "teacher"));
+  const vpis = users.filter((u) => u.user_roles?.some((ur: any) => ur.role === "vpi"));
+  const registrars = users.filter((u) => u.user_roles?.some((ur: any) => ur.role === "registrar"));
   const admins = users.filter((u) => u.user_roles?.some((ur: any) => ur.role === "admin") && !u.user_roles?.some((ur: any) => ur.role === "teacher"));
   const unassigned = users.filter((u) => !u.user_roles || u.user_roles.length === 0);
 
@@ -152,6 +156,8 @@ export const UserRoleManagement = ({
       </CardHeader>
       <CardContent className="space-y-4">
         <RoleGroup title="Teachers" icon={Users} users={teachers} defaultOpen={true} assignRole={assignRole} removeRole={removeRole} onOpenTeacherAssignment={onOpenTeacherAssignment} onOpenSponsorAssignment={onOpenSponsorAssignment} />
+        <RoleGroup title="VPI (Academics)" icon={BookOpen} users={vpis} defaultOpen={false} assignRole={assignRole} removeRole={removeRole} onOpenTeacherAssignment={onOpenTeacherAssignment} onOpenSponsorAssignment={onOpenSponsorAssignment} />
+        <RoleGroup title="Registrar (Finance)" icon={Wallet} users={registrars} defaultOpen={false} assignRole={assignRole} removeRole={removeRole} onOpenTeacherAssignment={onOpenTeacherAssignment} onOpenSponsorAssignment={onOpenSponsorAssignment} />
         <RoleGroup title="Admins" icon={Settings2} users={admins} defaultOpen={false} assignRole={assignRole} removeRole={removeRole} onOpenTeacherAssignment={onOpenTeacherAssignment} onOpenSponsorAssignment={onOpenSponsorAssignment} />
         {unassigned.length > 0 && (
           <RoleGroup title="Unassigned" icon={UserPlus} users={unassigned} defaultOpen={true} assignRole={assignRole} removeRole={removeRole} onOpenTeacherAssignment={onOpenTeacherAssignment} onOpenSponsorAssignment={onOpenSponsorAssignment} />

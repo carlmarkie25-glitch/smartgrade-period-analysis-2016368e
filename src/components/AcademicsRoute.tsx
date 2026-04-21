@@ -3,7 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserRoles } from "@/hooks/useUserRoles";
 
-export const TeacherRoute = ({ children }: { children: React.ReactNode }) => {
+/** Access for Admin, Teacher, or VPI (Vice Principal of Instruction). */
+export const AcademicsRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading: authLoading } = useAuth();
   const { isAdmin, isTeacher, isVpi, isLoading: rolesLoading } = useUserRoles();
   const navigate = useNavigate();
@@ -13,11 +14,8 @@ export const TeacherRoute = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     if (!isLoading) {
-      if (!user) {
-        navigate("/auth");
-      } else if (!hasAccess) {
-        navigate("/dashboard");
-      }
+      if (!user) navigate("/auth");
+      else if (!hasAccess) navigate("/dashboard");
     }
   }, [user, hasAccess, isLoading, navigate]);
 
