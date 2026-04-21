@@ -112,45 +112,50 @@ export const useUpdateGradeLocks = () => {
     }) => {
       const { data: { user } } = await supabase.auth.getUser();
       const now = new Date().toISOString();
-      for (const t of params.targets) {
-        const { data: existing } = await supabase
-          .from("grade_locks" as any)
-          .select("id")
-          .eq("class_subject_id", t.classSubjectId)
-          .eq("period", t.period as PeriodType)
-          .maybeSingle();
 
-        const updatePayload: any = { ...params.changes };
-        if (params.changes.is_locked === true) {
-          updatePayload.locked_by = user?.id ?? null;
-          updatePayload.locked_at = now;
-        }
-        if (params.changes.is_released === true) {
-          updatePayload.released_by = user?.id ?? null;
-          updatePayload.released_at = now;
-        }
+      await Promise.all(
+        params.targets.map(async (t) => {
+          const { data: existing } = await supabase
+            .from("grade_locks" as any)
+            .select("id")
+            .eq("class_subject_id", t.classSubjectId)
+            .eq("period", t.period as PeriodType)
+            .maybeSingle();
 
-        if (existing) {
-          const { error } = await supabase
-            .from("grade_locks" as any)
-            .update(updatePayload)
-            .eq("id", (existing as any).id);
-          if (error) throw error;
-        } else {
-          const { error } = await supabase
-            .from("grade_locks" as any)
-            .insert({
-              class_subject_id: t.classSubjectId,
-              period: t.period as PeriodType,
-              ...updatePayload,
-            });
-          if (error) throw error;
-        }
-      }
+          const updatePayload: any = { ...params.changes };
+          if (params.changes.is_locked === true) {
+            updatePayload.locked_by = user?.id ?? null;
+            updatePayload.locked_at = now;
+          }
+          if (params.changes.is_released === true) {
+            updatePayload.released_by = user?.id ?? null;
+            updatePayload.released_at = now;
+          }
+
+          if (existing) {
+            const { error } = await supabase
+              .from("grade_locks" as any)
+              .update(updatePayload)
+              .eq("id", (existing as any).id);
+            if (error) throw error;
+          } else {
+            const { error } = await supabase
+              .from("grade_locks" as any)
+              .insert({
+                class_subject_id: t.classSubjectId,
+                period: t.period as PeriodType,
+                ...updatePayload,
+              });
+            if (error) throw error;
+          }
+        })
+      );
     },
-    onSuccess: () => {
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["grade-locks-all"] });
       queryClient.invalidateQueries({ queryKey: ["grade-lock"] });
+    },
+    onSuccess: () => {
       toast({ title: "Updated", description: "Grade lock settings saved." });
     },
     onError: (err: any) =>
