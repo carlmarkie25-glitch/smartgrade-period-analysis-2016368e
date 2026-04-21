@@ -910,6 +910,66 @@ export type Database = {
           },
         ]
       }
+      grade_locks: {
+        Row: {
+          class_subject_id: string
+          created_at: string
+          id: string
+          is_locked: boolean
+          is_released: boolean
+          locked_at: string | null
+          locked_by: string | null
+          period: Database["public"]["Enums"]["period_type"]
+          released_at: string | null
+          released_by: string | null
+          school_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          class_subject_id: string
+          created_at?: string
+          id?: string
+          is_locked?: boolean
+          is_released?: boolean
+          locked_at?: string | null
+          locked_by?: string | null
+          period: Database["public"]["Enums"]["period_type"]
+          released_at?: string | null
+          released_by?: string | null
+          school_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          class_subject_id?: string
+          created_at?: string
+          id?: string
+          is_locked?: boolean
+          is_released?: boolean
+          locked_at?: string | null
+          locked_by?: string | null
+          period?: Database["public"]["Enums"]["period_type"]
+          released_at?: string | null
+          released_by?: string | null
+          school_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "grade_locks_class_subject_id_fkey"
+            columns: ["class_subject_id"]
+            isOneToOne: false
+            referencedRelation: "class_subjects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "grade_locks_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       installment_plans: {
         Row: {
           academic_year_id: string | null
@@ -2417,6 +2477,13 @@ export type Database = {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
           _user_id: string
+        }
+        Returns: boolean
+      }
+      is_grade_locked: {
+        Args: {
+          _class_subject_id: string
+          _period: Database["public"]["Enums"]["period_type"]
         }
         Returns: boolean
       }
