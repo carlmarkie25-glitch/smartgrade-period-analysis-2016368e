@@ -72,7 +72,7 @@ const AppSidebar = () => {
         <SidebarMenuButton
           asChild
           className={cn(
-            "mx-3 my-0.5 rounded-full transition-all duration-300 h-11",
+            "mx-2 my-0.5 rounded-full transition-all duration-300 h-11 w-auto",
             active
               ? "bg-sidebar-primary text-sidebar-primary-foreground font-semibold shadow-md hover:bg-sidebar-primary hover:text-sidebar-primary-foreground"
               : "text-sidebar-foreground/90 hover:bg-white/15 hover:text-sidebar-foreground"
@@ -95,7 +95,7 @@ const AppSidebar = () => {
         </Link>
       </SidebarHeader>
 
-      <SidebarContent className="bg-transparent">
+      <SidebarContent className="bg-transparent overflow-x-hidden [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:bg-white/20 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-track]:bg-transparent">
         {/* Main Menu */}
         <SidebarGroup>
           <SidebarGroupLabel className="text-sidebar-foreground/70 text-xs uppercase tracking-wider px-6">
@@ -113,7 +113,7 @@ const AppSidebar = () => {
           <SidebarGroup>
             <Collapsible open={isCollapsed ? false : academicsOpen} onOpenChange={setAcademicsOpen}>
               <CollapsibleTrigger className={cn(
-                "flex items-center justify-between w-full mx-3 my-0.5 px-4 h-11 rounded-full transition-all duration-300",
+                "flex items-center justify-between w-auto mx-2 my-0.5 px-4 h-11 rounded-full transition-all duration-300",
                 isAcademicsActive
                   ? "text-sidebar-foreground font-semibold"
                   : "text-sidebar-foreground/90 hover:bg-white/15 hover:text-sidebar-foreground"
@@ -145,7 +145,7 @@ const AppSidebar = () => {
           <SidebarGroup>
             <Collapsible open={isCollapsed ? false : adminOpen} onOpenChange={setAdminOpen}>
               <CollapsibleTrigger className={cn(
-                "flex items-center justify-between w-full mx-3 my-0.5 px-4 h-11 rounded-full transition-all duration-300",
+                "flex items-center justify-between w-auto mx-2 my-0.5 px-4 h-11 rounded-full transition-all duration-300",
                 isAdminActive
                   ? "text-sidebar-foreground font-semibold"
                   : "text-sidebar-foreground/90 hover:bg-white/15 hover:text-sidebar-foreground"
