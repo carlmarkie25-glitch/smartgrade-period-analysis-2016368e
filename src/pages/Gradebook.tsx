@@ -10,6 +10,8 @@ import { useClasses, useClassSubjects } from "@/hooks/useClasses";
 import { useStudents } from "@/hooks/useStudents";
 import { useGrades, useAssessmentTypes, useSaveGrades } from "@/hooks/useGrades";
 import { useGradeLock, useSubmitGrades } from "@/hooks/useGradeLocks";
+import { useAcademicYears } from "@/hooks/useAcademicYears";
+import AcademicYearSelector from "@/components/AcademicYearSelector";
 import { Skeleton } from "@/components/ui/skeleton";
 import { isKindergartenClass, scoreToLetter, letterColorClass, KG_SCALE } from "@/lib/kindergarten";
 import { isAggregateIncomplete } from "@/lib/grading";
@@ -19,6 +21,7 @@ import {
 } from "@/components/ui/alert-dialog";
 
 const Gradebook = () => {
+  const [selectedYear, setSelectedYear] = useState<string>("");
   const [selectedClass, setSelectedClass] = useState<string>("");
   const [selectedSubject, setSelectedSubject] = useState<string>("");
   const [selectedPeriod, setSelectedPeriod] = useState<string>("p1");
@@ -27,7 +30,32 @@ const Gradebook = () => {
   const [editedGrades, setEditedGrades] = useState<Record<string, Record<string, number | null>>>({});
   const [showSubmitConfirm, setShowSubmitConfirm] = useState(false);
 
-  const { data: classes, isLoading: classesLoading } = useClasses();
+  const { data: years } = useAcademicYears();
+  const { data: allClasses, isLoading: classesLoading } = useClasses();
+
+  // Default the year selector to the current academic year on first load.
+  useEffect(() => {
+    if (!selectedYear && years && years.length > 0) {
+      const current = years.find((y) => y.is_current) ?? years[0];
+      setSelectedYear(current.id);
+    }
+  }, [years, selectedYear]);
+
+  // Filter the class list to the selected academic year.
+  const classes = useMemo(() => {
+    if (!allClasses) return [];
+    if (!selectedYear) return allClasses;
+    return allClasses.filter((c: any) => c.academic_year_id === selectedYear);
+  }, [allClasses, selectedYear]);
+
+  // Reset class/subject when year changes if current selection isn't in the filtered list.
+  useEffect(() => {
+    if (selectedClass && !classes.find((c: any) => c.id === selectedClass)) {
+      setSelectedClass("");
+      setSelectedSubject("");
+    }
+  }, [classes, selectedClass]);
+
   const { data: classSubjects, isLoading: subjectsLoading } = useClassSubjects(selectedClass);
   const { data: students, isLoading: studentsLoading } = useStudents(selectedClass);
   const { data: gradeLock } = useGradeLock(selectedSubject, selectedPeriod);
