@@ -1704,6 +1704,51 @@ export type Database = {
           },
         ]
       }
+      student_enrollments: {
+        Row: {
+          academic_year_id: string
+          class_id: string
+          created_at: string
+          ended_at: string | null
+          enrolled_at: string
+          final_average: number | null
+          id: string
+          reason: string | null
+          school_id: string | null
+          status: string
+          student_id: string
+          updated_at: string
+        }
+        Insert: {
+          academic_year_id: string
+          class_id: string
+          created_at?: string
+          ended_at?: string | null
+          enrolled_at?: string
+          final_average?: number | null
+          id?: string
+          reason?: string | null
+          school_id?: string | null
+          status?: string
+          student_id: string
+          updated_at?: string
+        }
+        Update: {
+          academic_year_id?: string
+          class_id?: string
+          created_at?: string
+          ended_at?: string | null
+          enrolled_at?: string
+          final_average?: number | null
+          id?: string
+          reason?: string | null
+          school_id?: string | null
+          status?: string
+          student_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       student_grades: {
         Row: {
           assessment_type_id: string
