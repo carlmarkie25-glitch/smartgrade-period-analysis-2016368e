@@ -356,6 +356,8 @@ export default function Billing() {
           </Card>
         )}
       </div>
-    </MainLayout>
+        </SubscriptionGate>
+      </div>
+    </div>
   );
 }
