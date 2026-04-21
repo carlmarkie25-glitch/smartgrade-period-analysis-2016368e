@@ -50,13 +50,15 @@ const useAllSubjects = () => {
 };
 
 const GradesRelease = () => {
-  const [scope, setScope] = useState<"all" | "department" | "class">("all");
+  const [scope, setScope] = useState<"all" | "department" | "class" | "subject">("all");
   const [departmentId, setDepartmentId] = useState<string>("");
   const [classId, setClassId] = useState<string>("");
+  const [subjectId, setSubjectId] = useState<string>("");
   const [period, setPeriod] = useState<string>("p1");
 
   const { data: classes } = useClasses();
   const { data: allCS } = useAllClassSubjects();
+  const { data: allSubjects } = useAllSubjects();
   const { data: locks } = useAllGradeLocks();
   const updateMutation = useUpdateGradeLocks();
 
@@ -75,9 +77,10 @@ const GradesRelease = () => {
     return (allCS as any[]).filter((cs) => {
       if (scope === "class" && classId) return cs.class_id === classId;
       if (scope === "department" && departmentId) return cs.classes?.department_id === departmentId;
+      if (scope === "subject" && subjectId) return cs.subject_id === subjectId;
       return true;
     });
-  }, [allCS, scope, classId, departmentId]);
+  }, [allCS, scope, classId, departmentId, subjectId]);
 
   const lockMap = useMemo(() => {
     const m = new Map<string, { is_locked: boolean; is_released: boolean }>();
