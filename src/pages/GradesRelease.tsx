@@ -10,6 +10,7 @@ import { useClasses, useClassSubjects } from "@/hooks/useClasses";
 import { useAllGradeLocks, useUpdateGradeLocks } from "@/hooks/useGradeLocks";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
+import { useToast } from "@/hooks/use-toast";
 
 const PERIODS: { value: string; label: string }[] = [
   { value: "p1", label: "Period 1" },
