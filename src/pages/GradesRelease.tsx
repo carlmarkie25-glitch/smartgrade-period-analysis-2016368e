@@ -35,6 +35,20 @@ const useAllClassSubjects = () => {
   });
 };
 
+const useAllSubjects = () => {
+  return useQuery({
+    queryKey: ["all-subjects"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("subjects")
+        .select("id, name")
+        .order("name", { ascending: true });
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+};
+
 const GradesRelease = () => {
   const [scope, setScope] = useState<"all" | "department" | "class">("all");
   const [departmentId, setDepartmentId] = useState<string>("");
