@@ -62,6 +62,7 @@ const GradesRelease = () => {
   const { data: allSubjects } = useAllSubjects();
   const { data: locks } = useAllGradeLocks();
   const updateMutation = useUpdateGradeLocks();
+  const { toast } = useToast();
 
   const departments = useMemo(() => {
     const seen = new Map<string, string>();
