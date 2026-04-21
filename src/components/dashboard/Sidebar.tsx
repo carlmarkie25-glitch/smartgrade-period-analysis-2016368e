@@ -73,7 +73,6 @@ export const Sidebar = ({ activeTab, onTabChange, collapsed = false, onToggle }:
     children: [
       { id: "fees", icon: DollarSign, label: "Fee Management", path: "/fees", roles: ["admin"] },
       { id: "payments", icon: Receipt, label: "Payments & Billing", path: "/payments", roles: ["admin"] },
-      { id: "billing", icon: CreditCard, label: "Billing", path: "/settings/billing", roles: ["admin"] },
       { id: "expenses", icon: TrendingUp, label: "Expenses", path: "/expenses", roles: ["admin"] },
       { id: "finance-reports", icon: PieChart, label: "Finance Reports", path: "/finance-reports", roles: ["admin"] },
     ],
@@ -89,6 +88,17 @@ export const Sidebar = ({ activeTab, onTabChange, collapsed = false, onToggle }:
       { id: "calendar", icon: Calendar, label: "Calendar", path: "/academic-calendar", roles: ["admin"] },
       { id: "analytics", icon: BarChart3, label: "Analytics", path: "/analytics", roles: ["teacher", "admin"] },
       { id: "student-lifecycle", icon: Archive, label: "Lifecycle", path: "/student-lifecycle", roles: ["admin"] },
+    ],
+  };
+
+  const settingsGroup: MenuGroup = {
+    id: "settings",
+    icon: Settings,
+    label: "Settings",
+    roles: ["admin"],
+    children: [
+      { id: "admin-settings", icon: Settings, label: "Settings", path: "/admin", roles: ["admin"] },
+      { id: "billing", icon: CreditCard, label: "Billing", path: "/settings/billing", roles: ["admin"] },
     ],
   };
 
@@ -112,10 +122,16 @@ export const Sidebar = ({ activeTab, onTabChange, collapsed = false, onToggle }:
     (id) => activeTab === id || adminGroup.children.find((c) => c.id === id)?.path === location.pathname
   );
 
+  const settingsChildIds = settingsGroup.children.map((c) => c.id);
+  const isSettingsActive = settingsChildIds.some(
+    (id) => activeTab === id || settingsGroup.children.find((c) => c.id === id)?.path === location.pathname
+  );
+
   const [academicsOpen, setAcademicsOpen] = useState(isAcademicsActive);
   const [usersOpen, setUsersOpen] = useState(isUsersActive);
   const [financeOpen, setFinanceOpen] = useState(isFinanceActive);
   const [adminOpen, setAdminOpen] = useState(isAdminActive);
+  const [settingsOpen, setSettingsOpen] = useState(isSettingsActive);
 
   const canAccess = (roles: string[]) => {
     if (rolesLoading) return roles.includes("all");
@@ -257,28 +273,8 @@ export const Sidebar = ({ activeTab, onTabChange, collapsed = false, onToggle }:
         {renderGroup(usersGroup, usersOpen, setUsersOpen, isUsersActive)}
         {renderGroup(financeGroup, financeOpen, setFinanceOpen, isFinanceActive)}
         {renderGroup(adminGroup, adminOpen, setAdminOpen, isAdminActive)}
+        {renderGroup(settingsGroup, settingsOpen, setSettingsOpen, isSettingsActive)}
       </div>
-
-      {/* Settings */}
-      {canAccess(["admin"]) && (
-        <button
-          onClick={() => navigate("/admin")}
-          title="Settings"
-          className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-300 group relative ${collapsed ? "justify-center" : ""} ${
-            location.pathname === "/admin"
-              ? "bg-white/20 text-white shadow-lg"
-              : "text-[hsl(170,30%,70%)] hover:text-white hover:bg-white/10"
-          }`}
-        >
-          <Settings size={20} className="flex-shrink-0" />
-          {!collapsed && <span className="text-sm font-medium">Settings</span>}
-          {collapsed && (
-            <div className="absolute left-full ml-2 px-2 py-1 bg-[hsl(170,30%,20%)]/90 text-white text-[10px] rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
-              Settings
-            </div>
-          )}
-        </button>
-      )}
 
       {/* Sign Out */}
       <button
