@@ -9,7 +9,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Trash2 } from "lucide-react";
+import { Trash2, RotateCw } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const AcademicYearsPage = () => {
   const { toast } = useToast();
@@ -74,9 +75,14 @@ const AcademicYearsPage = () => {
   return (
     <AppShell activeTab="years">
       <div className="py-4">
-        <div className="neu-card p-6 mb-6">
-          <h1 className="text-3xl font-bold text-foreground mb-1">Academic Years</h1>
-          <p className="text-muted-foreground text-sm">Manage academic years and set the current active year</p>
+        <div className="neu-card p-6 mb-6 flex items-start justify-between gap-4 flex-wrap">
+          <div>
+            <h1 className="text-3xl font-bold text-foreground mb-1">Academic Years</h1>
+            <p className="text-muted-foreground text-sm">Manage academic years and set the current active year</p>
+          </div>
+          <Button asChild variant="outline">
+            <Link to="/year-rollover"><RotateCw className="h-4 w-4 mr-2" /> Year Rollover</Link>
+          </Button>
         </div>
 
         <div className="space-y-6">
