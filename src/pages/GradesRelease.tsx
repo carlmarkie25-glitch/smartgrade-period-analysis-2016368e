@@ -88,11 +88,20 @@ const GradesRelease = () => {
 
   const filteredCS = useMemo(() => {
     if (!allCS) return [];
-    return (allCS as any[]).filter((cs) => {
+    const filtered = (allCS as any[]).filter((cs) => {
       if (scope === "class" && classId) return cs.class_id === classId;
       if (scope === "department" && departmentId) return cs.classes?.department_id === departmentId;
       if (scope === "subject" && classId && subjectId) return cs.class_id === classId && cs.subject_id === subjectId;
       return true;
+    });
+    // Sort by class name, then subject name
+    return filtered.sort((a, b) => {
+      const classNameA = a.classes?.name ?? "";
+      const classNameB = b.classes?.name ?? "";
+      const subjectNameA = a.subjects?.name ?? "";
+      const subjectNameB = b.subjects?.name ?? "";
+      if (classNameA !== classNameB) return classNameA.localeCompare(classNameB);
+      return subjectNameA.localeCompare(subjectNameB);
     });
   }, [allCS, scope, classId, departmentId, subjectId]);
 
