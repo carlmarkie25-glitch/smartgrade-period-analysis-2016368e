@@ -10,9 +10,12 @@ import { useToast } from "@/hooks/use-toast";
 import { Loader2, Upload, Building2, Sparkles } from "lucide-react";
 import AppShell from "@/components/AppShell";
 import { useFeatureAccess } from "@/hooks/useFeatureAccess";
+import { useAuth } from "@/contexts/AuthContext";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 export default function SchoolSettings() {
   const { school, refresh } = useSchool();
+  const { profile, updateProfileAvatar } = useAuth();
   const { toast } = useToast();
   const { plan, status, trialDaysLeft } = useFeatureAccess();
 
@@ -21,7 +24,24 @@ export default function SchoolSettings() {
     primary_color: "#0d9488", country: "",
   });
   const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [avatarSaving, setAvatarSaving] = useState(false);
   const [saving, setSaving] = useState(false);
+
+  const profileName = profile?.full_name || "User";
+  const profileInitials = profileName.split(" ").filter(Boolean).slice(0, 2).map((part) => part[0]?.toUpperCase()).join("") || "U";
+
+  const saveProfilePhoto = async (file: File | null) => {
+    if (!file) return;
+    setAvatarSaving(true);
+    try {
+      await updateProfileAvatar(file);
+      toast({ title: "Profile photo updated" });
+    } catch (e: any) {
+      toast({ title: "Upload failed", description: e.message, variant: "destructive" });
+    } finally {
+      setAvatarSaving(false);
+    }
+  };
 
   useEffect(() => {
     if (school) {
@@ -85,6 +105,33 @@ export default function SchoolSettings() {
           </CardHeader>
           <CardContent>
             <Button variant="outline" disabled>Manage billing (coming soon)</Button>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Your profile photo</CardTitle>
+            <CardDescription>Shown in the navbar and across your dashboard pages.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+              <Avatar className="h-20 w-20 border border-border">
+                <AvatarImage src={profile?.avatar_url ?? undefined} alt={profileName} className="object-cover" />
+                <AvatarFallback>{profileInitials}</AvatarFallback>
+              </Avatar>
+              <label className="cursor-pointer">
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => void saveProfilePhoto(e.target.files?.[0] ?? null)}
+                />
+                <span className="inline-flex items-center gap-2 rounded-md border border-border px-3 py-2 text-sm hover:bg-accent">
+                  {avatarSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+                  {avatarSaving ? "Uploading..." : "Upload profile photo"}
+                </span>
+              </label>
+            </div>
           </CardContent>
         </Card>
 
