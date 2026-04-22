@@ -116,11 +116,20 @@ export const useStudentReport = (studentId: string, period: string, academicYear
       const hasMissingGrades = grades?.some((grade: any) => isMissingGrade(grade.score)) || false;
 
       // Get period ranks from the new RPC (computes overall class rank for each period)
+      const rankRpc = student.classes?.id ? "get_student_period_ranks_for_class" : "get_student_period_ranks";
+      const rankParams = student.classes?.id
+        ? {
+            p_student_id: studentId,
+            p_class_id: student.classes.id,
+            p_periods: periodsToFetch,
+          }
+        : {
+            p_student_id: studentId,
+            p_periods: periodsToFetch,
+          };
+
       const { data: periodRanks, error: periodRanksError } = await supabase
-        .rpc("get_student_period_ranks", {
-          p_student_id: studentId,
-          p_periods: periodsToFetch,
-        });
+        .rpc(rankRpc as any, rankParams as any);
 
       if (periodRanksError) throw periodRanksError;
 
