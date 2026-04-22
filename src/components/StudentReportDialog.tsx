@@ -112,6 +112,7 @@ interface StudentReportDialogProps {
   onOpenChange: (open: boolean) => void;
   studentId: string;
   period: string;
+  academicYearId?: string;
   className?: string;
   /** When provided, forces grey mode on/off and hides the toggle. Used by batch download. */
   forceGreyMode?: boolean;
@@ -147,15 +148,16 @@ export const StudentReportDialog = ({
   onOpenChange,
   studentId,
   period,
+  academicYearId,
   className,
   forceGreyMode,
   hidden,
   onReportReady,
 }: StudentReportDialogProps) => {
-  const { data: report, isLoading } = useStudentReport(studentId, period);
-  const { data: savedInputs } = useReportInputs(studentId, period);
+  const { data: report, isLoading } = useStudentReport(studentId, period, academicYearId);
+  const { data: savedInputs } = useReportInputs(studentId, period, academicYearId);
   const canEdit = useCanEditReportInputs(studentId);
-  const saveMutation = useSaveReportInputs(studentId, period);
+  const saveMutation = useSaveReportInputs(studentId, period, academicYearId);
   const { school } = useSchool();
   const { data: rcSettingsData } = useReportCardSettings();
   const { data: deptColorsData } = useDepartmentReportColors();
@@ -167,7 +169,7 @@ export const StudentReportDialog = ({
   useEffect(() => {
     setInputs(savedInputs ?? {});
     setEditing(false);
-  }, [savedInputs, studentId, period]);
+  }, [savedInputs, studentId, period, academicYearId]);
 
   const setField = (k: keyof ReportInputs) => (v: string) =>
     setInputs((prev) => ({ ...prev, [k]: v }));
