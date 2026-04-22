@@ -2501,6 +2501,20 @@ export type Database = {
           total_students: number
         }[]
       }
+      get_student_period_ranks_for_class: {
+        Args: {
+          p_class_id: string
+          p_periods: Database["public"]["Enums"]["period_type"][]
+          p_student_id: string
+        }
+        Returns: {
+          class_rank: number
+          is_incomplete: boolean
+          period: Database["public"]["Enums"]["period_type"]
+          total_score: number
+          total_students: number
+        }[]
+      }
       get_teacher_students: {
         Args: never
         Returns: {
