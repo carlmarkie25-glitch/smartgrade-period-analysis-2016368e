@@ -376,6 +376,7 @@ const Reports = () => {
           onOpenChange={setDialogOpen}
           studentId={selectedStudent}
           period={selectedPeriod}
+          academicYearId={selectedYear}
           className={classes?.find(c => c.id === selectedClass)?.name || ""}
         />
 
@@ -430,6 +431,7 @@ const Reports = () => {
             onOpenChange={(o) => { if (!o) cancelBatch(); }}
             studentId={currentBatchStudent.id}
             period={selectedPeriod}
+            academicYearId={selectedYear}
             className={classes?.find(c => c.id === selectedClass)?.name || ""}
             forceGreyMode={chosenMode === "grey"}
             onReportReady={handleReportReady}

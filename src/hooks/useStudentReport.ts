@@ -2,33 +2,61 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { isAggregateIncomplete, isMissingGrade } from "@/lib/grading";
 
-export const useStudentReport = (studentId: string, period: string) => {
+export const useStudentReport = (studentId: string, period: string, academicYearId?: string | null) => {
   return useQuery({
-    queryKey: ["student-report", studentId, period],
+    queryKey: ["student-report", studentId, period, academicYearId ?? "current"],
     queryFn: async () => {
       // Get student details
-      const { data: student, error: studentError } = await supabase
+      const { data: baseStudent, error: studentError } = await supabase
         .from("students")
-        .select(`
-          *,
-          classes (
-            id,
-            name,
-            grading_mode,
-            teacher_id,
-            departments:department_id (
-              id,
-              name
-            ),
-            academic_years (
-              year_name
-            )
-          )
-        `)
+        .select("*")
         .eq("id", studentId)
         .single();
 
       if (studentError) throw studentError;
+
+      let targetClassId = baseStudent.class_id;
+
+      if (academicYearId) {
+        const { data: enrollment, error: enrollmentError } = await supabase
+          .from("student_enrollments")
+          .select("class_id")
+          .eq("student_id", studentId)
+          .eq("academic_year_id", academicYearId)
+          .order("enrolled_at", { ascending: false })
+          .maybeSingle();
+        if (enrollmentError) throw enrollmentError;
+        if (enrollment?.class_id) targetClassId = enrollment.class_id;
+      }
+
+      const { data: classData, error: classError } = await supabase
+        .from("classes")
+        .select(`
+          id,
+          name,
+          grading_mode,
+          teacher_id,
+          academic_year_id,
+          departments:department_id (
+            id,
+            name
+          ),
+          academic_years (
+            id,
+            year_name,
+            is_current
+          )
+        `)
+        .eq("id", targetClassId)
+        .maybeSingle();
+
+      if (classError) throw classError;
+
+      const student = {
+        ...baseStudent,
+        class_id: targetClassId,
+        classes: classData,
+      } as any;
 
       // Determine which periods to fetch based on report type
       let periodsToFetch: any[] = [period];
@@ -56,7 +84,7 @@ export const useStudentReport = (studentId: string, period: string) => {
       if (classSubjectsError) throw classSubjectsError;
 
       // Get grades for this student and period(s)
-      const { data: grades, error: gradesError } = await supabase
+      let gradesQuery = supabase
         .from("student_grades")
         .select(`
           score,
@@ -66,8 +94,9 @@ export const useStudentReport = (studentId: string, period: string) => {
             name,
             max_points
           ),
-          class_subjects (
+          class_subjects!inner (
             id,
+            class_id,
             subjects (
               name,
               code
@@ -76,6 +105,10 @@ export const useStudentReport = (studentId: string, period: string) => {
         `)
         .eq("student_id", studentId)
         .in("period", periodsToFetch);
+      if (student.classes?.id) {
+        gradesQuery = gradesQuery.eq("class_subjects.class_id", student.classes.id);
+      }
+      const { data: grades, error: gradesError } = await gradesQuery;
 
       if (gradesError) throw gradesError;
 
@@ -83,11 +116,20 @@ export const useStudentReport = (studentId: string, period: string) => {
       const hasMissingGrades = grades?.some((grade: any) => isMissingGrade(grade.score)) || false;
 
       // Get period ranks from the new RPC (computes overall class rank for each period)
+      const rankRpc = student.classes?.id ? "get_student_period_ranks_for_class" : "get_student_period_ranks";
+      const rankParams = student.classes?.id
+        ? {
+            p_student_id: studentId,
+            p_class_id: student.classes.id,
+            p_periods: periodsToFetch,
+          }
+        : {
+            p_student_id: studentId,
+            p_periods: periodsToFetch,
+          };
+
       const { data: periodRanks, error: periodRanksError } = await supabase
-        .rpc("get_student_period_ranks", {
-          p_student_id: studentId,
-          p_periods: periodsToFetch,
-        });
+        .rpc(rankRpc as any, rankParams as any);
 
       if (periodRanksError) throw periodRanksError;
 
@@ -138,13 +180,16 @@ export const useStudentReport = (studentId: string, period: string) => {
       // Get semester/yearly totals if applicable
       let yearlyTotal = null;
       if (period === 'semester1' || period === 'semester2' || period === 'yearly') {
-        const { data: yearlyData, error: yearlyError } = await supabase
+        let yearlyQuery = supabase
           .from("student_yearly_totals")
-          .select("*")
-          .eq("student_id", studentId)
-          .maybeSingle();
+          .select("*, class_subjects!inner(class_id)")
+          .eq("student_id", studentId);
+        if (student.classes?.id) {
+          yearlyQuery = yearlyQuery.eq("class_subjects.class_id", student.classes.id);
+        }
+        const { data: yearlyRows, error: yearlyError } = await yearlyQuery;
         
-        if (!yearlyError) yearlyTotal = yearlyData;
+        if (!yearlyError) yearlyTotal = yearlyRows?.[0] ?? null;
       }
 
       // Build a map of all class subjects to ensure they all appear on the report

@@ -1944,6 +1944,7 @@ export type Database = {
       }
       student_report_inputs: {
         Row: {
+          academic_year_id: string
           administrator_name: string | null
           behavior: string | null
           can_improve_in: string | null
@@ -1964,6 +1965,7 @@ export type Database = {
           updated_by: string | null
         }
         Insert: {
+          academic_year_id: string
           administrator_name?: string | null
           behavior?: string | null
           can_improve_in?: string | null
@@ -1984,6 +1986,7 @@ export type Database = {
           updated_by?: string | null
         }
         Update: {
+          academic_year_id?: string
           administrator_name?: string | null
           behavior?: string | null
           can_improve_in?: string | null
@@ -2487,6 +2490,20 @@ export type Database = {
       get_billable_seats: { Args: { p_school_id: string }; Returns: number }
       get_student_period_ranks: {
         Args: {
+          p_periods: Database["public"]["Enums"]["period_type"][]
+          p_student_id: string
+        }
+        Returns: {
+          class_rank: number
+          is_incomplete: boolean
+          period: Database["public"]["Enums"]["period_type"]
+          total_score: number
+          total_students: number
+        }[]
+      }
+      get_student_period_ranks_for_class: {
+        Args: {
+          p_class_id: string
           p_periods: Database["public"]["Enums"]["period_type"][]
           p_student_id: string
         }
