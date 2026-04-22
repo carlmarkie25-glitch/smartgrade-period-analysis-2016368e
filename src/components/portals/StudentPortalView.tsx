@@ -333,6 +333,7 @@ const StudentPortalView = ({ student }: StudentPortalViewProps) => {
         onOpenChange={setReportOpen}
         studentId={student.id}
         period={reportPeriod}
+        academicYearId={selectedYearId}
         className={student.classes?.name}
       />
     </div>
