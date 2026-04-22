@@ -1,8 +1,9 @@
-import { Search, Bell, ChevronDown } from "lucide-react";
+import { Search, Bell } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useNotifications } from "@/hooks/useNotifications";
 import { SyncStatusIndicator } from "@/components/SyncStatusIndicator";
+import UserAvatarMenu from "@/components/UserAvatarMenu";
 
 interface TopbarProps {
   userName?: string;
@@ -14,7 +15,7 @@ interface TopbarProps {
 export const Topbar = ({
   userName = "Dr. John Jacob",
   userRole = "Principal",
-  userAvatar = "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=400&fit=crop",
+  userAvatar,
   sidebarCollapsed = false,
 }: TopbarProps) => {
   const [searchFocus, setSearchFocus] = useState(false);
@@ -51,15 +52,7 @@ export const Topbar = ({
 
         <div className="w-px h-5 bg-gray-200" />
 
-        <div className="flex items-center gap-2 px-2 py-1 rounded-xl hover:bg-[hsl(170,20%,96%)] transition-colors cursor-pointer group">
-          <p className="text-xs font-semibold text-gray-800">{userName}</p>
-          <img
-            src={userAvatar}
-            alt={userName}
-            className="w-8 h-8 rounded-full object-cover border border-[hsl(170,25%,85%)]"
-          />
-          <ChevronDown className="text-gray-400 size-3.5 group-hover:text-gray-600 transition-colors" />
-        </div>
+        <UserAvatarMenu userName={userName} avatarUrl={userAvatar} />
       </div>
     </nav>
   );
