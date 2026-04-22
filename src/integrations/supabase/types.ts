@@ -1944,6 +1944,7 @@ export type Database = {
       }
       student_report_inputs: {
         Row: {
+          academic_year_id: string
           administrator_name: string | null
           behavior: string | null
           can_improve_in: string | null
@@ -1964,6 +1965,7 @@ export type Database = {
           updated_by: string | null
         }
         Insert: {
+          academic_year_id: string
           administrator_name?: string | null
           behavior?: string | null
           can_improve_in?: string | null
@@ -1984,6 +1986,7 @@ export type Database = {
           updated_by?: string | null
         }
         Update: {
+          academic_year_id?: string
           administrator_name?: string | null
           behavior?: string | null
           can_improve_in?: string | null
