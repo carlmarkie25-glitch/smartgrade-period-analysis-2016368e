@@ -108,8 +108,12 @@ const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-background to-primary/5 p-4">
-      <div className="w-full max-w-md">
+    <div 
+      className="min-h-screen flex items-center justify-center p-4 relative bg-cover bg-center"
+      style={{ backgroundImage: 'url("/IMG_0741.png")' }}
+    >
+      <div className="absolute inset-0 bg-primary/80 backdrop-blur-[2px]"></div>
+      <div className="w-full max-w-md relative z-10">
         <div className="mb-4">
           <Link to="/" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors">
             <ArrowLeft className="h-4 w-4" />
