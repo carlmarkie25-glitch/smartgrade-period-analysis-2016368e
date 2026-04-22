@@ -3,10 +3,12 @@ import { LayoutDashboard, BookOpen, FileText, BarChart3 } from "lucide-react";
 import logo from "@/assets/logo.png";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import UserAvatarMenu from "@/components/UserAvatarMenu";
 
 const Navbar = () => {
   const location = useLocation();
-  const { signOut } = useAuth();
+  const { user, profile } = useAuth();
+  const profileName = profile?.full_name || user?.user_metadata?.full_name || user?.email?.split("@")[0] || "User";
 
   const navItems = [
     { path: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
@@ -42,7 +44,7 @@ const Navbar = () => {
           </div>
 
           <div className="flex items-center gap-2">
-            <Button variant="outline" onClick={signOut}>Sign Out</Button>
+            <UserAvatarMenu userName={profileName} avatarUrl={profile?.avatar_url ?? undefined} />
           </div>
         </div>
       </div>
