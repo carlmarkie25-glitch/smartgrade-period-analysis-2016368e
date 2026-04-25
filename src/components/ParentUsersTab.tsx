@@ -97,21 +97,22 @@ export const ParentUsersTab = () => {
   return (
     <div className="space-y-6">
       {/* Parent Users with linked children */}
-      <Card>
-        <CardHeader className="flex flex-row items-start justify-between gap-4">
+      <div className="glass-panel p-8 border border-white/10">
+        <div className="flex flex-col md:flex-row items-start justify-between gap-6 mb-8">
           <div>
-            <CardTitle className="text-lg flex items-center gap-2">
-              <Users className="h-5 w-5" />
-              Parents ({parentUsers.length})
-            </CardTitle>
-            <CardDescription>Manage parent accounts and their linked children</CardDescription>
+            <h3 className="text-xl font-black text-white tracking-tight flex items-center gap-3">
+              <Users className="h-6 w-6 text-primary" />
+              Authorized Parent Cluster ({parentUsers.length})
+            </h3>
+            <p className="text-[10px] font-black text-white/40 uppercase tracking-widest mt-2">Manage parental access and student associations</p>
           </div>
-          <Button size="sm" onClick={() => setCreateOpen(true)}>
-            <UserPlus className="h-4 w-4 mr-1" />
-            Add Parent
+          <Button onClick={() => setCreateOpen(true)} className="bg-primary hover:bg-primary/90 text-primary-foreground h-12 px-6 rounded-xl font-black text-[10px] uppercase tracking-widest">
+            <UserPlus className="h-4 w-4 mr-2" />
+            Provision New Parent
           </Button>
-        </CardHeader>
-        <CardContent>
+        </div>
+        <div>
+
           {parentUsers.length === 0 ? (
             <p className="text-muted-foreground text-sm">
               No parents assigned yet. Assign the parent role to users from the Unassigned Users section below.
@@ -129,11 +130,11 @@ export const ParentUsersTab = () => {
                 {parentUsers.map((user) => {
                   const children = getLinkedChildren(user.user_id);
                   return (
-                    <TableRow key={user.id}>
-                      <TableCell>
+                    <TableRow key={user.id} className="border-white/5 hover:bg-white/5 transition-colors">
+                      <TableCell className="py-6">
                         <div>
-                          <p className="font-medium">{user.full_name}</p>
-                          <p className="text-sm text-muted-foreground">{user.email}</p>
+                          <p className="text-sm font-black text-white">{user.full_name}</p>
+                          <p className="text-[10px] font-bold text-white/30 uppercase tracking-widest">{user.email}</p>
                         </div>
                       </TableCell>
                       <TableCell>
@@ -144,18 +145,17 @@ export const ParentUsersTab = () => {
                             {children.map((child) => (
                               <Badge
                                 key={child.id}
-                                variant="secondary"
-                                className="flex items-center gap-1 pr-1"
+                                className="bg-primary/10 text-primary border-primary/20 text-[9px] font-black uppercase tracking-widest py-1 px-3"
                               >
                                 {child.student?.full_name}
                                 {child.student?.class?.name && (
-                                  <span className="text-muted-foreground">
-                                    ({child.student.class.name})
+                                  <span className="text-white/40 ml-1">
+                                    [{child.student.class.name}]
                                   </span>
                                 )}
                                 <button
                                   onClick={() => handleUnlinkChild(child.id)}
-                                  className="ml-1 hover:bg-destructive/20 rounded-full p-0.5"
+                                  className="ml-2 hover:bg-rose-500/20 rounded-full p-0.5 text-rose-400 transition-colors"
                                   title="Unlink child"
                                 >
                                   <X className="h-3 w-3" />
@@ -165,11 +165,11 @@ export const ParentUsersTab = () => {
                           </div>
                         )}
                       </TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex justify-end gap-2">
+                      <TableCell className="text-right py-6">
+                        <div className="flex justify-end gap-3">
                           <Button
                             variant="outline"
-                            size="sm"
+                            className="bg-white/5 border-white/10 hover:bg-white/10 text-white h-10 px-4 rounded-xl font-black text-[9px] uppercase tracking-widest"
                             onClick={() =>
                               setAssignmentParent({
                                 id: user.id,
@@ -178,17 +178,17 @@ export const ParentUsersTab = () => {
                               })
                             }
                           >
-                            <Link2 className="h-4 w-4 mr-1" />
-                            Link Children
+                            <Link2 className="h-3.5 w-3.5 mr-2 text-primary" />
+                            Link Student
                           </Button>
                           <Button
                             variant="outline"
-                            size="sm"
+                            className="bg-rose-500/10 border-rose-500/20 hover:bg-rose-500/20 text-rose-400 h-10 px-4 rounded-xl font-black text-[9px] uppercase tracking-widest"
                             disabled={removingId === user.user_id}
                             onClick={() => handleRemoveParent(user.user_id, user.full_name)}
                           >
-                            <Unlink className="h-4 w-4 mr-1" />
-                            {removingId === user.user_id ? "Removing..." : "Remove Parent"}
+                            <Unlink className="h-3.5 w-3.5 mr-2" />
+                            {removingId === user.user_id ? "Terminating..." : "Revoke Access"}
                           </Button>
                         </div>
                       </TableCell>
@@ -198,53 +198,51 @@ export const ParentUsersTab = () => {
               </TableBody>
             </Table>
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
       {/* Unassigned Users */}
       {unassignedUsers.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg flex items-center gap-2">
-              <UserPlus className="h-5 w-5" />
-              Unassigned Users ({unassignedUsers.length})
-            </CardTitle>
-            <CardDescription>Assign the parent role to these users</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>User</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+        <div className="glass-panel p-8 border border-white/10 mt-8">
+          <div className="mb-8">
+            <h3 className="text-xl font-black text-white tracking-tight flex items-center gap-3">
+              <UserPlus className="h-6 w-6 text-emerald-400" />
+              Unassigned Clusters ({unassignedUsers.length})
+            </h3>
+            <p className="text-[10px] font-black text-white/40 uppercase tracking-widest mt-2">Provision access for newly registered users</p>
+          </div>
+          <Table>
+            <TableHeader>
+              <TableRow className="border-white/5">
+                <TableHead className="text-white/40 font-black text-[10px] uppercase tracking-widest">User Identity</TableHead>
+                <TableHead className="text-right text-white/40 font-black text-[10px] uppercase tracking-widest">Action Vector</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {unassignedUsers.map((user) => (
+                <TableRow key={user.id} className="border-white/5 hover:bg-white/5 transition-colors">
+                  <TableCell className="py-6">
+                    <div>
+                      <p className="text-sm font-black text-white">{user.full_name}</p>
+                      <p className="text-[10px] font-bold text-white/30 uppercase tracking-widest">{user.email}</p>
+                    </div>
+                  </TableCell>
+                  <TableCell className="text-right py-6">
+                    <Button
+                      className="bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/20 h-10 px-6 rounded-xl font-black text-[10px] uppercase tracking-widest"
+                      onClick={() =>
+                        assignRole.mutate({ userId: user.user_id, role: "parent" })
+                      }
+                    >
+                      <UserPlus className="h-4 w-4 mr-2" />
+                      Grant Parent Access
+                    </Button>
+                  </TableCell>
                 </TableRow>
-              </TableHeader>
-              <TableBody>
-                {unassignedUsers.map((user) => (
-                  <TableRow key={user.id}>
-                    <TableCell>
-                      <div>
-                        <p className="font-medium">{user.full_name}</p>
-                        <p className="text-sm text-muted-foreground">{user.email}</p>
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <Button
-                        size="sm"
-                        onClick={() =>
-                          assignRole.mutate({ userId: user.user_id, role: "parent" })
-                        }
-                      >
-                        <UserPlus className="h-4 w-4 mr-1" />
-                        Assign Parent
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
       )}
 
       {/* Child Assignment Dialog */}

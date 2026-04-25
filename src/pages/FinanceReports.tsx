@@ -65,112 +65,240 @@ const FinanceReports = () => {
   const expenseCategoryData = Object.entries(expenseByCategory).map(([name, value]) => ({ name, value }));
 
   const stats = [
-    { label: "Total Billed", value: totalBilled, icon: DollarSign, bgColor: "bg-[hsl(210,60%,96%)]", iconBg: "bg-[hsl(210,60%,90%)]", iconColor: "text-[hsl(210,60%,45%)]" },
-    { label: "Total Collected", value: totalRevenue, icon: TrendingUp, bgColor: "bg-[hsl(210,60%,95%)]", iconBg: "bg-[hsl(210,60%,88%)]", iconColor: "text-[hsl(220,60%,30%)]" },
-    { label: "Outstanding", value: totalOutstanding, icon: AlertCircle, bgColor: "bg-[hsl(35,60%,96%)]", iconBg: "bg-[hsl(35,60%,90%)]", iconColor: "text-[hsl(35,60%,40%)]" },
-    { label: "Total Expenses", value: totalExpenses, icon: TrendingDown, bgColor: "bg-[hsl(0,60%,96%)]", iconBg: "bg-[hsl(0,60%,90%)]", iconColor: "text-[hsl(0,50%,45%)]" },
+    { label: "Total Billed", value: totalBilled, icon: DollarSign, color: "text-primary", bg: "bg-primary/10" },
+    { label: "Collected", value: totalRevenue, icon: TrendingUp, color: "text-emerald-500", bg: "bg-emerald-500/10" },
+    { label: "Outstanding", value: totalOutstanding, icon: AlertCircle, color: "text-amber-500", bg: "bg-amber-500/10" },
+    { label: "Expenses", value: totalExpenses, icon: TrendingDown, color: "text-rose-500", bg: "bg-rose-500/10" },
   ];
 
   return (
-    <AppShell>
-      <div className="py-4 space-y-4">
-        <div className="neu-card p-6 flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900 mb-1">Financial Reports</h1>
-            <p className="text-sm text-gray-500">Overview of school finances</p>
+    <AppShell activeTab="finance">
+      <div className="flex flex-col gap-8 pb-8">
+        
+        {/* Header Section */}
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 px-1">
+          <div className="flex items-center gap-6">
+            <div className="w-20 h-20 rounded-[2rem] glass-panel flex items-center justify-center border border-white/20 p-1.5 shadow-none">
+              <div className="w-full h-full rounded-[1.5rem] bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center text-white">
+                <DollarSign className="size-8" />
+              </div>
+            </div>
+            <div>
+              <p className="text-[10px] font-black text-white/50 uppercase tracking-[0.3em] mb-1.5">Treasury Management</p>
+              <h1 className="text-4xl md:text-5xl font-black text-white tracking-tighter leading-tight">
+                Finance <span className="text-secondary">Reports</span>
+              </h1>
+            </div>
           </div>
-          {years && years.length > 0 && (
-            <select
-              className="neu-pill px-3 py-1.5 text-xs text-gray-900 outline-none"
-              value={selectedYear}
-              onChange={e => setSelectedYear(e.target.value)}
-            >
-              {years.map(y => (
-                <option key={y.id} value={y.id}>{y.year_name}</option>
-              ))}
-            </select>
-          )}
+          
+          <div className="flex items-center gap-4 glass-panel px-6 py-3 rounded-[1.5rem] shadow-none self-start lg:self-center">
+             <div className="relative">
+              <div className="w-2.5 h-2.5 rounded-full bg-secondary animate-pulse" />
+              <div className="absolute inset-0 w-2.5 h-2.5 rounded-full bg-secondary animate-ping opacity-40" />
+            </div>
+             {years && years.length > 0 && (
+              <select
+                className="bg-transparent border-none text-white font-black text-[11px] uppercase tracking-widest outline-none focus:ring-0 cursor-pointer pr-8"
+                value={selectedYear}
+                onChange={e => setSelectedYear(e.target.value)}
+              >
+                {years.map(y => (
+                  <option key={y.id} value={y.id} className="bg-slate-900 text-white font-black">{y.year_name}</option>
+                ))}
+              </select>
+            )}
+          </div>
         </div>
 
-        {/* Stats */}
-        <div className="neu-card p-4">
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="text-sm font-semibold text-gray-900">Financial Overview</h3>
-            <span className="text-[10px] font-medium text-[hsl(220,60%,30%)]/70 px-2 py-0.5 bg-[hsl(210,60%,95%)] rounded-md">Summary</span>
+        {/* Hero Performance Card */}
+        <div className="relative overflow-hidden rounded-[2.5rem] p-10 bg-gradient-to-br from-primary via-primary/90 to-primary/80 text-white min-h-[260px] flex flex-col justify-between border border-white/10 shadow-none group">
+          <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-white/5 rounded-full blur-[80px] -mr-40 -mt-40 pointer-events-none transition-transform duration-1000 group-hover:scale-110" />
+          <div className="absolute bottom-0 left-0 w-64 h-64 bg-secondary/10 rounded-full blur-[60px] -ml-32 -mb-32 pointer-events-none transition-transform duration-1000 group-hover:scale-110" />
+          
+          <div className="relative z-10">
+            <div className="inline-flex items-center gap-2 bg-white/10 text-white/80 border border-white/10 px-4 py-1.5 mb-6 backdrop-blur-md rounded-full uppercase tracking-widest text-[9px] font-black">
+              <TrendingUp className="size-3 text-secondary" />
+              Fiscal Performance Analytics
+            </div>
+            <h2 className="text-4xl md:text-5xl font-black tracking-tighter leading-[1.1] max-w-lg">
+              Net Institutional <br/><span className="text-secondary">Financial Matrix</span>
+            </h2>
           </div>
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-            {stats.map(s => {
-              const Icon = s.icon;
-              return (
-                <div key={s.label} className={`p-3 rounded-xl ${s.bgColor} transition-colors`}>
-                  <div className="flex items-center justify-between mb-1.5">
-                    <span className="text-[10px] font-medium text-gray-500">{s.label}</span>
-                    <div className={`w-7 h-7 rounded-lg ${s.iconBg} flex items-center justify-center`}>
-                      <Icon className={`h-3.5 w-3.5 ${s.iconColor}`} />
+
+          <div className="relative z-10 flex flex-wrap items-end justify-between gap-8 pt-8">
+            <div className="flex gap-12">
+              <div>
+                <p className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em] mb-2">Net Income</p>
+                <div className={`text-5xl font-black tracking-tighter flex items-baseline gap-1 ${netIncome >= 0 ? "text-white" : "text-rose-400"}`}>
+                  {netIncome.toLocaleString()}<span className="text-xl text-white/40 font-bold">TOTAL</span>
+                </div>
+              </div>
+              <div>
+                <p className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em] mb-2">Profitability</p>
+                <div className="text-5xl font-black tracking-tighter flex items-baseline gap-1">
+                  {totalRevenue > 0 ? Math.round((netIncome / totalRevenue) * 100) : 0}<span className="text-xl text-white/40 font-bold">%</span>
+                </div>
+              </div>
+            </div>
+            
+            <div className={`flex items-center gap-5 glass-panel px-8 py-5 rounded-[2rem] transition-all hover:bg-white/15 cursor-pointer shadow-none ${netIncome >= 0 ? "border-secondary/30" : "border-rose-500/30"}`}>
+              <div className="flex flex-col">
+                <span className="text-[9px] font-black text-white/50 uppercase tracking-[0.2em] leading-none mb-1">Status</span>
+                <span className={`text-sm font-black tracking-tight ${netIncome >= 0 ? "text-secondary" : "text-rose-400"}`}>
+                  {netIncome >= 0 ? "SURPLUS" : "DEFICIT"}
+                </span>
+              </div>
+              <div className={`w-12 h-12 rounded-full flex items-center justify-center ${netIncome >= 0 ? "bg-secondary/20" : "bg-rose-500/20"}`}>
+                {netIncome >= 0 ? <TrendingUp className="size-6 text-secondary" /> : <TrendingDown className="size-6 text-rose-500" />}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Stats Grid */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          {stats.map((stat, i) => (
+            <div key={i} className="p-6 glass-panel flex flex-col justify-between min-h-[140px] transition-all hover:bg-white/10 shadow-none group">
+              <div className={`w-12 h-12 rounded-2xl ${stat.bg} flex items-center justify-center group-hover:scale-110 transition-transform`}>
+                <stat.icon className={`size-6 ${stat.color}`} />
+              </div>
+              <div>
+                <p className="text-[9px] font-black text-white/40 uppercase tracking-[0.2em] mb-1">{stat.label}</p>
+                <p className="text-3xl font-black text-white tracking-tighter leading-none">{stat.value.toLocaleString()}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Main Analytics Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_400px] gap-6">
+          {/* Expenses Chart */}
+          <div className="glass-card p-8 min-h-[460px] flex flex-col border border-white/10">
+            <div className="flex items-center justify-between mb-10">
+              <div>
+                <h3 className="text-2xl font-black text-white tracking-tighter leading-none">Expense Allocation</h3>
+                <p className="text-[10px] font-black text-white/50 uppercase tracking-[0.2em] mt-2">Operational capital flow by category</p>
+              </div>
+              <div className="px-5 py-2 glass-pill text-[10px] font-black text-secondary uppercase tracking-widest border border-secondary/20">
+                Category View
+              </div>
+            </div>
+            
+            <div className="flex-1 min-h-[300px]">
+              {expenseCategoryData.length === 0 ? (
+                <div className="h-full flex items-center justify-center">
+                  <p className="text-[10px] font-black text-white/20 uppercase tracking-[0.2em]">No Financial Data Detected</p>
+                </div>
+              ) : (
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={expenseCategoryData} margin={{ top: 20, right: 0, left: -20, bottom: 0 }}>
+                    <defs>
+                      <linearGradient id="barGradient" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="hsl(var(--secondary))" stopOpacity={0.9} />
+                        <stop offset="95%" stopColor="hsl(var(--secondary))" stopOpacity={0.2} />
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255, 255, 255, 0.05)" />
+                    <XAxis 
+                      dataKey="name" 
+                      axisLine={false} 
+                      tickLine={false} 
+                      tick={{ fill: "rgba(255, 255, 255, 0.3)", fontSize: 9, fontWeight: "900", textTransform: "uppercase" }} 
+                    />
+                    <YAxis 
+                      axisLine={false} 
+                      tickLine={false} 
+                      tick={{ fill: "rgba(255, 255, 255, 0.3)", fontSize: 9, fontWeight: "900" }} 
+                    />
+                    <Tooltip
+                      cursor={{ fill: 'rgba(255, 255, 255, 0.05)', radius: [12, 12, 0, 0] }}
+                      contentStyle={{
+                        backgroundColor: "rgba(0, 0, 0, 0.7)",
+                        backdropFilter: "blur(20px)",
+                        border: "1px solid rgba(255, 255, 255, 0.1)",
+                        borderRadius: "20px",
+                        fontSize: "11px",
+                        fontWeight: "900",
+                        color: "white",
+                        boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.3)",
+                        textTransform: "uppercase",
+                        letterSpacing: "0.1em"
+                      }}
+                      itemStyle={{ color: "white" }}
+                      formatter={(value: number) => [`GHS ${value.toLocaleString()}`, "Amount"]}
+                    />
+                    <Bar dataKey="value" fill="url(#barGradient)" radius={[12, 12, 4, 4]} animationDuration={2000} barSize={40} />
+                  </BarChart>
+                </ResponsiveContainer>
+              )}
+            </div>
+          </div>
+
+          {/* Revenue Distribution */}
+          <div className="glass-card p-8 flex flex-col min-h-[460px] border border-white/10">
+            <div className="flex items-center justify-between mb-10">
+              <h3 className="text-sm font-black text-white/70 uppercase tracking-widest">Collection Status</h3>
+              <div className="w-10 h-10 rounded-full bg-secondary/10 flex items-center justify-center">
+                <TrendingUp className="size-4 text-secondary" />
+              </div>
+            </div>
+
+            <div className="flex-1 flex flex-col items-center justify-center relative">
+               {statusData.length === 0 ? (
+                <p className="text-[10px] font-black text-white/20 uppercase tracking-[0.2em]">No Billing Data</p>
+              ) : (
+                <>
+                  <div className="w-full h-[300px]">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <Pie 
+                          data={statusData} 
+                          cx="50%" 
+                          cy="50%" 
+                          innerRadius={80} 
+                          outerRadius={110} 
+                          paddingAngle={8} 
+                          dataKey="value"
+                          stroke="none"
+                          animationDuration={1500}
+                        >
+                          {statusData.map((_, i) => (
+                            <Cell key={i} fill={COLORS[i % COLORS.length]} className="transition-all hover:opacity-80 cursor-pointer" />
+                          ))}
+                        </Pie>
+                        <Tooltip
+                          contentStyle={{
+                            backgroundColor: "rgba(0, 0, 0, 0.7)",
+                            backdropFilter: "blur(20px)",
+                            border: "1px solid rgba(255, 255, 255, 0.1)",
+                            borderRadius: "20px",
+                            fontSize: "11px",
+                            fontWeight: "900",
+                            color: "white",
+                            boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.3)",
+                            textTransform: "uppercase",
+                          }}
+                        />
+                      </PieChart>
+                    </ResponsiveContainer>
+                    <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none pb-12">
+                      <span className="text-5xl font-black text-white tracking-tighter leading-none">{bills?.length || 0}</span>
+                      <span className="text-[9px] font-black text-white/30 uppercase tracking-[0.3em] mt-2">Total Invoices</span>
                     </div>
                   </div>
-                  <div className="text-xl font-bold text-gray-900">{s.value.toLocaleString()}</div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
 
-        {/* Net Income */}
-        <div className={`neu-card p-4 ${netIncome >= 0 ? "" : ""}`}>
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-[10px] font-medium text-gray-500">Net Income (Collected − Expenses)</p>
-              <p className={`text-2xl font-bold mt-1 ${netIncome >= 0 ? "text-[hsl(220,60%,30%)]" : "text-[hsl(0,60%,50%)]"}`}>
-                {netIncome.toLocaleString()}
-              </p>
+                  <div className="grid grid-cols-3 gap-3 w-full mt-6">
+                    {statusData.map((d, i) => (
+                      <div key={d.name} className="flex flex-col items-center p-4 glass-panel !rounded-[1.8rem] bg-white/5 border border-white/5 hover:border-white/10 transition-all">
+                        <div className="w-2.5 h-2.5 rounded-full mb-3" style={{ backgroundColor: COLORS[i % COLORS.length] }} />
+                        <span className="text-[8px] font-black text-white/40 uppercase tracking-[0.2em] mb-1">{d.name}</span>
+                        <span className="text-base font-black text-white tracking-tighter">{d.value}</span>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              )}
             </div>
-            <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${netIncome >= 0 ? "bg-[hsl(210,60%,92%)]" : "bg-[hsl(0,50%,94%)]"}` }>
-              <DollarSign className={`h-5 w-5 ${netIncome >= 0 ? "text-[hsl(220,60%,30%)]" : "text-[hsl(0,60%,50%)]"}`} />
-            </div>
-          </div>
-        </div>
-
-        {/* Charts */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          <div className="neu-card p-4">
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="text-sm font-semibold text-gray-900">Student Bill Status</h3>
-              <span className="text-[10px] font-medium text-[hsl(220,60%,30%)]/70 px-2 py-0.5 bg-[hsl(210,60%,95%)] rounded-md">Distribution</span>
-            </div>
-            {statusData.length === 0 ? (
-              <p className="text-gray-400 text-center py-8 text-xs">No data yet</p>
-            ) : (
-              <ResponsiveContainer width="100%" height={220}>
-                <PieChart>
-                  <Pie data={statusData} cx="50%" cy="50%" innerRadius={50} outerRadius={75} paddingAngle={5} dataKey="value" label>
-                    {statusData.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
-                  </Pie>
-                  <Legend formatter={(value) => <span className="text-xs text-gray-600">{value}</span>} />
-                  <Tooltip contentStyle={{ backgroundColor: "rgba(255,255,255,0.9)", borderColor: "hsl(170,30%,85%)", borderRadius: "12px", fontSize: "11px" }} />
-                </PieChart>
-              </ResponsiveContainer>
-            )}
-          </div>
-
-          <div className="neu-card p-4">
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="text-sm font-semibold text-gray-900">Expenses by Category</h3>
-              <span className="text-[10px] font-medium text-[hsl(220,60%,30%)]/70 px-2 py-0.5 bg-[hsl(210,60%,95%)] rounded-md">Breakdown</span>
-            </div>
-            {expenseCategoryData.length === 0 ? (
-              <p className="text-gray-400 text-center py-8 text-xs">No data yet</p>
-            ) : (
-              <ResponsiveContainer width="100%" height={220}>
-                <BarChart data={expenseCategoryData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(210,70%,90%)" />
-                  <XAxis dataKey="name" fontSize={11} tick={{ fill: "#9ca3af" }} />
-                  <YAxis tick={{ fill: "#9ca3af", fontSize: 11 }} />
-                  <Tooltip contentStyle={{ backgroundColor: "rgba(255,255,255,0.9)", borderColor: "hsl(210,60%,85%)", borderRadius: "12px", fontSize: "11px" }} />
-                  <Bar dataKey="value" fill="hsl(220,60%,35%)" radius={[4, 4, 0, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
-            )}
           </div>
         </div>
       </div>

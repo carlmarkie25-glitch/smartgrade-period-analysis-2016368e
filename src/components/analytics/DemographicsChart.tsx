@@ -2,16 +2,14 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 import { Skeleton } from "@/components/ui/skeleton";
 
 const COLORS = [
-  "hsl(170, 50%, 40%)",
-  "hsl(210, 60%, 50%)",
-  "hsl(35, 60%, 50%)",
-  "hsl(0, 50%, 50%)",
-  "hsl(280, 50%, 50%)",
-  "hsl(145, 50%, 40%)",
-  "hsl(50, 60%, 45%)",
-  "hsl(320, 50%, 45%)",
-  "hsl(210, 65%, 45%)",
-  "hsl(15, 55%, 50%)",
+  "hsl(220, 70%, 50%)", // Navy Blue
+  "hsl(45, 93%, 50%)",  // Gold
+  "hsl(142, 76%, 50%)", // Success Green
+  "hsl(0, 84%, 60%)",   // Error Red
+  "hsl(280, 65%, 60%)", // Purple
+  "hsl(200, 70%, 50%)", // Sky Blue
+  "hsl(30, 90%, 50%)",  // Orange
+  "hsl(180, 60%, 45%)", // Teal
 ];
 
 interface DemographicsChartProps {
@@ -24,15 +22,9 @@ interface DemographicsChartProps {
 const DemographicsChart = ({ title, data, isLoading, icon }: DemographicsChartProps) => {
   if (isLoading) {
     return (
-      <div
-        className="rounded-[22px] p-5"
-        style={{
-          background: "hsl(170, 25%, 96%)",
-          boxShadow: "8px 8px 16px hsl(170, 25%, 88%), -8px -8px 16px hsl(0, 0%, 100%)",
-        }}
-      >
-        <Skeleton className="h-4 w-32 mb-4" />
-        <Skeleton className="h-[180px] w-full rounded-xl" />
+      <div className="flex flex-col gap-4">
+        <Skeleton className="h-4 w-32 bg-white/5" />
+        <Skeleton className="h-[180px] w-full rounded-2xl bg-white/5" />
       </div>
     );
   }
@@ -41,62 +33,70 @@ const DemographicsChart = ({ title, data, isLoading, icon }: DemographicsChartPr
   const total = displayData.reduce((s, d) => s + d.value, 0);
 
   return (
-    <div
-      className="rounded-[22px] p-5"
-      style={{
-        background: "hsl(170, 25%, 96%)",
-        boxShadow: "8px 8px 16px hsl(170, 25%, 88%), -8px -8px 16px hsl(0, 0%, 100%)",
-      }}
-    >
-      <div className="flex items-center gap-2 mb-3">
-        {icon}
-        <h3 className="text-sm font-bold text-gray-700">{title}</h3>
-        <span
-          className="ml-auto text-[10px] font-bold text-gray-500 uppercase tracking-widest px-3 py-1 rounded-full"
-          style={{
-            background: "hsl(170, 25%, 96%)",
-            boxShadow: "inset 2px 2px 4px hsl(170, 25%, 88%), inset -2px -2px 4px hsl(0, 0%, 100%)",
-          }}
-        >
-          {total} total
-        </span>
-      </div>
+    <div className="flex flex-col h-full">
+      {title && (
+        <div className="flex items-center gap-2 mb-6">
+          {icon}
+          <h3 className="text-sm font-black text-white/70 uppercase tracking-widest">{title}</h3>
+          <span className="ml-auto text-[10px] font-black text-white/30 uppercase tracking-widest">
+            {total} total
+          </span>
+        </div>
+      )}
       {displayData.length === 0 ? (
-        <p className="text-xs text-gray-400 text-center py-8">No data available</p>
+        <div className="flex flex-col items-center justify-center flex-1 py-8">
+          <p className="text-[10px] font-black text-white/20 uppercase tracking-[0.2em]">No Data Available</p>
+        </div>
       ) : (
-        <div className="flex flex-col lg:flex-row items-center gap-2">
-          <div
-            className="rounded-[16px] p-2 w-full"
-            style={{
-              background: "hsl(170, 25%, 96%)",
-              boxShadow: "inset 3px 3px 6px hsl(170, 25%, 88%), inset -3px -3px 6px hsl(0, 0%, 100%)",
-            }}
-          >
-            <ResponsiveContainer width="100%" height={180}>
+        <div className="flex flex-col items-center gap-6">
+          <div className="relative w-full h-[180px]">
+            <ResponsiveContainer width="100%" height="100%">
               <PieChart>
-                <Pie data={displayData} cx="50%" cy="50%" innerRadius={40} outerRadius={70} paddingAngle={2} dataKey="value">
+                <Pie 
+                  data={displayData} 
+                  cx="50%" 
+                  cy="50%" 
+                  innerRadius={55} 
+                  outerRadius={75} 
+                  paddingAngle={4} 
+                  dataKey="value"
+                  stroke="none"
+                >
                   {displayData.map((_, i) => (
-                    <Cell key={i} fill={COLORS[i % COLORS.length]} />
+                    <Cell key={i} fill={COLORS[i % COLORS.length]} className="transition-all hover:opacity-80" />
                   ))}
                 </Pie>
                 <Tooltip
                   contentStyle={{
-                    backgroundColor: "hsl(170, 25%, 97%)",
-                    border: "none",
-                    borderRadius: "12px",
-                    boxShadow: "4px 4px 8px hsl(170,25%,88%), -4px -4px 8px hsl(0,0%,100%)",
+                    backgroundColor: "rgba(15, 23, 42, 0.9)",
+                    backdropFilter: "blur(12px)",
+                    border: "1px solid rgba(255, 255, 255, 0.1)",
+                    borderRadius: "16px",
                     fontSize: "11px",
+                    fontWeight: "900",
+                    color: "white",
+                    boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1)",
                   }}
-                  formatter={(value: number) => [`${value} (${total > 0 ? Math.round((value / total) * 100) : 0}%)`, "Count"]}
+                  itemStyle={{ color: "white" }}
+                  formatter={(value: number) => [`${value} students`, "Count"]}
                 />
               </PieChart>
             </ResponsiveContainer>
+            <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+              <span className="text-2xl font-black text-white tracking-tighter leading-none">{total}</span>
+              <span className="text-[8px] font-black text-white/30 uppercase tracking-widest">Total</span>
+            </div>
           </div>
-          <div className="flex flex-wrap gap-x-3 gap-y-1 justify-center lg:justify-start">
+          <div className="flex flex-wrap gap-x-4 gap-y-2 justify-center w-full">
             {displayData.map((d, i) => (
-              <div key={d.name} className="flex items-center gap-1.5">
-                <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: COLORS[i % COLORS.length] }} />
-                <span className="text-[10px] text-gray-600">{d.name} ({d.value})</span>
+              <div key={d.name} className="flex items-center gap-2 group cursor-default">
+                <div className="w-2 h-2 rounded-full transition-transform group-hover:scale-125" style={{ backgroundColor: COLORS[i % COLORS.length] }} />
+                <span className="text-[9px] font-black text-white/40 uppercase tracking-tight group-hover:text-white/70 transition-colors">
+                  {d.name}
+                </span>
+                <span className="text-[9px] font-black text-white/20">
+                  {Math.round((d.value / (total || 1)) * 100)}%
+                </span>
               </div>
             ))}
           </div>

@@ -21,7 +21,7 @@ const AcademicYearSelector = ({ value, onChange, className, allowedYearIds, plac
         <Calendar className="h-3.5 w-3.5 mr-1.5 text-muted-foreground" />
         <SelectValue placeholder={placeholder} />
       </SelectTrigger>
-      <SelectContent>
+      <SelectContent className="bg-slate-900/95 backdrop-blur-2xl shadow-xl border-white/10 text-white">
         {list.map((y) => (
           <SelectItem key={y.id} value={y.id}>
             {y.year_name}{y.is_current ? " (Current)" : ""}

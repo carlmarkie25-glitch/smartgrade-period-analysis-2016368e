@@ -238,17 +238,21 @@ const Reports = () => {
     <AppShell activeTab="reports">
       <div className="py-4">
         <div className="neu-card p-6 mb-6">
-          <h1 className="text-3xl font-bold text-foreground mb-1">Reports</h1>
-          <p className="text-muted-foreground text-sm">Generate and view student report cards</p>
+          <h1 className="text-3xl font-black text-white tracking-tighter mb-1">Reports</h1>
+          <p className="text-white/40 text-[10px] font-black uppercase tracking-widest">Generate and view student report cards</p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-          <AcademicYearSelector value={selectedYear} onChange={setSelectedYear} />
+          <AcademicYearSelector 
+            value={selectedYear} 
+            onChange={setSelectedYear} 
+            className="bg-white/5 border border-white/10 h-14 text-xs font-black text-white uppercase tracking-widest px-6 rounded-xl hover:bg-white/10 transition-all"
+          />
           <Select value={selectedClass} onValueChange={setSelectedClass}>
-            <SelectTrigger>
+            <SelectTrigger className="bg-white/5 border border-white/10 h-14 text-xs font-black text-white uppercase tracking-widest px-6 rounded-xl hover:bg-white/10 transition-all">
               <SelectValue placeholder="Select Class" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="bg-slate-900/95 backdrop-blur-2xl shadow-xl border-white/10 text-white">
               {classesLoading ? (
                 <SelectItem value="loading" disabled>Loading...</SelectItem>
               ) : classes?.length === 0 ? (
@@ -264,10 +268,10 @@ const Reports = () => {
           </Select>
 
           <Select value={selectedPeriod} onValueChange={setSelectedPeriod}>
-            <SelectTrigger>
+            <SelectTrigger className="bg-white/5 border border-white/10 h-14 text-xs font-black text-white uppercase tracking-widest px-6 rounded-xl hover:bg-white/10 transition-all">
               <SelectValue placeholder="Report Type" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="bg-slate-900/95 backdrop-blur-2xl shadow-xl border-white/10 text-white">
               <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground">Semester 1</div>
               <SelectItem value="p1">Period 1 Report</SelectItem>
               <SelectItem value="p2">Period 2 Report</SelectItem>
@@ -286,7 +290,7 @@ const Reports = () => {
           </Select>
 
           <Button
-            className="gap-2"
+            className="h-14 rounded-xl bg-secondary text-white text-[10px] font-black uppercase tracking-[0.2em] hover:bg-secondary/90 transition-all shadow-lg gap-2"
             disabled={!selectedClass || !students || students.length === 0 || batchOpen}
             onClick={handleDownloadAllClick}
           >
@@ -337,14 +341,14 @@ const Reports = () => {
                           </AvatarFallback>
                         </Avatar>
                         <div>
-                          <p className="font-semibold text-foreground">{student.full_name}</p>
-                          <p className="text-sm text-muted-foreground">{student.student_id}</p>
+                          <p className="font-black text-white tracking-tight">{student.full_name}</p>
+                          <p className="text-[10px] font-black text-white/40 uppercase tracking-widest">{student.student_id}</p>
                         </div>
                       </div>
                       <div className="flex items-center gap-6">
                         <div className="text-right">
-                          <p className="text-sm text-muted-foreground">Status</p>
-                          <p className="text-xl font-bold text-primary">Active</p>
+                          <p className="text-[10px] font-black text-white/40 uppercase tracking-widest">Status</p>
+                          <p className="text-xl font-black text-secondary tracking-tighter">Active</p>
                         </div>
                         <div className="flex gap-2">
                           <Button

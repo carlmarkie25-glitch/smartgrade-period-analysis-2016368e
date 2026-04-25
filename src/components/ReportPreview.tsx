@@ -16,7 +16,7 @@ const ReportPreview = () => {
 
         <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
           {/* Periodic Report */}
-          <Card className="shadow-xl border-2 hover:shadow-2xl transition-shadow">
+          <Card className="border-2 transition-all">
             <CardHeader className="bg-gradient-primary text-white">
               <CardTitle className="flex items-center gap-2">
                 <FileText className="w-5 h-5" />
@@ -62,7 +62,7 @@ const ReportPreview = () => {
           </Card>
 
           {/* Yearly Report */}
-          <Card className="shadow-xl border-2 hover:shadow-2xl transition-shadow">
+          <Card className="border-2 transition-all">
             <CardHeader className="bg-gradient-secondary text-white">
               <CardTitle className="flex items-center gap-2">
                 <Calendar className="w-5 h-5" />

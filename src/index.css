@@ -10,7 +10,7 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    --background: 210 17% 98%;
+    --background: 210 17% 98% / 0.05;
     --foreground: 220 100% 13%;
 
     --card: 0 0% 100%;
@@ -19,13 +19,13 @@ All colors MUST be HSL.
     --popover: 0 0% 100%;
     --popover-foreground: 220 100% 13%;
 
-    --primary: 219 100% 20%;
+    --primary: 222 100% 15%;
     --primary-foreground: 0 0% 100%;
-    --primary-glow: 219 100% 30%;
+    --primary-glow: 222 100% 25%;
 
-    --secondary: 46 65% 52%;
+    --secondary: 222 100% 15%;
     --secondary-foreground: 0 0% 100%;
-    --secondary-glow: 46 65% 62%;
+    --secondary-glow: 222 100% 25%;
 
     --success: 180 50% 35%;
     --success-foreground: 0 0% 100%;
@@ -36,63 +36,59 @@ All colors MUST be HSL.
     --muted: 210 17% 96%;
     --muted-foreground: 220 100% 33%;
 
-    --accent: 16 100% 60%;
-    --accent-foreground: 0 0% 100%;
+    --accent: 219 50% 90%;
+    --accent-foreground: 222 100% 15%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
     --border: 219 20% 85%;
     --input: 219 20% 85%;
-    --ring: 219 100% 20%;
+    --ring: 222 100% 15%;
 
     --radius: 0.75rem;
 
     /* Chart colors */
-    --chart-1: 219 100% 20%;
-    --chart-2: 46 65% 52%;
+    --chart-1: 222 100% 15%;
+    --chart-2: 222 100% 15%;
     --chart-3: 16 100% 60%;
     --chart-4: 220 100% 13%;
     --chart-5: 210 70% 40%;
 
     /* Sidebar - Navy Theme from school.web */
-    --sidebar-background: linear-gradient(180deg, hsl(219 100% 15%) 0%, hsl(219 100% 20%) 50%, hsl(220 100% 13%) 100%);
+    --sidebar-background: linear-gradient(180deg, hsla(222, 100%, 22%, 0.9) 0%, hsla(222, 100%, 15%, 0.9) 100%);
     --sidebar-foreground: 0 0% 100%;
-    --sidebar-primary: 46 65% 52%;
-    --sidebar-primary-foreground: 219 100% 20%;
+    --sidebar-primary: 222 100% 15%;
+    --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 0 0% 100% / 0.15;
     --sidebar-accent-foreground: 0 0% 100%;
     --sidebar-border: 0 0% 100% / 0.2;
     --sidebar-ring: 0 0% 100%;
 
     /* Gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(219 100% 15%), hsl(219 100% 25%));
-    --gradient-secondary: linear-gradient(135deg, hsl(46 65% 42%), hsl(46 65% 52%));
+    --gradient-primary: linear-gradient(135deg, hsl(222 100% 10%), hsl(222 100% 20%));
+    --gradient-secondary: linear-gradient(135deg, hsl(222 100% 10%), hsl(222 100% 15%));
     --gradient-hero: linear-gradient(135deg, hsl(219 100% 15%) 0%, hsl(219 100% 20%) 50%, hsl(220 100% 13%) 100%);
     --gradient-subtle: linear-gradient(180deg, hsl(210 17% 98%), hsl(210 17% 95%));
 
     /* Shadows */
-    --shadow-sm: 0 2px 4px -1px hsl(220 100% 13% / 0.06);
-    --shadow-md: 0 4px 6px -1px hsl(220 100% 13% / 0.1), 0 2px 4px -1px hsl(220 100% 13% / 0.06);
-    --shadow-lg: 0 10px 15px -3px hsl(220 100% 13% / 0.1), 0 4px 6px -2px hsl(220 100% 13% / 0.05);
-    --shadow-xl: 0 20px 25px -5px hsl(220 100% 13% / 0.1), 0 10px 10px -5px hsl(220 100% 13% / 0.04);
-    --shadow-glow: 0 0 40px hsl(219 100% 20% / 0.3);
-    --shadow-success: 0 10px 30px -10px hsl(180 50% 35% / 0.4);
+    /* Shadows - Disabled for Glassmorphism */
+    --shadow-sm: none;
+    --shadow-md: none;
+    --shadow-lg: none;
+    --shadow-xl: none;
+    --shadow-glow: none;
+    --shadow-success: none;
 
     /* Transitions */
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     --transition-bounce: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-
-    /* Neumorphic Sky Blue palette adapted to light gray */
-    --neu-bg: 210 17% 98%;
-    --neu-shadow: 6px 6px 12px hsl(210 10% 85%), -6px -6px 12px hsl(0 0% 100%);
-    --neu-shadow-sm: 4px 4px 8px hsl(210 10% 85%), -4px -4px 8px hsl(0 0% 100%);
-    --neu-inset: inset 3px 3px 6px hsl(210 10% 85%), inset -3px -3px 6px hsl(0 0% 100%);
-    --neu-inset-sm: inset 2px 2px 4px hsl(210 10% 85%), inset -2px -2px 4px hsl(0 0% 100%);
   }
 
+
+
   .dark {
-    --background: 220 100% 5%;
+    --background: 220 100% 5% / 0.05;
     --foreground: 210 17% 98%;
 
     --card: 220 100% 10%;
@@ -101,9 +97,9 @@ All colors MUST be HSL.
     --popover: 220 100% 10%;
     --popover-foreground: 210 17% 98%;
 
-    --primary: 46 65% 52%;
-    --primary-foreground: 220 100% 13%;
-    --primary-glow: 46 65% 62%;
+    --primary: 222 100% 15%;
+    --primary-foreground: 0 0% 100%;
+    --primary-glow: 222 100% 25%;
 
     --secondary: 219 100% 30%;
     --secondary-foreground: 0 0% 100%;
@@ -116,42 +112,42 @@ All colors MUST be HSL.
     --warning-foreground: 0 0% 100%;
 
     --muted: 220 50% 15%;
-    --muted-foreground: 220 20% 65%;
+    --muted-foreground: 220 20% 75%;
 
-    --accent: 16 100% 60%;
-    --accent-foreground: 0 0% 100%;
+    --accent: 219 50% 20%;
+    --accent-foreground: 210 17% 98%;
 
     --destructive: 0 84% 65%;
     --destructive-foreground: 0 0% 100%;
 
     --border: 220 50% 20%;
     --input: 220 50% 20%;
-    --ring: 46 65% 52%;
+    --ring: 222 100% 15%;
 
     /* Chart colors */
-    --chart-1: 46 65% 52%;
+    --chart-1: 222 100% 15%;
     --chart-2: 219 100% 40%;
     --chart-3: 16 100% 60%;
     --chart-4: 200 65% 50%;
     --chart-5: 210 70% 45%;
 
     /* Sidebar - Navy Blue theme (dark mode) */
-    --sidebar-background: linear-gradient(180deg, hsl(220 100% 10%) 0%, hsl(220 100% 8%) 50%, hsl(220 100% 5%) 100%);
+    --sidebar-background: linear-gradient(180deg, hsla(222, 100%, 18%, 0.95) 0%, hsla(222, 100%, 12%, 0.95) 50%, hsla(222, 100%, 8%, 0.95) 100%);
     --sidebar-foreground: 0 0% 100%;
-    --sidebar-primary: 46 65% 52%;
-    --sidebar-primary-foreground: 220 100% 5%;
+    --sidebar-primary: 222 100% 15%;
+    --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 0 0% 100% / 0.15;
     --sidebar-accent-foreground: 0 0% 100%;
     --sidebar-border: 0 0% 100% / 0.2;
     --sidebar-ring: 0 0% 100%;
 
     --gradient-primary: linear-gradient(135deg, hsl(219 100% 12%), hsl(219 100% 22%));
-    --gradient-secondary: linear-gradient(135deg, hsl(46 65% 35%), hsl(46 65% 45%));
+    --gradient-secondary: linear-gradient(135deg, hsl(222 100% 10%), hsl(222 100% 15%));
     --gradient-hero: linear-gradient(135deg, hsl(220 100% 5%) 0%, hsl(220 100% 10%) 50%, hsl(220 100% 5%) 100%);
     --gradient-subtle: linear-gradient(180deg, hsl(220 100% 5%), hsl(220 100% 8%));
 
-    --shadow-glow: 0 0 40px hsl(46 65% 52% / 0.4);
-    --shadow-success: 0 10px 30px -10px hsl(180 50% 50% / 0.5);
+    --shadow-glow: none;
+    --shadow-success: none;
   }
 }
 
@@ -179,35 +175,69 @@ All colors MUST be HSL.
   background: var(--sidebar-background);
 }
 
-/* Neumorphic utility classes */
-.neu-card {
-  background: hsl(var(--neu-bg));
-  box-shadow: var(--neu-shadow);
-  border-radius: 22px;
-  border: none;
+/* Glassmorphism Utilities */
+@layer components {
+  .glass-card {
+    @apply bg-white/10 backdrop-blur-xl border border-white/20 rounded-[2.5rem] shadow-none;
+  }
+
+  .dark .glass-card {
+    @apply bg-white/[0.03] backdrop-blur-3xl border border-white/10 shadow-none;
+  }
+
+  .glass-panel {
+    @apply bg-white/5 backdrop-blur-xl border border-white/10 rounded-[2rem] shadow-none;
+  }
+
+  .dark .glass-panel {
+    @apply bg-white/[0.02] backdrop-blur-[40px] border border-white/5 shadow-none;
+  }
+
+  .glass-pill {
+    @apply bg-white/30 backdrop-blur-md border border-white/10 rounded-full shadow-none;
+  }
+
+  .dark .glass-pill {
+    @apply bg-white/10 backdrop-blur-md border border-white/5;
+  }
+
+  /* Legacy fallbacks mapped to new glassmorphism tokens */
+  .neu-card {
+    @apply glass-card;
+  }
+
+  .neu-panel {
+    @apply glass-panel;
+  }
 }
 
-.neu-card-sm {
-  background: hsl(var(--neu-bg));
-  box-shadow: var(--neu-shadow-sm);
-  border-radius: 16px;
-  border: none;
+/* THEME SYSTEM OVERRIDES - Highest Priority */
+html.theme-navy {
+  --primary: 222 100% 15%;
+  --primary-glow: 222 100% 25%;
+  --secondary: 222 100% 15%;
+  --secondary-glow: 222 100% 25%;
+  --ring: 222 100% 15%;
+  --chart-1: 222 100% 15%;
+  --chart-2: 222 100% 15%;
+  --sidebar-background: linear-gradient(180deg, hsla(222, 100%, 22%, 0.9) 0%, hsla(222, 100%, 15%, 0.9) 100%);
+  --sidebar-primary: 222 100% 15%;
+  --gradient-primary: linear-gradient(135deg, hsl(222 100% 10%), hsl(222 100% 20%));
+  --gradient-secondary: linear-gradient(135deg, hsl(222 100% 10%), hsl(222 100% 15%));
+  --accent-foreground: 222 100% 15%;
 }
 
-.neu-inset {
-  background: hsl(var(--neu-bg));
-  box-shadow: var(--neu-inset);
-  border-radius: 16px;
-}
-
-.neu-inset-sm {
-  background: hsl(var(--neu-bg));
-  box-shadow: var(--neu-inset-sm);
-  border-radius: 12px;
-}
-
-.neu-pill {
-  background: hsl(var(--neu-bg));
-  box-shadow: var(--neu-inset-sm);
-  border-radius: 9999px;
-}
+html.theme-purple {
+  --primary: 270 100% 25%;
+  --primary-glow: 270 100% 35%;
+  --secondary: 270 80% 45%;
+  --secondary-glow: 270 80% 55%;
+  --ring: 270 100% 25%;
+  --chart-1: 270 100% 25%;
+  --chart-2: 270 80% 45%;
+  --sidebar-background: linear-gradient(180deg, hsla(270, 100%, 20%, 0.9) 0%, hsla(270, 100%, 12%, 0.9) 100%);
+  --sidebar-primary: 270 100% 25%;
+  --gradient-primary: linear-gradient(135deg, hsl(270 100% 15%), hsl(270 100% 30%));
+  --gradient-secondary: linear-gradient(135deg, hsl(270 80% 35%), hsl(270 80% 50%));
+  --accent-foreground: 270 100% 25%;
+}

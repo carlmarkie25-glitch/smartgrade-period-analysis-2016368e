@@ -1,151 +1,46 @@
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/contexts/AuthContext";
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
-import { User } from "lucide-react";
+import { User, Shield, Calendar } from "lucide-react";
 
 export const ProfileSummary = () => {
   const { user } = useAuth();
-
-  const { data: profile } = useQuery({
-    queryKey: ["admin-profile", user?.id],
-    queryFn: async () => {
-      if (!user?.id) return null;
-      const { data } = await supabase
-        .from("profiles")
-        .select("full_name, avatar_url")
-        .eq("user_id", user.id)
-        .single();
-      return data;
-    },
-    enabled: !!user?.id,
-  });
-
-  const { data: stats } = useQuery({
-    queryKey: ["dashboard-profile-stats"],
-    queryFn: async () => {
-      const { data: students, error } = await supabase.from("students").select("gender");
-      if (error) throw error;
-      const total = students?.length || 0;
-      const male = students?.filter((s) => s.gender?.toLowerCase() === "male").length || 0;
-      const female = students?.filter((s) => s.gender?.toLowerCase() === "female").length || 0;
-      return { total, male, female };
-    },
-  });
-
-  const totalStudents = stats?.total || 0;
-  const maleCount = stats?.male || 0;
-  const femaleCount = stats?.female || 0;
-  const malePercent = totalStudents > 0 ? Math.round((maleCount / totalStudents) * 100) : 0;
-  const femalePercent = totalStudents > 0 ? Math.round((femaleCount / totalStudents) * 100) : 0;
-  const fillPercent = totalStudents > 0 ? Math.min(100, malePercent + femalePercent) : 0;
-
-  const adminName = profile?.full_name || user?.email?.split("@")[0] || "Admin";
-  const initials = adminName.split(" ").map((n: string) => n[0]).join("").toUpperCase().slice(0, 2);
+  
+  const profileName = user?.user_metadata?.full_name || user?.email?.split("@")[0] || "User";
+  const initials = profileName.split(" ").map((n: string) => n[0]).join("").toUpperCase().slice(0, 2);
 
   return (
-    <div
-      className="flex flex-col items-center justify-between p-5 md:p-6 rounded-[20px] h-full"
-      style={{
-        background: "hsl(170, 25%, 96%)",
-        boxShadow: "8px 8px 16px hsl(170, 25%, 88%), -8px -8px 16px hsl(0, 0%, 100%)",
-      }}
-    >
-      {/* Top: Profile + Status */}
-      <div className="flex items-center justify-between w-full mb-4">
-        <div className="flex items-center gap-2">
-          {profile?.avatar_url ? (
-            <img src={profile.avatar_url} alt={adminName} className="w-10 h-10 rounded-full object-cover shadow-sm" />
-          ) : (
-            <div
-              className="w-10 h-10 rounded-full flex items-center justify-center text-gray-700 font-black text-xs tracking-wider"
-              style={{
-                background: "hsl(170, 25%, 96%)",
-                boxShadow: "4px 4px 8px hsl(170, 25%, 88%), -4px -4px 8px hsl(0, 0%, 100%)",
-              }}
-            >
-              {initials}
-            </div>
-          )}
-          <div className="flex flex-col">
-            <span className="text-xs font-black text-gray-700 leading-tight tracking-tight">{adminName}</span>
-            <span className="text-[9px] text-gray-400 font-bold uppercase tracking-widest mt-0.5">Admin</span>
-          </div>
-        </div>
-        <div
-          className="px-3 py-1.5 rounded-full flex items-center gap-1.5"
-          style={{
-            background: "hsl(170, 25%, 96%)",
-            boxShadow: "inset 2px 2px 4px hsl(170, 25%, 88%), inset -2px -2px 4px hsl(0, 0%, 100%)",
-          }}
-        >
-          <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_6px_#34d399]" />
-          <span className="text-[9px] font-bold text-gray-500 uppercase tracking-widest">Active</span>
+    <div className="glass-card p-10 flex flex-col items-center text-center h-full justify-center group">
+      <div className="relative mb-8">
+        <div className="absolute inset-0 bg-primary/20 rounded-full blur-2xl group-hover:scale-125 transition-transform duration-700" />
+        <Avatar className="h-28 w-28 border-4 border-white/10 relative z-10 shadow-2xl transition-transform duration-500 group-hover:rotate-3">
+          <AvatarImage src={user?.user_metadata?.avatar_url} />
+          <AvatarFallback className="bg-gradient-to-br from-primary to-primary/80 text-white text-3xl font-black tracking-tighter">
+            {initials}
+          </AvatarFallback>
+        </Avatar>
+        <div className="absolute -bottom-2 -right-2 bg-secondary text-white p-2.5 rounded-2xl shadow-xl z-20 border border-white/20 scale-90 group-hover:scale-110 transition-transform">
+          <Shield className="h-5 w-5" />
         </div>
       </div>
-
-      {/* Center: Donut Chart */}
-      <div
-        className="relative w-[120px] h-[120px] flex items-center justify-center rounded-full my-2"
-        style={{
-          background: "hsl(170, 25%, 96%)",
-          boxShadow: "inset 6px 6px 12px hsl(170, 25%, 88%), inset -6px -6px 12px hsl(0, 0%, 100%)",
-        }}
-      >
-        <svg className="absolute inset-0 -rotate-90 w-full h-full drop-shadow-sm" viewBox="0 0 120 120">
-          <circle cx="60" cy="60" r="46" fill="none" stroke="hsl(170, 20%, 90%)" strokeWidth="10" />
-          <circle
-            cx="60" cy="60" r="46"
-            fill="none"
-            stroke="url(#tealDonutGradient)"
-            strokeWidth="10"
-            strokeDasharray={2 * Math.PI * 46}
-            strokeDashoffset={(2 * Math.PI * 46) - (fillPercent / 100) * (2 * Math.PI * 46)}
-            strokeLinecap="round"
-            style={{ transition: "stroke-dashoffset 1s ease-out" }}
-          />
-          <defs>
-            <linearGradient id="tealDonutGradient" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0%" stopColor="hsl(170, 60%, 45%)" />
-              <stop offset="100%" stopColor="hsl(185, 60%, 50%)" />
-            </linearGradient>
-          </defs>
-        </svg>
-        <div className="absolute inset-0 flex flex-col items-center justify-center pt-1">
-          <span className="text-3xl font-black text-gray-700 leading-none">{totalStudents}</span>
-          <span className="text-[9px] font-bold text-gray-400 uppercase tracking-widest mt-1">Total</span>
-        </div>
+      
+      <div className="space-y-2">
+        <h3 className="text-3xl font-black text-white tracking-tighter leading-tight">{profileName}</h3>
+        <p className="text-[10px] font-black text-white/40 uppercase tracking-[0.3em]">Institutional Administrator</p>
       </div>
 
-      {/* Bottom: Gender Stats */}
-      <div className="w-full flex items-center justify-between px-2 mt-4">
-        <div className="flex flex-col items-center flex-1">
-          <div
-            className="w-10 h-10 rounded-full flex items-center justify-center mb-2"
-            style={{
-              background: "hsl(170, 25%, 96%)",
-              boxShadow: "4px 4px 8px hsl(170, 25%, 88%), -4px -4px 8px hsl(0, 0%, 100%)",
-            }}
-          >
-            <User className="size-4 text-[hsl(170,60%,42%)]" />
-          </div>
-          <span className="text-xs font-black text-gray-700">{maleCount}</span>
-          <span className="text-[9px] text-gray-400 font-bold uppercase tracking-widest mt-0.5">Male</span>
+      <div className="w-full h-px bg-white/10 my-8" />
+
+      <div className="grid grid-cols-2 gap-4 w-full">
+        <div className="bg-white/5 p-4 rounded-[1.5rem] border border-white/5 group-hover:bg-white/10 transition-colors">
+          <Calendar className="h-4 w-4 text-secondary mx-auto mb-2" />
+          <p className="text-[9px] font-black text-white/30 uppercase tracking-widest mb-1">Joined</p>
+          <p className="text-xs font-black text-white">Oct 2023</p>
         </div>
-
-        <div className="h-10 w-px bg-[hsl(170,20%,88%)]" />
-
-        <div className="flex flex-col items-center flex-1">
-          <div
-            className="w-10 h-10 rounded-full flex items-center justify-center mb-2"
-            style={{
-              background: "hsl(170, 25%, 96%)",
-              boxShadow: "4px 4px 8px hsl(170, 25%, 88%), -4px -4px 8px hsl(0, 0%, 100%)",
-            }}
-          >
-            <User className="size-4 text-[hsl(185,60%,48%)]" />
-          </div>
-          <span className="text-xs font-black text-gray-700">{femaleCount}</span>
-          <span className="text-[9px] text-gray-400 font-bold uppercase tracking-widest mt-0.5">Female</span>
+        <div className="bg-white/5 p-4 rounded-[1.5rem] border border-white/5 group-hover:bg-white/10 transition-colors">
+          <User className="h-4 w-4 text-primary mx-auto mb-2" />
+          <p className="text-[9px] font-black text-white/30 uppercase tracking-widest mb-1">Status</p>
+          <p className="text-xs font-black text-emerald-400">Verified</p>
         </div>
       </div>
     </div>

@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 
-type Theme = "light" | "dark" | "system";
+type Theme = "light" | "dark" | "system" | "navy" | "purple";
 
 interface ThemeContextType {
   theme: Theme;
@@ -29,23 +29,31 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({
     if (!isMounted) return;
 
     const updateTheme = () => {
+      const root = window.document.documentElement;
+      
+      // Clean up ALL theme-related classes first
+      root.classList.remove("light", "dark", "theme-navy", "theme-purple");
+
       let effectiveTheme: "light" | "dark" = "light";
 
       if (theme === "system") {
-        effectiveTheme = window.matchMedia("(prefers-color-scheme: dark)")
-          .matches
-          ? "dark"
-          : "light";
+        effectiveTheme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+      } else if (theme === "dark") {
+        effectiveTheme = "dark";
       } else {
-        effectiveTheme = theme;
+        effectiveTheme = "light";
       }
 
       setResolvedTheme(effectiveTheme);
+      
+      // Apply the effective light/dark class
+      root.classList.add(effectiveTheme);
 
-      if (effectiveTheme === "dark") {
-        document.documentElement.classList.add("dark");
-      } else {
-        document.documentElement.classList.remove("dark");
+      // Apply specific brand theme class
+      if (theme === "navy") {
+        root.classList.add("theme-navy");
+      } else if (theme === "purple") {
+        root.classList.add("theme-purple");
       }
 
       localStorage.setItem("theme", theme);

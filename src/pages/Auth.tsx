@@ -2,14 +2,9 @@ import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, User, Lock, LogIn, Mail } from "lucide-react";
 import logo from "@/assets/logo.png";
-
 import { useToast } from "@/hooks/use-toast";
 
 const Auth = () => {
@@ -46,7 +41,6 @@ const Auth = () => {
       if (error) throw error;
 
       if (data.user) {
-        // Create profile
         const { error: profileError } = await supabase
           .from("profiles")
           .insert({
@@ -95,7 +89,6 @@ const Auth = () => {
         description: "You have successfully signed in.",
       });
       
-      // Navigation will happen automatically via the useEffect when user state updates
     } catch (error: any) {
       toast({
         title: "Error",
@@ -108,114 +101,171 @@ const Auth = () => {
   };
 
   return (
-    <div 
-      className="min-h-screen flex items-center justify-center p-4 relative bg-cover bg-center"
-      style={{ backgroundImage: 'url("/IMG_0741.png")' }}
-    >
-      <div className="absolute inset-0 bg-primary/80 backdrop-blur-[2px]"></div>
-      <div className="w-full max-w-md relative z-10">
-        <div className="mb-4">
-          <Link to="/" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors">
-            <ArrowLeft className="h-4 w-4" />
-            Back to Home
-          </Link>
-        </div>
-        <div className="text-center mb-8">
-          <div className="flex items-center justify-center gap-2 mb-4">
-            <img src={logo} alt="Logo" className="h-16 w-16 object-contain" />
+    <div className="font-sans text-[#001540] bg-[#001540] min-h-screen flex items-center justify-center p-4 md:p-6 relative overflow-hidden">
+      {/* Decorative background elements */}
+      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[#D4AF37]/10 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>
+      <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-[#002366]/30 rounded-full blur-[120px] translate-y-1/2 -translate-x-1/2 pointer-events-none"></div>
+
+      <div className="w-full max-w-5xl bg-white/10 backdrop-blur-2xl border border-white/20 rounded-[3rem] overflow-hidden flex flex-col md:flex-row min-h-[600px] animate-in fade-in slide-in-from-bottom-8 duration-700 relative z-10 shadow-2xl">
+        {/* Brand Side */}
+        <div className="md:w-1/2 bg-[#002366] p-8 md:p-12 text-white flex flex-col justify-between relative overflow-hidden">
+          <div className="absolute inset-0 z-0 opacity-20">
+            <img src="/glassbackground.png" alt="Campus" className="w-full h-full object-cover" />
           </div>
-          <p className="text-muted-foreground">Software Systems</p>
+          <div className="absolute inset-0 bg-gradient-to-br from-[#001540] to-[#002366] opacity-90 z-0"></div>
+          
+          <div className="relative z-10">
+            <Link to="/" className="inline-flex items-center gap-3 mb-10 hover:text-[#D4AF37] transition-colors font-medium">
+              <ArrowLeft className="w-4 h-4" /> Back to Website
+            </Link>
+          </div>
+          
+          <div className="relative z-10 my-8 md:my-0">
+            <h1 className="font-serif text-4xl md:text-5xl mb-6 leading-tight">Welcome to the Academy Portal</h1>
+            <p className="text-white/60 text-lg leading-relaxed">Access your personalized learning environment, grades, and faculty resources.</p>
+          </div>
+          
+          <div className="relative z-10 flex items-center gap-4 mt-8 md:mt-0">
+            <div className="w-12 h-12 bg-[#D4AF37] p-2 rounded-xl flex items-center justify-center">
+              <img src="/IMG_E0751.JPG" alt="Logo" className="h-full w-full object-contain mix-blend-multiply" />
+            </div>
+            <div>
+              <span className="block font-bold">GLA Portal</span>
+              <span className="text-white/40 text-sm italic">Excellence through Innovation</span>
+            </div>
+          </div>
         </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Welcome</CardTitle>
-            <CardDescription>Sign in to your account or create a new one</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Tabs defaultValue="signin">
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="signin">Sign In</TabsTrigger>
-                <TabsTrigger value="signup">Sign Up</TabsTrigger>
+        {/* Login Side */}
+        <div className="md:w-1/2 p-8 md:p-12 lg:p-20 flex flex-col justify-center bg-white/5 backdrop-blur-md">
+          <div className="max-w-md w-full mx-auto">
+            <h2 className="text-3xl font-serif mb-2 text-white">Secure Login</h2>
+            <p className="text-white/40 mb-8 text-sm">Please enter your institutional credentials.</p>
+            
+            <Tabs defaultValue="signin" className="w-full">
+              <TabsList className="grid w-full grid-cols-2 mb-8 bg-white/5 border border-white/10 rounded-xl p-1">
+                <TabsTrigger value="signin" className="rounded-lg  ">Sign In</TabsTrigger>
+                <TabsTrigger value="signup" className="rounded-lg  ">Sign Up</TabsTrigger>
               </TabsList>
 
-              <TabsContent value="signin">
-                <form onSubmit={handleSignIn} className="space-y-4">
+              <TabsContent value="signin" className="mt-0">
+                <form onSubmit={handleSignIn} className="space-y-6">
                   <div className="space-y-2">
-                    <Label htmlFor="signin-email">Email</Label>
-                    <Input
-                      id="signin-email"
-                      type="email"
-                      placeholder="your.email@example.com"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      required
-                    />
+                    <label className="block text-xs font-bold uppercase tracking-widest text-slate-400">Email Address</label>
+                    <div className="relative">
+                      <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-300" />
+                      <input 
+                        type="email" 
+                        required
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        className="w-full bg-white/5 border-2 border-white/10 rounded-2xl p-4 pl-12 text-white focus:border-[#D4AF37] outline-none transition-all placeholder:text-white/20" 
+                        placeholder="your.email@example.com" 
+                      />
+                    </div>
                   </div>
+                  
                   <div className="space-y-2">
-                    <Label htmlFor="signin-password">Password</Label>
-                    <Input
-                      id="signin-password"
-                      type="password"
-                      placeholder="••••••••"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      required
-                    />
+                    <label className="block text-xs font-bold uppercase tracking-widest text-slate-400">Password</label>
+                    <div className="relative">
+                      <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-300" />
+                      <input 
+                        type="password" 
+                        required
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        className="w-full bg-white/5 border-2 border-white/10 rounded-2xl p-4 pl-12 text-white focus:border-[#D4AF37] outline-none transition-all" 
+                        placeholder="••••••••" 
+                      />
+                    </div>
                   </div>
-                  <Button type="submit" className="w-full" disabled={loading}>
-                    {loading ? "Signing in..." : "Sign In"}
-                  </Button>
+
+                  <div className="flex items-center justify-between">
+                    <label className="flex items-center gap-2 text-sm text-slate-500 cursor-pointer">
+                      <input type="checkbox" className="w-4 h-4 rounded border-slate-200 text-[#D4AF37] focus:ring-[#D4AF37]" />
+                      Remember me
+                    </label>
+                    <a href="#" className="text-sm font-bold text-[#002366] hover:text-[#D4AF37] transition-colors">Forgot Password?</a>
+                  </div>
+
+                  <button 
+                    type="submit" 
+                    disabled={loading}
+                    className="w-full bg-[#002366] text-white p-4 rounded-2xl font-bold hover:bg-[#D4AF37] hover:text-[#001540] transition-all duration-300 active:scale-95 flex items-center justify-center gap-3 disabled:opacity-70 disabled:cursor-not-allowed"
+                  >
+                    {loading ? "Authenticating..." : "Enter Portal"} <LogIn className="w-5 h-5" />
+                  </button>
+                  
+                  <div className="pt-8 border-t border-slate-100 text-center">
+                    <p className="text-sm text-slate-500 mb-2">Are you a prospective student?</p>
+                    <Link to="/#admissions" className="text-[#D4AF37] font-bold hover:underline">Apply for Admission</Link>
+                  </div>
                 </form>
               </TabsContent>
 
-              <TabsContent value="signup">
-                <form onSubmit={handleSignUp} className="space-y-4">
+              <TabsContent value="signup" className="mt-0">
+                <form onSubmit={handleSignUp} className="space-y-6">
                   <div className="space-y-2">
-                    <Label htmlFor="signup-name">Full Name</Label>
-                    <Input
-                      id="signup-name"
-                      type="text"
-                      placeholder="John Doe"
-                      value={fullName}
-                      onChange={(e) => setFullName(e.target.value)}
-                      required
-                    />
+                    <label className="block text-xs font-bold uppercase tracking-widest text-slate-400">Full Name</label>
+                    <div className="relative">
+                      <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-300" />
+                      <input 
+                        type="text" 
+                        required
+                        value={fullName}
+                        onChange={(e) => setFullName(e.target.value)}
+                        className="w-full bg-white/5 border-2 border-white/10 rounded-2xl p-4 pl-12 text-white focus:border-[#D4AF37] outline-none transition-all placeholder:text-white/20" 
+                        placeholder="John Doe" 
+                      />
+                    </div>
                   </div>
+
                   <div className="space-y-2">
-                    <Label htmlFor="signup-email">Email</Label>
-                    <Input
-                      id="signup-email"
-                      type="email"
-                      placeholder="your.email@example.com"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      required
-                    />
+                    <label className="block text-xs font-bold uppercase tracking-widest text-slate-400">Email Address</label>
+                    <div className="relative">
+                      <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-300" />
+                      <input 
+                        type="email" 
+                        required
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        className="w-full bg-white/5 border-2 border-white/10 rounded-2xl p-4 pl-12 text-white focus:border-[#D4AF37] outline-none transition-all placeholder:text-white/20" 
+                        placeholder="your.email@example.com" 
+                      />
+                    </div>
                   </div>
+                  
                   <div className="space-y-2">
-                    <Label htmlFor="signup-password">Password</Label>
-                    <Input
-                      id="signup-password"
-                      type="password"
-                      placeholder="••••••••"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      required
-                      minLength={6}
-                    />
+                    <label className="block text-xs font-bold uppercase tracking-widest text-slate-400">Password</label>
+                    <div className="relative">
+                      <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-300" />
+                      <input 
+                        type="password" 
+                        required
+                        minLength={6}
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        className="w-full bg-white/5 border-2 border-white/10 rounded-2xl p-4 pl-12 text-white focus:border-[#D4AF37] outline-none transition-all" 
+                        placeholder="••••••••" 
+                      />
+                    </div>
                   </div>
-                  <Button type="submit" className="w-full" disabled={loading}>
-                    {loading ? "Creating account..." : "Create Account"}
-                  </Button>
-                  <p className="text-xs text-muted-foreground text-center mt-2">
+
+                  <button 
+                    type="submit" 
+                    disabled={loading}
+                    className="w-full bg-[#002366] text-white p-4 rounded-2xl font-bold hover:bg-[#D4AF37] hover:text-[#001540] transition-all duration-300 active:scale-95 flex items-center justify-center gap-3 disabled:opacity-70 disabled:cursor-not-allowed"
+                  >
+                    {loading ? "Creating account..." : "Create Account"} <User className="w-5 h-5" />
+                  </button>
+                  <p className="text-xs text-slate-500 text-center mt-2">
                     After signing up, an administrator will assign your role.
                   </p>
                 </form>
               </TabsContent>
             </Tabs>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </div>
     </div>
   );

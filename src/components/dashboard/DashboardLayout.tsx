@@ -6,6 +6,7 @@ import { Schedule } from "./Schedule";
 import { ActivityList } from "./ActivityList";
 import AppShell from "@/components/AppShell";
 import { useDashboardStats } from "@/hooks/useDashboardStats";
+import { Badge } from "@/components/ui/badge";
 
 const analyticsData = [
   { month: "Sun", students: 120, capacity: 200 },
@@ -24,65 +25,58 @@ export const DashboardLayout = () => {
     <AppShell activeTab="dashboard">
       <div className="flex flex-col gap-6">
 
-        {/* Main Neumorphic Container — teal palette */}
-        <div
-          className="rounded-[28px] p-6 md:p-8"
-          style={{
-            background: "hsl(170, 25%, 96%)",
-            boxShadow: "12px 12px 24px hsl(170, 25%, 87%), -12px -12px 24px hsl(0, 0%, 100%)",
-          }}
-        >
-          <div className="grid grid-cols-1 lg:grid-cols-[1fr_260px] gap-8 items-center">
-
-            {/* LEFT: Stats Row */}
-            <div className="flex flex-col gap-5">
-              <div className="flex items-center justify-between px-2">
-                <h3 className="text-lg font-black text-gray-700 tracking-tight">Overview</h3>
-                <div
-                  className="px-4 py-1.5 rounded-full flex items-center"
-                  style={{
-                    background: "hsl(170, 25%, 96%)",
-                    boxShadow: "inset 3px 3px 6px hsl(170, 25%, 88%), inset -3px -3px 6px hsl(0, 0%, 100%)",
-                  }}
-                >
-                  <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">This Term</span>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-5">
-                <StatCard title="Students" value={stats?.totalStudents ?? "—"} icon={Users} iconColor="text-[hsl(170,55%,45%)]" />
-                <StatCard title="Classes" value={stats?.totalClasses ?? "—"} icon={GraduationCap} iconColor="text-[hsl(185,55%,45%)]" />
-                <StatCard title="Year" value={stats?.currentYear ?? "—"} icon={Clock} iconColor="text-amber-400" />
-                <StatCard title="Enrollment" value={stats?.totalStudents ? "+12%" : "—"} icon={TrendingUp} iconColor="text-emerald-400" />
-              </div>
+        {/* Top Section: Overview & 4 Cards */}
+        <div className="flex flex-col gap-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-3xl font-black text-white tracking-tighter leading-none">Administrative Overview</h3>
+              <p className="text-[10px] font-black text-white/50 uppercase tracking-[0.2em] mt-2">Real-time system telemetry</p>
             </div>
+            <Badge className="bg-primary/20 text-white border-white/10 px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest backdrop-blur-md">
+              Terminal A-1
+            </Badge>
+          </div>
 
-            {/* RIGHT: Profile Summary */}
-            <div className="h-full mt-4 lg:mt-0">
-              <ProfileSummary />
-            </div>
-
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+            <StatCard title="Classes" value={stats?.totalClasses ?? "—"} icon={GraduationCap} iconColor="text-secondary" />
+            <StatCard title="Term" value={stats?.currentYear ?? "—"} icon={Clock} iconColor="text-cyan-500" />
+            <StatCard title="Growth" value={stats?.totalStudents ? "+12.4%" : "—"} icon={TrendingUp} iconColor="text-emerald-500" />
+            <StatCard title="Total Students" value={stats?.totalStudents ?? "—"} icon={Users} iconColor="text-secondary" />
           </div>
         </div>
 
-        {/* Lower Sections */}
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr_260px] gap-6 auto-rows-max">
-          {/* Analytics Chart */}
+        {/* Middle Section: Area Chart (Left) + Profile Panel (Right) */}
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-6 items-stretch">
           <AnalyticsChart
             data={analyticsData}
-            title="Enrollment Rate"
-            height={140}
+            title="Student Enrollment Distribution"
+            height={360}
             standalone
             totalStudents={stats?.totalStudents ?? 0}
           />
+          <div className="h-full">
+            <ProfileSummary />
+          </div>
+        </div>
 
-          {/* Activity List — spans 2 rows */}
-          <div className="lg:row-span-2">
+        {/* Bottom Section: Activity List & Schedule */}
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-6 items-stretch">
+          <div className="flex flex-col h-full">
             <ActivityList />
           </div>
-
-          {/* Schedule */}
-          <Schedule />
+          
+          <div className="flex flex-col gap-6">
+            <Schedule />
+            <div className="glass-card border border-white/10 p-10 text-white flex flex-col justify-between shadow-none min-h-[220px]">
+              <div>
+                <h4 className="text-xl font-black tracking-tighter mb-2 text-white">Academic Calendar</h4>
+                <p className="text-xs text-white/60 font-medium leading-relaxed uppercase tracking-widest">School events timeline</p>
+              </div>
+              <button className="bg-white/10 hover:bg-white/20 transition-all py-3 rounded-2xl text-xs font-black uppercase tracking-widest backdrop-blur-md border border-white/10 mt-4">
+                Open Calendar
+              </button>
+            </div>
+          </div>
         </div>
 
       </div>

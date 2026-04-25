@@ -51,7 +51,7 @@ const Features = () => {
           {features.map((feature, index) => (
             <Card 
               key={index} 
-              className="border-2 hover:border-primary/50 transition-all hover:shadow-lg hover:-translate-y-1"
+              className="border-2 hover:border-primary/50 transition-all hover:-translate-y-1"
             >
               <CardContent className="pt-6">
                 <div className="mb-4">{feature.icon}</div>

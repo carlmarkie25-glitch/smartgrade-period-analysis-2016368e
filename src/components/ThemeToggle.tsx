@@ -1,4 +1,4 @@
-import { Moon, Sun, MonitorCog } from "lucide-react";
+import { Moon, Sun, MonitorCog, Palette } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -21,31 +21,58 @@ export const ThemeToggle = () => {
           <span className="sr-only">Toggle theme</span>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
-        <DropdownMenuCheckboxItem
-          checked={theme === "light"}
-          onCheckedChange={() => setTheme("light")}
-          className="flex items-center gap-2 cursor-pointer"
+      <DropdownMenuContent align="end" className="w-48">
+        <DropdownMenuItem
+          onClick={() => setTheme("light")}
+          className={`flex items-center justify-between cursor-pointer ${theme === "light" ? "bg-accent" : ""}`}
         >
-          <Sun className="h-4 w-4" />
-          Light
-        </DropdownMenuCheckboxItem>
-        <DropdownMenuCheckboxItem
-          checked={theme === "dark"}
-          onCheckedChange={() => setTheme("dark")}
-          className="flex items-center gap-2 cursor-pointer"
+          <div className="flex items-center gap-2">
+            <Sun className="h-4 w-4" />
+            <span>Light</span>
+          </div>
+          {theme === "light" && <div className="h-2 w-2 rounded-full bg-primary" />}
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          onClick={() => setTheme("dark")}
+          className={`flex items-center justify-between cursor-pointer ${theme === "dark" ? "bg-accent" : ""}`}
         >
-          <Moon className="h-4 w-4" />
-          Dark
-        </DropdownMenuCheckboxItem>
-        <DropdownMenuCheckboxItem
-          checked={theme === "system"}
-          onCheckedChange={() => setTheme("system")}
-          className="flex items-center gap-2 cursor-pointer"
+          <div className="flex items-center gap-2">
+            <Moon className="h-4 w-4" />
+            <span>Dark</span>
+          </div>
+          {theme === "dark" && <div className="h-2 w-2 rounded-full bg-primary" />}
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          onClick={() => setTheme("system")}
+          className={`flex items-center justify-between cursor-pointer ${theme === "system" ? "bg-accent" : ""}`}
         >
-          <MonitorCog className="h-4 w-4" />
-          System
-        </DropdownMenuCheckboxItem>
+          <div className="flex items-center gap-2">
+            <MonitorCog className="h-4 w-4" />
+            <span>System</span>
+          </div>
+          {theme === "system" && <div className="h-2 w-2 rounded-full bg-primary" />}
+        </DropdownMenuItem>
+        <div className="h-px bg-border my-1" />
+        <DropdownMenuItem
+          onClick={() => setTheme("navy")}
+          className={`flex items-center justify-between cursor-pointer ${theme === "navy" ? "bg-accent" : ""}`}
+        >
+          <div className="flex items-center gap-2">
+            <Palette className="h-4 w-4 text-blue-600" />
+            <span>Navy Blue</span>
+          </div>
+          {theme === "navy" && <div className="h-2 w-2 rounded-full bg-primary" />}
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          onClick={() => setTheme("purple")}
+          className={`flex items-center justify-between cursor-pointer ${theme === "purple" ? "bg-accent" : ""}`}
+        >
+          <div className="flex items-center gap-2">
+            <Palette className="h-4 w-4 text-purple-600" />
+            <span>Royal Purple</span>
+          </div>
+          {theme === "purple" && <div className="h-2 w-2 rounded-full bg-primary" />}
+        </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );

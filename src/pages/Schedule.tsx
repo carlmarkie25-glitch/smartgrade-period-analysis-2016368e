@@ -50,47 +50,70 @@ const Schedule = () => {
 
   return (
     <AppShell activeTab="schedule">
-      <div className="py-4">
-        <div className="neu-card p-6 mb-6">
-          <h1 className="text-3xl font-bold text-foreground">Schedule</h1>
-          <p className="text-muted-foreground mt-1">
-            {isAdmin ? "Manage class timetables and view today's schedule" : "View your daily schedule"}
-          </p>
+      <div className="flex flex-col gap-6 pb-6">
+        {/* Header Section */}
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 px-1">
+          <div className="flex items-center gap-6">
+            <div className="w-20 h-20 rounded-[2rem] glass-panel flex items-center justify-center border border-white/20 p-1.5 shadow-none">
+              <div className="w-full h-full rounded-[1.5rem] bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center text-white">
+                <CalendarDays className="size-8" />
+              </div>
+            </div>
+            <div>
+              <p className="text-[10px] font-black text-white/50 uppercase tracking-[0.3em] mb-1.5">Academic Planning</p>
+              <h1 className="text-4xl md:text-5xl font-black text-white tracking-tighter leading-tight">
+                Schedule
+              </h1>
+            </div>
+          </div>
         </div>
 
-        {rolesLoading ? (
-          <Skeleton className="h-40 w-full" />
-        ) : isAdmin ? (
-          <Tabs defaultValue="manage" className="space-y-6">
-            <TabsList>
-              <TabsTrigger value="manage">
-                <CalendarDays className="h-4 w-4 mr-2" />
-                Manage Timetable
-              </TabsTrigger>
-              <TabsTrigger value="timetable">
-                <LayoutGrid className="h-4 w-4 mr-2" />
-                Timetable View
-              </TabsTrigger>
-              <TabsTrigger value="preview">
-                <Eye className="h-4 w-4 mr-2" />
-                Today's Preview
-              </TabsTrigger>
-            </TabsList>
-            <TabsContent value="manage">
-              <ClassScheduleManagementTab />
-            </TabsContent>
-            <TabsContent value="timetable">
+        <div className="glass-card p-1 pb-2 overflow-hidden">
+          {rolesLoading ? (
+            <div className="p-8">
+              <Skeleton className="h-40 w-full rounded-2xl bg-white/5" />
+            </div>
+          ) : isAdmin ? (
+            <Tabs defaultValue="manage" className="w-full">
+              <div className="px-8 pt-8 pb-4">
+                <TabsList className="bg-white/5 border border-white/10 p-1 rounded-2xl">
+                  <TabsTrigger value="manage" className="rounded-xl data-[state=active]:bg-primary data-[state=active]:text-white text-[10px] font-black uppercase tracking-widest px-6 h-10 transition-all">
+                    <CalendarDays className="h-4 w-4 mr-2" />
+                    Manage
+                  </TabsTrigger>
+                  <TabsTrigger value="timetable" className="rounded-xl data-[state=active]:bg-primary data-[state=active]:text-white text-[10px] font-black uppercase tracking-widest px-6 h-10 transition-all">
+                    <LayoutGrid className="h-4 w-4 mr-2" />
+                    Timetable
+                  </TabsTrigger>
+                  <TabsTrigger value="preview" className="rounded-xl data-[state=active]:bg-primary data-[state=active]:text-white text-[10px] font-black uppercase tracking-widest px-6 h-10 transition-all">
+                    <Eye className="h-4 w-4 mr-2" />
+                    Preview
+                  </TabsTrigger>
+                </TabsList>
+              </div>
+              
+              <TabsContent value="manage" className="mt-0 focus-visible:outline-none">
+                <div className="p-8">
+                  <ClassScheduleManagementTab />
+                </div>
+              </TabsContent>
+              <TabsContent value="timetable" className="mt-0 focus-visible:outline-none">
+                <div className="p-8">
+                  <ClassScheduleTimetable />
+                </div>
+              </TabsContent>
+              <TabsContent value="preview" className="mt-0 focus-visible:outline-none">
+                <div className="p-8">
+                  {schedulePreview}
+                </div>
+              </TabsContent>
+            </Tabs>
+          ) : (
+            <div className="p-8">
               <ClassScheduleTimetable />
-            </TabsContent>
-            <TabsContent value="preview">
-              {schedulePreview}
-            </TabsContent>
-          </Tabs>
-        ) : (
-          <div className="space-y-6">
-            <ClassScheduleTimetable />
-          </div>
-        )}
+            </div>
+          )}
+        </div>
       </div>
     </AppShell>
   );

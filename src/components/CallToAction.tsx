@@ -23,7 +23,7 @@ const CallToAction = () => {
             <Button 
               size="lg" 
               variant="secondary" 
-              className="text-lg px-8 py-6 shadow-success hover:scale-105 transition-transform group"
+              className="text-lg px-8 py-6 hover:scale-105 transition-transform group"
             >
               Get Started Today
               <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />

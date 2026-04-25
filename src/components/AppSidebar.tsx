@@ -74,7 +74,7 @@ const AppSidebar = () => {
           className={cn(
             "mx-2 my-0.5 rounded-full transition-all duration-300 h-11 w-auto",
             active
-              ? "bg-sidebar-primary text-sidebar-primary-foreground font-semibold shadow-md hover:bg-sidebar-primary hover:text-sidebar-primary-foreground"
+              ? "bg-sidebar-primary text-sidebar-primary-foreground font-semibold hover:bg-sidebar-primary hover:text-sidebar-primary-foreground"
               : "text-sidebar-foreground/90 hover:bg-white/15 hover:text-sidebar-foreground"
           )}
         >
@@ -91,7 +91,7 @@ const AppSidebar = () => {
     <Sidebar className="border-r-0 bg-sidebar">
       <SidebarHeader className="bg-transparent p-4">
         <Link to="/dashboard" className="flex items-center gap-3">
-          <img src={logo} alt="Logo" className="h-14 w-14 rounded-xl object-contain shadow-md" />
+          <img src={logo} alt="Logo" className="h-14 w-14 rounded-xl object-contain" />
         </Link>
       </SidebarHeader>
 
@@ -183,7 +183,7 @@ const AppSidebar = () => {
           className={cn(
             "flex items-center justify-center gap-2 w-full px-4 py-2.5 rounded-full",
             "bg-white/20 text-sidebar-foreground hover:bg-white/30",
-            "transition-all duration-300 shadow-sm font-medium text-sm"
+            "transition-all duration-300 font-medium text-sm"
           )}
         >
           <LogOut className="h-4 w-4" />

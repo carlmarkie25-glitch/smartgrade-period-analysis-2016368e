@@ -180,217 +180,244 @@ const FeeManagement = () => {
   };
 
   return (
-    <AppShell>
-      <div className="py-4 space-y-6">
-        <div className="neu-card p-6 flex items-center justify-between flex-wrap gap-4">
-          <div>
-            <h1 className="text-2xl font-bold text-foreground">Fee Management</h1>
-            <p className="text-muted-foreground text-sm">Set fee standards by division and manage installment plans</p>
+    <AppShell activeTab="finance">
+      <div className="flex flex-col gap-8 pb-8">
+        
+        {/* Header Section */}
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 px-1">
+          <div className="flex items-center gap-6">
+            <div className="w-20 h-20 rounded-[2rem] glass-panel flex items-center justify-center border border-white/20 p-1.5 shadow-none">
+              <div className="w-full h-full rounded-[1.5rem] bg-gradient-to-br from-indigo-500 to-indigo-600 flex items-center justify-center text-white">
+                <DollarSign className="size-8" />
+              </div>
+            </div>
+            <div>
+              <p className="text-[10px] font-black text-white/50 uppercase tracking-[0.3em] mb-1.5">Financial Architecture</p>
+              <h1 className="text-4xl md:text-5xl font-black text-white tracking-tighter leading-tight">
+                Fee <span className="text-secondary">Management</span>
+              </h1>
+            </div>
           </div>
-          <div className="flex items-center gap-3">
-            <Button onClick={() => generateBills.mutate()} disabled={generateBills.isPending} variant="default">
-              <Zap className="h-4 w-4 mr-1" /> {generateBills.isPending ? "Generating..." : "Generate Bills for All Students"}
+          
+          <div className="flex items-center gap-4">
+            <Button 
+              onClick={() => generateBills.mutate()} 
+              disabled={generateBills.isPending} 
+              className="h-14 px-8 rounded-2xl bg-white text-slate-900 text-xs font-black uppercase tracking-[0.2em] hover:bg-white/90 transition-all shadow-xl"
+            >
+              <Zap className="h-4 w-4 mr-2 text-indigo-600" /> {generateBills.isPending ? "Generating..." : "Generate Bulk Invoices"}
             </Button>
-            <Select value={selectedYear} onValueChange={setSelectedYear}>
-              <SelectTrigger className="w-[200px]">
-                <SelectValue placeholder="Select academic year" />
-              </SelectTrigger>
-              <SelectContent>
-                {years?.map(y => (
-                  <SelectItem key={y.id} value={y.id}>
-                    {y.year_name} {y.is_current ? "(Current)" : ""}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            
+            <div className="flex items-center gap-4 glass-panel px-6 py-3 rounded-[1.5rem] shadow-none">
+               <div className="relative">
+                <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
+              </div>
+               {years && years.length > 0 && (
+                <select
+                  className="bg-transparent border-none text-white font-black text-[11px] uppercase tracking-widest outline-none focus:ring-0 cursor-pointer pr-8"
+                  value={selectedYear}
+                  onChange={e => setSelectedYear(e.target.value)}
+                >
+                  {years.map(y => (
+                    <option key={y.id} value={y.id} className="bg-slate-900 text-white font-black">{y.year_name}</option>
+                  ))}
+                </select>
+              )}
+            </div>
           </div>
         </div>
 
-        <Tabs defaultValue="requirements">
-          <TabsList>
-            <TabsTrigger value="requirements"><ClipboardList className="h-4 w-4 mr-1" /> Requirements & Registration</TabsTrigger>
-            <TabsTrigger value="installments"><Calendar className="h-4 w-4 mr-1" /> Payment Installments</TabsTrigger>
-            <TabsTrigger value="categories"><DollarSign className="h-4 w-4 mr-1" /> Fee Categories</TabsTrigger>
+        <Tabs defaultValue="requirements" className="w-full">
+          <TabsList className="bg-white/5 border border-white/10 p-1 rounded-2xl mb-8">
+            <TabsTrigger value="requirements" className="px-8 py-3 rounded-xl data-[state=active]:bg-primary data-[state=active]:text-white transition-all text-[10px] font-black uppercase tracking-widest">
+              <ClipboardList className="h-3.5 w-3.5 mr-2" /> Standards
+            </TabsTrigger>
+            <TabsTrigger value="installments" className="px-8 py-3 rounded-xl data-[state=active]:bg-primary data-[state=active]:text-white transition-all text-[10px] font-black uppercase tracking-widest">
+              <Calendar className="h-3.5 w-3.5 mr-2" /> Installments
+            </TabsTrigger>
+            <TabsTrigger value="categories" className="px-8 py-3 rounded-xl data-[state=active]:bg-primary data-[state=active]:text-white transition-all text-[10px] font-black uppercase tracking-widest">
+              <DollarSign className="h-3.5 w-3.5 mr-2" /> Categories
+            </TabsTrigger>
           </TabsList>
 
-          {/* Requirements & Registration Matrix */}
-          <TabsContent value="requirements" className="space-y-4">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between pb-3">
-                <CardTitle className="text-lg">Requirements & Registration Fees by Division</CardTitle>
+          <TabsContent value="requirements" className="space-y-6">
+            <div className="glass-card overflow-hidden border border-white/10">
+              <div className="p-8 border-b border-white/5 flex items-center justify-between bg-white/[0.02]">
+                <div>
+                  <h3 className="text-xl font-black text-white tracking-tight">Institutional Fee Matrix</h3>
+                  <p className="text-xs font-bold text-white/30 uppercase tracking-widest mt-1">Requirements & Registration Standards</p>
+                </div>
                 {Object.keys(rateEdits).length > 0 && (
-                  <Button onClick={handleSaveRates} disabled={upsertRate.isPending} size="sm">
-                    <Save className="h-4 w-4 mr-1" /> Save Changes
+                  <Button onClick={handleSaveRates} disabled={upsertRate.isPending} className="bg-secondary hover:bg-secondary/90 text-white h-12 px-6 rounded-xl font-black text-[10px] uppercase tracking-widest">
+                    <Save className="h-4 w-4 mr-2" /> Save Standard Rates
                   </Button>
                 )}
-              </CardHeader>
-              <CardContent className="p-0">
-                <div className="overflow-x-auto">
-                  <Table>
-                    <TableHeader>
-                      <TableRow className="bg-muted/50">
-                        <TableHead className="font-bold min-w-[180px]">Requirements & Registration</TableHead>
-                        {departments?.map(dept => (
-                          <TableHead key={dept.id} className="text-center font-bold min-w-[130px]">{dept.name}</TableHead>
-                        ))}
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {catLoading ? (
-                        <TableRow><TableCell colSpan={(departments?.length || 0) + 1} className="text-center py-8 text-muted-foreground">Loading...</TableCell></TableRow>
-                      ) : categories?.map(cat => (
-                        <TableRow key={cat.id}>
-                          <TableCell className="font-medium">{cat.name}</TableCell>
-                          {departments?.map(dept => (
-                            <TableCell key={dept.id} className="text-center p-1">
-                              <Input
-                                type="number"
-                                className="text-center h-8 w-full"
-                                value={getRateValue(cat.id, dept.id) || ""}
-                                onChange={e => setRateValue(cat.id, dept.id, parseFloat(e.target.value) || 0)}
-                                placeholder="0"
-                              />
-                            </TableCell>
-                          ))}
-                        </TableRow>
+              </div>
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow className="border-b border-white/5 bg-transparent hover:bg-transparent">
+                      <TableHead className="text-[10px] font-black text-white/40 uppercase tracking-widest py-6 px-8 min-w-[200px]">Service / Requirement</TableHead>
+                      {departments?.map(dept => (
+                        <TableHead key={dept.id} className="text-center text-[10px] font-black text-white/40 uppercase tracking-widest py-6 min-w-[140px]">{dept.name}</TableHead>
                       ))}
-                      {/* Total row */}
-                      <TableRow className="bg-destructive/10 font-bold border-t-2">
-                        <TableCell className="font-bold text-destructive">Total</TableCell>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {catLoading ? (
+                      <TableRow><TableCell colSpan={(departments?.length || 0) + 1} className="text-center py-20 text-white/20 font-black uppercase tracking-widest text-[10px]">Processing Matrix...</TableCell></TableRow>
+                    ) : categories?.map(cat => (
+                      <TableRow key={cat.id} className="border-b border-white/5 hover:bg-white/5 transition-colors">
+                        <TableCell className="py-5 px-8 font-black text-white text-sm">{cat.name}</TableCell>
                         {departments?.map(dept => (
-                          <TableCell key={dept.id} className="text-center font-bold text-destructive">
-                            {getColumnTotal(dept.id).toLocaleString()}LD
+                          <TableCell key={dept.id} className="text-center p-3">
+                            <Input
+                              type="number"
+                              className="text-center h-10 w-full bg-white/5 border-white/10 rounded-lg text-white font-bold focus:ring-indigo-500/50"
+                              value={getRateValue(cat.id, dept.id) || ""}
+                              onChange={e => setRateValue(cat.id, dept.id, parseFloat(e.target.value) || 0)}
+                              placeholder="0"
+                            />
                           </TableCell>
                         ))}
                       </TableRow>
-                    </TableBody>
-                  </Table>
-                </div>
-              </CardContent>
-            </Card>
+                    ))}
+                    <TableRow className="bg-white/[0.02] font-black border-t border-white/10">
+                      <TableCell className="py-8 px-8 text-[11px] font-black text-secondary uppercase tracking-[0.2em]">Matrix Total</TableCell>
+                      {departments?.map(dept => (
+                        <TableCell key={dept.id} className="text-center py-8 font-black text-xl text-white tracking-tighter">
+                          {getColumnTotal(dept.id).toLocaleString()} <span className="text-[10px] text-white/30 tracking-normal">LD</span>
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                  </TableBody>
+                </Table>
+              </div>
+            </div>
           </TabsContent>
 
-          {/* Payment Installments */}
-          <TabsContent value="installments" className="space-y-4">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between pb-3">
-                <CardTitle className="text-lg">Tuition Payment Installment Plan</CardTitle>
+          <TabsContent value="installments" className="space-y-6">
+            <div className="glass-card overflow-hidden border border-white/10">
+              <div className="p-8 border-b border-white/5 flex items-center justify-between bg-white/[0.02]">
+                <div>
+                  <h3 className="text-xl font-black text-white tracking-tight">Tuition Distribution Strategy</h3>
+                  <p className="text-xs font-bold text-white/30 uppercase tracking-widest mt-1">Payment Period Configuration</p>
+                </div>
                 {Object.keys(installEdits).length > 0 && (
-                  <Button onClick={handleSaveInstallments} disabled={upsertInstallment.isPending} size="sm">
-                    <Save className="h-4 w-4 mr-1" /> Save Changes
+                  <Button onClick={handleSaveInstallments} disabled={upsertInstallment.isPending} className="bg-indigo-500 hover:bg-indigo-600 text-white h-12 px-6 rounded-xl font-black text-[10px] uppercase tracking-widest">
+                    <Save className="h-4 w-4 mr-2" /> Save Installment Plan
                   </Button>
                 )}
-              </CardHeader>
-              <CardContent className="p-0">
-                <div className="overflow-x-auto">
-                  <Table>
-                    <TableHeader>
-                      <TableRow className="bg-muted/50">
-                        <TableHead className="font-bold min-w-[180px]">Payment Duration</TableHead>
-                        {departments?.map(dept => (
-                          <TableHead key={dept.id} className="text-center font-bold min-w-[130px]">{dept.name}</TableHead>
-                        ))}
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {/* Registration row - read only from requirements total */}
-                      <TableRow className="bg-muted/30">
-                        <TableCell className="font-medium p-2">
-                          <div className="font-medium mb-1">Registration / Requirements</div>
-                          <Input
-                            className="h-7 text-xs text-muted-foreground"
-                            value={regPeriod}
-                            onChange={e => setRegPeriod(e.target.value)}
-                            placeholder="e.g. July - September"
-                          />
+              </div>
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow className="border-b border-white/5 bg-transparent hover:bg-transparent">
+                      <TableHead className="text-[10px] font-black text-white/40 uppercase tracking-widest py-6 px-8 min-w-[220px]">Payment Horizon</TableHead>
+                      {departments?.map(dept => (
+                        <TableHead key={dept.id} className="text-center text-[10px] font-black text-white/40 uppercase tracking-widest py-6 min-w-[140px]">{dept.name}</TableHead>
+                      ))}
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    <TableRow className="bg-white/[0.01]">
+                      <TableCell className="py-6 px-8">
+                        <div className="text-[11px] font-black text-white uppercase tracking-widest mb-2">Registration Threshold</div>
+                        <Input
+                          className="h-9 text-xs bg-white/5 border-white/5 text-white/50 italic rounded-lg"
+                          value={regPeriod}
+                          onChange={e => setRegPeriod(e.target.value)}
+                          placeholder="e.g. July - September"
+                        />
+                      </TableCell>
+                      {departments?.map(dept => (
+                        <TableCell key={dept.id} className="text-center font-black text-white/40">
+                          {getColumnTotal(dept.id).toLocaleString()} LD
                         </TableCell>
-                        {departments?.map(dept => (
-                          <TableCell key={dept.id} className="text-center font-medium">
-                            {getColumnTotal(dept.id).toLocaleString()}LD
-                          </TableCell>
-                        ))}
-                      </TableRow>
+                      ))}
+                    </TableRow>
 
-                      {/* Installment rows */}
-                      {installmentRows.map(row => (
-                        <TableRow key={row.num}>
-                          <TableCell className="font-medium p-2">
+                    {installmentRows.map(row => (
+                      <TableRow key={row.num} className="border-b border-white/5 hover:bg-white/5 transition-colors group">
+                        <TableCell className="py-6 px-8">
+                          <Input
+                            className="h-9 text-sm font-black text-white mb-2 bg-white/5 border-white/10 rounded-lg"
+                            value={row.label}
+                            onChange={e => updateInstallmentRowMeta(row.num, "label", e.target.value)}
+                            placeholder="e.g. 1st Installment"
+                          />
+                          <div className="flex items-center gap-2">
                             <Input
-                              className="h-7 text-sm font-medium mb-1"
-                              value={row.label}
-                              onChange={e => updateInstallmentRowMeta(row.num, "label", e.target.value)}
-                              placeholder="e.g. 1st Installment"
-                            />
-                            <Input
-                              className="h-7 text-xs text-muted-foreground"
+                              className="h-8 text-[10px] text-white/40 font-bold bg-transparent border-white/5 rounded-lg uppercase tracking-widest"
                               value={row.period_label}
                               onChange={e => updateInstallmentRowMeta(row.num, "period_label", e.target.value)}
                               placeholder="e.g. October - December"
                             />
-                            <Button variant="ghost" size="sm" className="h-6 text-xs text-destructive mt-1 p-0" onClick={() => removeInstallmentRow(row.num)}>
-                              <Trash2 className="h-3 w-3 mr-1" /> Remove
+                            <Button variant="ghost" size="sm" className="h-8 w-8 rounded-lg text-rose-500 hover:bg-rose-500/10 opacity-0 group-hover:opacity-100 transition-opacity" onClick={() => removeInstallmentRow(row.num)}>
+                              <Trash2 className="h-3.5 w-3.5" />
                             </Button>
-                          </TableCell>
-                          {departments?.map(dept => (
-                            <TableCell key={dept.id} className="text-center p-1">
-                              <Input
-                                type="number"
-                                className="text-center h-8 w-full"
-                                value={getInstallValue(dept.id, row.num).amount || ""}
-                                onChange={e => setInstallValue(dept.id, row.num, "amount", parseFloat(e.target.value) || 0)}
-                                placeholder="0"
-                              />
-                            </TableCell>
-                          ))}
-                        </TableRow>
-                      ))}
-
-                      {/* Add installment button row */}
-                      <TableRow>
-                        <TableCell colSpan={(departments?.length || 0) + 1} className="text-center py-2">
-                          <Button variant="outline" size="sm" onClick={addInstallmentRow}>
-                            <Plus className="h-4 w-4 mr-1" /> Add Installment Period
-                          </Button>
+                          </div>
                         </TableCell>
-                      </TableRow>
-
-                      {/* Total Tuition */}
-                      <TableRow className="bg-muted/30 border-t">
-                        <TableCell className="font-bold">Total Tuition</TableCell>
                         {departments?.map(dept => (
-                          <TableCell key={dept.id} className="text-center font-bold">
-                            {getTuitionTotal(dept.id).toLocaleString()}LD
+                          <TableCell key={dept.id} className="text-center p-3">
+                            <Input
+                              type="number"
+                              className="text-center h-10 w-full bg-white/5 border-white/10 rounded-lg text-white font-bold focus:ring-indigo-500/50"
+                              value={getInstallValue(dept.id, row.num).amount || ""}
+                              onChange={e => setInstallValue(dept.id, row.num, "amount", parseFloat(e.target.value) || 0)}
+                              placeholder="0"
+                            />
                           </TableCell>
                         ))}
                       </TableRow>
+                    ))}
 
-                      {/* Grand Total */}
-                      <TableRow className="bg-destructive/10 font-bold border-t-2">
-                        <TableCell className="font-bold text-destructive">Grand Total (Reg. + Tuition)</TableCell>
-                        {departments?.map(dept => (
-                          <TableCell key={dept.id} className="text-center font-bold text-destructive">
-                            {getGrandTotal(dept.id).toLocaleString()}LD
-                          </TableCell>
-                        ))}
-                      </TableRow>
-                    </TableBody>
-                  </Table>
-                </div>
-              </CardContent>
-            </Card>
+                    <TableRow>
+                      <TableCell colSpan={(departments?.length || 0) + 1} className="py-6 text-center">
+                        <Button variant="ghost" onClick={addInstallmentRow} className="h-12 px-6 rounded-xl border-dashed border border-white/10 text-white/40 hover:text-white hover:bg-white/5 text-[10px] font-black uppercase tracking-widest">
+                          <Plus className="h-4 w-4 mr-2" /> Append Installment Window
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+
+                    <TableRow className="bg-white/[0.02] border-t border-white/10">
+                      <TableCell className="py-6 px-8 text-[11px] font-black text-secondary uppercase tracking-[0.2em]">Tuition Total</TableCell>
+                      {departments?.map(dept => (
+                        <TableCell key={dept.id} className="text-center py-6 font-black text-white/60">
+                          {getTuitionTotal(dept.id).toLocaleString()} LD
+                        </TableCell>
+                      ))}
+                    </TableRow>
+
+                    <TableRow className="bg-indigo-500/10 border-t-2 border-indigo-500/30">
+                      <TableCell className="py-10 px-8 text-sm font-black text-secondary uppercase tracking-[0.3em]">Institutional Grand Total</TableCell>
+                      {departments?.map(dept => (
+                        <TableCell key={dept.id} className="text-center py-10 font-black text-3xl text-white tracking-tighter">
+                          {getGrandTotal(dept.id).toLocaleString()} <span className="text-xs tracking-normal text-white/40">LD</span>
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                  </TableBody>
+                </Table>
+              </div>
+            </div>
           </TabsContent>
 
-          {/* Fee Categories Management */}
-          <TabsContent value="categories" className="space-y-4">
-            <div className="flex justify-end">
+          <TabsContent value="categories" className="space-y-6">
+            <div className="flex justify-end mb-4">
               <Dialog open={catOpen} onOpenChange={setCatOpen}>
                 <DialogTrigger asChild>
-                  <Button><Plus className="h-4 w-4 mr-1" /> Add Fee Category</Button>
+                  <Button className="h-12 px-6 rounded-xl bg-white text-slate-900 text-[10px] font-black uppercase tracking-widest hover:bg-white/90">
+                    <Plus className="h-4 w-4 mr-2" /> Define Fee Category
+                  </Button>
                 </DialogTrigger>
-                <DialogContent>
-                  <DialogHeader><DialogTitle>New Fee Category</DialogTitle></DialogHeader>
-                  <div className="space-y-3">
-                    <div><Label>Name</Label><Input value={newCatName} onChange={e => setNewCatName(e.target.value)} placeholder="e.g. Lab Fees" /></div>
+                <DialogContent className="bg-slate-900/90 backdrop-blur-2xl border-white/10 text-white rounded-[2rem] p-8 max-w-md">
+                  <DialogHeader><DialogTitle className="text-2xl font-black tracking-tighter">New Category</DialogTitle></DialogHeader>
+                  <div className="space-y-4 mt-4">
+                    <div className="space-y-1.5">
+                      <Label className="text-[10px] font-black text-white/40 uppercase tracking-widest ml-1">Category Label</Label>
+                      <Input value={newCatName} onChange={e => setNewCatName(e.target.value)} placeholder="e.g. Lab Fees" className="bg-white/5 border-white/10 h-12 rounded-xl" />
+                    </div>
                     <Button
                       onClick={() => {
                         createCategory.mutate({ name: newCatName, display_order: (categories?.length || 0) + 1 }, {
@@ -398,40 +425,45 @@ const FeeManagement = () => {
                         });
                       }}
                       disabled={!newCatName}
-                      className="w-full"
-                    >Create</Button>
+                      className="w-full h-14 rounded-2xl bg-indigo-500 text-white text-xs font-black uppercase tracking-[0.2em] hover:bg-indigo-600 transition-all mt-4"
+                    >
+                      Initialize Category
+                    </Button>
                   </div>
                 </DialogContent>
               </Dialog>
             </div>
-            <Card>
-              <CardContent className="p-0">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Name</TableHead>
-                      <TableHead>Order</TableHead>
-                      <TableHead>Type</TableHead>
-                      <TableHead className="w-12"></TableHead>
+            
+            <div className="glass-card overflow-hidden border border-white/10">
+              <Table>
+                <TableHeader>
+                  <TableRow className="border-b border-white/5 bg-transparent hover:bg-transparent">
+                    <TableHead className="text-[10px] font-black text-white/40 uppercase tracking-widest py-6 px-8">Category Name</TableHead>
+                    <TableHead className="text-[10px] font-black text-white/40 uppercase tracking-widest py-6">Sequence</TableHead>
+                    <TableHead className="text-[10px] font-black text-white/40 uppercase tracking-widest py-6">Functional Type</TableHead>
+                    <TableHead className="text-[10px] font-black text-white/40 uppercase tracking-widest py-6 text-right px-8">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {categories?.map(cat => (
+                    <TableRow key={cat.id} className="border-b border-white/5 hover:bg-white/5 transition-colors group">
+                      <TableCell className="py-5 px-8 font-black text-white">{cat.name}</TableCell>
+                      <TableCell className="py-5 font-mono text-xs text-white/40">{cat.display_order}</TableCell>
+                      <TableCell className="py-5">
+                        <span className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border ${cat.is_registration ? "bg-indigo-500/10 text-indigo-400 border-indigo-500/20" : "bg-white/5 text-white/40 border-white/5"}`}>
+                          {cat.is_registration ? "Registration Component" : "Standard Variable"}
+                        </span>
+                      </TableCell>
+                      <TableCell className="py-5 text-right px-8">
+                        <Button variant="ghost" size="icon" className="w-8 h-8 rounded-full bg-white/5 hover:bg-rose-500/20 opacity-0 group-hover:opacity-100 transition-all group/btn" onClick={() => deleteCategory.mutate(cat.id)}>
+                          <Trash2 className="h-4 w-4 text-white/40 group-hover/btn:text-rose-500" />
+                        </Button>
+                      </TableCell>
                     </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {categories?.map(cat => (
-                      <TableRow key={cat.id}>
-                        <TableCell className="font-medium">{cat.name}</TableCell>
-                        <TableCell>{cat.display_order}</TableCell>
-                        <TableCell><Badge variant={cat.is_registration ? "default" : "secondary"}>{cat.is_registration ? "Registration" : "Custom"}</Badge></TableCell>
-                        <TableCell>
-                          <Button variant="ghost" size="icon" onClick={() => deleteCategory.mutate(cat.id)}>
-                            <Trash2 className="h-4 w-4 text-destructive" />
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </CardContent>
-            </Card>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
           </TabsContent>
         </Tabs>
       </div>

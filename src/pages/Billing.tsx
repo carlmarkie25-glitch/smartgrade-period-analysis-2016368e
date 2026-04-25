@@ -14,6 +14,8 @@ import { useBillableSeats, MIN_SEATS } from "@/hooks/useBillableSeats";
 import { initializePaddle, getPaddlePriceId, paddleEnvironment } from "@/lib/paddle";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import AppShell from "@/components/AppShell";
+
 
 type TierId = "basic" | "standard" | "premium";
 
@@ -205,21 +207,9 @@ export default function Billing() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-background">
-      <PaymentTestModeBanner />
-      <TrialBanner />
-      <header className="sticky top-0 z-40 flex h-14 items-center gap-3 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-4 lg:px-6">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => navigate("/dashboard")}
-          className="gap-2"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          Back to dashboard
-        </Button>
-      </header>
+    <AppShell activeTab="billing">
       <div className="flex-1 overflow-auto">
+
         <SubscriptionGate>
       <div className="max-w-6xl mx-auto p-6 space-y-8">
         <div className="text-center space-y-2">
@@ -357,7 +347,6 @@ export default function Billing() {
         )}
       </div>
         </SubscriptionGate>
-      </div>
-    </div>
+    </AppShell>
   );
 }

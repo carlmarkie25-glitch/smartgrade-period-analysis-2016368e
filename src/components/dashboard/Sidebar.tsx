@@ -10,6 +10,8 @@ interface SidebarProps {
   onTabChange?: (tab: string) => void;
   collapsed?: boolean;
   onToggle?: () => void;
+  mobileOpen?: boolean;
+  setMobileOpen?: (val: boolean) => void;
 }
 
 type MenuItem = {
@@ -28,7 +30,7 @@ type MenuGroup = {
   children: MenuItem[];
 };
 
-export const Sidebar = ({ activeTab, onTabChange, collapsed = false, onToggle }: SidebarProps) => {
+export const Sidebar = ({ activeTab, onTabChange, collapsed = false, onToggle, mobileOpen = false, setMobileOpen }: SidebarProps) => {
   const navigate = useNavigate();
   const location = useLocation();
   const { isAdmin, isTeacher, isVpi, isRegistrar, isLoading: rolesLoading } = useUserRoles();
@@ -140,17 +142,13 @@ export const Sidebar = ({ activeTab, onTabChange, collapsed = false, onToggle }:
     if (roles.includes("all")) return true;
     if (roles.includes("admin") && isAdmin) return true;
     if (roles.includes("teacher") && (isTeacher || isAdmin || isVpi)) return true;
-    // VPI sees everything in academics (anything teachers/admins see in the academics group)
     if (isVpi && roles.some((r) => r === "admin" || r === "teacher")) return true;
-    // Registrar sees finance items (marked with admin role on finance group)
     if (isRegistrar && roles.includes("admin")) {
-      // Only allow if this access check is happening for a finance item — handled at group level below
       return false;
     }
     return false;
   };
 
-  // Group-level access: VPI gets academics; Registrar gets finance
   const groupAccess = (groupId: string, roles: string[]) => {
     if (canAccess(roles)) return true;
     if (isVpi && (groupId === "academics" || groupId === "users")) return true;
@@ -172,6 +170,7 @@ export const Sidebar = ({ activeTab, onTabChange, collapsed = false, onToggle }:
   const handleClick = (item: MenuItem) => {
     onTabChange?.(item.id);
     navigate(item.path);
+    setMobileOpen?.(false);
   };
 
   const renderItem = (item: MenuItem) => {
@@ -184,14 +183,14 @@ export const Sidebar = ({ activeTab, onTabChange, collapsed = false, onToggle }:
         title={item.label}
         className={`flex items-center gap-3 w-full px-3 py-2.5 rounded-xl transition-all duration-300 group ${
           active
-            ? "bg-white/20 text-white shadow-lg"
-            : "text-[hsl(170,30%,70%)] hover:text-white hover:bg-white/10"
+            ? "bg-white/20 text-white border border-white/10"
+            : "text-sidebar-foreground/70 hover:text-white hover:bg-white/10"
         }`}
       >
         <Icon size={20} className="flex-shrink-0" />
         {!collapsed && <span className="text-sm font-medium truncate">{item.label}</span>}
         {collapsed && (
-          <div className="absolute left-full ml-2 px-2 py-1 bg-[hsl(170,30%,20%)]/90 text-white text-[10px] rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
+          <div className="absolute left-full ml-2 px-2 py-1 bg-primary/90 text-white text-[10px] rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
             {item.label}
           </div>
         )}
@@ -210,7 +209,7 @@ export const Sidebar = ({ activeTab, onTabChange, collapsed = false, onToggle }:
         className={`flex items-center gap-3 w-full px-3 py-2 rounded-lg transition-all duration-300 ${
           active
             ? "bg-white/15 text-white"
-            : "text-[hsl(170,30%,70%)] hover:text-white hover:bg-white/10"
+            : "text-sidebar-foreground/70 hover:text-white hover:bg-white/10"
         }`}
       >
         <Icon size={16} className="flex-shrink-0" />
@@ -229,10 +228,10 @@ export const Sidebar = ({ activeTab, onTabChange, collapsed = false, onToggle }:
           title={group.label}
           className={`flex items-center gap-3 w-full px-3 py-2.5 rounded-xl transition-all duration-300 group relative ${
             isGroupActive && !isOpen
-              ? "bg-white/20 text-white shadow-lg"
+              ? "bg-white/20 text-white border border-white/10"
               : isGroupActive
               ? "text-white"
-              : "text-[hsl(170,30%,70%)] hover:text-white hover:bg-white/10"
+              : "text-sidebar-foreground/70 hover:text-white hover:bg-white/10"
           }`}
         >
           <GroupIcon size={20} className="flex-shrink-0" />
@@ -251,7 +250,7 @@ export const Sidebar = ({ activeTab, onTabChange, collapsed = false, onToggle }:
                 size={10}
                 className={`absolute bottom-1 left-1/2 -translate-x-1/2 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
               />
-              <div className="absolute left-full ml-2 px-2 py-1 bg-[hsl(170,30%,20%)]/90 text-white text-[10px] rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
+              <div className="absolute left-full ml-2 px-2 py-1 bg-primary/90 text-white text-[10px] rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
                 {group.label}
               </div>
             </>
@@ -269,51 +268,61 @@ export const Sidebar = ({ activeTab, onTabChange, collapsed = false, onToggle }:
   };
 
   return (
-    <aside
-      className={`fixed left-0 top-0 h-screen bg-gradient-to-b from-[hsl(170,35%,25%)] via-[hsl(170,30%,22%)] to-[hsl(170,35%,20%)] rounded-r-3xl flex flex-col py-5 shadow-2xl backdrop-blur-md z-50 transition-all duration-300 ${
-        collapsed ? "w-20 items-center px-2" : "w-56 px-3"
-      }`}
-    >
-      {/* Header: Logo + Toggle */}
-      <div className={`flex items-center mb-6 ${collapsed ? "justify-center" : "justify-between px-1"}`}>
-        <div className="flex items-center gap-3">
-          <img src={logo} alt="Logo" className="h-10 w-10 rounded-lg object-contain flex-shrink-0" />
-          {!collapsed && <span className="text-white font-bold text-lg truncate">SmartGrade</span>}
-        </div>
-        <button
-          onClick={onToggle}
-          title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-          className="p-1.5 rounded-lg text-[hsl(170,30%,70%)] hover:text-white hover:bg-white/10 transition-all duration-200"
-        >
-          {collapsed ? <PanelLeft size={18} /> : <PanelLeftClose size={18} />}
-        </button>
-      </div>
-
-      {/* Nav Items */}
-      <div className="flex-1 flex flex-col gap-1.5 overflow-hidden">
-        {topItems.filter((item) => canAccess(item.roles)).map((item) => renderItem(item))}
-
-        {renderGroup(academicsGroup, academicsOpen, setAcademicsOpen, isAcademicsActive)}
-        {renderGroup(usersGroup, usersOpen, setUsersOpen, isUsersActive)}
-        {renderGroup(financeGroup, financeOpen, setFinanceOpen, isFinanceActive)}
-        {renderGroup(adminGroup, adminOpen, setAdminOpen, isAdminActive)}
-        {renderGroup(settingsGroup, settingsOpen, setSettingsOpen, isSettingsActive)}
-      </div>
-
-      {/* Sign Out */}
-      <button
-        onClick={signOut}
-        title="Sign Out"
-        className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-300 text-[hsl(170,30%,70%)] hover:text-white hover:bg-white/10 group relative mt-1 ${collapsed ? "justify-center" : ""}`}
+    <>
+      {mobileOpen && (
+        <div 
+          className="fixed inset-0 bg-black/50 z-40 md:hidden" 
+          onClick={() => setMobileOpen?.(false)}
+        />
+      )}
+      <aside
+        className={`fixed left-0 top-0 h-screen bg-sidebar rounded-r-[2.5rem] border-r border-white/20 flex flex-col py-6 backdrop-blur-xl z-50 transition-all duration-500 ${
+          collapsed ? "md:w-24 items-center px-2" : "w-64 px-4"
+        } ${mobileOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"}`}
       >
-        <LogOut size={20} className="flex-shrink-0" />
-        {!collapsed && <span className="text-sm font-medium">Sign Out</span>}
-        {collapsed && (
-          <div className="absolute left-full ml-2 px-2 py-1 bg-[hsl(170,30%,20%)]/90 text-white text-[10px] rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
-            Sign Out
+        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-cyan-400/50 to-transparent pointer-events-none" />
+
+        {/* Header: Logo + Toggle */}
+        <div className={`flex items-center mb-6 ${collapsed ? "justify-center" : "justify-between px-1"}`}>
+          <div className="flex items-center gap-3">
+            <img src={logo} alt="Logo" className="h-10 w-10 rounded-lg object-contain flex-shrink-0" />
+            {!collapsed && <span className="text-white font-bold text-lg truncate">SmartGrade</span>}
           </div>
-        )}
-      </button>
-    </aside>
+          <button
+            onClick={onToggle}
+            title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+            className="hidden md:block p-1.5 rounded-lg text-sidebar-foreground/70 hover:text-white hover:bg-white/10 transition-all duration-200"
+          >
+            {collapsed ? <PanelLeft size={18} /> : <PanelLeftClose size={18} />}
+          </button>
+        </div>
+
+        {/* Nav Items */}
+        <div className="flex-1 flex flex-col gap-1.5 overflow-hidden overflow-y-auto scrollbar-hide">
+          {topItems.filter((item) => canAccess(item.roles)).map((item) => renderItem(item))}
+
+          {renderGroup(academicsGroup, academicsOpen, setAcademicsOpen, isAcademicsActive)}
+          {renderGroup(usersGroup, usersOpen, setUsersOpen, isUsersActive)}
+          {renderGroup(financeGroup, financeOpen, setFinanceOpen, isFinanceActive)}
+          {renderGroup(adminGroup, adminOpen, setAdminOpen, isAdminActive)}
+          {renderGroup(settingsGroup, settingsOpen, setSettingsOpen, isSettingsActive)}
+        </div>
+
+        {/* Sign Out */}
+        <button
+          onClick={signOut}
+          title="Sign Out"
+          className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-300 text-sidebar-foreground/70 hover:text-white hover:bg-white/10 group relative mt-1 ${collapsed ? "justify-center" : ""}`}
+        >
+          <LogOut size={20} className="flex-shrink-0" />
+          {!collapsed && <span className="text-sm font-medium">Sign Out</span>}
+          {collapsed && (
+            <div className="absolute left-full ml-2 px-2 py-1 bg-primary/90 text-white text-[10px] rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
+              Sign Out
+            </div>
+          )}
+        </button>
+      </aside>
+    </>
   );
 };

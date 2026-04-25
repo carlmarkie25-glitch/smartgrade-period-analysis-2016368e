@@ -30,7 +30,7 @@ const Hero = () => {
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16">
             <Link to="/auth">
-              <Button size="lg" variant="secondary" className="text-lg px-8 py-6 shadow-success hover:scale-105 transition-transform">
+              <Button size="lg" variant="secondary" className="text-lg px-8 py-6 hover:scale-105 transition-transform">
                 Get Started
               </Button>
             </Link>
@@ -65,7 +65,7 @@ const Hero = () => {
 
 const FeatureCard = ({ icon, title, description }: { icon: React.ReactNode; title: string; description: string }) => {
   return (
-    <div className="p-6 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 hover:bg-white/15 transition-all hover:scale-105 hover:shadow-glow">
+    <div className="p-6 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 hover:bg-white/15 transition-all hover:scale-105">
       <div className="text-secondary-glow mb-4">{icon}</div>
       <h3 className="text-xl font-semibold text-white mb-2">{title}</h3>
       <p className="text-white/80">{description}</p>

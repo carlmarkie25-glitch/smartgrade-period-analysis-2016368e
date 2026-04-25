@@ -109,7 +109,7 @@ export default function Landing() {
         </div>
         <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
           {tiers.map((t) => (
-            <Card key={t.name} className={`p-8 relative ${t.highlight ? "border-primary shadow-lg scale-[1.02]" : ""}`}>
+            <Card key={t.name} className={`p-8 relative ${t.highlight ? "border-primary scale-[1.02]" : ""}`}>
               {t.highlight && (
                 <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-primary text-primary-foreground text-xs font-medium">
                   Most popular

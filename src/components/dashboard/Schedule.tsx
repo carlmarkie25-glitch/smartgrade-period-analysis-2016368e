@@ -1,122 +1,46 @@
-import { useState } from "react";
-import { Clock } from "lucide-react";
+import { CalendarDays, Clock } from "lucide-react";
 
-interface TimeSlot {
-  time: string;
-  class: string;
-}
+const events = [
+  { time: "08:00 AM", title: "Morning Assembly", type: "Standard" },
+  { time: "10:30 AM", title: "Staff Sync: Finals", type: "Admin" },
+  { time: "02:00 PM", title: "Parent Conference", type: "External" },
+];
 
-interface ScheduleProps {
-  timeSlots?: TimeSlot[];
-}
-
-export const Schedule = ({
-  timeSlots = [
-    { time: "10:00", class: "Grade 10 Math" },
-    { time: "11:00", class: "Grade 9 Science" },
-    { time: "12:00", class: "Grade 11 English" },
-    { time: "12:30", class: "Grade 8 History" },
-    { time: "13:00", class: "Grade 12 Physics" },
-  ],
-}: ScheduleProps) => {
-  const days = [
-    { short: "12", long: "SUN" },
-    { short: "13", long: "MON" },
-    { short: "14", long: "TUE" },
-    { short: "15", long: "WED" },
-    { short: "16", long: "THU" },
-    { short: "17", long: "FRI" },
-    { short: "18", long: "SAT" },
-  ];
-
-  const [activeDay, setActiveDay] = useState(3);
-
+export const Schedule = () => {
   return (
-    <div
-      className="rounded-[26px] p-6 md:p-7"
-      style={{
-        background: "hsl(170, 25%, 96%)",
-        boxShadow: "10px 10px 20px hsl(170, 25%, 87%), -10px -10px 20px hsl(0, 0%, 100%)",
-      }}
-    >
-      {/* Header */}
-      <div className="flex items-center justify-between mb-5">
-        <h3 className="text-sm font-bold text-gray-700 tracking-tight">My Schedule</h3>
-        <div
-          className="px-4 py-1.5 rounded-full flex items-center"
-          style={{
-            background: "hsl(170, 25%, 96%)",
-            boxShadow: "inset 3px 3px 6px hsl(170, 25%, 88%), inset -3px -3px 6px hsl(0, 0%, 100%)",
-          }}
-        >
-          <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Weekly</span>
+    <div className="glass-card p-10 flex flex-col">
+      <div className="flex items-center justify-between mb-10">
+        <div>
+          <h3 className="text-2xl font-black text-white tracking-tighter">Daily Horizon</h3>
+          <p className="text-[10px] font-black text-white/50 uppercase tracking-[0.2em] mt-1">Operational Timeline</p>
+        </div>
+        <div className="p-3 bg-secondary/10 rounded-2xl">
+          <CalendarDays className="h-5 w-5 text-secondary" />
         </div>
       </div>
-
-      {/* Day Selector */}
-      <div className="flex justify-between gap-2 mb-5">
-        {days.map((day, index) => (
-          <button
-            key={index}
-            onClick={() => setActiveDay(index)}
-            className="flex flex-col items-center px-2 py-2.5 rounded-[14px] transition-all duration-300 flex-1"
-            style={
-              activeDay === index
-                ? {
-                    background: "linear-gradient(135deg, hsl(170, 55%, 45%), hsl(160, 50%, 40%))",
-                    boxShadow: "4px 4px 8px hsl(170, 25%, 87%), -2px -2px 6px hsl(0, 0%, 100%)",
-                    color: "white",
-                  }
-                : {
-                    background: "hsl(170, 25%, 96%)",
-                    boxShadow: "4px 4px 8px hsl(170, 25%, 88%), -4px -4px 8px hsl(0, 0%, 100%)",
-                    color: "hsl(170, 10%, 55%)",
-                  }
-            }
-          >
-            <span className="text-sm font-black leading-none mb-0.5">{day.short}</span>
-            <span className="text-[8px] font-bold uppercase tracking-wider opacity-75">{day.long}</span>
-          </button>
-        ))}
-      </div>
-
-      {/* Timeline Inner Container */}
-      <div
-        className="rounded-[18px] p-4 max-h-48 overflow-y-auto"
-        style={{
-          background: "hsl(170, 25%, 96%)",
-          boxShadow: "inset 4px 4px 10px hsl(170, 25%, 88%), inset -4px -4px 10px hsl(0, 0%, 100%)",
-        }}
-      >
-        <div className="space-y-1">
-          {timeSlots.map((slot, index) => (
-            <div
-              key={index}
-              className="flex items-center gap-3 py-2 px-2 rounded-xl transition-all duration-200 cursor-pointer group"
-              style={{ background: "transparent" }}
-              onMouseEnter={(e) => {
-                (e.currentTarget as HTMLDivElement).style.background = "hsl(170, 20%, 93%)";
-              }}
-              onMouseLeave={(e) => {
-                (e.currentTarget as HTMLDivElement).style.background = "transparent";
-              }}
-            >
-              <div className="flex items-center gap-1.5 flex-shrink-0 w-12">
-                <Clock className="h-2.5 w-2.5 text-[hsl(170,30%,55%)]" />
-                <p className="text-[10px] font-bold text-gray-400 tabular-nums">{slot.time}</p>
-              </div>
-              <div
-                className="w-0.5 h-5 rounded-full flex-shrink-0"
-                style={{
-                  background: "linear-gradient(to bottom, hsl(170, 55%, 45%), hsl(160, 50%, 56%))",
-                }}
-              />
-              <p className="text-xs font-semibold text-gray-600 group-hover:text-gray-800 transition-colors">
-                {slot.class}
-              </p>
+      
+      <div className="space-y-4">
+        {events.map((event, i) => (
+          <div key={i} className="flex items-center gap-6 p-4 glass-panel !rounded-[1.5rem] bg-white/5 hover:bg-white/10 transition-all group cursor-default">
+            <div className="text-center min-w-[70px]">
+              <p className="text-xs font-black text-white">{event.time.split(' ')[0]}</p>
+              <p className="text-[9px] font-bold text-white/30 uppercase tracking-tighter">{event.time.split(' ')[1]}</p>
             </div>
-          ))}
-        </div>
+            <div className="h-8 w-px bg-white/10" />
+            <div className="flex-1">
+              <p className="text-sm font-black text-white tracking-tight leading-none mb-1 group-hover:text-secondary transition-colors">{event.title}</p>
+              <div className="flex items-center gap-2">
+                <span className={`text-[8px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md ${
+                  event.type === 'Admin' ? 'bg-primary/20 text-primary' :
+                  event.type === 'External' ? 'bg-secondary/20 text-secondary' :
+                  'bg-white/10 text-white/50'
+                }`}>
+                  {event.type}
+                </span>
+              </div>
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   );

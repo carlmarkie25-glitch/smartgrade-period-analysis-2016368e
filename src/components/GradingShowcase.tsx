@@ -26,7 +26,7 @@ const GradingShowcase = () => {
 
         <div className="grid lg:grid-cols-2 gap-8 max-w-6xl mx-auto">
           {/* Sample Grade Table */}
-          <Card className="shadow-lg border-2">
+          <Card className="border-2">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Trophy className="w-5 h-5 text-secondary" />
@@ -69,7 +69,7 @@ const GradingShowcase = () => {
           </Card>
 
           {/* Analytics Preview */}
-          <Card className="shadow-lg border-2">
+          <Card className="border-2">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <TrendingUp className="w-5 h-5 text-primary" />

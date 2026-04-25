@@ -88,55 +88,65 @@ export const useTeacherDashboardStats = () => {
         };
       }
 
-      // Get teacher's classes
-      const { data: classes, error: classesError } = await supabase
-        .from("classes")
-        .select("id")
-        .eq("teacher_id", user.id);
+      try {
+        // Get teacher's classes
+        const { data: classes, error: classesError } = await supabase
+          .from("classes")
+          .select("id")
+          .eq("teacher_id", user.id);
 
-      if (classesError) throw classesError;
+        if (classesError) throw classesError;
 
-      const classIds = classes?.map(c => c.id) || [];
+        const classIds = classes?.map(c => c.id) || [];
 
-      // Get students in teacher's classes
-      let totalStudents = 0;
-      if (classIds.length > 0) {
-        const { count, error: studentsError } = await supabase
-          .from("students")
-          .select("*", { count: "exact", head: true })
-          .in("class_id", classIds);
+        // Get students in teacher's classes
+        let totalStudents = 0;
+        if (classIds.length > 0) {
+          const { count, error: studentsError } = await supabase
+            .from("students")
+            .select("*", { count: "exact", head: true })
+            .in("class_id", classIds);
 
-        if (studentsError) throw studentsError;
-        totalStudents = count || 0;
+          if (studentsError) throw studentsError;
+          totalStudents = count || 0;
+        }
+
+        // Get class subjects for teacher's classes
+        let totalSubjects = 0;
+        if (classIds.length > 0) {
+          const { count, error: subjectsError } = await supabase
+            .from("class_subjects")
+            .select("*", { count: "exact", head: true })
+            .in("class_id", classIds);
+
+          if (subjectsError) throw subjectsError;
+          totalSubjects = count || 0;
+        }
+
+        // Get current academic year
+        const { data: currentYear, error: yearError } = await supabase
+          .from("academic_years")
+          .select("year_name")
+          .eq("is_current", true)
+          .single();
+
+        if (yearError && yearError.code !== "PGRST116") throw yearError;
+
+        return {
+          totalStudents,
+          totalClasses: classIds.length,
+          totalSubjects,
+          currentYear: currentYear?.year_name || "N/A",
+        };
+      } catch (error) {
+        console.error("Teacher dashboard stats error:", error);
+        return {
+          totalStudents: 0,
+          totalClasses: 0,
+          totalSubjects: 0,
+          currentYear: "N/A",
+        };
       }
-
-      // Get class subjects for teacher's classes
-      let totalSubjects = 0;
-      if (classIds.length > 0) {
-        const { count, error: subjectsError } = await supabase
-          .from("class_subjects")
-          .select("*", { count: "exact", head: true })
-          .in("class_id", classIds);
-
-        if (subjectsError) throw subjectsError;
-        totalSubjects = count || 0;
-      }
-
-      // Get current academic year
-      const { data: currentYear, error: yearError } = await supabase
-        .from("academic_years")
-        .select("year_name")
-        .eq("is_current", true)
-        .single();
-
-      if (yearError && yearError.code !== "PGRST116") throw yearError;
-
-      return {
-        totalStudents,
-        totalClasses: classIds.length,
-        totalSubjects,
-        currentYear: currentYear?.year_name || "N/A",
-      };
     },
     enabled: !!user?.id,
   });

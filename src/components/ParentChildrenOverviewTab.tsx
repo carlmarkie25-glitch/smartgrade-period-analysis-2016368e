@@ -72,68 +72,71 @@ export const ParentChildrenOverviewTab = () => {
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-lg flex items-center gap-2">
-          <Users2 className="h-5 w-5" />
-          Parent-Child Linkages
-        </CardTitle>
-        <CardDescription>
-          Overview of all parent-child relationships in the system
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
+    <div className="glass-panel p-8 border border-white/10">
+      <div className="mb-8">
+        <h3 className="text-xl font-black text-white tracking-tight flex items-center gap-3">
+          <Users2 className="h-6 w-6 text-primary" />
+          Parent-Child Linkage Registry
+        </h3>
+        <p className="text-[10px] font-black text-white/40 uppercase tracking-widest mt-2">Comprehensive overview of all verified family associations</p>
+      </div>
+
+      <div>
         {parentGroups.length === 0 ? (
-          <p className="text-muted-foreground text-sm">
-            No parent-child linkages have been created yet. Use the Users tab to link children to parents.
+          <p className="text-white/30 text-sm font-black uppercase tracking-[0.2em] text-center py-20">
+            No active linkages detected in the neural registry.
           </p>
         ) : (
-          <div className="space-y-6">
+          <div className="space-y-10">
             {parentGroups.map((group) => {
               const parentProfile = getParentProfile(group.parentUserId);
               return (
-                <div key={group.parentUserId} className="border rounded-lg overflow-hidden">
-                  <div className="bg-muted/50 px-4 py-3 flex items-center gap-2">
-                    <Users2 className="h-4 w-4 text-primary" />
-                    <span className="font-semibold">{parentProfile?.full_name || "Unknown Parent"}</span>
-                    <span className="text-sm text-muted-foreground">({parentProfile?.email})</span>
-                    <Badge variant="outline" className="ml-auto">
-                      {group.children?.length || 0} child{(group.children?.length || 0) !== 1 ? "ren" : ""}
+                <div key={group.parentUserId} className="glass-card border-white/5 overflow-hidden">
+                  <div className="bg-white/5 px-6 py-4 flex items-center gap-4 border-b border-white/5">
+                    <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                      <Users2 className="h-5 w-5 text-primary" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-black text-white">{parentProfile?.full_name || "Unknown Parent"}</p>
+                      <p className="text-[9px] font-bold text-white/30 uppercase tracking-widest">{parentProfile?.email}</p>
+                    </div>
+                    <Badge className="ml-auto bg-primary text-white text-[9px] font-black uppercase tracking-widest px-3 py-1">
+                      {group.children?.length || 0} ASSOCIATION{(group.children?.length || 0) !== 1 ? "S" : ""}
                     </Badge>
                   </div>
                   <Table>
                     <TableHeader>
-                      <TableRow>
-                        <TableHead>Student</TableHead>
-                        <TableHead>Student ID</TableHead>
-                        <TableHead>Class</TableHead>
-                        <TableHead>Department</TableHead>
-                        <TableHead>Gender</TableHead>
+                      <TableRow className="border-white/5">
+                        <TableHead className="text-white/40 font-black text-[9px] uppercase tracking-widest px-6">Student Cluster</TableHead>
+                        <TableHead className="text-white/40 font-black text-[9px] uppercase tracking-widest">Node ID</TableHead>
+                        <TableHead className="text-white/40 font-black text-[9px] uppercase tracking-widest">Cohort</TableHead>
+                        <TableHead className="text-white/40 font-black text-[9px] uppercase tracking-widest">Division</TableHead>
+                        <TableHead className="text-white/40 font-black text-[9px] uppercase tracking-widest">Gender</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {group.children?.map((child) => (
-                        <TableRow key={child.id}>
-                          <TableCell>
+                        <TableRow key={child.id} className="border-white/5 hover:bg-white/5 transition-colors">
+                          <TableCell className="px-6 py-4">
                             <div className="flex items-center gap-3">
-                              <Avatar className="h-8 w-8">
+                              <Avatar className="h-9 w-9 border border-white/10 rounded-xl">
                                 <AvatarImage src={child.student?.photo_url || ""} />
-                                <AvatarFallback className="text-xs">
+                                <AvatarFallback className="text-[10px] font-black bg-white/5 text-white/50">
                                   {child.student?.full_name
                                     ?.split(" ")
                                     .map((n: string) => n[0])
                                     .join("") || "?"}
                                 </AvatarFallback>
                               </Avatar>
-                              <span className="font-medium">{child.student?.full_name}</span>
+                              <span className="text-xs font-black text-white">{child.student?.full_name}</span>
                             </div>
                           </TableCell>
-                          <TableCell>{child.student?.student_id}</TableCell>
-                          <TableCell>{child.student?.class?.name || "—"}</TableCell>
-                          <TableCell>{child.student?.department?.name || "—"}</TableCell>
+                          <TableCell className="text-[10px] font-bold text-white/60 font-mono tracking-wider">{child.student?.student_id}</TableCell>
+                          <TableCell className="text-[10px] font-black text-white/40 uppercase tracking-widest">{child.student?.class?.name || "—"}</TableCell>
+                          <TableCell className="text-[10px] font-black text-white/40 uppercase tracking-widest">{child.student?.department?.name || "—"}</TableCell>
                           <TableCell>
                             {child.student?.gender ? (
-                              <Badge variant="outline" className="capitalize">
+                              <Badge className="bg-white/5 text-white/60 border-white/10 text-[8px] font-black uppercase tracking-widest">
                                 {child.student.gender}
                               </Badge>
                             ) : (
@@ -149,7 +152,7 @@ export const ParentChildrenOverviewTab = () => {
             })}
           </div>
         )}
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 };

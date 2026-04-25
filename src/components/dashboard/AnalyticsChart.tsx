@@ -1,6 +1,6 @@
 import {
-  BarChart,
-  Bar,
+  AreaChart,
+  Area,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -31,33 +31,39 @@ export const AnalyticsChart = ({
 }: AnalyticsChartProps) => {
   const chart = (
     <ResponsiveContainer width="100%" height={height}>
-      <BarChart data={data} margin={{ top: 0, right: 0, left: -20, bottom: 0 }} barGap={3}>
-        <CartesianGrid strokeDasharray="0" stroke="hsl(170,20%,90%)" opacity={0.4} vertical={false} />
-        <XAxis dataKey="month" stroke="#94a3b8" style={{ fontSize: "9px", fontWeight: 500 }} axisLine={false} tickLine={false} />
-        <YAxis stroke="#94a3b8" style={{ fontSize: "9px", fontWeight: 500 }} axisLine={false} tickLine={false} />
-        <Tooltip
-          contentStyle={{
-            backgroundColor: "hsl(170, 25%, 97%)",
-            border: "none",
-            borderRadius: "12px",
-            boxShadow: "6px 6px 12px hsl(170,25%,87%), -4px -4px 8px hsl(0,0%,100%)",
-            fontSize: "11px",
-          }}
-          cursor={{ fill: "hsla(170,30%,50%,0.05)" }}
-        />
-        <Bar dataKey="students" fill="url(#tealBarGradient)" radius={[6, 6, 2, 2]} barSize={14} />
-        <Bar dataKey="capacity" fill="url(#capacityTealGradient)" radius={[6, 6, 2, 2]} barSize={14} />
+      <AreaChart data={data} margin={{ top: 10, right: 0, left: -20, bottom: 0 }}>
         <defs>
-          <linearGradient id="tealBarGradient" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="hsl(170, 55%, 45%)" stopOpacity={1} />
-            <stop offset="100%" stopColor="hsl(170, 45%, 58%)" stopOpacity={0.7} />
+          <linearGradient id="navyGradient" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="5%" stopColor="#3B82F6" stopOpacity={0.6} />
+            <stop offset="95%" stopColor="#3B82F6" stopOpacity={0} />
           </linearGradient>
-          <linearGradient id="capacityTealGradient" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="hsl(170, 20%, 88%)" stopOpacity={1} />
-            <stop offset="100%" stopColor="hsl(170, 15%, 92%)" stopOpacity={0.8} />
+          <linearGradient id="purpleGradient" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="5%" stopColor="#C084FC" stopOpacity={0.4} />
+            <stop offset="95%" stopColor="#C084FC" stopOpacity={0} />
           </linearGradient>
         </defs>
-      </BarChart>
+        <CartesianGrid strokeDasharray="3 3" stroke="white" className="opacity-5" vertical={false} />
+        <XAxis dataKey="month" stroke="white" className="opacity-40 text-[9px] font-black uppercase tracking-widest" axisLine={false} tickLine={false} />
+        <YAxis stroke="white" className="opacity-40 text-[9px] font-black uppercase tracking-widest" axisLine={false} tickLine={false} />
+        <Tooltip
+          contentStyle={{
+            backgroundColor: "rgba(0, 0, 0, 0.6)",
+            border: "1px solid rgba(255, 255, 255, 0.2)",
+            borderRadius: "16px",
+            boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.3)",
+            fontSize: "11px",
+            fontWeight: "900",
+            backdropFilter: "blur(20px)",
+            color: "white",
+            textTransform: "uppercase",
+            letterSpacing: "0.1em",
+          }}
+          itemStyle={{ color: "white" }}
+          cursor={{ stroke: "#C084FC", strokeWidth: 1, strokeDasharray: "4 4", fill: "transparent" }}
+        />
+        <Area type="monotone" dataKey="capacity" stroke="#3B82F6" strokeWidth={3} fillOpacity={1} fill="url(#navyGradient)" />
+        <Area type="monotone" dataKey="students" stroke="#C084FC" strokeWidth={4} fillOpacity={1} fill="url(#purpleGradient)" />
+      </AreaChart>
     </ResponsiveContainer>
   );
 
@@ -65,41 +71,29 @@ export const AnalyticsChart = ({
 
   return (
     <div
-      className="rounded-[26px] p-6 md:p-7"
-      style={{
-        background: "hsl(170, 25%, 96%)",
-        boxShadow: "10px 10px 20px hsl(170, 25%, 87%), -10px -10px 20px hsl(0, 0%, 100%)",
-      }}
+      className="rounded-[26px] p-6 md:p-7 bg-white/5 backdrop-blur-xl border border-white/10 shadow-2xl"
     >
       {/* Header */}
       <div className="flex items-center justify-between mb-5">
         <div>
-          <h3 className="text-sm font-bold text-gray-700 tracking-tight">{title}</h3>
+          <h3 className="text-sm font-black text-white uppercase tracking-widest">{title}</h3>
           {totalStudents !== undefined && (
-            <p className="text-[10px] text-gray-400 mt-0.5">
-              <span className="text-base font-black text-gray-700 mr-1">{totalStudents}</span>
+            <p className="text-[10px] text-white/50 mt-1 uppercase font-bold tracking-tight">
+              <span className="text-base font-black text-white mr-1">{totalStudents}</span>
               Total Enrolled Students
             </p>
           )}
         </div>
         <div
-          className="px-4 py-1.5 rounded-full flex items-center"
-          style={{
-            background: "hsl(170, 25%, 96%)",
-            boxShadow: "inset 3px 3px 6px hsl(170, 25%, 88%), inset -3px -3px 6px hsl(0, 0%, 100%)",
-          }}
+          className="px-4 py-1.5 rounded-full flex items-center bg-white/10 border border-white/20"
         >
-          <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Weekly</span>
+          <span className="text-[10px] font-black text-white uppercase tracking-widest">Weekly</span>
         </div>
       </div>
 
       {/* Chart Inner Container */}
       <div
-        className="rounded-[18px] p-4"
-        style={{
-          background: "hsl(170, 25%, 96%)",
-          boxShadow: "inset 4px 4px 10px hsl(170, 25%, 88%), inset -4px -4px 10px hsl(0, 0%, 100%)",
-        }}
+        className="rounded-[18px] p-4 bg-white/5 border border-white/10"
       >
         {chart}
       </div>

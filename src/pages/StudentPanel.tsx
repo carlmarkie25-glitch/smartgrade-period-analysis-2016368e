@@ -17,13 +17,13 @@ const StudentPanel = () => {
         <div className="neu-card p-4">
           <Tabs defaultValue="users" className="space-y-4">
             <TabsList className="grid w-full grid-cols-3 bg-[hsl(210,80%,96%)] rounded-xl p-1">
-              <TabsTrigger value="users" className="rounded-lg text-xs data-[state=active]:bg-white data-[state=active]:shadow-sm">
+              <TabsTrigger value="users" className="rounded-lg text-xs  data-[state=active]:shadow-sm">
                 <Users className="h-3.5 w-3.5 mr-1.5" />Students
               </TabsTrigger>
-              <TabsTrigger value="biodata" className="rounded-lg text-xs data-[state=active]:bg-white data-[state=active]:shadow-sm">
+              <TabsTrigger value="biodata" className="rounded-lg text-xs  data-[state=active]:shadow-sm">
                 <FileText className="h-3.5 w-3.5 mr-1.5" />Biodata
               </TabsTrigger>
-              <TabsTrigger value="payments" className="rounded-lg text-xs data-[state=active]:bg-white data-[state=active]:shadow-sm">
+              <TabsTrigger value="payments" className="rounded-lg text-xs  data-[state=active]:shadow-sm">
                 <Receipt className="h-3.5 w-3.5 mr-1.5" />Payments
               </TabsTrigger>
             </TabsList>
